@@ -1691,12 +1691,8 @@ export function validateRegistration(device, allowedBundleID) {
   const alert = device.alert_token || "";
   const watchVoIP = device.watch_voip_token || "";
   const liveActivity = device.live_activity_push_to_start_token || "";
-  // 免费 Apple ID 侧载无 PushKit 能力：允许显式标记为 sideload 测试的
-  // 无 token 注册（仅用于自检链路与心跳查询，来电推送唤醒不可用）。
-  const sideloadTest = device.sideload_test === true;
-  if (!voip && !alert && !watchVoIP && !liveActivity && !sideloadTest) {
-    return "at least one APNs token is required";
-  }
+  // 无 APNs 配置（免费侧载）：允许无 token 注册，推送唤醒对该设备不可用。
+  // sideload_test 标记保留兼容。
   if ((voip && !TOKEN_PATTERN.test(voip)) || (alert && !TOKEN_PATTERN.test(alert)) ||
       (watchVoIP && !TOKEN_PATTERN.test(watchVoIP)) ||
       (liveActivity && !TOKEN_PATTERN.test(liveActivity))) {
