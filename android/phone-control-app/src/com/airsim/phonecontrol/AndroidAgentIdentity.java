@@ -11,6 +11,7 @@ import android.telephony.TelephonyManager;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.json.JSONException;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -100,13 +101,15 @@ final class AndroidAgentIdentity {
                 }
                 CharSequence carrier = subscription.getCarrierName();
                 CharSequence displayName = subscription.getDisplayName();
-                cards.put(new JSONObject()
-                        .put("subscription_id", subscriptionId)
-                        .put("slot_index", subscription.getSimSlotIndex())
-                        .put("carrier_name", clean(carrier == null ? "" : carrier.toString()))
-                        .put("display_name", clean(displayName == null ? "" : displayName.toString()))
-                        .put("number", clean(number))
-                        .put("icc_id", clean(subscription.getIccId())));
+                try {
+                    cards.put(new JSONObject()
+                            .put("subscription_id", subscriptionId)
+                            .put("slot_index", subscription.getSimSlotIndex())
+                            .put("carrier_name", clean(carrier == null ? "" : carrier.toString()))
+                            .put("display_name", clean(displayName == null ? "" : displayName.toString()))
+                            .put("number", clean(number))
+                            .put("icc_id", clean(subscription.getIccId())));
+                } catch (JSONException ignored) {}
             }
         } catch (SecurityException ignored) {}
         return cards;
