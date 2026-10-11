@@ -285,13 +285,11 @@
 				C10000000000000000000001 /* Frameworks */,
 				C10000000000000000000003 /* Resources */,
 				C10000000000000000000007 /* Embed App Extensions */,
-				C1000000000000000000000B /* Embed Watch Content */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 				H10000000000000000000001 /* PBXTargetDependency */,
-				H10000000000000000000002 /* PBXTargetDependency */,
 			);
 			name = "AirSIM";
 			productName = AirSIM;
