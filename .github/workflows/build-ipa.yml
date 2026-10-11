@@ -16,13 +16,13 @@ jobs:
 
       - name: Select Xcode 26
         run: |
-          ls /Applications/ | grep -i xcode
-          sudo xcode-select -s /Applications/Xcode_26.app/Contents/Developer || sudo xcode-select -s /Applications/Xcode_26.0.app/Contents/Developer || echo "Xcode 26 not found, using default"
+          sudo xcode-select -s /Applications/Xcode_26.app/Contents/Developer || echo "no Xcode 26"
           xcodebuild -version
 
       - name: Build unsigned app
         run: |
           cd iOS
+          set -o pipefail
           xcodebuild -project AirSIM.xcodeproj \
             -scheme AirSIM \
             -configuration Release \
@@ -31,28 +31,28 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             build 2>&1 | tee xcodebuild.log
-          echo "=== ERRORS ==="
-          grep -i "^error:" xcodebuild.log | head -20 || echo "No error lines found"
-
-      - name: Upload build log
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: xcodebuild-log
-          path: iOS/xcodebuild.log
-          if-no-files-found: warn
+          echo "=== BUILD DONE ==="
 
       - name: Package IPA
         run: |
           APP_DIR="iOS/build/Build/Products/Release-iphoneos"
-          ls "$APP_DIR"
-          # Find the .app (could be AirSIM.app or uPhone.app)
+          echo "=== Contents of $APP_DIR ==="
+          ls -la "$APP_DIR"
           APP_NAME=$(ls "$APP_DIR" | grep "\.app$" | head -1)
+          if [ -z "$APP_NAME" ]; then
+            echo "ERROR: No .app found!"
+            exit 1
+          fi
           echo "Found app: $APP_NAME"
+          echo "=== App contents ==="
+          ls -la "$APP_DIR/$APP_NAME" | head -20
           mkdir -p "$APP_DIR/Payload"
           cp -r "$APP_DIR/$APP_NAME" "$APP_DIR/Payload/"
           cd "$APP_DIR"
           zip -qry uPhone-unsigned.ipa Payload
+          echo "=== IPA created ==="
+          ls -lh uPhone-unsigned.ipa
+          unzip -l uPhone-unsigned.ipa | head -20
 
       - name: Upload IPA
         uses: actions/upload-artifact@v4
