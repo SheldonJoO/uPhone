@@ -33,6 +33,11 @@ jobs:
           echo "Using default Xcode"
           xcodebuild -version
 
+      - name: Stamp build number
+        run: |
+          # 每次构建用 GitHub run 号做 build 号，手机上能区分版本
+          echo "BUILD_NUM=${{ github.run_number }}" >> "$GITHUB_ENV"
+
       - name: Build unsigned app
         run: |
           cd iOS
@@ -44,6 +49,7 @@ jobs:
             -derivedDataPath build \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
+            CURRENT_PROJECT_VERSION="$BUILD_NUM" \
             AIRSIM_PUSH_RELAY_URL=https://airsim-push.dntmove.asia \
             build 2>&1 | tee xcodebuild.log
 
