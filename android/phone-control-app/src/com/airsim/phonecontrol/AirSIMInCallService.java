@@ -1,6 +1,8 @@
 package com.airsim.phonecontrol;
 
+import android.content.Context;
 import android.content.Intent;
+import android.media.AudioManager;
 import android.net.Uri;
 import android.telecom.Call;
 import android.telecom.InCallService;
@@ -77,6 +79,32 @@ public final class AirSIMInCallService extends InCallService {
 			}
 		}
 		localAudio.update(shouldSilence);
+		updateMicrophoneMutePolicy(shouldSilence);
+	}
+
+	/**
+	 * üPhone 接管通话时（remote_silent），iPhone 是听筒/话筒，
+	 * 上行音频由 PhoneAudioBridge 经 VOICE_TX 数字注入，安卓本机
+	 * 麦克风必须静音，否则对端会同时听到安卓周围的环境音/回声。
+	 * 策略与本地扬声器静音保持一致。
+	 */
+	private void updateMicrophoneMutePolicy(boolean shouldMute) {
+		AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+		if (audioManager == null) return;
+		boolean currentlyMuted;
+		try {
+			currentlyMuted = audioManager.isMicrophoneMute();
+		} catch (Exception error) {
+			BridgeLog.error("call_mic_mute_query_failed", error);
+			return;
+		}
+		if (currentlyMuted == shouldMute) return;
+		try {
+			audioManager.setMicrophoneMute(shouldMute);
+			BridgeLog.info("call_mic_mute target_muted=" + shouldMute);
+		} catch (Exception error) {
+			BridgeLog.error("call_mic_mute_failed target_muted=" + shouldMute, error);
+		}
 	}
 
     private void emit(String callId, String direction, String state, String number) {
@@ -107,6 +135,7 @@ public final class AirSIMInCallService extends InCallService {
     @Override public void onDestroy() {
 		BridgeLog.info("incall_service_destroyed");
 		if (localAudio != null) localAudio.update(false);
+		updateMicrophoneMutePolicy(false);
         network.shutdownNow();
         super.onDestroy();
     }

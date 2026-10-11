@@ -520,6 +520,7 @@ struct AgentPushRegistration: Encodable, Equatable, Sendable {
     var appMediaCapabilities: [String] = [CloudMediaTransport.legacyPCM.rawValue]
     var forceLegacyPCM: Bool = true
     var vowlanSecret: String? = nil
+    var sideloadTest: Bool = false
 
     enum CodingKeys: String, CodingKey {
         case cloudModeEnabled = "cloud_enabled"
@@ -538,6 +539,7 @@ struct AgentPushRegistration: Encodable, Equatable, Sendable {
         case appMediaCapabilities = "app_media_capabilities"
         case forceLegacyPCM = "force_legacy_pcm"
         case vowlanSecret = "vowlan_secret"
+        case sideloadTest = "sideload_test"
     }
 
     func encode(to encoder: Encoder) throws {
@@ -546,6 +548,7 @@ struct AgentPushRegistration: Encodable, Equatable, Sendable {
         try values.encode(localMode, forKey: .localMode)
         try values.encodeIfPresent(vowlanSecret, forKey: .vowlanSecret)
         guard !localMode else { return }
+        if sideloadTest { try values.encode(true, forKey: .sideloadTest) }
 
         try values.encode(deviceID, forKey: .deviceID)
         try values.encode(deviceSecret, forKey: .deviceSecret)
@@ -1074,7 +1077,7 @@ final class VoIPPushController: NSObject {
         report.update(.agentHeartbeat, state: .running, detail: "查询 AVF Agent 最近 90 秒心跳")
         onUpdate(report)
         do {
-            let status = try await fetchCloudAgentStatusForDiagnostics()
+            let status = try await fetchCloudAgentStatusForDiagnostics(using: registration)
             guard status.cloudOnline else {
                 report.fail(.agentHeartbeat, detail: "Relay 已连接，但 AVF Agent 90 秒内无心跳")
                 onUpdate(report)
@@ -1127,8 +1130,10 @@ final class VoIPPushController: NSObject {
     }
 
     /// 检查单即使在公网 PCM 关闭时也需要读取心跳，避免用户无法判断开启条件。
-    func fetchCloudAgentStatusForDiagnostics() async throws -> CloudAgentStatus {
-        guard let registration = currentRegistration() else {
+    func fetchCloudAgentStatusForDiagnostics(
+        using registration: AgentPushRegistration? = nil
+    ) async throws -> CloudAgentStatus {
+        guard let registration = registration ?? currentRegistration() else {
             throw CloudAgentStatusError.unavailable
         }
         guard let url = RelayEndpoint.url(
@@ -1460,7 +1465,8 @@ final class VoIPPushController: NSObject {
             mediaTransport: CloudMediaTransportPreference.requested().rawValue,
             appMediaCapabilities: [CloudMediaTransport.legacyPCM.rawValue],
             forceLegacyPCM: CloudMediaTransportPreference.forceLegacy(),
-            vowlanSecret: nil
+            vowlanSecret: nil,
+            sideloadTest: true
         )
     }
 
