@@ -146,9 +146,13 @@ struct AirSIMAPI: Sendable {
 
     func dial(number: String) async throws {
         do {
+            var body: [String: String] = ["number": number]
+            if let sim = SimSelectionStore.selectedSubscriptionID() {
+                body["subscription_id"] = String(sim)
+            }
             try await post(
                 "api/calls/dial",
-                ["number": number],
+                body,
                 timeout: Self.voWLANDialTimeout
             )
         } catch {
@@ -181,7 +185,11 @@ struct AirSIMAPI: Sendable {
     func audioHostConfig() async throws -> MaVoAudioHostConfig { try await get("api/calls/audio/host/config") }
 
     func sendSMS(to phone: String, message: String) async throws -> SMSSendResult {
-        try await postDecoded("api/sms/send", ["phone": phone, "message": message], timeout: 80)
+        var body: [String: String] = ["phone": phone, "message": message]
+        if let sim = SimSelectionStore.selectedSubscriptionID() {
+            body["subscription_id"] = String(sim)
+        }
+        try await postDecoded("api/sms/send", body, timeout: 80)
     }
     func refreshSMS() async throws { try await post("api/sms/refresh", EmptyBody()) }
     func clearModuleSMS() async throws { try await post("api/sms/clear-module", EmptyBody()) }

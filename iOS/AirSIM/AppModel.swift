@@ -206,7 +206,8 @@ final class AppModel: ObservableObject {
                 agentKind: agent.agentKind,
                 cloudOnline: agent.cloudOnline,
                 vowlanOnline: false,
-                isCurrent: false
+                isCurrent: false,
+                simCards: agent.simCards
             )
         }
 
@@ -219,7 +220,8 @@ final class AppModel: ObservableObject {
                 agentKind: local.agentKind ?? previous?.agentKind,
                 cloudOnline: previous?.cloudOnline ?? false,
                 vowlanOnline: true,
-                isCurrent: false
+                isCurrent: false,
+                simCards: previous?.simCards ?? []
             )
         }
 
@@ -274,6 +276,7 @@ final class AppModel: ObservableObject {
         } catch {
             cloudAgentDirectory = nil
         }
+        NotificationCenter.default.post(name: .simCardsUpdated, object: nil)
     }
 
     @discardableResult

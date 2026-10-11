@@ -82,6 +82,7 @@ struct CloudAndroidAgent: Codable, Equatable, Sendable, Identifiable {
     let phoneNumber: String?
     let agentVersion: String?
     let cloudOnline: Bool
+    let simCards: [SimCard]
 
     var id: String { agentID }
 
@@ -93,6 +94,20 @@ struct CloudAndroidAgent: Codable, Equatable, Sendable, Identifiable {
         case phoneNumber = "phone_number"
         case agentVersion = "agent_version"
         case cloudOnline = "cloud_online"
+        case simCards = "sim_cards"
+    }
+
+    init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        agentID = try values.decode(String.self, forKey: .agentID)
+        agentKind = try values.decodeIfPresent(String.self, forKey: .agentKind)
+        deviceName = try values.decodeIfPresent(String.self, forKey: .deviceName)
+        manufacturer = try values.decodeIfPresent(String.self, forKey: .manufacturer)
+        model = try values.decodeIfPresent(String.self, forKey: .model)
+        phoneNumber = try values.decodeIfPresent(String.self, forKey: .phoneNumber)
+        agentVersion = try values.decodeIfPresent(String.self, forKey: .agentVersion)
+        cloudOnline = try values.decodeIfPresent(Bool.self, forKey: .cloudOnline) ?? false
+        simCards = try values.decodeIfPresent([SimCard].self, forKey: .simCards) ?? []
     }
 }
 
@@ -136,6 +151,66 @@ struct CloudAgentStatus: Decodable, Equatable, Sendable {
     }
 }
 
+struct SimCard: Equatable, Identifiable, Sendable, Codable {
+    let subscriptionID: Int
+    let slotIndex: Int
+    let carrierName: String
+    let displayName: String
+    let number: String
+
+    var id: Int { subscriptionID }
+
+    /// SIM 1 / SIM 2 这样的短标签。
+    var shortLabel: String {
+        if slotIndex >= 0 { return "SIM \(slotIndex + 1)" }
+        return "SIM"
+    }
+
+    /// 选择器里显示的完整标签：SIM 1 · 中国移动 · 138****0000
+    var fullLabel: String {
+        var parts = [shortLabel]
+        let carrier = carrierName.isEmpty ? displayName : carrierName
+        if !carrier.isEmpty { parts.append(carrier) }
+        if !number.isEmpty { parts.append(maskedNumber) }
+        return parts.joined(separator: " · ")
+    }
+
+    private var maskedNumber: String {
+        guard number.count > 7 else { return number }
+        let prefix = number.prefix(3)
+        let suffix = number.suffix(4)
+        return "\(prefix)****\(suffix)"
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case subscriptionID = "subscription_id"
+        case slotIndex = "slot_index"
+        case carrierName = "carrier_name"
+        case displayName = "display_name"
+        case number
+    }
+}
+
+/// 双卡选择的持久化：记住用户上次选的 SIM。
+enum SimSelectionStore {
+    private static let key = "uphone.selected-sim-subscription-id"
+
+    static func selectedSubscriptionID() -> Int? {
+        let value = UserDefaults.standard.integer(forKey: key)
+        // integer(forKey:) 在缺省时返回 0；用 object(forKey:) 区分"未设置"。
+        guard UserDefaults.standard.object(forKey: key) != nil, value > 0 else { return nil }
+        return value
+    }
+
+    static func select(subscriptionID: Int?) {
+        if let subscriptionID {
+            UserDefaults.standard.set(subscriptionID, forKey: key)
+        } else {
+            UserDefaults.standard.removeObject(forKey: key)
+        }
+    }
+}
+
 struct AndroidAgentPresentation: Equatable, Identifiable, Sendable {
     let id: String
     let deviceName: String
@@ -144,6 +219,27 @@ struct AndroidAgentPresentation: Equatable, Identifiable, Sendable {
     let cloudOnline: Bool
     let vowlanOnline: Bool
     let isCurrent: Bool
+    let simCards: [SimCard]
+
+    init(
+        id: String,
+        deviceName: String,
+        phoneNumber: String?,
+        agentKind: String?,
+        cloudOnline: Bool,
+        vowlanOnline: Bool,
+        isCurrent: Bool,
+        simCards: [SimCard] = []
+    ) {
+        self.id = id
+        self.deviceName = deviceName
+        self.phoneNumber = phoneNumber
+        self.agentKind = agentKind
+        self.cloudOnline = cloudOnline
+        self.vowlanOnline = vowlanOnline
+        self.isCurrent = isCurrent
+        self.simCards = simCards
+    }
 
     var agentKindTitle: String {
         switch agentKind {
@@ -189,8 +285,40 @@ struct SMSMessage: Codable, Equatable, Sendable, Identifiable {
     var deliveryID: String?
     /// 旧模块没有方向字段，缺省按收到的短信展示；发送成功后由 App 标记为 outgoing。
     var direction: SMSDirection? = nil
+    /// 收到短信的 SIM（双卡场景）；发送时为 nil。
+    var subscriptionID: Int? = nil
+    var slotIndex: Int? = nil
 
     var isOutgoing: Bool { direction == .outgoing }
+
+    /// 收到短信时的 SIM 短标签，如 "SIM 1"；无信息时返回 nil。
+    var simLabel: String? {
+        guard !isOutgoing, let slotIndex, slotIndex >= 0 else { return nil }
+        return "SIM \(slotIndex + 1)"
+    }
+
+    /// 短信验证码：优先用服务端提取的 code 字段，否则从正文正则提取 4-8 位数字。
+    var verificationCode: String? {
+        if let code, code.range(of: "^[0-9]{4,8}$", options: .regularExpression) != nil {
+            return code
+        }
+        // 常见验证码句式：验证码 123456、code is 123456、【xxx】123456
+        let patterns = [
+            "验证码[^0-9]{0,6}([0-9]{4,8})",
+            "verification code[^0-9]{0,6}([0-9]{4,8})",
+            "code[^0-9]{0,6}([0-9]{4,8})",
+            "【[^】]{1,12}】([0-9]{4,8})",
+        ]
+        for pattern in patterns {
+            if let range = content.range(of: pattern, options: [.regularExpression, .caseInsensitive]) {
+                let matched = String(content[range])
+                if let digits = matched.range(of: "[0-9]{4,8}$", options: .regularExpression) {
+                    return String(matched[digits])
+                }
+            }
+        }
+        return nil
+    }
 
     /// 新版 Agent 用 delivery_id 对齐 APNs 与本地同步；旧版仍回退到内容指纹。
     var id: String {
