@@ -42,15 +42,6 @@ public final class IncomingSMSReceiver extends BroadcastReceiver {
                 content.append(part.getMessageBody() == null ? "" : part.getMessageBody());
                 byte[] pdu = part.getPdu();
                 if (pdu != null) digest.update(pdu);
-                if (subscriptionId == SubscriptionManager.INVALID_SUBSCRIPTION_ID
-                        && Build.VERSION.SDK_INT >= 22) {
-                    try {
-                        int subId = part.getSubId();
-                        if (subId != SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
-                            subscriptionId = subId;
-                        }
-                    } catch (SecurityException ignored) {}
-                }
             }
             if (content.length() == 0) return;
             digest.update((sender == null ? "" : sender).getBytes(StandardCharsets.UTF_8));
