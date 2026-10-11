@@ -1,0 +1,47 @@
+name: Build üPhone IPA
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'iOS/**'
+      - '.github/workflows/build-ipa.yml'
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      - name: Build unsigned app
+        run: |
+          cd iOS
+          xcodebuild -project AirSIM.xcodeproj \
+            -scheme AirSIM \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            build
+
+      - name: Package IPA
+        run: |
+          APP_DIR="iOS/build/Build/Products/Release-iphoneos"
+          ls "$APP_DIR"
+          mkdir -p "$APP_DIR/Payload"
+          cp -r "$APP_DIR/uPhone.app" "$APP_DIR/Payload/"
+          cd "$APP_DIR"
+          zip -qry uPhone-unsigned.ipa Payload
+
+      - name: Upload IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: uPhone-unsigned-ipa
+          path: iOS/build/Build/Products/Release-iphoneos/uPhone-unsigned.ipa
+          if-no-files-found: error
