@@ -1,1 +1,268 @@
-aW1wb3J0IENvbnRhY3RzCmltcG9ydCBGb3VuZGF0aW9uCgplbnVtIENvbnRhY3RBdXRob3JpemF0aW9uU3RhdGU6IEVxdWF0YWJsZSB7CiAgICBjYXNlIG5vdERldGVybWluZWQKICAgIGNhc2UgYXV0aG9yaXplZAogICAgY2FzZSBkZW5pZWQKfQoKZW51bSBDb250YWN0QWNjZXNzQWN0aW9uOiBFcXVhdGFibGUgewogICAgY2FzZSByZXF1ZXN0CiAgICBjYXNlIGxvYWQKICAgIGNhc2Ugd2FpdEZvclVzZXIKICAgIGNhc2UgYmxvY2tlZAp9CgplbnVtIENvbnRhY3RBY2Nlc3NQb2xpY3kgewogICAgc3RhdGljIGZ1bmMgYWN0aW9uKAogICAgICAgIGZvciBzdGF0ZTogQ29udGFjdEF1dGhvcml6YXRpb25TdGF0ZSwKICAgICAgICB1c2VySW5pdGlhdGVkOiBCb29sCiAgICApIC0+IENvbnRhY3RBY2Nlc3NBY3Rpb24gewogICAgICAgIHN3aXRjaCBzdGF0ZSB7CiAgICAgICAgY2FzZSAuYXV0aG9yaXplZDogcmV0dXJuIC5sb2FkCiAgICAgICAgY2FzZSAubm90RGV0ZXJtaW5lZDogcmV0dXJuIHVzZXJJbml0aWF0ZWQgPyAucmVxdWVzdCA6IC53YWl0Rm9yVXNlcgogICAgICAgIGNhc2UgLmRlbmllZDogcmV0dXJuIC5ibG9ja2VkCiAgICAgICAgfQogICAgfQp9CgovLy8g6Z2e5Li757q/56iL6IGU57O75Lq66K+75Y+W5Zmo77yM6YG/5YWN5ZyoIFN3aWZ0IDYg5LiL6Leo57q/56iL5oyB5pyJIENOQ29udGFjdFN0b3Jl44CCCnN0cnVjdCBDb250YWN0RmV0Y2hlcjogU2VuZGFibGUgewogICAgZnVuYyBhdXRob3JpemF0aW9uU3RhdGUoKSAtPiBDb250YWN0QXV0aG9yaXphdGlvblN0YXRlIHsKICAgICAgICBsZXQgc3RhdHVzID0gQ05Db250YWN0U3RvcmUuYXV0aG9yaXphdGlvblN0YXR1cyhmb3I6IC5jb250YWN0cykKICAgICAgICBpZiBzdGF0dXMgPT0gLmF1dGhvcml6ZWQgeyByZXR1cm4gLmF1dGhvcml6ZWQgfQogICAgICAgIGlmICNhdmFpbGFibGUoaU9TIDE4LjAsICopLCBzdGF0dXMgPT0gLmxpbWl0ZWQgeyByZXR1cm4gLmF1dGhvcml6ZWQgfQogICAgICAgIHJldHVybiBzdGF0dXMgPT0gLm5vdERldGVybWluZWQgPyAubm90RGV0ZXJtaW5lZCA6IC5kZW5pZWQKICAgIH0KCiAgICBmdW5jIHJlcXVlc3RBY2Nlc3MoKSBhc3luYyB0aHJvd3MgLT4gQm9vbCB7CiAgICAgICAgdHJ5IGF3YWl0IENOQ29udGFjdFN0b3JlKCkucmVxdWVzdEFjY2Vzcyhmb3I6IC5jb250YWN0cykKICAgIH0KCiAgICBmdW5jIGZldGNoQWxsKCkgdGhyb3dzIC0+IFtDb250YWN0U3RvcmUuQ29udGFjdF0gewogICAgICAgIGxldCBzdG9yZSA9IENOQ29udGFjdFN0b3JlKCkKICAgICAgICBsZXQga2V5czogW0NOS2V5RGVzY3JpcHRvcl0gPSBbCiAgICAgICAgICAgIENOQ29udGFjdEdpdmVuTmFtZUtleSBhcyBDTktleURlc2NyaXB0b3IsCiAgICAgICAgICAgIENOQ29udGFjdEZhbWlseU5hbWVLZXkgYXMgQ05LZXlEZXNjcmlwdG9yLAogICAgICAgICAgICBDTkNvbnRhY3RQaG9uZU51bWJlcnNLZXkgYXMgQ05LZXlEZXNjcmlwdG9yLAogICAgICAgICAgICBDTkNvbnRhY3RFbWFpbEFkZHJlc3Nlc0tleSBhcyBDTktleURlc2NyaXB0b3IsCiAgICAgICAgICAgIENOQ29udGFjdFRodW1ibmFpbEltYWdlRGF0YUtleSBhcyBDTktleURlc2NyaXB0b3IsCiAgICAgICAgICAgIENOQ29udGFjdElkZW50aWZpZXJLZXkgYXMgQ05LZXlEZXNjcmlwdG9yLAogICAgICAgIF0KICAgICAgICBsZXQgcmVxdWVzdCA9IENOQ29udGFjdEZldGNoUmVxdWVzdChrZXlzVG9GZXRjaDoga2V5cykKICAgICAgICByZXF1ZXN0LnNvcnRPcmRlciA9IC51c2VyRGVmYXVsdAogICAgICAgIHZhciBjb250YWN0czogW0NvbnRhY3RTdG9yZS5Db250YWN0XSA9IFtdCiAgICAgICAgdHJ5IHN0b3JlLmVudW1lcmF0ZUNvbnRhY3RzKHdpdGg6IHJlcXVlc3QpIHsgY29udGFjdCwgXyBpbgogICAgICAgICAgICBsZXQgY2prTmFtZSA9IFNlbGYuY29udGFpbnNDSksoY29udGFjdC5naXZlbk5hbWUgKyBjb250YWN0LmZhbWlseU5hbWUpCiAgICAgICAgICAgIGxldCBuYW1lUGFydHMgPSBjamtOYW1lCiAgICAgICAgICAgICAgICA/IFtjb250YWN0LmZhbWlseU5hbWUsIGNvbnRhY3QuZ2l2ZW5OYW1lXQogICAgICAgICAgICAgICAgOiBbY29udGFjdC5naXZlbk5hbWUsIGNvbnRhY3QuZmFtaWx5TmFtZV0KICAgICAgICAgICAgbGV0IHNlcGFyYXRvciA9IGNqa05hbWUgPyAiIiA6ICIgIgogICAgICAgICAgICBsZXQgbmFtZSA9IG5hbWVQYXJ0cy5maWx0ZXIgeyAhJDAuaXNFbXB0eSB9LmpvaW5lZChzZXBhcmF0b3I6IHNlcGFyYXRvcikKICAgICAgICAgICAgbGV0IHBob25lcyA9IGNvbnRhY3QucGhvbmVOdW1iZXJzCiAgICAgICAgICAgICAgICAubWFwIHsgQ29udGFjdFN0b3JlLm5vcm1hbGl6ZWQoJDAudmFsdWUuc3RyaW5nVmFsdWUpIH0KICAgICAgICAgICAgICAgIC5maWx0ZXIgeyAhJDAuaXNFbXB0eSB9CiAgICAgICAgICAgIGd1YXJkICFuYW1lLmlzRW1wdHksICFwaG9uZXMuaXNFbXB0eSBlbHNlIHsgcmV0dXJuIH0KICAgICAgICAgICAgY29udGFjdHMuYXBwZW5kKC5pbml0KAogICAgICAgICAgICAgICAgaWQ6IGNvbnRhY3QuaWRlbnRpZmllciwKICAgICAgICAgICAgICAgIG5hbWU6IG5hbWUsCiAgICAgICAgICAgICAgICBwaG9uZXM6IHBob25lcywKICAgICAgICAgICAgICAgIGVtYWlsczogY29udGFjdC5lbWFpbEFkZHJlc3Nlcy5tYXAgeyAkMC52YWx1ZSBhcyBTdHJpbmcgfSwKICAgICAgICAgICAgICAgIHBob3RvRGF0YTogY29udGFjdC50aHVtYm5haWxJbWFnZURhdGEKICAgICAgICAgICAgKSkKICAgICAgICB9CiAgICAgICAgcmV0dXJuIGNvbnRhY3RzCiAgICB9CgogICAgZnVuYyBkaXNwbGF5TmFtZShmb3IgbnVtYmVyOiBTdHJpbmcpIHRocm93cyAtPiBTdHJpbmc/IHsKICAgICAgICBndWFyZCBhdXRob3JpemF0aW9uU3RhdGUoKSA9PSAuYXV0aG9yaXplZCBlbHNlIHsgcmV0dXJuIG5pbCB9CiAgICAgICAgbGV0IHRhcmdldCA9IENvbnRhY3RTdG9yZS5ub3JtYWxpemVkKG51bWJlcikKICAgICAgICBndWFyZCAhdGFyZ2V0LmlzRW1wdHkgZWxzZSB7IHJldHVybiBuaWwgfQogICAgICAgIGxldCBjb250YWN0cyA9IHRyeSBmZXRjaEFsbCgpCiAgICAgICAgaWYgbGV0IGV4YWN0ID0gY29udGFjdHMuZmlyc3Qod2hlcmU6IHsgJDAucGhvbmVzLmNvbnRhaW5zKHRhcmdldCkgfSkgewogICAgICAgICAgICByZXR1cm4gZXhhY3QubmFtZQogICAgICAgIH0KICAgICAgICBndWFyZCB0YXJnZXQuY291bnQgPj0gNyBlbHNlIHsgcmV0dXJuIG5pbCB9CiAgICAgICAgbGV0IHN1ZmZpeCA9IHRhcmdldC5zdWZmaXgoNykKICAgICAgICByZXR1cm4gY29udGFjdHMuZmlyc3QgeyBjb250YWN0IGluCiAgICAgICAgICAgIGNvbnRhY3QucGhvbmVzLmNvbnRhaW5zIHsgJDAuY291bnQgPj0gNyAmJiAkMC5oYXNTdWZmaXgoc3VmZml4KSB9CiAgICAgICAgfT8ubmFtZQogICAgfQoKICAgIHByaXZhdGUgc3RhdGljIGZ1bmMgY29udGFpbnNDSksoXyB0ZXh0OiBTdHJpbmcpIC0+IEJvb2wgewogICAgICAgIHRleHQudW5pY29kZVNjYWxhcnMuY29udGFpbnMgeyBzY2FsYXIgaW4KICAgICAgICAgICAgc3dpdGNoIHNjYWxhci52YWx1ZSB7CiAgICAgICAgICAgIGNhc2UgMHgzNDAwLi4uMHg0REJGLCAweDRFMDAuLi4weDlGRkYsIDB4RjkwMC4uLjB4RkFGRiwgMHgzMDQwLi4uMHgzMEZGOgogICAgICAgICAgICAgICAgcmV0dXJuIHRydWUKICAgICAgICAgICAgZGVmYXVsdDoKICAgICAgICAgICAgICAgIHJldHVybiBmYWxzZQogICAgICAgICAgICB9CiAgICAgICAgfQogICAgfQp9CgpATWFpbkFjdG9yCmZpbmFsIGNsYXNzIENvbnRhY3RTdG9yZTogT2JzZXJ2YWJsZU9iamVjdCB7CiAgICBzdHJ1Y3QgQ29udGFjdDogQ29kYWJsZSwgSWRlbnRpZmlhYmxlLCBFcXVhdGFibGUsIFNlbmRhYmxlIHsKICAgICAgICBsZXQgaWQ6IFN0cmluZwogICAgICAgIGxldCBuYW1lOiBTdHJpbmcKICAgICAgICBsZXQgcGhvbmVzOiBbU3RyaW5nXQogICAgICAgIGxldCBlbWFpbHM6IFtTdHJpbmddCiAgICAgICAgbGV0IHBob3RvRGF0YTogRGF0YT8KICAgIH0KCiAgICBAUHVibGlzaGVkIHByaXZhdGUoc2V0KSB2YXIgY29udGFjdHM6IFtDb250YWN0XSA9IFtdCiAgICBAUHVibGlzaGVkIHByaXZhdGUoc2V0KSB2YXIgaXNBdXRob3JpemVkID0gZmFsc2UKICAgIEBQdWJsaXNoZWQgcHJpdmF0ZShzZXQpIHZhciBhdXRob3JpemF0aW9uU3RhdGU6IENvbnRhY3RBdXRob3JpemF0aW9uU3RhdGUgPSAubm90RGV0ZXJtaW5lZAogICAgQFB1Ymxpc2hlZCB2YXIgZXJyb3JNZXNzYWdlOiBTdHJpbmc/CiAgICBwcml2YXRlIGxldCBjYWNoZTogQ29udGFjdENhY2hlU3RvcmUKCiAgICBpbml0KGZpbGVNYW5hZ2VyOiBGaWxlTWFuYWdlciA9IC5kZWZhdWx0KSB7CiAgICAgICAgY2FjaGUgPSBDb250YWN0Q2FjaGVTdG9yZShmaWxlTWFuYWdlcjogZmlsZU1hbmFnZXIpCiAgICAgICAgLy8g6IGU57O75Lq65bGe5LqO5omL5py65pWw5o2u44CC5qih5Z2X56a757q/5oiW57O757uf6IGU57O75Lq65pWw5o2u5bqT5pqC5LiN5Y+v6K+75pe277yM5YWI5bGV56S65pys5py65Ymv5pys44CCCiAgICAgICAgY29udGFjdHMgPSBjYWNoZS5sb2FkKCkKICAgICAgICBsZXQgc3RhdGUgPSBDb250YWN0RmV0Y2hlcigpLmF1dGhvcml6YXRpb25TdGF0ZSgpCiAgICAgICAgYXV0aG9yaXphdGlvblN0YXRlID0gc3RhdGUKICAgICAgICBpc0F1dGhvcml6ZWQgPSBzdGF0ZSA9PSAuYXV0aG9yaXplZAogICAgfQoKICAgIG5vbmlzb2xhdGVkIHN0YXRpYyBmdW5jIG5vcm1hbGl6ZWQoXyBwaG9uZTogU3RyaW5nKSAtPiBTdHJpbmcgewogICAgICAgIHZhciB2YWx1ZSA9IHBob25lLmZpbHRlciB7ICQwLmlzTnVtYmVyIHx8ICQwID09ICIrIiB9CiAgICAgICAgaWYgdmFsdWUuaGFzUHJlZml4KCIrODYiKSB7CiAgICAgICAgICAgIHZhbHVlLnJlbW92ZUZpcnN0KDMpCiAgICAgICAgfSBlbHNlIGlmIHZhbHVlLmhhc1ByZWZpeCgiODYiKSwgdmFsdWUuY291bnQgPiAxMSB7CiAgICAgICAgICAgIHZhbHVlLnJlbW92ZUZpcnN0KDIpCiAgICAgICAgfQogICAgICAgIHJldHVybiB2YWx1ZQogICAgfQoKICAgIGZ1bmMgbG9hZElmQXV0aG9yaXplZCgpIGFzeW5jIHsKICAgICAgICBhd2FpdCByZWZyZXNoKHVzZXJJbml0aWF0ZWQ6IGZhbHNlKQogICAgfQoKICAgIGZ1bmMgcmVxdWVzdEFjY2Vzc0FuZExvYWQoKSBhc3luYyB7CiAgICAgICAgYXdhaXQgcmVmcmVzaCh1c2VySW5pdGlhdGVkOiB0cnVlKQogICAgfQoKICAgIHByaXZhdGUgZnVuYyByZWZyZXNoKHVzZXJJbml0aWF0ZWQ6IEJvb2wpIGFzeW5jIHsKICAgICAgICBkbyB7CiAgICAgICAgICAgIC8vIOaJi+acuumHjeWQr+WQjuWPr+iDveWFiOWcqOaVsOaNruS/neaKpOWwmuacquino+mUgeaXtuivu+WPluWIsOepuuaVsOe7hO+8m+avj+asoeWJjeWPsOWIt+aWsOmDvemHjeivleejgeebmOe8k+WtmOOAggogICAgICAgICAgICBsZXQgY2FjaGVkQ29udGFjdHMgPSBjYWNoZS5sb2FkKCkKICAgICAgICAgICAgaWYgIWNhY2hlZENvbnRhY3RzLmlzRW1wdHkgewogICAgICAgICAgICAgICAgY29udGFjdHMgPSBjYWNoZWRDb250YWN0cwogICAgICAgICAgICB9CgogICAgICAgICAgICB2YXIgc3RhdGUgPSBhd2FpdCBUYXNrLmRldGFjaGVkKHByaW9yaXR5OiAudXNlckluaXRpYXRlZCkgewogICAgICAgICAgICAgICAgQ29udGFjdEZldGNoZXIoKS5hdXRob3JpemF0aW9uU3RhdGUoKQogICAgICAgICAgICB9LnZhbHVlCiAgICAgICAgICAgIGF1dGhvcml6YXRpb25TdGF0ZSA9IHN0YXRlCgogICAgICAgICAgICBzd2l0Y2ggQ29udGFjdEFjY2Vzc1BvbGljeS5hY3Rpb24oZm9yOiBzdGF0ZSwgdXNlckluaXRpYXRlZDogdXNlckluaXRpYXRlZCkgewogICAgICAgICAgICBjYXNlIC5yZXF1ZXN0OgogICAgICAgICAgICAgICAgbGV0IGdyYW50ZWQgPSB0cnkgYXdhaXQgVGFzay5kZXRhY2hlZChwcmlvcml0eTogLnVzZXJJbml0aWF0ZWQpIHsKICAgICAgICAgICAgICAgICAgICB0cnkgYXdhaXQgQ29udGFjdEZldGNoZXIoKS5yZXF1ZXN0QWNjZXNzKCkKICAgICAgICAgICAgICAgIH0udmFsdWUKICAgICAgICAgICAgICAgIHN0YXRlID0gZ3JhbnRlZCA/IC5hdXRob3JpemVkIDogLmRlbmllZAogICAgICAgICAgICAgICAgYXV0aG9yaXphdGlvblN0YXRlID0gc3RhdGUKICAgICAgICAgICAgICAgIGd1YXJkIGdyYW50ZWQgZWxzZSB7CiAgICAgICAgICAgICAgICAgICAgaXNBdXRob3JpemVkID0gZmFsc2UKICAgICAgICAgICAgICAgICAgICBlcnJvck1lc3NhZ2UgPSAi5pyq6I635b6X6YCa6K6v5b2V6K6/6Zeu5p2D6ZmQIgogICAgICAgICAgICAgICAgICAgIHJldHVybgogICAgICAgICAgICAgICAgfQogICAgICAgICAgICBjYXNlIC5sb2FkOgogICAgICAgICAgICAgICAgYnJlYWsKICAgICAgICAgICAgY2FzZSAud2FpdEZvclVzZXI6CiAgICAgICAgICAgICAgICBpc0F1dGhvcml6ZWQgPSBmYWxzZQogICAgICAgICAgICAgICAgZXJyb3JNZXNzYWdlID0gbmlsCiAgICAgICAgICAgICAgICByZXR1cm4KICAgICAgICAgICAgY2FzZSAuYmxvY2tlZDoKICAgICAgICAgICAgICAgIGlzQXV0aG9yaXplZCA9IGZhbHNlCiAgICAgICAgICAgICAgICBlcnJvck1lc3NhZ2UgPSAi6YCa6K6v5b2V5p2D6ZmQ5bey5YWz6Zet77yM6K+35Zyo57O757uf6K6+572u5Lit5byA5ZCvIgogICAgICAgICAgICAgICAgcmV0dXJuCiAgICAgICAgICAgIH0KCiAgICAgICAgICAgIGlzQXV0aG9yaXplZCA9IHRydWUKICAgICAgICAgICAgLy8g6Z2e55So5oi35Li75Yqo5Yi35paw5pe25LyY5YWI5L2/55So5bey5oGi5aSN55qE57yT5a2Y77yM6YG/5YWN5q+P5qyh5YiH5o2i6IGU57O75Lq66aG16YO95a6M5pW05p6a5Li+6YCa6K6v5b2V44CCCiAgICAgICAgICAgIGd1YXJkIHVzZXJJbml0aWF0ZWQgfHwgY29udGFjdHMuaXNFbXB0eSBlbHNlIHsKICAgICAgICAgICAgICAgIGVycm9yTWVzc2FnZSA9IG5pbAogICAgICAgICAgICAgICAgcmV0dXJuCiAgICAgICAgICAgIH0KICAgICAgICAgICAgY29udGFjdHMgPSB0cnkgYXdhaXQgVGFzay5kZXRhY2hlZChwcmlvcml0eTogLnVzZXJJbml0aWF0ZWQpIHsKICAgICAgICAgICAgICAgIHRyeSBDb250YWN0RmV0Y2hlcigpLmZldGNoQWxsKCkKICAgICAgICAgICAgfS52YWx1ZQogICAgICAgICAgICBndWFyZCBjYWNoZS5zYXZlKGNvbnRhY3RzKSBlbHNlIHsKICAgICAgICAgICAgICAgIGVycm9yTWVzc2FnZSA9ICLpgJrorq/lvZXlt7Lor7vlj5bvvIzkvYbkv53lrZjliLDmnKzmnLrlpLHotKUiCiAgICAgICAgICAgICAgICByZXR1cm4KICAgICAgICAgICAgfQogICAgICAgICAgICBlcnJvck1lc3NhZ2UgPSBuaWwKICAgICAgICB9IGNhdGNoIHsKICAgICAgICAgICAgaXNBdXRob3JpemVkID0gZmFsc2UKICAgICAgICAgICAgZXJyb3JNZXNzYWdlID0gZXJyb3IubG9jYWxpemVkRGVzY3JpcHRpb24KICAgICAgICB9CiAgICB9CgogICAgZnVuYyBjb250YWN0KGZvciBudW1iZXI6IFN0cmluZykgLT4gQ29udGFjdD8gewogICAgICAgIGxldCB0YXJnZXQgPSBTZWxmLm5vcm1hbGl6ZWQobnVtYmVyKQogICAgICAgIGd1YXJkICF0YXJnZXQuaXNFbXB0eSBlbHNlIHsgcmV0dXJuIG5pbCB9CiAgICAgICAgaWYgbGV0IGV4YWN0ID0gY29udGFjdHMuZmlyc3Qod2hlcmU6IHsgJDAucGhvbmVzLmNvbnRhaW5zKHRhcmdldCkgfSkgeyByZXR1cm4gZXhhY3QgfQogICAgICAgIGd1YXJkIHRhcmdldC5jb3VudCA+PSA3IGVsc2UgeyByZXR1cm4gbmlsIH0KICAgICAgICBsZXQgc3VmZml4ID0gdGFyZ2V0LnN1ZmZpeCg3KQogICAgICAgIHJldHVybiBjb250YWN0cy5maXJzdCB7IGNvbnRhY3QgaW4KICAgICAgICAgICAgY29udGFjdC5waG9uZXMuY29udGFpbnMgeyAkMC5jb3VudCA+PSA3ICYmICQwLmhhc1N1ZmZpeChzdWZmaXgpIH0KICAgICAgICB9CiAgICB9CgogICAgZnVuYyBkaXNwbGF5TmFtZShmb3IgbnVtYmVyOiBTdHJpbmc/KSAtPiBTdHJpbmcgewogICAgICAgIGd1YXJkIGxldCBudW1iZXIsICFudW1iZXIuaXNFbXB0eSBlbHNlIHsgcmV0dXJuICLmnKrnn6Xlj7fnoIEiIH0KICAgICAgICByZXR1cm4gY29udGFjdChmb3I6IG51bWJlcik/Lm5hbWUgPz8gbnVtYmVyCiAgICB9Cn0KCi8vLyDpgJrorq/lvZXnvJPlrZjku4Xkv53lrZjlnKggQXBwIOaymeebku+8jOS4jeS8muS4iuS8oOWIsOaooeWdl+aIliBQdXNoIFJlbGF544CCCnByaXZhdGUgZmluYWwgY2xhc3MgQ29udGFjdENhY2hlU3RvcmUgewogICAgcHJpdmF0ZSBsZXQgZmlsZU1hbmFnZXI6IEZpbGVNYW5hZ2VyCiAgICBwcml2YXRlIGxldCBmaWxlVVJMOiBVUkwKCiAgICBpbml0KGZpbGVNYW5hZ2VyOiBGaWxlTWFuYWdlciA9IC5kZWZhdWx0KSB7CiAgICAgICAgc2VsZi5maWxlTWFuYWdlciA9IGZpbGVNYW5hZ2VyCiAgICAgICAgbGV0IGR1cmFibGVSb290ID0gZmlsZU1hbmFnZXIudXJscygKICAgICAgICAgICAgZm9yOiAuYXBwbGljYXRpb25TdXBwb3J0RGlyZWN0b3J5LAogICAgICAgICAgICBpbjogLnVzZXJEb21haW5NYXNrCiAgICAgICAgKS5maXJzdAogICAgICAgICAgICA/PyBmaWxlTWFuYWdlci51cmxzKGZvcjogLmRvY3VtZW50RGlyZWN0b3J5LCBpbjogLnVzZXJEb21haW5NYXNrKS5maXJzdAogICAgICAgICAgICA/PyBVUkwoZmlsZVVSTFdpdGhQYXRoOiBOU0hvbWVEaXJlY3RvcnkoKSwgaXNEaXJlY3Rvcnk6IHRydWUpCiAgICAgICAgICAgICAgICAuYXBwZW5kaW5nUGF0aENvbXBvbmVudCgiRG9jdW1lbnRzIiwgaXNEaXJlY3Rvcnk6IHRydWUpCiAgICAgICAgbGV0IGRpcmVjdG9yeSA9IGR1cmFibGVSb290LmFwcGVuZGluZ1BhdGhDb21wb25lbnQoIkFpclNJTSIsIGlzRGlyZWN0b3J5OiB0cnVlKQogICAgICAgIGZpbGVVUkwgPSBkaXJlY3RvcnkuYXBwZW5kaW5nUGF0aENvbXBvbmVudCgiY29udGFjdHMuanNvbiIpCiAgICAgICAgdHJ5PyBmaWxlTWFuYWdlci5jcmVhdGVEaXJlY3RvcnkoYXQ6IGRpcmVjdG9yeSwgd2l0aEludGVybWVkaWF0ZURpcmVjdG9yaWVzOiB0cnVlKQogICAgfQoKICAgIGZ1bmMgbG9hZCgpIC0+IFtDb250YWN0U3RvcmUuQ29udGFjdF0gewogICAgICAgIGd1YXJkIGxldCBkYXRhID0gdHJ5PyBEYXRhKGNvbnRlbnRzT2Y6IGZpbGVVUkwpIGVsc2UgeyByZXR1cm4gW10gfQogICAgICAgIGRvIHsKICAgICAgICAgICAgcmV0dXJuIHRyeSBKU09ORGVjb2RlcigpLmRlY29kZShbQ29udGFjdFN0b3JlLkNvbnRhY3RdLnNlbGYsIGZyb206IGRhdGEpCiAgICAgICAgfSBjYXRjaCB7CiAgICAgICAgICAgIFNlbGYubG9nKCLor7vlj5bpgJrorq/lvZXnvJPlrZjlpLHotKXvvJpcKGVycm9yLmxvY2FsaXplZERlc2NyaXB0aW9uKSIpCiAgICAgICAgICAgIHJldHVybiBbXQogICAgICAgIH0KICAgIH0KCiAgICBAZGlzY2FyZGFibGVSZXN1bHQKICAgIGZ1bmMgc2F2ZShfIGNvbnRhY3RzOiBbQ29udGFjdFN0b3JlLkNvbnRhY3RdKSAtPiBCb29sIHsKICAgICAgICBkbyB7CiAgICAgICAgICAgIGxldCBkYXRhID0gdHJ5IEpTT05FbmNvZGVyKCkuZW5jb2RlKGNvbnRhY3RzKQogICAgICAgICAgICB0cnkgZGF0YS53cml0ZSh0bzogZmlsZVVSTCwgb3B0aW9uczogWy5hdG9taWNdKQogICAgICAgICAgICByZXR1cm4gdHJ1ZQogICAgICAgIH0gY2F0Y2ggewogICAgICAgICAgICBTZWxmLmxvZygi5L+d5a2Y6YCa6K6v5b2V57yT5a2Y5aSx6LSl77yaXChlcnJvci5sb2NhbGl6ZWREZXNjcmlwdGlvbikiKQogICAgICAgICAgICByZXR1cm4gZmFsc2UKICAgICAgICB9CiAgICB9CgogICAgcHJpdmF0ZSBzdGF0aWMgZnVuYyBsb2coXyBtZXNzYWdlOiBTdHJpbmcpIHsKI2lmIERFQlVHCiAgICAgICAgcHJpbnQoIltBaXJTSU0gQ29udGFjdHNdIFwobWVzc2FnZSkiKQojZW5kaWYKICAgIH0KfQo=
+import Contacts
+import Foundation
+
+enum ContactAuthorizationState: Equatable {
+    case notDetermined
+    case authorized
+    case denied
+}
+
+enum ContactAccessAction: Equatable {
+    case request
+    case load
+    case waitForUser
+    case blocked
+}
+
+enum ContactAccessPolicy {
+    static func action(
+        for state: ContactAuthorizationState,
+        userInitiated: Bool
+    ) -> ContactAccessAction {
+        switch state {
+        case .authorized: return .load
+        case .notDetermined: return userInitiated ? .request : .waitForUser
+        case .denied: return .blocked
+        }
+    }
+}
+
+/// 非主线程联系人读取器，避免在 Swift 6 下跨线程持有 CNContactStore。
+struct ContactFetcher: Sendable {
+    func authorizationState() -> ContactAuthorizationState {
+        let status = CNContactStore.authorizationStatus(for: .contacts)
+        if status == .authorized { return .authorized }
+        if #available(iOS 18.0, *), status == .limited { return .authorized }
+        return status == .notDetermined ? .notDetermined : .denied
+    }
+
+    func requestAccess() async throws -> Bool {
+        try await CNContactStore().requestAccess(for: .contacts)
+    }
+
+    func fetchAll() throws -> [ContactStore.Contact] {
+        let store = CNContactStore()
+        let keys: [CNKeyDescriptor] = [
+            CNContactGivenNameKey as CNKeyDescriptor,
+            CNContactFamilyNameKey as CNKeyDescriptor,
+            CNContactPhoneNumbersKey as CNKeyDescriptor,
+            CNContactEmailAddressesKey as CNKeyDescriptor,
+            CNContactThumbnailImageDataKey as CNKeyDescriptor,
+            CNContactIdentifierKey as CNKeyDescriptor,
+        ]
+        let request = CNContactFetchRequest(keysToFetch: keys)
+        request.sortOrder = .userDefault
+        var contacts: [ContactStore.Contact] = []
+        try store.enumerateContacts(with: request) { contact, _ in
+            let cjkName = Self.containsCJK(contact.givenName + contact.familyName)
+            let nameParts = cjkName
+                ? [contact.familyName, contact.givenName]
+                : [contact.givenName, contact.familyName]
+            let separator = cjkName ? "" : " "
+            let name = nameParts.filter { !$0.isEmpty }.joined(separator: separator)
+            let phones = contact.phoneNumbers
+                .map { ContactStore.normalized($0.value.stringValue) }
+                .filter { !$0.isEmpty }
+            guard !name.isEmpty, !phones.isEmpty else { return }
+            contacts.append(.init(
+                id: contact.identifier,
+                name: name,
+                phones: phones,
+                emails: contact.emailAddresses.map { $0.value as String },
+                photoData: contact.thumbnailImageData
+            ))
+        }
+        return contacts
+    }
+
+    func displayName(for number: String) throws -> String? {
+        guard authorizationState() == .authorized else { return nil }
+        let target = ContactStore.normalized(number)
+        guard !target.isEmpty else { return nil }
+        let contacts = try fetchAll()
+        if let exact = contacts.first(where: { $0.phones.contains(target) }) {
+            return exact.name
+        }
+        guard target.count >= 7 else { return nil }
+        let suffix = target.suffix(7)
+        return contacts.first { contact in
+            contact.phones.contains { $0.count >= 7 && $0.hasSuffix(suffix) }
+        }?.name
+    }
+
+    private static func containsCJK(_ text: String) -> Bool {
+        text.unicodeScalars.contains { scalar in
+            switch scalar.value {
+            case 0x3400...0x4DBF, 0x4E00...0x9FFF, 0xF900...0xFAFF, 0x3040...0x30FF:
+                return true
+            default:
+                return false
+            }
+        }
+    }
+}
+
+@MainActor
+final class ContactStore: ObservableObject {
+    struct Contact: Codable, Identifiable, Equatable, Sendable {
+        let id: String
+        let name: String
+        let phones: [String]
+        let emails: [String]
+        let photoData: Data?
+    }
+
+    @Published private(set) var contacts: [Contact] = []
+    @Published private(set) var isAuthorized = false
+    @Published private(set) var authorizationState: ContactAuthorizationState = .notDetermined
+    @Published var errorMessage: String?
+    private let cache: ContactCacheStore
+
+    init(fileManager: FileManager = .default) {
+        cache = ContactCacheStore(fileManager: fileManager)
+        // 联系人属于手机数据。模块离线或系统联系人数据库暂不可读时，先展示本机副本。
+        contacts = cache.load()
+        let state = ContactFetcher().authorizationState()
+        authorizationState = state
+        isAuthorized = state == .authorized
+    }
+
+    nonisolated static func normalized(_ phone: String) -> String {
+        var value = phone.filter { $0.isNumber || $0 == "+" }
+        if value.hasPrefix("+86") {
+            value.removeFirst(3)
+        } else if value.hasPrefix("86"), value.count > 11 {
+            value.removeFirst(2)
+        }
+        return value
+    }
+
+    func loadIfAuthorized() async {
+        await refresh(userInitiated: false)
+    }
+
+    func requestAccessAndLoad() async {
+        await refresh(userInitiated: true)
+    }
+
+    private func refresh(userInitiated: Bool) async {
+        do {
+            // 手机重启后可能先在数据保护尚未解锁时读取到空数组；每次前台刷新都重试磁盘缓存。
+            let cachedContacts = cache.load()
+            if !cachedContacts.isEmpty {
+                contacts = cachedContacts
+            }
+
+            var state = await Task.detached(priority: .userInitiated) {
+                ContactFetcher().authorizationState()
+            }.value
+            authorizationState = state
+
+            switch ContactAccessPolicy.action(for: state, userInitiated: userInitiated) {
+            case .request:
+                let granted = try await Task.detached(priority: .userInitiated) {
+                    try await ContactFetcher().requestAccess()
+                }.value
+                state = granted ? .authorized : .denied
+                authorizationState = state
+                guard granted else {
+                    isAuthorized = false
+                    errorMessage = "未获得通讯录访问权限"
+                    return
+                }
+            case .load:
+                break
+            case .waitForUser:
+                isAuthorized = false
+                errorMessage = nil
+                return
+            case .blocked:
+                isAuthorized = false
+                errorMessage = "通讯录权限已关闭，请在系统设置中开启"
+                return
+            }
+
+            isAuthorized = true
+            // 非用户主动刷新时优先使用已恢复的缓存，避免每次切换联系人页都完整枚举通讯录。
+            guard userInitiated || contacts.isEmpty else {
+                errorMessage = nil
+                return
+            }
+            contacts = try await Task.detached(priority: .userInitiated) {
+                try ContactFetcher().fetchAll()
+            }.value
+            guard cache.save(contacts) else {
+                errorMessage = "通讯录已读取，但保存到本机失败"
+                return
+            }
+            errorMessage = nil
+        } catch {
+            isAuthorized = false
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    func contact(for number: String) -> Contact? {
+        let target = Self.normalized(number)
+        guard !target.isEmpty else { return nil }
+        if let exact = contacts.first(where: { $0.phones.contains(target) }) { return exact }
+        guard target.count >= 7 else { return nil }
+        let suffix = target.suffix(7)
+        return contacts.first { contact in
+            contact.phones.contains { $0.count >= 7 && $0.hasSuffix(suffix) }
+        }
+    }
+
+    func displayName(for number: String?) -> String {
+        guard let number, !number.isEmpty else { return "未知号码" }
+        return contact(for: number)?.name ?? number
+    }
+}
+
+/// 通讯录缓存仅保存在 App 沙盒，不会上传到模块或 Push Relay。
+private final class ContactCacheStore {
+    private let fileManager: FileManager
+    private let fileURL: URL
+
+    init(fileManager: FileManager = .default) {
+        self.fileManager = fileManager
+        let durableRoot = fileManager.urls(
+            for: .applicationSupportDirectory,
+            in: .userDomainMask
+        ).first
+            ?? fileManager.urls(for: .documentDirectory, in: .userDomainMask).first
+            ?? URL(fileURLWithPath: NSHomeDirectory(), isDirectory: true)
+                .appendingPathComponent("Documents", isDirectory: true)
+        let directory = durableRoot.appendingPathComponent("AirSIM", isDirectory: true)
+        fileURL = directory.appendingPathComponent("contacts.json")
+        try? fileManager.createDirectory(at: directory, withIntermediateDirectories: true)
+    }
+
+    func load() -> [ContactStore.Contact] {
+        guard let data = try? Data(contentsOf: fileURL) else { return [] }
+        do {
+            return try JSONDecoder().decode([ContactStore.Contact].self, from: data)
+        } catch {
+            Self.log("读取通讯录缓存失败：\(error.localizedDescription)")
+            return []
+        }
+    }
+
+    @discardableResult
+    func save(_ contacts: [ContactStore.Contact]) -> Bool {
+        do {
+            let data = try JSONEncoder().encode(contacts)
+            try data.write(to: fileURL, options: [.atomic])
+            return true
+        } catch {
+            Self.log("保存通讯录缓存失败：\(error.localizedDescription)")
+            return false
+        }
+    }
+
+    private static func log(_ message: String) {
+#if DEBUG
+        print("[AirSIM Contacts] \(message)")
+#endif
+    }
+}

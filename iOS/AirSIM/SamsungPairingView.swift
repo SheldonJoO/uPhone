@@ -1,1 +1,102 @@
-aW1wb3J0IFN3aWZ0VUkKCnN0cnVjdCBTYW1zdW5nUGFpcmluZ1ZpZXc6IFZpZXcgewogICAgQEVudmlyb25tZW50T2JqZWN0IHByaXZhdGUgdmFyIG1vZGVsOiBBcHBNb2RlbAogICAgQEFwcFN0b3JhZ2UoTG9jYWxNb2RlUHJlZmVyZW5jZS5rZXkpIHByaXZhdGUgdmFyIGxvY2FsTW9kZUVuYWJsZWQgPSBmYWxzZQogICAgQFN0YXRlT2JqZWN0IHByaXZhdGUgdmFyIGJyb3dzZXIgPSBTYW1zdW5nUGFpcmluZ0Jyb3dzZXIoKQogICAgQFN0YXRlIHByaXZhdGUgdmFyIGNvZGUgPSAiIgogICAgQFN0YXRlIHByaXZhdGUgdmFyIHBhaXJpbmdTZXJ2aWNlSUQ6IFN0cmluZz8KICAgIEBTdGF0ZSBwcml2YXRlIHZhciBtZXNzYWdlID0gIiIKCiAgICB2YXIgYm9keTogc29tZSBWaWV3IHsKICAgICAgICBGb3JtIHsKICAgICAgICAgICAgaWYgbG9jYWxNb2RlRW5hYmxlZCB7CiAgICAgICAgICAgICAgICBTZWN0aW9uIHsKICAgICAgICAgICAgICAgICAgICBMYWJlbCgi5pys5Zyw5qih5byP6YWN5a+5Iiwgc3lzdGVtSW1hZ2U6ICJ3aWZpIikKICAgICAgICAgICAgICAgICAgICAgICAgLmZvcmVncm91bmRTdHlsZSguZ3JlZW4pCiAgICAgICAgICAgICAgICAgICAgVGV4dCgi6YWN5a+55YyF5Y+q5YyF5ZCrIFZvV0xBTiDlr4bpkqXvvIzkuI3mo4Dmn6XmiJblhpnlhaUgUmVsYXnjgIFBUE5z44CBUHVzaEtpdCDlkowgQ2FsbEtpdCDlj4LmlbDjgIIiKQogICAgICAgICAgICAgICAgICAgICAgICAuZm9udCguZm9vdG5vdGUpCiAgICAgICAgICAgICAgICAgICAgICAgIC5mb3JlZ3JvdW5kU3R5bGUoLnNlY29uZGFyeSkKICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgfQoKICAgICAgICAgICAgU2VjdGlvbigi6L+e5o6l5q2l6aqkIikgewogICAgICAgICAgICAgICAgTGFiZWwoIuiuqeS4ieaYn+S4juacrOacuui/nuaOpeWQjOS4gCBXaS1GaSIsIHN5c3RlbUltYWdlOiAid2lmaSIpCiAgICAgICAgICAgICAgICBMYWJlbCgi5Lmf5Y+v6K6p5pys5py66L+e5o6l5LiJ5pif56e75Yqo54Ot54K5Iiwgc3lzdGVtSW1hZ2U6ICJwZXJzb25hbGhvdHNwb3QiKQogICAgICAgICAgICAgICAgTGFiZWwoIuWcqOS4ieaYnyBBcHAg54K55Ye74oCc5byA5aeL5LiA5qyh5oCn6YWN5a+54oCdIiwgc3lzdGVtSW1hZ2U6ICJrZXkiKQogICAgICAgICAgICB9CgogICAgICAgICAgICBTZWN0aW9uKCLlj5HnjrDnmoTorr7lpIciKSB7CiAgICAgICAgICAgICAgICBpZiBicm93c2VyLnNlcnZpY2VzLmlzRW1wdHkgewogICAgICAgICAgICAgICAgICAgIEhTdGFjayB7CiAgICAgICAgICAgICAgICAgICAgICAgIFByb2dyZXNzVmlldygpCiAgICAgICAgICAgICAgICAgICAgICAgIFRleHQoYnJvd3Nlci5zdGF0ZVRleHQpLmZvcmVncm91bmRTdHlsZSguc2Vjb25kYXJ5KQogICAgICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgICAgIEZvckVhY2goYnJvd3Nlci5zZXJ2aWNlcykgeyBzZXJ2aWNlIGluCiAgICAgICAgICAgICAgICAgICAgVlN0YWNrKGFsaWdubWVudDogLmxlYWRpbmcsIHNwYWNpbmc6IDEwKSB7CiAgICAgICAgICAgICAgICAgICAgICAgIExhYmVsKHNlcnZpY2UuZGlzcGxheU5hbWUsIHN5c3RlbUltYWdlOiAiaXBob25lLnJhZGlvd2F2ZXMubGVmdC5hbmQucmlnaHQiKQogICAgICAgICAgICAgICAgICAgICAgICAgICAgLmZvbnQoLmhlYWRsaW5lKQogICAgICAgICAgICAgICAgICAgICAgICBUZXh0RmllbGQoIuS4ieaYn+aYvuekuueahCA2IOS9jemqjOivgeeggSIsIHRleHQ6ICRjb2RlKQogICAgICAgICAgICAgICAgICAgICAgICAgICAgLmtleWJvYXJkVHlwZSgubnVtYmVyUGFkKQogICAgICAgICAgICAgICAgICAgICAgICAgICAgLnRleHRDb250ZW50VHlwZSgub25lVGltZUNvZGUpCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAub25DaGFuZ2Uob2Y6IGNvZGUpIHsgdmFsdWUgaW4KICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBjb2RlID0gU3RyaW5nKHZhbHVlLmZpbHRlcihcLmlzTnVtYmVyKS5wcmVmaXgoNikpCiAgICAgICAgICAgICAgICAgICAgICAgICAgICB9CiAgICAgICAgICAgICAgICAgICAgICAgIEJ1dHRvbigi5Yqg5a+G6YWN5a+5Iiwgc3lzdGVtSW1hZ2U6ICJsb2NrLnNoaWVsZCIpIHsKICAgICAgICAgICAgICAgICAgICAgICAgICAgIFRhc2sgeyBhd2FpdCBwYWlyKHNlcnZpY2UpIH0KICAgICAgICAgICAgICAgICAgICAgICAgfQogICAgICAgICAgICAgICAgICAgICAgICAuYnV0dG9uU3R5bGUoLmJvcmRlcmVkUHJvbWluZW50KQogICAgICAgICAgICAgICAgICAgICAgICAuZGlzYWJsZWQoY29kZS5jb3VudCAhPSA2IHx8IHBhaXJpbmdTZXJ2aWNlSUQgIT0gbmlsKQogICAgICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgICAgICAgICAucGFkZGluZygudmVydGljYWwsIDQpCiAgICAgICAgICAgICAgICB9CiAgICAgICAgICAgIH0KCiAgICAgICAgICAgIGlmICFtZXNzYWdlLmlzRW1wdHkgewogICAgICAgICAgICAgICAgU2VjdGlvbigi57uT5p6cIikgeyBUZXh0KG1lc3NhZ2UpIH0KICAgICAgICAgICAgfQogICAgICAgIH0KICAgICAgICAubmF2aWdhdGlvblRpdGxlKCLphY3lr7nkuInmmJ/lvIDlj5HmnLoiKQogICAgICAgIC5uYXZpZ2F0aW9uQmFyVGl0bGVEaXNwbGF5TW9kZSguaW5saW5lKQogICAgICAgIC5vbkFwcGVhciB7IGJyb3dzZXIuc3RhcnQoKSB9CiAgICAgICAgLm9uRGlzYXBwZWFyIHsgYnJvd3Nlci5zdG9wKCkgfQogICAgfQoKICAgIEBNYWluQWN0b3IKICAgIHByaXZhdGUgZnVuYyBwYWlyKF8gc2VydmljZTogU2Ftc3VuZ1BhaXJpbmdTZXJ2aWNlKSBhc3luYyB7CiAgICAgICAgcGFpcmluZ1NlcnZpY2VJRCA9IHNlcnZpY2UuaWQKICAgICAgICBtZXNzYWdlID0gbG9jYWxNb2RlRW5hYmxlZAogICAgICAgICAgICA/ICLmraPlnKjliqDlr4blubblhpnlhaUgVm9XTEFOIOacrOWcsOWvhumSpeKApiIKICAgICAgICAgICAgOiAi5q2j5Zyo5Yqg5a+G5bm25YaZ5YWlIEFuZHJvaWQgQWdlbnTigKYiCiNpZiBERUJVRwogICAgICAgIHByaW50KCJbQWlyU0lNIFBhaXJdIGNsYWltX3N0YXJ0ZWQgc2Vzc2lvbj1cKHNlcnZpY2Uuc2Vzc2lvbklEKSIpCiNlbmRpZgogICAgICAgIGRlZmVyIHsgcGFpcmluZ1NlcnZpY2VJRCA9IG5pbCB9CiAgICAgICAgZG8gewogICAgICAgICAgICBndWFyZCBsZXQgcmVnaXN0cmF0aW9uID0gVm9JUFB1c2hDb250cm9sbGVyLnNoYXJlZC5wYWlyaW5nUmVnaXN0cmF0aW9uKCkgZWxzZSB7CiAgICAgICAgICAgICAgICB0aHJvdyBTYW1zdW5nUGFpcmluZ0NsaWVudEVycm9yLnJlZ2lzdHJhdGlvblVuYXZhaWxhYmxlCiAgICAgICAgICAgIH0KICAgICAgICAgICAgbWVzc2FnZSA9IHRyeSBhd2FpdCBTYW1zdW5nUGFpcmluZ0NvbXBsZXRpb25Db29yZGluYXRvci5jb21wbGV0ZSgKICAgICAgICAgICAgICAgIHBlcmZvcm1QYWlyaW5nOiB7CiAgICAgICAgICAgICAgICAgICAgdHJ5IGF3YWl0IFNhbXN1bmdQYWlyaW5nQ2xpZW50LnBhaXIoCiAgICAgICAgICAgICAgICAgICAgICAgIHNlcnZpY2U6IHNlcnZpY2UsCiAgICAgICAgICAgICAgICAgICAgICAgIGNvZGU6IGNvZGUsCiAgICAgICAgICAgICAgICAgICAgICAgIHJlZ2lzdHJhdGlvbjogcmVnaXN0cmF0aW9uCiAgICAgICAgICAgICAgICAgICAgKQogICAgICAgICAgICAgICAgfSwKICAgICAgICAgICAgICAgIHJlZnJlc2hWb1dMQU46IHsKICAgICAgICAgICAgICAgICAgICBhd2FpdCBtb2RlbC52b3dsYW4ucmVmcmVzaEFmdGVyUGFpcmluZygpCiAgICAgICAgICAgICAgICB9CiAgICAgICAgICAgICkKI2lmIERFQlVHCiAgICAgICAgICAgIHByaW50KCJbQWlyU0lNIFBhaXJdIGNsYWltX2NvbXBsZXRlZCBzZXNzaW9uPVwoc2VydmljZS5zZXNzaW9uSUQpIikKI2VuZGlmCiAgICAgICAgfSBjYXRjaCB7CiAgICAgICAgICAgIG1lc3NhZ2UgPSAi6YWN5a+55aSx6LSl77yaXChlcnJvci5sb2NhbGl6ZWREZXNjcmlwdGlvbikiCiNpZiBERUJVRwogICAgICAgICAgICBwcmludCgiW0FpclNJTSBQYWlyXSBjbGFpbV9mYWlsZWQgc2Vzc2lvbj1cKHNlcnZpY2Uuc2Vzc2lvbklEKSBlcnJvcj1cKFN0cmluZyhkZXNjcmliaW5nOiB0eXBlKG9mOiBlcnJvcikpKSIpCiNlbmRpZgogICAgICAgIH0KICAgIH0KfQo=
+import SwiftUI
+
+struct SamsungPairingView: View {
+    @EnvironmentObject private var model: AppModel
+    @AppStorage(LocalModePreference.key) private var localModeEnabled = false
+    @StateObject private var browser = SamsungPairingBrowser()
+    @State private var code = ""
+    @State private var pairingServiceID: String?
+    @State private var message = ""
+
+    var body: some View {
+        Form {
+            if localModeEnabled {
+                Section {
+                    Label("本地模式配对", systemImage: "wifi")
+                        .foregroundStyle(.green)
+                    Text("配对包只包含 VoWLAN 密钥，不检查或写入 Relay、APNs、PushKit 和 CallKit 参数。")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            Section("连接步骤") {
+                Label("让三星与本机连接同一 Wi-Fi", systemImage: "wifi")
+                Label("也可让本机连接三星移动热点", systemImage: "personalhotspot")
+                Label("在三星 App 点击“开始一次性配对”", systemImage: "key")
+            }
+
+            Section("发现的设备") {
+                if browser.services.isEmpty {
+                    HStack {
+                        ProgressView()
+                        Text(browser.stateText).foregroundStyle(.secondary)
+                    }
+                }
+                ForEach(browser.services) { service in
+                    VStack(alignment: .leading, spacing: 10) {
+                        Label(service.displayName, systemImage: "iphone.radiowaves.left.and.right")
+                            .font(.headline)
+                        TextField("三星显示的 6 位验证码", text: $code)
+                            .keyboardType(.numberPad)
+                            .textContentType(.oneTimeCode)
+                            .onChange(of: code) { value in
+                                code = String(value.filter(\.isNumber).prefix(6))
+                            }
+                        Button("加密配对", systemImage: "lock.shield") {
+                            Task { await pair(service) }
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .disabled(code.count != 6 || pairingServiceID != nil)
+                    }
+                    .padding(.vertical, 4)
+                }
+            }
+
+            if !message.isEmpty {
+                Section("结果") { Text(message) }
+            }
+        }
+        .navigationTitle("配对三星开发机")
+        .navigationBarTitleDisplayMode(.inline)
+        .onAppear { browser.start() }
+        .onDisappear { browser.stop() }
+    }
+
+    @MainActor
+    private func pair(_ service: SamsungPairingService) async {
+        pairingServiceID = service.id
+        message = localModeEnabled
+            ? "正在加密并写入 VoWLAN 本地密钥…"
+            : "正在加密并写入 Android Agent…"
+#if DEBUG
+        print("[AirSIM Pair] claim_started session=\(service.sessionID)")
+#endif
+        defer { pairingServiceID = nil }
+        do {
+            guard let registration = VoIPPushController.shared.pairingRegistration() else {
+                throw SamsungPairingClientError.registrationUnavailable
+            }
+            message = try await SamsungPairingCompletionCoordinator.complete(
+                performPairing: {
+                    try await SamsungPairingClient.pair(
+                        service: service,
+                        code: code,
+                        registration: registration
+                    )
+                },
+                refreshVoWLAN: {
+                    await model.vowlan.refreshAfterPairing()
+                }
+            )
+#if DEBUG
+            print("[AirSIM Pair] claim_completed session=\(service.sessionID)")
+#endif
+        } catch {
+            message = "配对失败：\(error.localizedDescription)"
+#if DEBUG
+            print("[AirSIM Pair] claim_failed session=\(service.sessionID) error=\(String(describing: type(of: error)))")
+#endif
+        }
+    }
+}

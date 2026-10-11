@@ -1,1 +1,102 @@
-aW1wb3J0IFN3aWZ0VUkKaW1wb3J0IFVJS2l0CgovLy8g6ZuG5Lit5o+Q5L6b56e75Yqo6K6+5aSH5ZCN56ew77yM6YG/5YWNIGlQaG9uZSDkuIrnu6fnu63lh7rnjrDnoaznvJbnoIHnmoQgaVBhZCDmlofmoYjjgIIKZW51bSBEZXZpY2VDb250ZXh0IHsKICAgIHN0YXRpYyB2YXIgZGlzcGxheU5hbWU6IFN0cmluZyB7CiAgICAgICAgVUlEZXZpY2UuY3VycmVudC51c2VySW50ZXJmYWNlSWRpb20gPT0gLnBob25lID8gImlQaG9uZSIgOiAiaVBhZCIKICAgIH0KCiAgICBzdGF0aWMgdmFyIHN5bWJvbE5hbWU6IFN0cmluZyB7CiAgICAgICAgVUlEZXZpY2UuY3VycmVudC51c2VySW50ZXJmYWNlSWRpb20gPT0gLnBob25lID8gImlwaG9uZSIgOiAiaXBhZCIKICAgIH0KfQoKLy8vIGlQaG9uZS9pUGFkIOerr+S/neeVmSBNYWMg54mI55qE5aSW6KeC6YCJ6aG544CCCmVudW0gQXBwQXBwZWFyYW5jZTogU3RyaW5nLCBDYXNlSXRlcmFibGUsIElkZW50aWZpYWJsZSB7CiAgICBjYXNlIHN5c3RlbSwgbGlnaHQsIGRhcmsKICAgIHZhciBpZDogU3RyaW5nIHsgcmF3VmFsdWUgfQoKICAgIHZhciB0aXRsZTogU3RyaW5nIHsKICAgICAgICBzd2l0Y2ggc2VsZiB7CiAgICAgICAgY2FzZSAuc3lzdGVtOiByZXR1cm4gTDEwbi50KCLot5/pmo/ns7vnu58iKQogICAgICAgIGNhc2UgLmxpZ2h0OiByZXR1cm4gTDEwbi50KCLmtYXoibIiKQogICAgICAgIGNhc2UgLmRhcms6IHJldHVybiBMMTBuLnQoIua3seiJsiIpCiAgICAgICAgfQogICAgfQoKICAgIHZhciBjb2xvclNjaGVtZTogQ29sb3JTY2hlbWU/IHsKICAgICAgICBzd2l0Y2ggc2VsZiB7CiAgICAgICAgY2FzZSAuc3lzdGVtOiByZXR1cm4gbmlsCiAgICAgICAgY2FzZSAubGlnaHQ6IHJldHVybiAubGlnaHQKICAgICAgICBjYXNlIC5kYXJrOiByZXR1cm4gLmRhcmsKICAgICAgICB9CiAgICB9Cn0KCmVudW0gQXBwTGFuZ3VhZ2U6IFN0cmluZywgQ2FzZUl0ZXJhYmxlLCBJZGVudGlmaWFibGUgewogICAgY2FzZSBzeXN0ZW0sIHpoLCBlbgogICAgdmFyIGlkOiBTdHJpbmcgeyByYXdWYWx1ZSB9CgogICAgdmFyIHRpdGxlOiBTdHJpbmcgewogICAgICAgIHN3aXRjaCBzZWxmIHsKICAgICAgICBjYXNlIC5zeXN0ZW06IHJldHVybiBMMTBuLnQoIui3n+maj+ezu+e7nyIpCiAgICAgICAgY2FzZSAuemg6IHJldHVybiAi566A5L2T5Lit5paHIgogICAgICAgIGNhc2UgLmVuOiByZXR1cm4gIkVuZ2xpc2giCiAgICAgICAgfQogICAgfQp9CgpATWFpbkFjdG9yCmZpbmFsIGNsYXNzIEFwcFNldHRpbmdzOiBPYnNlcnZhYmxlT2JqZWN0IHsKICAgIEBQdWJsaXNoZWQgdmFyIGFwcGVhcmFuY2U6IEFwcEFwcGVhcmFuY2UgewogICAgICAgIGRpZFNldCB7IFVzZXJEZWZhdWx0cy5zdGFuZGFyZC5zZXQoYXBwZWFyYW5jZS5yYXdWYWx1ZSwgZm9yS2V5OiBMMTBuLmFwcGVhcmFuY2VLZXkpIH0KICAgIH0KICAgIEBQdWJsaXNoZWQgdmFyIGxhbmd1YWdlOiBBcHBMYW5ndWFnZSB7CiAgICAgICAgZGlkU2V0IHsgVXNlckRlZmF1bHRzLnN0YW5kYXJkLnNldChsYW5ndWFnZS5yYXdWYWx1ZSwgZm9yS2V5OiBMMTBuLmxhbmd1YWdlS2V5KSB9CiAgICB9CgogICAgaW5pdCgpIHsKICAgICAgICBsZXQgZGVmYXVsdHMgPSBVc2VyRGVmYXVsdHMuc3RhbmRhcmQKICAgICAgICBhcHBlYXJhbmNlID0gQXBwQXBwZWFyYW5jZShyYXdWYWx1ZTogZGVmYXVsdHMuc3RyaW5nKGZvcktleTogTDEwbi5hcHBlYXJhbmNlS2V5KSA/PyAiIikgPz8gLnN5c3RlbQogICAgICAgIGxhbmd1YWdlID0gQXBwTGFuZ3VhZ2UocmF3VmFsdWU6IGRlZmF1bHRzLnN0cmluZyhmb3JLZXk6IEwxMG4ubGFuZ3VhZ2VLZXkpID8/ICIiKSA/PyAuc3lzdGVtCiAgICB9Cn0KCi8vLyDkuI4gTWFjIOeJiOS4gOiHtOeahOi9u+mHj+acrOWcsOWMluaWueahiO+8jOmBv+WFjemmlueJiOW8leWFpemHjeWkjeWtl+espuS4sui1hOa6kOOAggplbnVtIEwxMG4gewogICAgc3RhdGljIGxldCBhcHBlYXJhbmNlS2V5ID0gImFpcnNpbS5hcHBlYXJhbmNlIgogICAgc3RhdGljIGxldCBsYW5ndWFnZUtleSA9ICJhaXJzaW0ubGFuZ3VhZ2UiCgogICAgc3RhdGljIHZhciBlZmZlY3RpdmVMYW5ndWFnZTogQXBwTGFuZ3VhZ2UgewogICAgICAgIGxldCBzYXZlZCA9IEFwcExhbmd1YWdlKHJhd1ZhbHVlOiBVc2VyRGVmYXVsdHMuc3RhbmRhcmQuc3RyaW5nKGZvcktleTogbGFuZ3VhZ2VLZXkpID8/ICIiKSA/PyAuc3lzdGVtCiAgICAgICAgaWYgc2F2ZWQgIT0gLnN5c3RlbSB7IHJldHVybiBzYXZlZCB9CiAgICAgICAgcmV0dXJuIChMb2NhbGUucHJlZmVycmVkTGFuZ3VhZ2VzLmZpcnN0ID8/ICIiKS5sb3dlcmNhc2VkKCkuaGFzUHJlZml4KCJ6aCIpID8gLnpoIDogLmVuCiAgICB9CgogICAgc3RhdGljIGZ1bmMgdChfIGtleTogU3RyaW5nKSAtPiBTdHJpbmcgewogICAgICAgIGd1YXJkIGVmZmVjdGl2ZUxhbmd1YWdlID09IC5lbiBlbHNlIHsgcmV0dXJuIGtleSB9CiAgICAgICAgcmV0dXJuIGVuZ2xpc2hba2V5XSA/PyBrZXkKICAgIH0KCiAgICBwcml2YXRlIHN0YXRpYyBsZXQgZW5nbGlzaDogW1N0cmluZzogU3RyaW5nXSA9IFsKICAgICAgICAi5ouo5Y+3IjogIkRpYWwiLCAi5pyA6L+RIjogIlJlY2VudHMiLCAi5pyA6L+R6YCa6K+dIjogIlJlY2VudHMiLCAi55+t5L+hIjogIk1lc3NhZ2VzIiwgIuiBlOezu+S6uiI6ICJDb250YWN0cyIsICLpgJrorq/lvZUiOiAiQ29udGFjdHMiLCAi6K6+572uIjogIlNldHRpbmdzIiwKICAgICAgICAi6L6T5YWl5Y+356CBIjogIkVudGVyIG51bWJlciIsICLmjqXlkKwiOiAiQWNjZXB0IiwgIuaLkuaOpSI6ICJEZWNsaW5lIiwgIuaMguaWrSI6ICJFbmQiLCAi6Z2Z6Z+zIjogIk11dGUiLAogICAgICAgICLlj5bmtojpnZnpn7MiOiAiVW5tdXRlIiwgIuaJrOWjsOWZqCI6ICJTcGVha2VyIiwgIuW9lemfsyI6ICJSZWNvcmQiLCAi5YGc5q2i5b2V6Z+zIjogIlN0b3AgUmVjb3JkaW5nIiwgIumAmuivneS4rSI6ICJPbiBDYWxsIiwKICAgICAgICAi562J5b6F5o6l5ZCsIjogIldhaXRpbmciLCAi5pqC5peg6YCa6K+d6K6w5b2VIjogIk5vIFJlY2VudHMiLCAi5paw5L+h5oGvIjogIk5ldyBNZXNzYWdlIiwgIuaUtuS7tuS6uiI6ICJUbyIsCiAgICAgICAgIuefreS/oeWGheWuuSI6ICJNZXNzYWdlIiwgIuWPkemAgSI6ICJTZW5kIiwgIuW3suWPkemAgSI6ICJTZW50IiwgIuWPlua2iCI6ICJDYW5jZWwiLCAi5Yi35pawIjogIlJlZnJlc2giLCAi5pqC5peg55+t5L+hIjogIk5vIE1lc3NhZ2VzIiwKICAgICAgICAi6K+75Y+W5ZCO6Ieq5Yqo5riF55CG5qih5Z2X55+t5L+hIjogIkF1dG8tY2xlYW4gbW9kdWxlIFNNUyBhZnRlciByZWFkaW5nIiwgIua4heepuuWFqOmDqOefreS/oSI6ICJDbGVhciBhbGwgU01TIiwKICAgICAgICAi5pCc57Si5aeT5ZCN5oiW5Y+356CBIjogIlNlYXJjaCBuYW1lIG9yIG51bWJlciIsICLmjojmnYPorr/pl67pgJrorq/lvZUiOiAiQWxsb3cgQ29udGFjdHMgQWNjZXNzIiwgIumAmuiur+W9leS4uuepuiI6ICJObyBjb250YWN0cyIsCiAgICAgICAgIueKtuaAgSI6ICJTdGF0dXMiLCAi6YCa55SoIjogIkdlbmVyYWwiLCAi572R57ucIjogIk5ldHdvcmsiLCAi5a6a5L2NIjogIkxvY2F0aW9uIiwgImVTSU0gLyDljaHniYciOiAiZVNJTSAvIENhcmQiLAogICAgICAgICJBVCDosIPor5UiOiAiQVQgRGVidWciLCAi572R57uc6K+K5patIjogIk5ldHdvcmsgRGlhZ25vc3RpY3MiLCAi6L+Q6JCl5ZWGIjogIk9wZXJhdG9yIiwgIlNJTSDljaEiOiAiU0lNIENhcmQiLAogICAgICAgICLnvZHnu5zmqKHlvI8iOiAiTmV0d29yayBNb2RlIiwgIuS/oeWPt+W8uuW6piI6ICJTaWduYWwiLCAi5LiL6L296YCf5bqmIjogIkRvd25sb2FkIiwgIuS4iuS8oOmAn+W6piI6ICJVcGxvYWQiLAogICAgICAgICLmnKzmrKHmtYHph48iOiAiU2Vzc2lvbiBEYXRhIiwgIuWFgeiuuCA0RyDkuIrnvZEiOiAiQWxsb3cgNEcgRGF0YSIsICLmo4Dmn6UgNEcg5Ye65Y+jIjogIkNoZWNrIDRHIFJvdXRlIiwKICAgICAgICAi5qOA5p+l5Luj55CG5Ye65Y+jIjogIkNoZWNrIFByb3h5IFJvdXRlIiwgIumHjeWQr+aooeWdlyI6ICJSZWJvb3QgTW9kdWxlIiwgIkdQUyDlrprkvY0iOiAiR1BTIFBvc2l0aW9uaW5nIiwKICAgICAgICAi562J5b6F5a6a5L2NIjogIldhaXRpbmcgZm9yIGZpeCIsICLlnZDmoIciOiAiQ29vcmRpbmF0ZXMiLCAi5Y2r5pifIjogIlNhdGVsbGl0ZXMiLCAi5Y2h54mH57G75Z6LIjogIkNhcmQgVHlwZSIsCiAgICAgICAgIuS4i+i9veaWsCBQcm9maWxlIjogIkRvd25sb2FkIE5ldyBQcm9maWxlIiwgIumAmuiur+W9leajgOa1iyI6ICJQaG9uZWJvb2sgQ2hlY2siLCAiQVQg5oyH5LukIjogIkFUIENvbW1hbmQiLAogICAgICAgICLlj5HpgIEgQVQiOiAiU2VuZCBBVCIsICLlpJbop4IiOiAiQXBwZWFyYW5jZSIsICLmmL7npLrmqKHlvI8iOiAiRGlzcGxheSBNb2RlIiwgIuivreiogCI6ICJMYW5ndWFnZSIsICLot5/pmo/ns7vnu58iOiAiRm9sbG93IFN5c3RlbSIsCiAgICAgICAgIua1heiJsiI6ICJMaWdodCIsICLmt7HoibIiOiAiRGFyayIsICLmqKHlnZfku6PnkIYiOiAiTW9kdWxlIEFnZW50IiwgIuWcqOe6vyI6ICJPbmxpbmUiLCAi56a757q/IjogIk9mZmxpbmUiLAogICAgICAgICLmnKrmjqUiOiAiTWlzc2VkIiwgIuWRvOWFpSI6ICJJbmNvbWluZyIsICLlkbzlh7oiOiAiT3V0Z29pbmciLCAi5aSE55CG5LitIjogIldvcmtpbmciLCAi5L+d5a2YIjogIlNhdmUiLAogICAgICAgICLliKDpmaQiOiAiRGVsZXRlIiwgIuWIh+aNoiI6ICJTd2l0Y2giLCAi6YeN5ZG95ZCNIjogIlJlbmFtZSIsICLplJnor68iOiAiRXJyb3IiCiAgICBdCn0K
+import SwiftUI
+import UIKit
+
+/// 集中提供移动设备名称，避免 iPhone 上继续出现硬编码的 iPad 文案。
+enum DeviceContext {
+    static var displayName: String {
+        UIDevice.current.userInterfaceIdiom == .phone ? "iPhone" : "iPad"
+    }
+
+    static var symbolName: String {
+        UIDevice.current.userInterfaceIdiom == .phone ? "iphone" : "ipad"
+    }
+}
+
+/// iPhone/iPad 端保留 Mac 版的外观选项。
+enum AppAppearance: String, CaseIterable, Identifiable {
+    case system, light, dark
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .system: return L10n.t("跟随系统")
+        case .light: return L10n.t("浅色")
+        case .dark: return L10n.t("深色")
+        }
+    }
+
+    var colorScheme: ColorScheme? {
+        switch self {
+        case .system: return nil
+        case .light: return .light
+        case .dark: return .dark
+        }
+    }
+}
+
+enum AppLanguage: String, CaseIterable, Identifiable {
+    case system, zh, en
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .system: return L10n.t("跟随系统")
+        case .zh: return "简体中文"
+        case .en: return "English"
+        }
+    }
+}
+
+@MainActor
+final class AppSettings: ObservableObject {
+    @Published var appearance: AppAppearance {
+        didSet { UserDefaults.standard.set(appearance.rawValue, forKey: L10n.appearanceKey) }
+    }
+    @Published var language: AppLanguage {
+        didSet { UserDefaults.standard.set(language.rawValue, forKey: L10n.languageKey) }
+    }
+
+    init() {
+        let defaults = UserDefaults.standard
+        appearance = AppAppearance(rawValue: defaults.string(forKey: L10n.appearanceKey) ?? "") ?? .system
+        language = AppLanguage(rawValue: defaults.string(forKey: L10n.languageKey) ?? "") ?? .system
+    }
+}
+
+/// 与 Mac 版一致的轻量本地化方案，避免首版引入重复字符串资源。
+enum L10n {
+    static let appearanceKey = "airsim.appearance"
+    static let languageKey = "airsim.language"
+
+    static var effectiveLanguage: AppLanguage {
+        let saved = AppLanguage(rawValue: UserDefaults.standard.string(forKey: languageKey) ?? "") ?? .system
+        if saved != .system { return saved }
+        return (Locale.preferredLanguages.first ?? "").lowercased().hasPrefix("zh") ? .zh : .en
+    }
+
+    static func t(_ key: String) -> String {
+        guard effectiveLanguage == .en else { return key }
+        return english[key] ?? key
+    }
+
+    private static let english: [String: String] = [
+        "拨号": "Dial", "最近": "Recents", "最近通话": "Recents", "短信": "Messages", "联系人": "Contacts", "通讯录": "Contacts", "设置": "Settings",
+        "输入号码": "Enter number", "接听": "Accept", "拒接": "Decline", "挂断": "End", "静音": "Mute",
+        "取消静音": "Unmute", "扬声器": "Speaker", "录音": "Record", "停止录音": "Stop Recording", "通话中": "On Call",
+        "等待接听": "Waiting", "暂无通话记录": "No Recents", "新信息": "New Message", "收件人": "To",
+        "短信内容": "Message", "发送": "Send", "已发送": "Sent", "取消": "Cancel", "刷新": "Refresh", "暂无短信": "No Messages",
+        "读取后自动清理模块短信": "Auto-clean module SMS after reading", "清空全部短信": "Clear all SMS",
+        "搜索姓名或号码": "Search name or number", "授权访问通讯录": "Allow Contacts Access", "通讯录为空": "No contacts",
+        "状态": "Status", "通用": "General", "网络": "Network", "定位": "Location", "eSIM / 卡片": "eSIM / Card",
+        "AT 调试": "AT Debug", "网络诊断": "Network Diagnostics", "运营商": "Operator", "SIM 卡": "SIM Card",
+        "网络模式": "Network Mode", "信号强度": "Signal", "下载速度": "Download", "上传速度": "Upload",
+        "本次流量": "Session Data", "允许 4G 上网": "Allow 4G Data", "检查 4G 出口": "Check 4G Route",
+        "检查代理出口": "Check Proxy Route", "重启模块": "Reboot Module", "GPS 定位": "GPS Positioning",
+        "等待定位": "Waiting for fix", "坐标": "Coordinates", "卫星": "Satellites", "卡片类型": "Card Type",
+        "下载新 Profile": "Download New Profile", "通讯录检测": "Phonebook Check", "AT 指令": "AT Command",
+        "发送 AT": "Send AT", "外观": "Appearance", "显示模式": "Display Mode", "语言": "Language", "跟随系统": "Follow System",
+        "浅色": "Light", "深色": "Dark", "模块代理": "Module Agent", "在线": "Online", "离线": "Offline",
+        "未接": "Missed", "呼入": "Incoming", "呼出": "Outgoing", "处理中": "Working", "保存": "Save",
+        "删除": "Delete", "切换": "Switch", "重命名": "Rename", "错误": "Error"
+    ]
+}

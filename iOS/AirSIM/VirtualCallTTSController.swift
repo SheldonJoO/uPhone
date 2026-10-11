@@ -1,1 +1,80 @@
-aW1wb3J0IEFWRm91bmRhdGlvbgppbXBvcnQgQ2FsbEtpdAppbXBvcnQgRm91bmRhdGlvbgoKZW51bSBWaXJ0dWFsQ2FsbFRUU0Vycm9yOiBMb2NhbGl6ZWRFcnJvciB7CiAgICBjYXNlIGludmFsaWRQYXlsb2FkCgogICAgdmFyIGVycm9yRGVzY3JpcHRpb246IFN0cmluZz8gewogICAgICAgIHN3aXRjaCBzZWxmIHsKICAgICAgICBjYXNlIC5pbnZhbGlkUGF5bG9hZDogcmV0dXJuICLomZrmi5/mnaXnlLXmsqHmnInlj6/mkq3miqXnmoTlhoXlrrkiCiAgICAgICAgfQogICAgfQp9CgovLy8gRGFzaGJvYXJkIOiZmuaLn+adpeeUteeahOacrOWcsOWqkuS9k+a6kOOAgkNhbGxLaXQg5LuN6LSf6LSj57O757uf5p2l55S155Sf5ZG95ZGo5pyf5LiO6Z+z6aKR6Lev55Sx77yMCi8vLyDkvYbmjqXlkKwv5oyC5pat5LiN5Lya5ZCR5qih5Z2X5Y+R6YCBIEFU77yM5Lmf5LiN5Lya5bu656uL5YWs572RIFBDTSDkvJror53jgIIKQE1haW5BY3RvcgpmaW5hbCBjbGFzcyBWaXJ0dWFsQ2FsbFRUU0NvbnRyb2xsZXI6IE5TT2JqZWN0LCBBVlNwZWVjaFN5bnRoZXNpemVyRGVsZWdhdGUgewogICAgc3RhdGljIGxldCBzaGFyZWQgPSBWaXJ0dWFsQ2FsbFRUU0NvbnRyb2xsZXIoKQoKICAgIHByaXZhdGUgbGV0IHN5bnRoZXNpemVyID0gQVZTcGVlY2hTeW50aGVzaXplcigpCiAgICBwcml2YXRlKHNldCkgdmFyIGNhbGw6IEluY29taW5nVm9JUENhbGw/CiAgICBwcml2YXRlIHZhciBzdGFydGVkID0gZmFsc2UKCiAgICB2YXIgaXNQcmVwYXJlZDogQm9vbCB7IGNhbGw/LmlzVmlydHVhbCA9PSB0cnVlIH0KCiAgICBwcml2YXRlIG92ZXJyaWRlIGluaXQoKSB7CiAgICAgICAgc3VwZXIuaW5pdCgpCiAgICAgICAgc3ludGhlc2l6ZXIuZGVsZWdhdGUgPSBzZWxmCiAgICAgICAgc3ludGhlc2l6ZXIudXNlc0FwcGxpY2F0aW9uQXVkaW9TZXNzaW9uID0gdHJ1ZQogICAgfQoKICAgIGZ1bmMgcHJlcGFyZShfIGluY29taW5nOiBJbmNvbWluZ1ZvSVBDYWxsKSB0aHJvd3MgewogICAgICAgIGd1YXJkIGluY29taW5nLmlzVmlydHVhbCwgaW5jb21pbmcudHRzVGV4dD8uaXNFbXB0eSA9PSBmYWxzZSBlbHNlIHsKICAgICAgICAgICAgdGhyb3cgVmlydHVhbENhbGxUVFNFcnJvci5pbnZhbGlkUGF5bG9hZAogICAgICAgIH0KICAgICAgICBsZXQgc2Vzc2lvbiA9IEFWQXVkaW9TZXNzaW9uLnNoYXJlZEluc3RhbmNlKCkKICAgICAgICB0cnkgc2Vzc2lvbi5zZXRDYXRlZ29yeSgucGxheUFuZFJlY29yZCwgbW9kZTogLnZvaWNlQ2hhdCwgb3B0aW9uczogWy5hbGxvd0JsdWV0b290aEhGUF0pCiAgICAgICAgY2FsbCA9IGluY29taW5nCiAgICAgICAgc3RhcnRlZCA9IGZhbHNlCiAgICB9CgogICAgLy8vIOWPquiDveWcqCBDWFByb3ZpZGVyIOa/gOa0uyBDYWxsS2l0IOeahCBBVkF1ZGlvU2Vzc2lvbiDlkI7lvIDlp4vmkq3miqXjgIIKICAgIGZ1bmMgc3RhcnQoKSB7CiAgICAgICAgZ3VhcmQgIXN0YXJ0ZWQsIGxldCB0ZXh0ID0gY2FsbD8udHRzVGV4dCBlbHNlIHsgcmV0dXJuIH0KICAgICAgICBzdGFydGVkID0gdHJ1ZQogICAgICAgIGxldCB1dHRlcmFuY2UgPSBBVlNwZWVjaFV0dGVyYW5jZShzdHJpbmc6IHRleHQpCiAgICAgICAgdXR0ZXJhbmNlLnZvaWNlID0gQVZTcGVlY2hTeW50aGVzaXNWb2ljZShsYW5ndWFnZTogInpoLUNOIikKICAgICAgICB1dHRlcmFuY2UucmF0ZSA9IEFWU3BlZWNoVXR0ZXJhbmNlRGVmYXVsdFNwZWVjaFJhdGUgKiAwLjkyCiAgICAgICAgdXR0ZXJhbmNlLnByZVV0dGVyYW5jZURlbGF5ID0gMC4xOAogICAgICAgIHN5bnRoZXNpemVyLnNwZWFrKHV0dGVyYW5jZSkKICAgIH0KCiAgICBmdW5jIHNldE11dGVkKF8gbXV0ZWQ6IEJvb2wpIHsKICAgICAgICBpZiBtdXRlZCB7CiAgICAgICAgICAgIF8gPSBzeW50aGVzaXplci5wYXVzZVNwZWFraW5nKGF0OiAuaW1tZWRpYXRlKQogICAgICAgIH0gZWxzZSBpZiBzeW50aGVzaXplci5pc1BhdXNlZCB7CiAgICAgICAgICAgIF8gPSBzeW50aGVzaXplci5jb250aW51ZVNwZWFraW5nKCkKICAgICAgICB9CiAgICB9CgogICAgZnVuYyBzdG9wKCkgewogICAgICAgIGlmIHN5bnRoZXNpemVyLmlzU3BlYWtpbmcgewogICAgICAgICAgICBzeW50aGVzaXplci5zdG9wU3BlYWtpbmcoYXQ6IC5pbW1lZGlhdGUpCiAgICAgICAgfQogICAgICAgIGNhbGwgPSBuaWwKICAgICAgICBzdGFydGVkID0gZmFsc2UKICAgIH0KCiAgICBub25pc29sYXRlZCBmdW5jIHNwZWVjaFN5bnRoZXNpemVyKAogICAgICAgIF8gc3ludGhlc2l6ZXI6IEFWU3BlZWNoU3ludGhlc2l6ZXIsCiAgICAgICAgZGlkRmluaXNoIHV0dGVyYW5jZTogQVZTcGVlY2hVdHRlcmFuY2UKICAgICkgewogICAgICAgIFRhc2sgeyBATWFpbkFjdG9yIGluCiAgICAgICAgICAgIGd1YXJkIFZpcnR1YWxDYWxsVFRTQ29udHJvbGxlci5zaGFyZWQuaXNQcmVwYXJlZCBlbHNlIHsgcmV0dXJuIH0KICAgICAgICAgICAgLy8g5pKt5oql5a6M5oiQ562J5ZCM6L+c56uv57uT5p2f77ybQ2FsbEtpdCDmlLbotbflkI7nlLEgZGlkRGVhY3RpdmF0ZSDmuIXnkIblqpLkvZPnirbmgIHjgIIKICAgICAgICAgICAgQ2FsbEtpdENvbnRyb2xsZXIuc2hhcmVkLnJlcG9ydEN1cnJlbnRDYWxsRW5kZWQocmVhc29uOiAucmVtb3RlRW5kZWQpCiAgICAgICAgfQogICAgfQp9Cg==
+import AVFoundation
+import CallKit
+import Foundation
+
+enum VirtualCallTTSError: LocalizedError {
+    case invalidPayload
+
+    var errorDescription: String? {
+        switch self {
+        case .invalidPayload: return "虚拟来电没有可播报的内容"
+        }
+    }
+}
+
+/// Dashboard 虚拟来电的本地媒体源。CallKit 仍负责系统来电生命周期与音频路由，
+/// 但接听/挂断不会向模块发送 AT，也不会建立公网 PCM 会话。
+@MainActor
+final class VirtualCallTTSController: NSObject, AVSpeechSynthesizerDelegate {
+    static let shared = VirtualCallTTSController()
+
+    private let synthesizer = AVSpeechSynthesizer()
+    private(set) var call: IncomingVoIPCall?
+    private var started = false
+
+    var isPrepared: Bool { call?.isVirtual == true }
+
+    private override init() {
+        super.init()
+        synthesizer.delegate = self
+        synthesizer.usesApplicationAudioSession = true
+    }
+
+    func prepare(_ incoming: IncomingVoIPCall) throws {
+        guard incoming.isVirtual, incoming.ttsText?.isEmpty == false else {
+            throw VirtualCallTTSError.invalidPayload
+        }
+        let session = AVAudioSession.sharedInstance()
+        try session.setCategory(.playAndRecord, mode: .voiceChat, options: [.allowBluetoothHFP])
+        call = incoming
+        started = false
+    }
+
+    /// 只能在 CXProvider 激活 CallKit 的 AVAudioSession 后开始播报。
+    func start() {
+        guard !started, let text = call?.ttsText else { return }
+        started = true
+        let utterance = AVSpeechUtterance(string: text)
+        utterance.voice = AVSpeechSynthesisVoice(language: "zh-CN")
+        utterance.rate = AVSpeechUtteranceDefaultSpeechRate * 0.92
+        utterance.preUtteranceDelay = 0.18
+        synthesizer.speak(utterance)
+    }
+
+    func setMuted(_ muted: Bool) {
+        if muted {
+            _ = synthesizer.pauseSpeaking(at: .immediate)
+        } else if synthesizer.isPaused {
+            _ = synthesizer.continueSpeaking()
+        }
+    }
+
+    func stop() {
+        if synthesizer.isSpeaking {
+            synthesizer.stopSpeaking(at: .immediate)
+        }
+        call = nil
+        started = false
+    }
+
+    nonisolated func speechSynthesizer(
+        _ synthesizer: AVSpeechSynthesizer,
+        didFinish utterance: AVSpeechUtterance
+    ) {
+        Task { @MainActor in
+            guard VirtualCallTTSController.shared.isPrepared else { return }
+            // 播报完成等同远端结束；CallKit 收起后由 didDeactivate 清理媒体状态。
+            CallKitController.shared.reportCurrentCallEnded(reason: .remoteEnded)
+        }
+    }
+}

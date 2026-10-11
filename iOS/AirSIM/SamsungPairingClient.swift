@@ -1,1 +1,233 @@
-aW1wb3J0IEZvdW5kYXRpb24KaW1wb3J0IE5ldHdvcmsKCnN0cnVjdCBTYW1zdW5nUGFpcmluZ1NlcnZpY2U6IElkZW50aWZpYWJsZSB7CiAgICBsZXQgZW5kcG9pbnQ6IE5XRW5kcG9pbnQKICAgIGxldCBzZXNzaW9uSUQ6IFN0cmluZwogICAgbGV0IHNlcnZlclB1YmxpY0tleTogRGF0YQogICAgbGV0IGV4cGlyZXNBdDogRGF0ZQoKICAgIHZhciBpZDogU3RyaW5nIHsgc2Vzc2lvbklEIH0KICAgIHZhciBkaXNwbGF5TmFtZTogU3RyaW5nIHsKICAgICAgICBpZiBjYXNlIGxldCAuc2VydmljZShuYW1lLCBfLCBfLCBfKSA9IGVuZHBvaW50IHsgcmV0dXJuIG5hbWUgfQogICAgICAgIHJldHVybiAiU2Ftc3VuZyBQaG9uZSBCcmlkZ2UiCiAgICB9Cn0KCkBNYWluQWN0b3IKZmluYWwgY2xhc3MgU2Ftc3VuZ1BhaXJpbmdCcm93c2VyOiBPYnNlcnZhYmxlT2JqZWN0IHsKICAgIEBQdWJsaXNoZWQgcHJpdmF0ZShzZXQpIHZhciBzZXJ2aWNlczogW1NhbXN1bmdQYWlyaW5nU2VydmljZV0gPSBbXQogICAgQFB1Ymxpc2hlZCBwcml2YXRlKHNldCkgdmFyIHN0YXRlVGV4dCA9ICLmraPlnKjmiavmj48gVm9XTEFOIOWxgOWfn+e9keKApiIKCiAgICBwcml2YXRlIGxldCBxdWV1ZSA9IERpc3BhdGNoUXVldWUobGFiZWw6ICJjb20uYWlyc2ltLnNhbXN1bmctcGFpci5icm93c2VyIikKICAgIHByaXZhdGUgdmFyIGJyb3dzZXI6IE5XQnJvd3Nlcj8KCiAgICBmdW5jIHN0YXJ0KCkgewogICAgICAgIGd1YXJkIGJyb3dzZXIgPT0gbmlsIGVsc2UgeyByZXR1cm4gfQogICAgICAgIGxldCBwYXJhbWV0ZXJzID0gTldQYXJhbWV0ZXJzLnRjcAogICAgICAgIHBhcmFtZXRlcnMuaW5jbHVkZVBlZXJUb1BlZXIgPSB0cnVlCiAgICAgICAgbGV0IGFjdGl2ZSA9IE5XQnJvd3NlcigKICAgICAgICAgICAgZm9yOiAuYm9uam91cldpdGhUWFRSZWNvcmQodHlwZTogIl9haXJzaW0tcGFpci5fdGNwIiwgZG9tYWluOiBuaWwpLAogICAgICAgICAgICB1c2luZzogcGFyYW1ldGVycwogICAgICAgICkKICAgICAgICBhY3RpdmUuc3RhdGVVcGRhdGVIYW5kbGVyID0geyBbd2VhayBzZWxmXSBzdGF0ZSBpbgogICAgICAgICAgICBUYXNrIHsgQE1haW5BY3RvciBpbgogICAgICAgICAgICAgICAgZ3VhcmQgbGV0IHNlbGYgZWxzZSB7IHJldHVybiB9CiAgICAgICAgICAgICAgICBzd2l0Y2ggc3RhdGUgewogICAgICAgICAgICAgICAgY2FzZSAucmVhZHk6IHNlbGYuc3RhdGVUZXh0ID0gIuato+WcqOetieW+heS4ieaYn+mFjeWvueW5v+aSreKApiIKICAgICAgICAgICAgICAgIGNhc2UgLndhaXRpbmc6IHNlbGYuc3RhdGVUZXh0ID0gIuivt+ehruiupCBpUGhvbmUg5LiO5LiJ5pif5aSE5LqO5ZCM5LiAIFdpLUZpIOaIluS4ieaYn+eDreeCuSIKICAgICAgICAgICAgICAgIGNhc2UgLmZhaWxlZChsZXQgZXJyb3IpOiBzZWxmLnN0YXRlVGV4dCA9ICLlsYDln5/nvZHmiavmj4/lpLHotKXvvJpcKGVycm9yLmxvY2FsaXplZERlc2NyaXB0aW9uKSIKICAgICAgICAgICAgICAgIGNhc2UgLmNhbmNlbGxlZDogc2VsZi5zdGF0ZVRleHQgPSAi5omr5o+P5bey5YGc5q2iIgogICAgICAgICAgICAgICAgZGVmYXVsdDogYnJlYWsKICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgfQogICAgICAgIH0KICAgICAgICBhY3RpdmUuYnJvd3NlUmVzdWx0c0NoYW5nZWRIYW5kbGVyID0geyBbd2VhayBzZWxmXSByZXN1bHRzLCBfIGluCiAgICAgICAgICAgIGxldCBwYXJzZWQgPSByZXN1bHRzLmNvbXBhY3RNYXAoU2VsZi5wYXJzZSkKICAgICAgICAgICAgICAgIC5maWx0ZXIgeyAkMC5leHBpcmVzQXQgPiBEYXRlKCkgfQogICAgICAgICAgICAgICAgLnNvcnRlZCB7ICQwLmV4cGlyZXNBdCA8ICQxLmV4cGlyZXNBdCB9CiAgICAgICAgICAgIFRhc2sgeyBATWFpbkFjdG9yIGluCiAgICAgICAgICAgICAgICBzZWxmPy5zZXJ2aWNlcyA9IHBhcnNlZAogICAgICAgICAgICAgICAgaWYgIXBhcnNlZC5pc0VtcHR5IHsgc2VsZj8uc3RhdGVUZXh0ID0gIuW3suWPkeeOsCBcKHBhcnNlZC5jb3VudCkg5Y+w5b6F6YWN5a+56K6+5aSHIiB9CiAgICAgICAgICAgIH0KICAgICAgICB9CiAgICAgICAgYnJvd3NlciA9IGFjdGl2ZQogICAgICAgIGFjdGl2ZS5zdGFydChxdWV1ZTogcXVldWUpCiAgICB9CgogICAgZnVuYyBzdG9wKCkgewogICAgICAgIGJyb3dzZXI/LmNhbmNlbCgpCiAgICAgICAgYnJvd3NlciA9IG5pbAogICAgICAgIHNlcnZpY2VzID0gW10KICAgIH0KCiAgICBwcml2YXRlIG5vbmlzb2xhdGVkIHN0YXRpYyBmdW5jIHBhcnNlKF8gcmVzdWx0OiBOV0Jyb3dzZXIuUmVzdWx0KSAtPiBTYW1zdW5nUGFpcmluZ1NlcnZpY2U/IHsKICAgICAgICBndWFyZCBjYXNlIGxldCAuYm9uam91cihyZWNvcmQpID0gcmVzdWx0Lm1ldGFkYXRhLAogICAgICAgICAgICAgIHJlY29yZFsidiJdID09ICIxIiwKICAgICAgICAgICAgICBsZXQgc2Vzc2lvbklEID0gcmVjb3JkWyJzZXNzaW9uIl0sCiAgICAgICAgICAgICAgbGV0IGtleVRleHQgPSByZWNvcmRbImtleSJdLAogICAgICAgICAgICAgIGxldCBzZXJ2ZXJQdWJsaWNLZXkgPSBEYXRhKGJhc2U2NFVSTDoga2V5VGV4dCksCiAgICAgICAgICAgICAgc2VydmVyUHVibGljS2V5LmNvdW50ID09IDMyLAogICAgICAgICAgICAgIGxldCBleHBpcmVzVGV4dCA9IHJlY29yZFsiZXhwaXJlcyJdLAogICAgICAgICAgICAgIGxldCBleHBpcmVzTWlsbGlzID0gRG91YmxlKGV4cGlyZXNUZXh0KSBlbHNlIHsgcmV0dXJuIG5pbCB9CiAgICAgICAgcmV0dXJuIFNhbXN1bmdQYWlyaW5nU2VydmljZSgKICAgICAgICAgICAgZW5kcG9pbnQ6IHJlc3VsdC5lbmRwb2ludCwKICAgICAgICAgICAgc2Vzc2lvbklEOiBzZXNzaW9uSUQsCiAgICAgICAgICAgIHNlcnZlclB1YmxpY0tleTogc2VydmVyUHVibGljS2V5LAogICAgICAgICAgICBleHBpcmVzQXQ6IERhdGUodGltZUludGVydmFsU2luY2UxOTcwOiBleHBpcmVzTWlsbGlzIC8gMV8wMDApCiAgICAgICAgKQogICAgfQp9CgplbnVtIFNhbXN1bmdQYWlyaW5nQ2xpZW50IHsKICAgIHByaXZhdGUgc3RydWN0IENsYWltOiBFbmNvZGFibGUgewogICAgICAgIGxldCB2ZXJzaW9uID0gMQogICAgICAgIGxldCBzZXNzaW9uSUQ6IFN0cmluZwogICAgICAgIGxldCBjbGllbnRQdWJsaWNLZXk6IFN0cmluZwogICAgICAgIGxldCBzZWFsZWRSZWdpc3RyYXRpb246IFN0cmluZwoKICAgICAgICBlbnVtIENvZGluZ0tleXM6IFN0cmluZywgQ29kaW5nS2V5IHsKICAgICAgICAgICAgY2FzZSB2ZXJzaW9uCiAgICAgICAgICAgIGNhc2Ugc2Vzc2lvbklEID0gInNlc3Npb25faWQiCiAgICAgICAgICAgIGNhc2UgY2xpZW50UHVibGljS2V5ID0gImNsaWVudF9wdWJsaWNfa2V5IgogICAgICAgICAgICBjYXNlIHNlYWxlZFJlZ2lzdHJhdGlvbiA9ICJzZWFsZWRfcmVnaXN0cmF0aW9uIgogICAgICAgIH0KICAgIH0KCiAgICBwcml2YXRlIHN0cnVjdCBSZXNwb25zZTogRGVjb2RhYmxlIHsKICAgICAgICBsZXQgY29uZmlndXJlZDogQm9vbAogICAgICAgIGxldCBkZXZpY2VJREhpbnQ6IFN0cmluZz8KICAgICAgICBlbnVtIENvZGluZ0tleXM6IFN0cmluZywgQ29kaW5nS2V5IHsKICAgICAgICAgICAgY2FzZSBjb25maWd1cmVkCiAgICAgICAgICAgIGNhc2UgZGV2aWNlSURIaW50ID0gImRldmljZV9pZF9oaW50IgogICAgICAgIH0KICAgIH0KCiAgICBzdGF0aWMgZnVuYyBwYWlyKHNlcnZpY2U6IFNhbXN1bmdQYWlyaW5nU2VydmljZSwgY29kZTogU3RyaW5nLCByZWdpc3RyYXRpb246IEFnZW50UHVzaFJlZ2lzdHJhdGlvbikgYXN5bmMgdGhyb3dzIC0+IFN0cmluZyB7CiAgICAgICAgZ3VhcmQgY29kZS5yYW5nZShvZjogIyJeWzAtOV17Nn0kIiMsIG9wdGlvbnM6IC5yZWd1bGFyRXhwcmVzc2lvbikgIT0gbmlsIGVsc2UgewogICAgICAgICAgICB0aHJvdyBTYW1zdW5nUGFpcmluZ0NsaWVudEVycm9yLmludmFsaWRDb2RlCiAgICAgICAgfQogICAgICAgIGd1YXJkIHNlcnZpY2UuZXhwaXJlc0F0ID4gRGF0ZSgpIGVsc2UgeyB0aHJvdyBTYW1zdW5nUGFpcmluZ0NsaWVudEVycm9yLmV4cGlyZWQgfQogICAgICAgIGxldCByZWdpc3RyYXRpb25EYXRhID0gdHJ5IEpTT05FbmNvZGVyKCkuZW5jb2RlKHJlZ2lzdHJhdGlvbikKICAgICAgICBsZXQgc2VhbGVkID0gdHJ5IFNhbXN1bmdQYWlyaW5nQ3J5cHRvLnNlYWwoCiAgICAgICAgICAgIHJlZ2lzdHJhdGlvbjogcmVnaXN0cmF0aW9uRGF0YSwKICAgICAgICAgICAgc2VydmVyUHVibGljS2V5OiBzZXJ2aWNlLnNlcnZlclB1YmxpY0tleSwKICAgICAgICAgICAgc2Vzc2lvbklEOiBzZXJ2aWNlLnNlc3Npb25JRCwKICAgICAgICAgICAgY29kZTogY29kZQogICAgICAgICkKICAgICAgICBsZXQgYm9keSA9IHRyeSBKU09ORW5jb2RlcigpLmVuY29kZShDbGFpbSgKICAgICAgICAgICAgc2Vzc2lvbklEOiBzZXJ2aWNlLnNlc3Npb25JRCwKICAgICAgICAgICAgY2xpZW50UHVibGljS2V5OiBzZWFsZWQuY2xpZW50UHVibGljS2V5LmJhc2U2NFVSTCwKICAgICAgICAgICAgc2VhbGVkUmVnaXN0cmF0aW9uOiBzZWFsZWQuY29tYmluZWQuYmFzZTY0VVJMCiAgICAgICAgKSkKICAgICAgICBsZXQgcmVzcG9uc2VEYXRhID0gdHJ5IGF3YWl0IGV4Y2hhbmdlKGVuZHBvaW50OiBzZXJ2aWNlLmVuZHBvaW50LCBib2R5OiBib2R5KQogICAgICAgIGxldCByZXNwb25zZSA9IHRyeSBKU09ORGVjb2RlcigpLmRlY29kZShSZXNwb25zZS5zZWxmLCBmcm9tOiByZXNwb25zZURhdGEpCiAgICAgICAgZ3VhcmQgcmVzcG9uc2UuY29uZmlndXJlZCBlbHNlIHsgdGhyb3cgU2Ftc3VuZ1BhaXJpbmdDbGllbnRFcnJvci5yZWplY3RlZCB9CiAgICAgICAgcmV0dXJuIHJlc3BvbnNlLmRldmljZUlESGludC5tYXAgeyAi6YWN5a+55oiQ5Yqf77yI6K6+5aSHIOKAplwoJDAp77yJIiB9ID8/ICLphY3lr7nmiJDlip8iCiAgICB9CgogICAgcHJpdmF0ZSBzdGF0aWMgZnVuYyBleGNoYW5nZShlbmRwb2ludDogTldFbmRwb2ludCwgYm9keTogRGF0YSkgYXN5bmMgdGhyb3dzIC0+IERhdGEgewogICAgICAgIHRyeSBhd2FpdCB3aXRoQ2hlY2tlZFRocm93aW5nQ29udGludWF0aW9uIHsgY29udGludWF0aW9uIGluCiAgICAgICAgICAgIGxldCBjb25uZWN0aW9uID0gTldDb25uZWN0aW9uKHRvOiBlbmRwb2ludCwgdXNpbmc6IC50Y3ApCiAgICAgICAgICAgIGxldCBzdGF0ZSA9IFBhaXJpbmdFeGNoYW5nZVN0YXRlKGNvbm5lY3Rpb246IGNvbm5lY3Rpb24sIGNvbnRpbnVhdGlvbjogY29udGludWF0aW9uKQogICAgICAgICAgICBjb25uZWN0aW9uLnN0YXRlVXBkYXRlSGFuZGxlciA9IHsgbmV3U3RhdGUgaW4KICAgICAgICAgICAgICAgIHN3aXRjaCBuZXdTdGF0ZSB7CiAgICAgICAgICAgICAgICBjYXNlIC5yZWFkeTogc3RhdGUuc2VuZChib2R5OiBib2R5KQogICAgICAgICAgICAgICAgY2FzZSAuZmFpbGVkKGxldCBlcnJvcik6IHN0YXRlLmZpbmlzaCguZmFpbHVyZShlcnJvcikpCiAgICAgICAgICAgICAgICBjYXNlIC5jYW5jZWxsZWQ6IHN0YXRlLmZpbmlzaCguZmFpbHVyZShTYW1zdW5nUGFpcmluZ0NsaWVudEVycm9yLmNvbm5lY3Rpb25DbG9zZWQpKQogICAgICAgICAgICAgICAgZGVmYXVsdDogYnJlYWsKICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgfQogICAgICAgICAgICBjb25uZWN0aW9uLnN0YXJ0KHF1ZXVlOiBEaXNwYXRjaFF1ZXVlKGxhYmVsOiAiY29tLmFpcnNpbS5zYW1zdW5nLXBhaXIuY2xhaW0iKSkKICAgICAgICB9CiAgICB9Cn0KCkBNYWluQWN0b3IKZW51bSBTYW1zdW5nUGFpcmluZ0NvbXBsZXRpb25Db29yZGluYXRvciB7CiAgICBzdGF0aWMgZnVuYyBjb21wbGV0ZSgKICAgICAgICBwZXJmb3JtUGFpcmluZzogKCkgYXN5bmMgdGhyb3dzIC0+IFN0cmluZywKICAgICAgICByZWZyZXNoVm9XTEFOOiAoKSBhc3luYyAtPiBWb2lkCiAgICApIGFzeW5jIHJldGhyb3dzIC0+IFN0cmluZyB7CiAgICAgICAgbGV0IG1lc3NhZ2UgPSB0cnkgYXdhaXQgcGVyZm9ybVBhaXJpbmcoKQogICAgICAgIGF3YWl0IHJlZnJlc2hWb1dMQU4oKQogICAgICAgIHJldHVybiBtZXNzYWdlCiAgICB9Cn0KCnByaXZhdGUgZmluYWwgY2xhc3MgUGFpcmluZ0V4Y2hhbmdlU3RhdGU6IEB1bmNoZWNrZWQgU2VuZGFibGUgewogICAgcHJpdmF0ZSBsZXQgY29ubmVjdGlvbjogTldDb25uZWN0aW9uCiAgICBwcml2YXRlIGxldCBjb250aW51YXRpb246IENoZWNrZWRDb250aW51YXRpb248RGF0YSwgRXJyb3I+CiAgICBwcml2YXRlIHZhciByZWNlaXZlZCA9IERhdGEoKQogICAgcHJpdmF0ZSB2YXIgZmluaXNoZWQgPSBmYWxzZQogICAgcHJpdmF0ZSBsZXQgbG9jayA9IE5TTG9jaygpCgogICAgaW5pdChjb25uZWN0aW9uOiBOV0Nvbm5lY3Rpb24sIGNvbnRpbnVhdGlvbjogQ2hlY2tlZENvbnRpbnVhdGlvbjxEYXRhLCBFcnJvcj4pIHsKICAgICAgICBzZWxmLmNvbm5lY3Rpb24gPSBjb25uZWN0aW9uCiAgICAgICAgc2VsZi5jb250aW51YXRpb24gPSBjb250aW51YXRpb24KICAgIH0KCiAgICBmdW5jIHNlbmQoYm9keTogRGF0YSkgewogICAgICAgIHZhciByZXF1ZXN0ID0gRGF0YSgiUE9TVCAvcGFpci92MS9jbGFpbSBIVFRQLzEuMVxyXG5Ib3N0OiBhaXJzaW0tcGFpci5sb2NhbFxyXG5Db250ZW50LVR5cGU6IGFwcGxpY2F0aW9uL2pzb25cclxuQ29udGVudC1MZW5ndGg6IFwoYm9keS5jb3VudClcclxuQ29ubmVjdGlvbjogY2xvc2VcclxuXHJcbiIudXRmOCkKICAgICAgICByZXF1ZXN0LmFwcGVuZChib2R5KQogICAgICAgIGNvbm5lY3Rpb24uc2VuZChjb250ZW50OiByZXF1ZXN0LCBjb21wbGV0aW9uOiAuY29udGVudFByb2Nlc3NlZCB7IFt3ZWFrIHNlbGZdIGVycm9yIGluCiAgICAgICAgICAgIGlmIGxldCBlcnJvciB7IHNlbGY/LmZpbmlzaCguZmFpbHVyZShlcnJvcikpOyByZXR1cm4gfQogICAgICAgICAgICBzZWxmPy5yZWNlaXZlKCkKICAgICAgICB9KQogICAgfQoKICAgIHByaXZhdGUgZnVuYyByZWNlaXZlKCkgewogICAgICAgIGNvbm5lY3Rpb24ucmVjZWl2ZShtaW5pbXVtSW5jb21wbGV0ZUxlbmd0aDogMSwgbWF4aW11bUxlbmd0aDogNjVfNTM2KSB7IFt3ZWFrIHNlbGZdIGNvbnRlbnQsIF8sIGlzQ29tcGxldGUsIGVycm9yIGluCiAgICAgICAgICAgIGd1YXJkIGxldCBzZWxmIGVsc2UgeyByZXR1cm4gfQogICAgICAgICAgICBpZiBsZXQgY29udGVudCB7IHNlbGYucmVjZWl2ZWQuYXBwZW5kKGNvbnRlbnQpIH0KICAgICAgICAgICAgaWYgbGV0IGVycm9yIHsgc2VsZi5maW5pc2goLmZhaWx1cmUoZXJyb3IpKTsgcmV0dXJuIH0KICAgICAgICAgICAgaWYgc2VsZi5yZWNlaXZlZC5jb3VudCA+IDY1XzUzNiB7IHNlbGYuZmluaXNoKC5mYWlsdXJlKFNhbXN1bmdQYWlyaW5nQ2xpZW50RXJyb3IucmVzcG9uc2VUb29MYXJnZSkpOyByZXR1cm4gfQogICAgICAgICAgICBpZiBpc0NvbXBsZXRlIHsgc2VsZi5maW5pc2goc2VsZi5wYXJzZVJlc3BvbnNlKCkpOyByZXR1cm4gfQogICAgICAgICAgICBzZWxmLnJlY2VpdmUoKQogICAgICAgIH0KICAgIH0KCiAgICBwcml2YXRlIGZ1bmMgcGFyc2VSZXNwb25zZSgpIC0+IFJlc3VsdDxEYXRhLCBFcnJvcj4gewogICAgICAgIGxldCBtYXJrZXIgPSBEYXRhKCJcclxuXHJcbiIudXRmOCkKICAgICAgICBndWFyZCBsZXQgcmFuZ2UgPSByZWNlaXZlZC5yYW5nZShvZjogbWFya2VyKSwKICAgICAgICAgICAgICBsZXQgZmlyc3RMaW5lID0gU3RyaW5nKGRhdGE6IHJlY2VpdmVkWy4uPHJhbmdlLmxvd2VyQm91bmRdLCBlbmNvZGluZzogLnV0ZjgpPy5zcGxpdChzZXBhcmF0b3I6ICJcbiIpLmZpcnN0LAogICAgICAgICAgICAgIGZpcnN0TGluZS5jb250YWlucygiIDIwMCAiKSBlbHNlIHsgcmV0dXJuIC5mYWlsdXJlKFNhbXN1bmdQYWlyaW5nQ2xpZW50RXJyb3IucmVqZWN0ZWQpIH0KICAgICAgICByZXR1cm4gLnN1Y2Nlc3MoRGF0YShyZWNlaXZlZFtyYW5nZS51cHBlckJvdW5kLi4uXSkpCiAgICB9CgogICAgZnVuYyBmaW5pc2goXyByZXN1bHQ6IFJlc3VsdDxEYXRhLCBFcnJvcj4pIHsKICAgICAgICBsb2NrLmxvY2soKQogICAgICAgIGd1YXJkICFmaW5pc2hlZCBlbHNlIHsgbG9jay51bmxvY2soKTsgcmV0dXJuIH0KICAgICAgICBmaW5pc2hlZCA9IHRydWUKICAgICAgICBsb2NrLnVubG9jaygpCiAgICAgICAgY29ubmVjdGlvbi5jYW5jZWwoKQogICAgICAgIGNvbnRpbnVhdGlvbi5yZXN1bWUod2l0aDogcmVzdWx0KQogICAgfQp9CgplbnVtIFNhbXN1bmdQYWlyaW5nQ2xpZW50RXJyb3I6IExvY2FsaXplZEVycm9yIHsKICAgIGNhc2UgaW52YWxpZENvZGUsIGV4cGlyZWQsIHJlamVjdGVkLCByZXNwb25zZVRvb0xhcmdlLCBjb25uZWN0aW9uQ2xvc2VkLCByZWdpc3RyYXRpb25VbmF2YWlsYWJsZQogICAgdmFyIGVycm9yRGVzY3JpcHRpb246IFN0cmluZz8gewogICAgICAgIHN3aXRjaCBzZWxmIHsKICAgICAgICBjYXNlIC5pbnZhbGlkQ29kZTogcmV0dXJuICLor7fovpPlhaXkuInmmJ/lsY/luZXkuIrnmoQgNiDkvY3pqozor4HnoIEiCiAgICAgICAgY2FzZSAuZXhwaXJlZDogcmV0dXJuICLkuInmmJ/phY3lr7nnqpflj6Plt7Lov4fmnJ/vvIzor7fph43mlrDlvIDlp4siCiAgICAgICAgY2FzZSAucmVqZWN0ZWQ6IHJldHVybiAi5LiJ5pif5ouS57ud5LqG6YWN5a+577yM6K+35qC45a+56aqM6K+B56CB5ZCO6YeN6K+VIgogICAgICAgIGNhc2UgLnJlc3BvbnNlVG9vTGFyZ2U6IHJldHVybiAi5LiJ5pif6L+U5Zue55qE5pWw5o2u5byC5bi4IgogICAgICAgIGNhc2UgLmNvbm5lY3Rpb25DbG9zZWQ6IHJldHVybiAi5LiO5LiJ5pif55qE5bGA5Z+f572R6L+e5o6l5bey5pat5byAIgogICAgICAgIGNhc2UgLnJlZ2lzdHJhdGlvblVuYXZhaWxhYmxlOiByZXR1cm4gIuacrOacuuWwmuacquWPluW+lyBQdXNoS2l0IOWHreaNru+8jOivt+WFiOWFgeiuuOmAmuefpeW5tuetieW+heazqOWGjCIKICAgICAgICB9CiAgICB9Cn0KCnByaXZhdGUgZXh0ZW5zaW9uIERhdGEgewogICAgaW5pdD8oYmFzZTY0VVJMOiBTdHJpbmcpIHsKICAgICAgICB2YXIgdmFsdWUgPSBiYXNlNjRVUkwucmVwbGFjaW5nT2NjdXJyZW5jZXMob2Y6ICItIiwgd2l0aDogIisiKS5yZXBsYWNpbmdPY2N1cnJlbmNlcyhvZjogIl8iLCB3aXRoOiAiLyIpCiAgICAgICAgdmFsdWUgKz0gU3RyaW5nKHJlcGVhdGluZzogIj0iLCBjb3VudDogKDQgLSB2YWx1ZS5jb3VudCAlIDQpICUgNCkKICAgICAgICBzZWxmLmluaXQoYmFzZTY0RW5jb2RlZDogdmFsdWUpCiAgICB9CgogICAgdmFyIGJhc2U2NFVSTDogU3RyaW5nIHsKICAgICAgICBiYXNlNjRFbmNvZGVkU3RyaW5nKCkucmVwbGFjaW5nT2NjdXJyZW5jZXMob2Y6ICIrIiwgd2l0aDogIi0iKQogICAgICAgICAgICAucmVwbGFjaW5nT2NjdXJyZW5jZXMob2Y6ICIvIiwgd2l0aDogIl8iKS5yZXBsYWNpbmdPY2N1cnJlbmNlcyhvZjogIj0iLCB3aXRoOiAiIikKICAgIH0KfQo=
+import Foundation
+import Network
+
+struct SamsungPairingService: Identifiable {
+    let endpoint: NWEndpoint
+    let sessionID: String
+    let serverPublicKey: Data
+    let expiresAt: Date
+
+    var id: String { sessionID }
+    var displayName: String {
+        if case let .service(name, _, _, _) = endpoint { return name }
+        return "Samsung Phone Bridge"
+    }
+}
+
+@MainActor
+final class SamsungPairingBrowser: ObservableObject {
+    @Published private(set) var services: [SamsungPairingService] = []
+    @Published private(set) var stateText = "正在扫描 VoWLAN 局域网…"
+
+    private let queue = DispatchQueue(label: "com.airsim.samsung-pair.browser")
+    private var browser: NWBrowser?
+
+    func start() {
+        guard browser == nil else { return }
+        let parameters = NWParameters.tcp
+        parameters.includePeerToPeer = true
+        let active = NWBrowser(
+            for: .bonjourWithTXTRecord(type: "_airsim-pair._tcp", domain: nil),
+            using: parameters
+        )
+        active.stateUpdateHandler = { [weak self] state in
+            Task { @MainActor in
+                guard let self else { return }
+                switch state {
+                case .ready: self.stateText = "正在等待三星配对广播…"
+                case .waiting: self.stateText = "请确认 iPhone 与三星处于同一 Wi-Fi 或三星热点"
+                case .failed(let error): self.stateText = "局域网扫描失败：\(error.localizedDescription)"
+                case .cancelled: self.stateText = "扫描已停止"
+                default: break
+                }
+            }
+        }
+        active.browseResultsChangedHandler = { [weak self] results, _ in
+            let parsed = results.compactMap(Self.parse)
+                .filter { $0.expiresAt > Date() }
+                .sorted { $0.expiresAt < $1.expiresAt }
+            Task { @MainActor in
+                self?.services = parsed
+                if !parsed.isEmpty { self?.stateText = "已发现 \(parsed.count) 台待配对设备" }
+            }
+        }
+        browser = active
+        active.start(queue: queue)
+    }
+
+    func stop() {
+        browser?.cancel()
+        browser = nil
+        services = []
+    }
+
+    private nonisolated static func parse(_ result: NWBrowser.Result) -> SamsungPairingService? {
+        guard case let .bonjour(record) = result.metadata,
+              record["v"] == "1",
+              let sessionID = record["session"],
+              let keyText = record["key"],
+              let serverPublicKey = Data(base64URL: keyText),
+              serverPublicKey.count == 32,
+              let expiresText = record["expires"],
+              let expiresMillis = Double(expiresText) else { return nil }
+        return SamsungPairingService(
+            endpoint: result.endpoint,
+            sessionID: sessionID,
+            serverPublicKey: serverPublicKey,
+            expiresAt: Date(timeIntervalSince1970: expiresMillis / 1_000)
+        )
+    }
+}
+
+enum SamsungPairingClient {
+    private struct Claim: Encodable {
+        let version = 1
+        let sessionID: String
+        let clientPublicKey: String
+        let sealedRegistration: String
+
+        enum CodingKeys: String, CodingKey {
+            case version
+            case sessionID = "session_id"
+            case clientPublicKey = "client_public_key"
+            case sealedRegistration = "sealed_registration"
+        }
+    }
+
+    private struct Response: Decodable {
+        let configured: Bool
+        let deviceIDHint: String?
+        enum CodingKeys: String, CodingKey {
+            case configured
+            case deviceIDHint = "device_id_hint"
+        }
+    }
+
+    static func pair(service: SamsungPairingService, code: String, registration: AgentPushRegistration) async throws -> String {
+        guard code.range(of: #"^[0-9]{6}$"#, options: .regularExpression) != nil else {
+            throw SamsungPairingClientError.invalidCode
+        }
+        guard service.expiresAt > Date() else { throw SamsungPairingClientError.expired }
+        let registrationData = try JSONEncoder().encode(registration)
+        let sealed = try SamsungPairingCrypto.seal(
+            registration: registrationData,
+            serverPublicKey: service.serverPublicKey,
+            sessionID: service.sessionID,
+            code: code
+        )
+        let body = try JSONEncoder().encode(Claim(
+            sessionID: service.sessionID,
+            clientPublicKey: sealed.clientPublicKey.base64URL,
+            sealedRegistration: sealed.combined.base64URL
+        ))
+        let responseData = try await exchange(endpoint: service.endpoint, body: body)
+        let response = try JSONDecoder().decode(Response.self, from: responseData)
+        guard response.configured else { throw SamsungPairingClientError.rejected }
+        return response.deviceIDHint.map { "配对成功（设备 …\($0)）" } ?? "配对成功"
+    }
+
+    private static func exchange(endpoint: NWEndpoint, body: Data) async throws -> Data {
+        try await withCheckedThrowingContinuation { continuation in
+            let connection = NWConnection(to: endpoint, using: .tcp)
+            let state = PairingExchangeState(connection: connection, continuation: continuation)
+            connection.stateUpdateHandler = { newState in
+                switch newState {
+                case .ready: state.send(body: body)
+                case .failed(let error): state.finish(.failure(error))
+                case .cancelled: state.finish(.failure(SamsungPairingClientError.connectionClosed))
+                default: break
+                }
+            }
+            connection.start(queue: DispatchQueue(label: "com.airsim.samsung-pair.claim"))
+        }
+    }
+}
+
+@MainActor
+enum SamsungPairingCompletionCoordinator {
+    static func complete(
+        performPairing: () async throws -> String,
+        refreshVoWLAN: () async -> Void
+    ) async rethrows -> String {
+        let message = try await performPairing()
+        await refreshVoWLAN()
+        return message
+    }
+}
+
+private final class PairingExchangeState: @unchecked Sendable {
+    private let connection: NWConnection
+    private let continuation: CheckedContinuation<Data, Error>
+    private var received = Data()
+    private var finished = false
+    private let lock = NSLock()
+
+    init(connection: NWConnection, continuation: CheckedContinuation<Data, Error>) {
+        self.connection = connection
+        self.continuation = continuation
+    }
+
+    func send(body: Data) {
+        var request = Data("POST /pair/v1/claim HTTP/1.1\r\nHost: airsim-pair.local\r\nContent-Type: application/json\r\nContent-Length: \(body.count)\r\nConnection: close\r\n\r\n".utf8)
+        request.append(body)
+        connection.send(content: request, completion: .contentProcessed { [weak self] error in
+            if let error { self?.finish(.failure(error)); return }
+            self?.receive()
+        })
+    }
+
+    private func receive() {
+        connection.receive(minimumIncompleteLength: 1, maximumLength: 65_536) { [weak self] content, _, isComplete, error in
+            guard let self else { return }
+            if let content { self.received.append(content) }
+            if let error { self.finish(.failure(error)); return }
+            if self.received.count > 65_536 { self.finish(.failure(SamsungPairingClientError.responseTooLarge)); return }
+            if isComplete { self.finish(self.parseResponse()); return }
+            self.receive()
+        }
+    }
+
+    private func parseResponse() -> Result<Data, Error> {
+        let marker = Data("\r\n\r\n".utf8)
+        guard let range = received.range(of: marker),
+              let firstLine = String(data: received[..<range.lowerBound], encoding: .utf8)?.split(separator: "\n").first,
+              firstLine.contains(" 200 ") else { return .failure(SamsungPairingClientError.rejected) }
+        return .success(Data(received[range.upperBound...]))
+    }
+
+    func finish(_ result: Result<Data, Error>) {
+        lock.lock()
+        guard !finished else { lock.unlock(); return }
+        finished = true
+        lock.unlock()
+        connection.cancel()
+        continuation.resume(with: result)
+    }
+}
+
+enum SamsungPairingClientError: LocalizedError {
+    case invalidCode, expired, rejected, responseTooLarge, connectionClosed, registrationUnavailable
+    var errorDescription: String? {
+        switch self {
+        case .invalidCode: return "请输入三星屏幕上的 6 位验证码"
+        case .expired: return "三星配对窗口已过期，请重新开始"
+        case .rejected: return "三星拒绝了配对，请核对验证码后重试"
+        case .responseTooLarge: return "三星返回的数据异常"
+        case .connectionClosed: return "与三星的局域网连接已断开"
+        case .registrationUnavailable: return "本机尚未取得 PushKit 凭据，请先允许通知并等待注册"
+        }
+    }
+}
+
+private extension Data {
+    init?(base64URL: String) {
+        var value = base64URL.replacingOccurrences(of: "-", with: "+").replacingOccurrences(of: "_", with: "/")
+        value += String(repeating: "=", count: (4 - value.count % 4) % 4)
+        self.init(base64Encoded: value)
+    }
+
+    var base64URL: String {
+        base64EncodedString().replacingOccurrences(of: "+", with: "-")
+            .replacingOccurrences(of: "/", with: "_").replacingOccurrences(of: "=", with: "")
+    }
+}

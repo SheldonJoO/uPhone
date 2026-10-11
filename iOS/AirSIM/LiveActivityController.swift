@@ -1,1 +1,249 @@
-aW1wb3J0IEFjdGl2aXR5S2l0CmltcG9ydCBVSUtpdAoKZW51bSBMaXZlQWN0aXZpdHlDcmVhdGlvblBvbGljeSB7CiAgICBzdGF0aWMgZnVuYyBzaG91bGRDcmVhdGUoCiAgICAgICAgYXBwSXNBY3RpdmU6IEJvb2wsCiAgICAgICAgbW9kdWxlT25saW5lOiBCb29sLAogICAgICAgIGhhc0FjdGl2aXR5OiBCb29sCiAgICApIC0+IEJvb2wgewogICAgICAgICFoYXNBY3Rpdml0eSAmJiBhcHBJc0FjdGl2ZQogICAgfQp9CgpzdHJ1Y3QgTGl2ZUFjdGl2aXR5QWdlbnRTbmFwc2hvdDogRXF1YXRhYmxlIHsKICAgIGxldCBkZXZpY2VOYW1lOiBTdHJpbmc/CiAgICBsZXQgcGhvbmVOdW1iZXI6IFN0cmluZz8KICAgIGxldCBhZ2VudEtpbmQ6IFN0cmluZz8KICAgIGxldCBwYWlyZWRBZ2VudENvdW50OiBJbnQKICAgIGxldCB2b3dsYW5PbmxpbmU6IEJvb2wKICAgIGxldCBjbG91ZE9ubGluZTogQm9vbAoKICAgIGluaXQoYWdlbnQ6IEFuZHJvaWRBZ2VudFByZXNlbnRhdGlvbj8sIHBhaXJlZEFnZW50Q291bnQ6IEludCkgewogICAgICAgIGRldmljZU5hbWUgPSBhZ2VudD8uZGV2aWNlTmFtZQogICAgICAgIHBob25lTnVtYmVyID0gYWdlbnQ/LnBob25lTnVtYmVyCiAgICAgICAgYWdlbnRLaW5kID0gYWdlbnQ/LmFnZW50S2luZAogICAgICAgIHNlbGYucGFpcmVkQWdlbnRDb3VudCA9IHBhaXJlZEFnZW50Q291bnQKICAgICAgICB2b3dsYW5PbmxpbmUgPSBhZ2VudD8udm93bGFuT25saW5lID09IHRydWUKICAgICAgICBjbG91ZE9ubGluZSA9IGFnZW50Py5jbG91ZE9ubGluZSA9PSB0cnVlCiAgICB9Cn0KCmVudW0gTGl2ZUFjdGl2aXR5U3RhdGVCdWlsZGVyIHsKICAgIHN0YXRpYyBmdW5jIG1ha2UoCiAgICAgICAgY2FsbDogQ2FsbFJlY29yZD8sCiAgICAgICAgY2FsbGVyTmFtZTogU3RyaW5nPywKICAgICAgICBtb2R1bGVPbmxpbmU6IEJvb2wsCiAgICAgICAgY2xvdWRPbmxpbmU6IEJvb2wgPSBmYWxzZSwKICAgICAgICB0cmFuc3BvcnQ6IEFpclNJTUNhbGxBY3Rpdml0eUF0dHJpYnV0ZXMuQ29udGVudFN0YXRlLlRyYW5zcG9ydD8gPSBuaWwsCiAgICAgICAgcmFkaW86IE1vZGVtU3RhdHVzPywKICAgICAgICBhZ2VudDogTGl2ZUFjdGl2aXR5QWdlbnRTbmFwc2hvdD8gPSBuaWwsCiAgICAgICAgaWRsZVN0YXJ0ZWRBdDogRGF0ZSwKICAgICAgICBkb3dubG9hZEJ5dGVzUGVyU2Vjb25kOiBEb3VibGU/ID0gbmlsLAogICAgICAgIHVwbG9hZEJ5dGVzUGVyU2Vjb25kOiBEb3VibGU/ID0gbmlsCiAgICApIC0+IEFpclNJTUNhbGxBY3Rpdml0eUF0dHJpYnV0ZXMuQ29udGVudFN0YXRlIHsKICAgICAgICAvLyDlj6rmnInmnKzlnLDmjqfliLbkuI4gUmVsYXkg5b+D6Lez5ZCM5pe25LiN5Y+v6L6+5omN5pi+56S656a757q/77yb5LqR56uv5b+D6Lez5paw6bKc5pe25L2/55SoCiAgICAgICAgLy8g54us56uL5b6F5py65oCB77yM6YG/5YWN5oqKIFVTQiBFQ00g5Lit5pat6K+v5oql5oiQ5pW05Liq5qih5Z2X56a757q/44CCCiAgICAgICAgZ3VhcmQgbW9kdWxlT25saW5lIHx8IGNsb3VkT25saW5lIGVsc2UgewogICAgICAgICAgICByZXR1cm4gLmluaXQoCiAgICAgICAgICAgICAgICBjYWxsSUQ6ICIiLAogICAgICAgICAgICAgICAgbnVtYmVyOiAiIiwKICAgICAgICAgICAgICAgIGRpc3BsYXlOYW1lOiAi5qih5Z2X56a757q/IiwKICAgICAgICAgICAgICAgIHBoYXNlOiAub2ZmbGluZSwKICAgICAgICAgICAgICAgIHN0YXJ0ZWRBdDogaWRsZVN0YXJ0ZWRBdCwKICAgICAgICAgICAgICAgIGFnZW50RGV2aWNlTmFtZTogYWdlbnQ/LmRldmljZU5hbWUsCiAgICAgICAgICAgICAgICBhZ2VudFBob25lTnVtYmVyOiBhZ2VudD8ucGhvbmVOdW1iZXIsCiAgICAgICAgICAgICAgICBhZ2VudEtpbmQ6IGFnZW50Py5hZ2VudEtpbmQsCiAgICAgICAgICAgICAgICBwYWlyZWRBZ2VudENvdW50OiBhZ2VudD8ucGFpcmVkQWdlbnRDb3VudCwKICAgICAgICAgICAgICAgIHZvd2xhbk9ubGluZTogYWdlbnQ/LnZvd2xhbk9ubGluZSwKICAgICAgICAgICAgICAgIGNsb3VkT25saW5lOiBhZ2VudD8uY2xvdWRPbmxpbmUKICAgICAgICAgICAgKQogICAgICAgIH0KICAgICAgICBndWFyZCBsZXQgY2FsbCBlbHNlIHsKICAgICAgICAgICAgbGV0IGNsb3VkT25seSA9IGNsb3VkT25saW5lICYmICFtb2R1bGVPbmxpbmUKICAgICAgICAgICAgcmV0dXJuIC5pbml0KAogICAgICAgICAgICAgICAgY2FsbElEOiAiIiwKICAgICAgICAgICAgICAgIG51bWJlcjogIiIsCiAgICAgICAgICAgICAgICBkaXNwbGF5TmFtZTogY2xvdWRPbmx5ID8gIuWFrOe9keS4ree7p+W3sui/nuaOpSIgOiAi562J5b6F5qih5Z2X5p2l55S1IiwKICAgICAgICAgICAgICAgIHBoYXNlOiBjbG91ZE9ubHkgPyAuY2xvdWRTdGFuZGJ5IDogLnN0YW5kYnksCiAgICAgICAgICAgICAgICBzdGFydGVkQXQ6IGlkbGVTdGFydGVkQXQsCiAgICAgICAgICAgICAgICB0cmFuc3BvcnQ6IGNsb3VkT25seSA/IC5jbG91ZCA6IHRyYW5zcG9ydCwKICAgICAgICAgICAgICAgIHNpZ25hbERCTTogcmFkaW8/LnNpZ25hbERCTSwKICAgICAgICAgICAgICAgIG9wZXJhdG9yTmFtZTogcmFkaW8/Lm9wZXJhdG9yTmFtZSwKICAgICAgICAgICAgICAgIG5ldHdvcmtNb2RlOiByYWRpbz8ubmV0d29ya01vZGUsCiAgICAgICAgICAgICAgICByYWRpb0JhbmQ6IHJhZGlvPy5yYWRpb0JhbmQsCiAgICAgICAgICAgICAgICBkb3dubG9hZEJ5dGVzUGVyU2Vjb25kOiBuaWwsCiAgICAgICAgICAgICAgICB1cGxvYWRCeXRlc1BlclNlY29uZDogbmlsLAogICAgICAgICAgICAgICAgYWdlbnREZXZpY2VOYW1lOiBhZ2VudD8uZGV2aWNlTmFtZSwKICAgICAgICAgICAgICAgIGFnZW50UGhvbmVOdW1iZXI6IGFnZW50Py5waG9uZU51bWJlciwKICAgICAgICAgICAgICAgIGFnZW50S2luZDogYWdlbnQ/LmFnZW50S2luZCwKICAgICAgICAgICAgICAgIHBhaXJlZEFnZW50Q291bnQ6IGFnZW50Py5wYWlyZWRBZ2VudENvdW50LAogICAgICAgICAgICAgICAgdm93bGFuT25saW5lOiBhZ2VudD8udm93bGFuT25saW5lLAogICAgICAgICAgICAgICAgY2xvdWRPbmxpbmU6IGFnZW50Py5jbG91ZE9ubGluZQogICAgICAgICAgICApCiAgICAgICAgfQoKICAgICAgICBsZXQgcGhhc2U6IEFpclNJTUNhbGxBY3Rpdml0eUF0dHJpYnV0ZXMuQ29udGVudFN0YXRlLlBoYXNlCiAgICAgICAgaWYgY2FsbC5kaXJlY3Rpb24gPT0gImluY29taW5nIiwgWyJpbmNvbWluZyIsICJ3YWl0aW5nIl0uY29udGFpbnMoY2FsbC5zdGF0ZSkgewogICAgICAgICAgICBwaGFzZSA9IC5pbmNvbWluZwogICAgICAgIH0gZWxzZSBpZiBjYWxsLnN0YXRlID09ICJoZWxkIiB7CiAgICAgICAgICAgIHBoYXNlID0gLmhlbGQKICAgICAgICB9IGVsc2UgewogICAgICAgICAgICBwaGFzZSA9IC5hY3RpdmUKICAgICAgICB9CiAgICAgICAgbGV0IG51bWJlciA9IGNhbGwubnVtYmVyPy5pc0VtcHR5ID09IGZhbHNlID8gY2FsbC5udW1iZXIhIDogIuacquefpeWPt+eggSIKICAgICAgICByZXR1cm4gLmluaXQoCiAgICAgICAgICAgIGNhbGxJRDogY2FsbC5pZCwKICAgICAgICAgICAgbnVtYmVyOiBudW1iZXIsCiAgICAgICAgICAgIGRpc3BsYXlOYW1lOiBjYWxsZXJOYW1lPy5pc0VtcHR5ID09IGZhbHNlID8gY2FsbGVyTmFtZSEgOiBudW1iZXIsCiAgICAgICAgICAgIHBoYXNlOiBwaGFzZSwKICAgICAgICAgICAgc3RhcnRlZEF0OiBjYWxsLnN0YXJ0ZWRBdCwKICAgICAgICAgICAgdHJhbnNwb3J0OiB0cmFuc3BvcnQsCiAgICAgICAgICAgIGFnZW50RGV2aWNlTmFtZTogYWdlbnQ/LmRldmljZU5hbWUsCiAgICAgICAgICAgIGFnZW50UGhvbmVOdW1iZXI6IGFnZW50Py5waG9uZU51bWJlciwKICAgICAgICAgICAgYWdlbnRLaW5kOiBhZ2VudD8uYWdlbnRLaW5kLAogICAgICAgICAgICBwYWlyZWRBZ2VudENvdW50OiBhZ2VudD8ucGFpcmVkQWdlbnRDb3VudCwKICAgICAgICAgICAgdm93bGFuT25saW5lOiBhZ2VudD8udm93bGFuT25saW5lLAogICAgICAgICAgICBjbG91ZE9ubGluZTogYWdlbnQ/LmNsb3VkT25saW5lCiAgICAgICAgKQogICAgfQp9CgovLy8g5Li7IEFwcCDotJ/otKPpooTlkK/liqjlubbmjIHnu63lkIzmraXngbXliqjlspvvvJvlkI7lj7Dlj6rog73mm7TmlrDlt7Lnu4/lrZjlnKjnmoQgTGl2ZSBBY3Rpdml0eeOAggpATWFpbkFjdG9yCmZpbmFsIGNsYXNzIExpdmVBY3Rpdml0eUNvbnRyb2xsZXIgewogICAgcHJpdmF0ZSB2YXIgYWN0aXZpdHk6IEFjdGl2aXR5PEFpclNJTUNhbGxBY3Rpdml0eUF0dHJpYnV0ZXM+PwogICAgcHJpdmF0ZSB2YXIgbGFzdFN0YXRlOiBBaXJTSU1DYWxsQWN0aXZpdHlBdHRyaWJ1dGVzLkNvbnRlbnRTdGF0ZT8KICAgIHByaXZhdGUgbGV0IGlkbGVTdGFydGVkQXQgPSBEYXRlKCkKICAgIHByaXZhdGUgdmFyIGVuYWJsZWQgPSB0cnVlCgogICAgLy8vIOeUqOaIt+WFs+mXreW8gOWFs+aXtueri+WNs+a4heeQhuezu+e7n+a0u+WKqO+8m+mHjeaWsOW8gOWQr+WQjueUseS4i+S4gOi9ruaooeWdl+eKtuaAgeWQjOatpeaMiemcgOWIm+W7uuOAggogICAgZnVuYyBzZXRFbmFibGVkKF8gZW5hYmxlZDogQm9vbCkgewogICAgICAgIHNlbGYuZW5hYmxlZCA9IGVuYWJsZWQKICAgICAgICBpZiAhZW5hYmxlZCB7CiAgICAgICAgICAgIFRhc2sgeyBATWFpbkFjdG9yIFt3ZWFrIHNlbGZdIGluIGF3YWl0IHNlbGY/LnN0b3AoKSB9CiAgICAgICAgfQogICAgfQoKICAgIGZ1bmMgdXBkYXRlKAogICAgICAgIGNhbGw6IENhbGxSZWNvcmQ/LAogICAgICAgIGNhbGxlck5hbWU6IFN0cmluZz8sCiAgICAgICAgbW9kdWxlT25saW5lOiBCb29sLAogICAgICAgIGNsb3VkT25saW5lOiBCb29sID0gZmFsc2UsCiAgICAgICAgdHJhbnNwb3J0OiBBaXJTSU1DYWxsQWN0aXZpdHlBdHRyaWJ1dGVzLkNvbnRlbnRTdGF0ZS5UcmFuc3BvcnQ/ID0gbmlsLAogICAgICAgIHJhZGlvOiBNb2RlbVN0YXR1cz8sCiAgICAgICAgYWdlbnQ6IExpdmVBY3Rpdml0eUFnZW50U25hcHNob3Q/ID0gbmlsLAogICAgICAgIGFwcElzQWN0aXZlOiBCb29sLAogICAgICAgIGRvd25sb2FkQnl0ZXNQZXJTZWNvbmQ6IERvdWJsZT8gPSBuaWwsCiAgICAgICAgdXBsb2FkQnl0ZXNQZXJTZWNvbmQ6IERvdWJsZT8gPSBuaWwKICAgICkgYXN5bmMgewogICAgICAgIGd1YXJkIGVuYWJsZWQsIFVJRGV2aWNlLmN1cnJlbnQudXNlckludGVyZmFjZUlkaW9tID09IC5waG9uZSBlbHNlIHsgcmV0dXJuIH0KICAgICAgICByZXNvbHZlRXhpc3RpbmdBY3Rpdml0eSgpCiNpZiBERUJVRwogICAgICAgIGxldCByZXF1ZXN0ZWRQaGFzZSA9IGNhbGwgIT0gbmlsID8gImNhbGwiIDogKG1vZHVsZU9ubGluZSA/ICJzdGFuZGJ5IiA6IChjbG91ZE9ubGluZSA/ICJjbG91ZF9zdGFuZGJ5IiA6ICJvZmZsaW5lIikpCiAgICAgICAgcHJpbnQoIltBaXJTSU0gTGl2ZUFjdGl2aXR5XSByZXF1ZXN0ZWRQaGFzZT1cKHJlcXVlc3RlZFBoYXNlKSBleGlzdGluZ0NvdW50PVwoQWN0aXZpdHk8QWlyU0lNQ2FsbEFjdGl2aXR5QXR0cmlidXRlcz4uYWN0aXZpdGllcy5jb3VudCkgc2VsZWN0ZWQ9XChhY3Rpdml0eT8uaWQgPz8gIm5vbmUiKSIpCiNlbmRpZgoKICAgICAgICBpZiBhY3Rpdml0eSA9PSBuaWwgewogICAgICAgICAgICAvLyBpT1Mg5LiN5L+d6K+B5ZCO5Y+w6IO95pys5Zyw5Yib5bu65rS75Yqo44CC5YmN5Y+w56a757q/5pe25Lmf5YWB6K645Yib5bu677yM5Lul5pu/5o2i5Y2H57qn5a6J6KOF5ZCOCiAgICAgICAgICAgIC8vIOezu+e7n+S7jeaYvuekuuOAgeS9hiBBY3Rpdml0eS5hY3Rpdml0aWVzIOW3suaXoOazlei/lOWbnuWPpeafhOeahOWtpOeri+a0u+WKqOOAggogICAgICAgICAgICBndWFyZCBMaXZlQWN0aXZpdHlDcmVhdGlvblBvbGljeS5zaG91bGRDcmVhdGUoCiAgICAgICAgICAgICAgICAgICAgICBhcHBJc0FjdGl2ZTogYXBwSXNBY3RpdmUsCiAgICAgICAgICAgICAgICAgICAgICBtb2R1bGVPbmxpbmU6IG1vZHVsZU9ubGluZSwKICAgICAgICAgICAgICAgICAgICAgIGhhc0FjdGl2aXR5OiBmYWxzZQogICAgICAgICAgICAgICAgICApLAogICAgICAgICAgICAgICAgICBBY3Rpdml0eUF1dGhvcml6YXRpb25JbmZvKCkuYXJlQWN0aXZpdGllc0VuYWJsZWQgZWxzZSB7IHJldHVybiB9CiAgICAgICAgICAgIGRvIHsKICAgICAgICAgICAgICAgIGxldCBpbml0aWFsU3RhdGUgPSBMaXZlQWN0aXZpdHlTdGF0ZUJ1aWxkZXIubWFrZSgKICAgICAgICAgICAgICAgICAgICBjYWxsOiBjYWxsLAogICAgICAgICAgICAgICAgICAgIGNhbGxlck5hbWU6IGNhbGxlck5hbWUsCiAgICAgICAgICAgICAgICAgICAgbW9kdWxlT25saW5lOiBtb2R1bGVPbmxpbmUsCiAgICAgICAgICAgICAgICAgICAgY2xvdWRPbmxpbmU6IGNsb3VkT25saW5lLAogICAgICAgICAgICAgICAgICAgIHRyYW5zcG9ydDogdHJhbnNwb3J0LAogICAgICAgICAgICAgICAgICAgIHJhZGlvOiByYWRpbywKICAgICAgICAgICAgICAgICAgICBhZ2VudDogYWdlbnQsCiAgICAgICAgICAgICAgICAgICAgaWRsZVN0YXJ0ZWRBdDogaWRsZVN0YXJ0ZWRBdCwKICAgICAgICAgICAgICAgICAgICBkb3dubG9hZEJ5dGVzUGVyU2Vjb25kOiBkb3dubG9hZEJ5dGVzUGVyU2Vjb25kLAogICAgICAgICAgICAgICAgICAgIHVwbG9hZEJ5dGVzUGVyU2Vjb25kOiB1cGxvYWRCeXRlc1BlclNlY29uZAogICAgICAgICAgICAgICAgKQogICAgICAgICAgICAgICAgYWN0aXZpdHkgPSB0cnkgQWN0aXZpdHkucmVxdWVzdCgKICAgICAgICAgICAgICAgICAgICBhdHRyaWJ1dGVzOiBBaXJTSU1DYWxsQWN0aXZpdHlBdHRyaWJ1dGVzKG1vZHVsZU5hbWU6ICJBaXJTSU0iKSwKICAgICAgICAgICAgICAgICAgICBjb250ZW50OiBBY3Rpdml0eUNvbnRlbnQoCiAgICAgICAgICAgICAgICAgICAgICAgIHN0YXRlOiBpbml0aWFsU3RhdGUsCiAgICAgICAgICAgICAgICAgICAgICAgIHN0YWxlRGF0ZTogbmlsCiAgICAgICAgICAgICAgICAgICAgKSwKICAgICAgICAgICAgICAgICAgICBwdXNoVHlwZTogLnRva2VuCiAgICAgICAgICAgICAgICApCiAgICAgICAgICAgICAgICBpZiBsZXQgYWN0aXZpdHkgewogICAgICAgICAgICAgICAgICAgIFZvSVBQdXNoQ29udHJvbGxlci5zaGFyZWQub2JzZXJ2ZUxpdmVBY3Rpdml0eShhY3Rpdml0eSkKICAgICAgICAgICAgICAgIH0KI2lmIERFQlVHCiAgICAgICAgICAgICAgICBwcmludCgiW0FpclNJTSBMaXZlQWN0aXZpdHldIGNyZWF0ZWQgaWQ9XChhY3Rpdml0eT8uaWQgPz8gIm5vbmUiKSBwaGFzZT1cKGluaXRpYWxTdGF0ZS5waGFzZS5yYXdWYWx1ZSkiKQojZW5kaWYKICAgICAgICAgICAgICAgIGxhc3RTdGF0ZSA9IGluaXRpYWxTdGF0ZQogICAgICAgICAgICB9IGNhdGNoIHsKICAgICAgICAgICAgICAgIHJldHVybgogICAgICAgICAgICB9CiAgICAgICAgfSBlbHNlIGlmIGxldCBhY3Rpdml0eSB7CiAgICAgICAgICAgIGxldCBuZXh0U3RhdGUgPSBMaXZlQWN0aXZpdHlTdGF0ZUJ1aWxkZXIubWFrZSgKICAgICAgICAgICAgICAgIGNhbGw6IGNhbGwsCiAgICAgICAgICAgICAgICBjYWxsZXJOYW1lOiBjYWxsZXJOYW1lLAogICAgICAgICAgICAgICAgbW9kdWxlT25saW5lOiBtb2R1bGVPbmxpbmUsCiAgICAgICAgICAgICAgICBjbG91ZE9ubGluZTogY2xvdWRPbmxpbmUsCiAgICAgICAgICAgICAgICB0cmFuc3BvcnQ6IHRyYW5zcG9ydCwKICAgICAgICAgICAgICAgIHJhZGlvOiByYWRpbywKICAgICAgICAgICAgICAgIGFnZW50OiBhZ2VudCwKICAgICAgICAgICAgICAgIGlkbGVTdGFydGVkQXQ6IGlkbGVTdGFydGVkQXQsCiAgICAgICAgICAgICAgICBkb3dubG9hZEJ5dGVzUGVyU2Vjb25kOiBkb3dubG9hZEJ5dGVzUGVyU2Vjb25kLAogICAgICAgICAgICAgICAgdXBsb2FkQnl0ZXNQZXJTZWNvbmQ6IHVwbG9hZEJ5dGVzUGVyU2Vjb25kCiAgICAgICAgICAgICkKICAgICAgICAgICAgLy8g5Zyo57q/L+emu+e6v+eUseecn+WunuaooeWdl+ivt+axguWGs+Wumu+8m+S4jeS7pSBBY3Rpdml0eUtpdCBzdGFsZSDku6Pmm7/ov57pgJrmgKfmjqLmtYvjgIIKICAgICAgICAgICAgZ3VhcmQgbmV4dFN0YXRlICE9IGxhc3RTdGF0ZSBlbHNlIHsgcmV0dXJuIH0KICAgICAgICAgICAgYXdhaXQgYWN0aXZpdHkudXBkYXRlKAogICAgICAgICAgICAgICAgQWN0aXZpdHlDb250ZW50KAogICAgICAgICAgICAgICAgICAgIHN0YXRlOiBuZXh0U3RhdGUsCiAgICAgICAgICAgICAgICAgICAgc3RhbGVEYXRlOiBuaWwKICAgICAgICAgICAgICAgICkKICAgICAgICAgICAgKQojaWYgREVCVUcKICAgICAgICAgICAgcHJpbnQoIltBaXJTSU0gTGl2ZUFjdGl2aXR5XSB1cGRhdGVkIGlkPVwoYWN0aXZpdHkuaWQpIHBoYXNlPVwobmV4dFN0YXRlLnBoYXNlLnJhd1ZhbHVlKSIpCiNlbmRpZgogICAgICAgICAgICBsYXN0U3RhdGUgPSBuZXh0U3RhdGUKICAgICAgICB9CiAgICB9CgogICAgZnVuYyBtYXJrT2ZmbGluZShhZ2VudDogTGl2ZUFjdGl2aXR5QWdlbnRTbmFwc2hvdD8gPSBuaWwsIGFwcElzQWN0aXZlOiBCb29sKSBhc3luYyB7CiAgICAgICAgYXdhaXQgdXBkYXRlKAogICAgICAgICAgICBjYWxsOiBuaWwsCiAgICAgICAgICAgIGNhbGxlck5hbWU6IG5pbCwKICAgICAgICAgICAgbW9kdWxlT25saW5lOiBmYWxzZSwKICAgICAgICAgICAgcmFkaW86IG5pbCwKICAgICAgICAgICAgYWdlbnQ6IGFnZW50LAogICAgICAgICAgICBhcHBJc0FjdGl2ZTogYXBwSXNBY3RpdmUKICAgICAgICApCiAgICB9CgogICAgZnVuYyBzdG9wKCkgYXN5bmMgewogICAgICAgIHJlc29sdmVFeGlzdGluZ0FjdGl2aXR5KCkKICAgICAgICBpZiBsZXQgYWN0aXZpdHkgewogICAgICAgICAgICBhd2FpdCBhY3Rpdml0eS5lbmQobmlsLCBkaXNtaXNzYWxQb2xpY3k6IC5pbW1lZGlhdGUpCiAgICAgICAgfQogICAgICAgIGFjdGl2aXR5ID0gbmlsCiAgICAgICAgbGFzdFN0YXRlID0gbmlsCiAgICB9CgogICAgcHJpdmF0ZSBmdW5jIHJlc29sdmVFeGlzdGluZ0FjdGl2aXR5KCkgewogICAgICAgIGd1YXJkIGFjdGl2aXR5ID09IG5pbCBlbHNlIHsgcmV0dXJuIH0KICAgICAgICBsZXQgZXhpc3RpbmcgPSBBY3Rpdml0eTxBaXJTSU1DYWxsQWN0aXZpdHlBdHRyaWJ1dGVzPi5hY3Rpdml0aWVzCiAgICAgICAgYWN0aXZpdHkgPSBleGlzdGluZy5maXJzdAogICAgICAgIGlmIGxldCBhY3Rpdml0eSB7CiAgICAgICAgICAgIFZvSVBQdXNoQ29udHJvbGxlci5zaGFyZWQub2JzZXJ2ZUxpdmVBY3Rpdml0eShhY3Rpdml0eSkKICAgICAgICB9CiNpZiBERUJVRwogICAgICAgIGxldCBzdW1tYXJ5ID0gZXhpc3RpbmcubWFwIHsgIlwoJDAuaWQpOlwoJDAuY29udGVudC5zdGF0ZS5waGFzZS5yYXdWYWx1ZSkiIH0uam9pbmVkKHNlcGFyYXRvcjogIiwiKQogICAgICAgIHByaW50KCJbQWlyU0lNIExpdmVBY3Rpdml0eV0gcmVzb2x2ZWQgY291bnQ9XChleGlzdGluZy5jb3VudCkgYWN0aXZpdGllcz1bXChzdW1tYXJ5KV0iKQojZW5kaWYKICAgICAgICBsYXN0U3RhdGUgPSBhY3Rpdml0eT8uY29udGVudC5zdGF0ZQogICAgfQoKfQo=
+import ActivityKit
+import UIKit
+
+enum LiveActivityCreationPolicy {
+    static func shouldCreate(
+        appIsActive: Bool,
+        moduleOnline: Bool,
+        hasActivity: Bool
+    ) -> Bool {
+        !hasActivity && appIsActive
+    }
+}
+
+struct LiveActivityAgentSnapshot: Equatable {
+    let deviceName: String?
+    let phoneNumber: String?
+    let agentKind: String?
+    let pairedAgentCount: Int
+    let vowlanOnline: Bool
+    let cloudOnline: Bool
+
+    init(agent: AndroidAgentPresentation?, pairedAgentCount: Int) {
+        deviceName = agent?.deviceName
+        phoneNumber = agent?.phoneNumber
+        agentKind = agent?.agentKind
+        self.pairedAgentCount = pairedAgentCount
+        vowlanOnline = agent?.vowlanOnline == true
+        cloudOnline = agent?.cloudOnline == true
+    }
+}
+
+enum LiveActivityStateBuilder {
+    static func make(
+        call: CallRecord?,
+        callerName: String?,
+        moduleOnline: Bool,
+        cloudOnline: Bool = false,
+        transport: AirSIMCallActivityAttributes.ContentState.Transport? = nil,
+        radio: ModemStatus?,
+        agent: LiveActivityAgentSnapshot? = nil,
+        idleStartedAt: Date,
+        downloadBytesPerSecond: Double? = nil,
+        uploadBytesPerSecond: Double? = nil
+    ) -> AirSIMCallActivityAttributes.ContentState {
+        // 只有本地控制与 Relay 心跳同时不可达才显示离线；云端心跳新鲜时使用
+        // 独立待机态，避免把 USB ECM 中断误报成整个模块离线。
+        guard moduleOnline || cloudOnline else {
+            return .init(
+                callID: "",
+                number: "",
+                displayName: "模块离线",
+                phase: .offline,
+                startedAt: idleStartedAt,
+                agentDeviceName: agent?.deviceName,
+                agentPhoneNumber: agent?.phoneNumber,
+                agentKind: agent?.agentKind,
+                pairedAgentCount: agent?.pairedAgentCount,
+                vowlanOnline: agent?.vowlanOnline,
+                cloudOnline: agent?.cloudOnline
+            )
+        }
+        guard let call else {
+            let cloudOnly = cloudOnline && !moduleOnline
+            return .init(
+                callID: "",
+                number: "",
+                displayName: cloudOnly ? "公网中继已连接" : "等待模块来电",
+                phase: cloudOnly ? .cloudStandby : .standby,
+                startedAt: idleStartedAt,
+                transport: cloudOnly ? .cloud : transport,
+                signalDBM: radio?.signalDBM,
+                operatorName: radio?.operatorName,
+                networkMode: radio?.networkMode,
+                radioBand: radio?.radioBand,
+                downloadBytesPerSecond: nil,
+                uploadBytesPerSecond: nil,
+                agentDeviceName: agent?.deviceName,
+                agentPhoneNumber: agent?.phoneNumber,
+                agentKind: agent?.agentKind,
+                pairedAgentCount: agent?.pairedAgentCount,
+                vowlanOnline: agent?.vowlanOnline,
+                cloudOnline: agent?.cloudOnline
+            )
+        }
+
+        let phase: AirSIMCallActivityAttributes.ContentState.Phase
+        if call.direction == "incoming", ["incoming", "waiting"].contains(call.state) {
+            phase = .incoming
+        } else if call.state == "held" {
+            phase = .held
+        } else {
+            phase = .active
+        }
+        let number = call.number?.isEmpty == false ? call.number! : "未知号码"
+        return .init(
+            callID: call.id,
+            number: number,
+            displayName: callerName?.isEmpty == false ? callerName! : number,
+            phase: phase,
+            startedAt: call.startedAt,
+            transport: transport,
+            agentDeviceName: agent?.deviceName,
+            agentPhoneNumber: agent?.phoneNumber,
+            agentKind: agent?.agentKind,
+            pairedAgentCount: agent?.pairedAgentCount,
+            vowlanOnline: agent?.vowlanOnline,
+            cloudOnline: agent?.cloudOnline
+        )
+    }
+}
+
+/// 主 App 负责预启动并持续同步灵动岛；后台只能更新已经存在的 Live Activity。
+@MainActor
+final class LiveActivityController {
+    private var activity: Activity<AirSIMCallActivityAttributes>?
+    private var lastState: AirSIMCallActivityAttributes.ContentState?
+    private let idleStartedAt = Date()
+    private var enabled = true
+
+    /// 用户关闭开关时立即清理系统活动；重新开启后由下一轮模块状态同步按需创建。
+    func setEnabled(_ enabled: Bool) {
+        self.enabled = enabled
+        if !enabled {
+            Task { @MainActor [weak self] in await self?.stop() }
+        }
+    }
+
+    func update(
+        call: CallRecord?,
+        callerName: String?,
+        moduleOnline: Bool,
+        cloudOnline: Bool = false,
+        transport: AirSIMCallActivityAttributes.ContentState.Transport? = nil,
+        radio: ModemStatus?,
+        agent: LiveActivityAgentSnapshot? = nil,
+        appIsActive: Bool,
+        downloadBytesPerSecond: Double? = nil,
+        uploadBytesPerSecond: Double? = nil
+    ) async {
+        guard enabled, UIDevice.current.userInterfaceIdiom == .phone else { return }
+        resolveExistingActivity()
+#if DEBUG
+        let requestedPhase = call != nil ? "call" : (moduleOnline ? "standby" : (cloudOnline ? "cloud_standby" : "offline"))
+        print("[AirSIM LiveActivity] requestedPhase=\(requestedPhase) existingCount=\(Activity<AirSIMCallActivityAttributes>.activities.count) selected=\(activity?.id ?? "none")")
+#endif
+
+        if activity == nil {
+            // iOS 不保证后台能本地创建活动。前台离线时也允许创建，以替换升级安装后
+            // 系统仍显示、但 Activity.activities 已无法返回句柄的孤立活动。
+            guard LiveActivityCreationPolicy.shouldCreate(
+                      appIsActive: appIsActive,
+                      moduleOnline: moduleOnline,
+                      hasActivity: false
+                  ),
+                  ActivityAuthorizationInfo().areActivitiesEnabled else { return }
+            do {
+                let initialState = LiveActivityStateBuilder.make(
+                    call: call,
+                    callerName: callerName,
+                    moduleOnline: moduleOnline,
+                    cloudOnline: cloudOnline,
+                    transport: transport,
+                    radio: radio,
+                    agent: agent,
+                    idleStartedAt: idleStartedAt,
+                    downloadBytesPerSecond: downloadBytesPerSecond,
+                    uploadBytesPerSecond: uploadBytesPerSecond
+                )
+                activity = try Activity.request(
+                    attributes: AirSIMCallActivityAttributes(moduleName: "AirSIM"),
+                    content: ActivityContent(
+                        state: initialState,
+                        staleDate: nil
+                    ),
+                    pushType: .token
+                )
+                if let activity {
+                    VoIPPushController.shared.observeLiveActivity(activity)
+                }
+#if DEBUG
+                print("[AirSIM LiveActivity] created id=\(activity?.id ?? "none") phase=\(initialState.phase.rawValue)")
+#endif
+                lastState = initialState
+            } catch {
+                return
+            }
+        } else if let activity {
+            let nextState = LiveActivityStateBuilder.make(
+                call: call,
+                callerName: callerName,
+                moduleOnline: moduleOnline,
+                cloudOnline: cloudOnline,
+                transport: transport,
+                radio: radio,
+                agent: agent,
+                idleStartedAt: idleStartedAt,
+                downloadBytesPerSecond: downloadBytesPerSecond,
+                uploadBytesPerSecond: uploadBytesPerSecond
+            )
+            // 在线/离线由真实模块请求决定；不以 ActivityKit stale 代替连通性探测。
+            guard nextState != lastState else { return }
+            await activity.update(
+                ActivityContent(
+                    state: nextState,
+                    staleDate: nil
+                )
+            )
+#if DEBUG
+            print("[AirSIM LiveActivity] updated id=\(activity.id) phase=\(nextState.phase.rawValue)")
+#endif
+            lastState = nextState
+        }
+    }
+
+    func markOffline(agent: LiveActivityAgentSnapshot? = nil, appIsActive: Bool) async {
+        await update(
+            call: nil,
+            callerName: nil,
+            moduleOnline: false,
+            radio: nil,
+            agent: agent,
+            appIsActive: appIsActive
+        )
+    }
+
+    func stop() async {
+        resolveExistingActivity()
+        if let activity {
+            await activity.end(nil, dismissalPolicy: .immediate)
+        }
+        activity = nil
+        lastState = nil
+    }
+
+    private func resolveExistingActivity() {
+        guard activity == nil else { return }
+        let existing = Activity<AirSIMCallActivityAttributes>.activities
+        activity = existing.first
+        if let activity {
+            VoIPPushController.shared.observeLiveActivity(activity)
+        }
+#if DEBUG
+        let summary = existing.map { "\($0.id):\($0.content.state.phase.rawValue)" }.joined(separator: ",")
+        print("[AirSIM LiveActivity] resolved count=\(existing.count) activities=[\(summary)]")
+#endif
+        lastState = activity?.content.state
+    }
+
+}

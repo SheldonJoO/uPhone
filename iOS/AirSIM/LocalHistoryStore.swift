@@ -1,1 +1,88 @@
-aW1wb3J0IEZvdW5kYXRpb24KCi8vLyDotJ/otKPkv53lrZjmiYvmnLrmnKzlnLDnmoTpgJror53orrDlvZXlkoznn63kv6HvvIzkuI3kvp3otZbmqKHlnZfmmK/lkKblnKjnur/jgIIKZmluYWwgY2xhc3MgTG9jYWxIaXN0b3J5U3RvcmUgewogICAgcHJpdmF0ZSBsZXQgZmlsZU1hbmFnZXI6IEZpbGVNYW5hZ2VyCiAgICBwcml2YXRlIGxldCBkaXJlY3RvcnlVUkw6IFVSTAogICAgcHJpdmF0ZSBsZXQgY2FsbEhpc3RvcnlVUkw6IFVSTAogICAgcHJpdmF0ZSBsZXQgbWVzc2FnZXNVUkw6IFVSTAoKICAgIGluaXQoZmlsZU1hbmFnZXI6IEZpbGVNYW5hZ2VyID0gLmRlZmF1bHQsIGRpcmVjdG9yeVVSTDogVVJMPyA9IG5pbCkgewogICAgICAgIHNlbGYuZmlsZU1hbmFnZXIgPSBmaWxlTWFuYWdlcgogICAgICAgIGxldCBkdXJhYmxlUm9vdCA9IGZpbGVNYW5hZ2VyLnVybHMoCiAgICAgICAgICAgIGZvcjogLmFwcGxpY2F0aW9uU3VwcG9ydERpcmVjdG9yeSwKICAgICAgICAgICAgaW46IC51c2VyRG9tYWluTWFzawogICAgICAgICkuZmlyc3QKICAgICAgICAgICAgPz8gZmlsZU1hbmFnZXIudXJscyhmb3I6IC5kb2N1bWVudERpcmVjdG9yeSwgaW46IC51c2VyRG9tYWluTWFzaykuZmlyc3QKICAgICAgICAgICAgPz8gVVJMKGZpbGVVUkxXaXRoUGF0aDogTlNIb21lRGlyZWN0b3J5KCksIGlzRGlyZWN0b3J5OiB0cnVlKQogICAgICAgICAgICAgICAgLmFwcGVuZGluZ1BhdGhDb21wb25lbnQoIkRvY3VtZW50cyIsIGlzRGlyZWN0b3J5OiB0cnVlKQogICAgICAgIGxldCByZXNvbHZlZERpcmVjdG9yeVVSTCA9IGRpcmVjdG9yeVVSTAogICAgICAgICAgICA/PyBkdXJhYmxlUm9vdC5hcHBlbmRpbmdQYXRoQ29tcG9uZW50KCJBaXJTSU0iLCBpc0RpcmVjdG9yeTogdHJ1ZSkKICAgICAgICBzZWxmLmRpcmVjdG9yeVVSTCA9IHJlc29sdmVkRGlyZWN0b3J5VVJMCiAgICAgICAgY2FsbEhpc3RvcnlVUkwgPSByZXNvbHZlZERpcmVjdG9yeVVSTC5hcHBlbmRpbmdQYXRoQ29tcG9uZW50KCJjYWxsLWhpc3RvcnkuanNvbiIpCiAgICAgICAgbWVzc2FnZXNVUkwgPSByZXNvbHZlZERpcmVjdG9yeVVSTC5hcHBlbmRpbmdQYXRoQ29tcG9uZW50KCJtZXNzYWdlcy5qc29uIikKCiAgICAgICAgZG8gewogICAgICAgICAgICB0cnkgZmlsZU1hbmFnZXIuY3JlYXRlRGlyZWN0b3J5KAogICAgICAgICAgICAgICAgYXQ6IHJlc29sdmVkRGlyZWN0b3J5VVJMLAogICAgICAgICAgICAgICAgd2l0aEludGVybWVkaWF0ZURpcmVjdG9yaWVzOiB0cnVlLAogICAgICAgICAgICAgICAgYXR0cmlidXRlczogbmlsCiAgICAgICAgICAgICkKICAgICAgICB9IGNhdGNoIHsKICAgICAgICAgICAgLy8g5pys5Zyw57yT5a2Y5LiN6IO96Zi75aGe6YCa6K+d5ZKM55+t5L+h77yb5ZCO57ut5YaZ5YWl5aSx6LSl5pe25LuN5Lya57un57ut6K6w5b2V5pel5b+X44CCCiAgICAgICAgICAgIFNlbGYubG9nKCLliJvlu7rmnKzlnLDljoblj7Lnm67lvZXlpLHotKXvvJpcKGVycm9yLmxvY2FsaXplZERlc2NyaXB0aW9uKSIpCiAgICAgICAgfQogICAgfQoKICAgIGZ1bmMgbG9hZENhbGxIaXN0b3J5KCkgLT4gW0NhbGxSZWNvcmRdIHsKICAgICAgICBsb2FkKENhbGxSZWNvcmQuc2VsZiwgZnJvbTogY2FsbEhpc3RvcnlVUkwpID8/IFtdCiAgICB9CgogICAgZnVuYyBsb2FkTWVzc2FnZXMoKSAtPiBbU01TTWVzc2FnZV0gewogICAgICAgIGxvYWQoU01TTWVzc2FnZS5zZWxmLCBmcm9tOiBtZXNzYWdlc1VSTCkgPz8gW10KICAgIH0KCiAgICBAZGlzY2FyZGFibGVSZXN1bHQKICAgIGZ1bmMgc2F2ZUNhbGxIaXN0b3J5KF8gcmVjb3JkczogW0NhbGxSZWNvcmRdKSAtPiBCb29sIHsKICAgICAgICBzYXZlKHJlY29yZHMsIHRvOiBjYWxsSGlzdG9yeVVSTCkKICAgIH0KCiAgICBAZGlzY2FyZGFibGVSZXN1bHQKICAgIGZ1bmMgc2F2ZU1lc3NhZ2VzKF8gcmVjb3JkczogW1NNU01lc3NhZ2VdKSAtPiBCb29sIHsKICAgICAgICBzYXZlKHJlY29yZHMsIHRvOiBtZXNzYWdlc1VSTCkKICAgIH0KCiAgICBwcml2YXRlIGZ1bmMgbG9hZDxFbGVtZW50OiBEZWNvZGFibGU+KF8gdHlwZTogRWxlbWVudC5UeXBlLCBmcm9tIHVybDogVVJMKSAtPiBbRWxlbWVudF0/IHsKICAgICAgICBkbyB7CiAgICAgICAgICAgIGxldCBkYXRhID0gdHJ5IERhdGEoY29udGVudHNPZjogdXJsKQogICAgICAgICAgICBsZXQgZGVjb2RlciA9IEpTT05EZWNvZGVyKCkKICAgICAgICAgICAgZGVjb2Rlci5kYXRlRGVjb2RpbmdTdHJhdGVneSA9IC5pc284NjAxCiAgICAgICAgICAgIHJldHVybiB0cnkgZGVjb2Rlci5kZWNvZGUoW0VsZW1lbnRdLnNlbGYsIGZyb206IGRhdGEpCiAgICAgICAgfSBjYXRjaCBDb2NvYUVycm9yLmZpbGVSZWFkTm9TdWNoRmlsZSB7CiAgICAgICAgICAgIHJldHVybiBuaWwKICAgICAgICB9IGNhdGNoIHsKICAgICAgICAgICAgU2VsZi5sb2coIuivu+WPluacrOWcsOWOhuWPsuWksei0pe+8iFwodXJsLmxhc3RQYXRoQ29tcG9uZW50Ke+8ie+8mlwoZXJyb3IubG9jYWxpemVkRGVzY3JpcHRpb24pIikKICAgICAgICAgICAgcmV0dXJuIG5pbAogICAgICAgIH0KICAgIH0KCiAgICBwcml2YXRlIGZ1bmMgc2F2ZTxFbGVtZW50OiBFbmNvZGFibGU+KF8gcmVjb3JkczogW0VsZW1lbnRdLCB0byB1cmw6IFVSTCkgLT4gQm9vbCB7CiAgICAgICAgZG8gewogICAgICAgICAgICBsZXQgZW5jb2RlciA9IEpTT05FbmNvZGVyKCkKICAgICAgICAgICAgZW5jb2Rlci5kYXRlRW5jb2RpbmdTdHJhdGVneSA9IC5pc284NjAxCiAgICAgICAgICAgIGxldCBkYXRhID0gdHJ5IGVuY29kZXIuZW5jb2RlKHJlY29yZHMpCiAgICAgICAgICAgIC8vIOWOn+WtkOWGmeWFpeWFiOeUn+aIkOS4tOaXtuaWh+S7tuWGjeabv+aNouebruagh++8jOmBv+WFjeaWreeUteeVmeS4i+WNiuS4qiBKU09OIOaWh+S7tuOAggogICAgICAgICAgICB0cnkgZGF0YS53cml0ZSh0bzogdXJsLCBvcHRpb25zOiBbLmF0b21pY10pCiAgICAgICAgICAgIHJldHVybiB0cnVlCiAgICAgICAgfSBjYXRjaCB7CiAgICAgICAgICAgIFNlbGYubG9nKCLlhpnlhaXmnKzlnLDljoblj7LlpLHotKXvvIhcKHVybC5sYXN0UGF0aENvbXBvbmVudCnvvInvvJpcKGVycm9yLmxvY2FsaXplZERlc2NyaXB0aW9uKSIpCiAgICAgICAgICAgIHJldHVybiBmYWxzZQogICAgICAgIH0KICAgIH0KCiAgICBwcml2YXRlIHN0YXRpYyBmdW5jIGxvZyhfIG1lc3NhZ2U6IFN0cmluZykgewojaWYgREVCVUcKICAgICAgICBwcmludCgiW0FpclNJTSBMb2NhbEhpc3RvcnldIFwobWVzc2FnZSkiKQojZW5kaWYKICAgIH0KfQo=
+import Foundation
+
+/// 负责保存手机本地的通话记录和短信，不依赖模块是否在线。
+final class LocalHistoryStore {
+    private let fileManager: FileManager
+    private let directoryURL: URL
+    private let callHistoryURL: URL
+    private let messagesURL: URL
+
+    init(fileManager: FileManager = .default, directoryURL: URL? = nil) {
+        self.fileManager = fileManager
+        let durableRoot = fileManager.urls(
+            for: .applicationSupportDirectory,
+            in: .userDomainMask
+        ).first
+            ?? fileManager.urls(for: .documentDirectory, in: .userDomainMask).first
+            ?? URL(fileURLWithPath: NSHomeDirectory(), isDirectory: true)
+                .appendingPathComponent("Documents", isDirectory: true)
+        let resolvedDirectoryURL = directoryURL
+            ?? durableRoot.appendingPathComponent("AirSIM", isDirectory: true)
+        self.directoryURL = resolvedDirectoryURL
+        callHistoryURL = resolvedDirectoryURL.appendingPathComponent("call-history.json")
+        messagesURL = resolvedDirectoryURL.appendingPathComponent("messages.json")
+
+        do {
+            try fileManager.createDirectory(
+                at: resolvedDirectoryURL,
+                withIntermediateDirectories: true,
+                attributes: nil
+            )
+        } catch {
+            // 本地缓存不能阻塞通话和短信；后续写入失败时仍会继续记录日志。
+            Self.log("创建本地历史目录失败：\(error.localizedDescription)")
+        }
+    }
+
+    func loadCallHistory() -> [CallRecord] {
+        load(CallRecord.self, from: callHistoryURL) ?? []
+    }
+
+    func loadMessages() -> [SMSMessage] {
+        load(SMSMessage.self, from: messagesURL) ?? []
+    }
+
+    @discardableResult
+    func saveCallHistory(_ records: [CallRecord]) -> Bool {
+        save(records, to: callHistoryURL)
+    }
+
+    @discardableResult
+    func saveMessages(_ records: [SMSMessage]) -> Bool {
+        save(records, to: messagesURL)
+    }
+
+    private func load<Element: Decodable>(_ type: Element.Type, from url: URL) -> [Element]? {
+        do {
+            let data = try Data(contentsOf: url)
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .iso8601
+            return try decoder.decode([Element].self, from: data)
+        } catch CocoaError.fileReadNoSuchFile {
+            return nil
+        } catch {
+            Self.log("读取本地历史失败（\(url.lastPathComponent)）：\(error.localizedDescription)")
+            return nil
+        }
+    }
+
+    private func save<Element: Encodable>(_ records: [Element], to url: URL) -> Bool {
+        do {
+            let encoder = JSONEncoder()
+            encoder.dateEncodingStrategy = .iso8601
+            let data = try encoder.encode(records)
+            // 原子写入先生成临时文件再替换目标，避免断电留下半个 JSON 文件。
+            try data.write(to: url, options: [.atomic])
+            return true
+        } catch {
+            Self.log("写入本地历史失败（\(url.lastPathComponent)）：\(error.localizedDescription)")
+            return false
+        }
+    }
+
+    private static func log(_ message: String) {
+#if DEBUG
+        print("[AirSIM LocalHistory] \(message)")
+#endif
+    }
+}

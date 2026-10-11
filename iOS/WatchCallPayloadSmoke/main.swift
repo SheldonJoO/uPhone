@@ -1,1 +1,31 @@
-aW1wb3J0IEZvdW5kYXRpb24KCmZ1bmMgY2hlY2soXyBjb25kaXRpb246IEBhdXRvY2xvc3VyZSAoKSAtPiBCb29sLCBfIG1lc3NhZ2U6IFN0cmluZykgewogICAgaWYgIWNvbmRpdGlvbigpIHsgZmF0YWxFcnJvcihtZXNzYWdlKSB9Cn0KCmRvIHsKICAgIGxldCBub3cgPSBJU084NjAxRGF0ZUZvcm1hdHRlcigpLmRhdGUoZnJvbTogIjIwMjYtMDktMjdUMTA6MDA6MDBaIikhCiAgICBsZXQgY2FsbCA9IHRyeSBXYXRjaFZvSVBDYWxsKHVzZXJJbmZvOiBbCiAgICAgICAgImV2ZW50IjogImluY29taW5nX2NhbGwiLAogICAgICAgICJjYWxsX2lkIjogImxvY2FsLWluY29taW5nLXdhdGNoIiwKICAgICAgICAiY2FsbF91dWlkIjogIkQ5QjU5NjYwLTA1QkItNEVBOC05QUVCLTQ1MDVCMzVDOTNGOSIsCiAgICAgICAgIm51bWJlciI6ICIxMDA4NiIsCiAgICAgICAgImV4cGlyZXNfYXQiOiAiMjAyNi0wOS0yN1QxMDowMDo0NVoiLAogICAgXSwgbm93OiBub3cpCiAgICBjaGVjayhjYWxsLmNhbGxJRCA9PSAibG9jYWwtaW5jb21pbmctd2F0Y2giLCAiV3JvbmcgbG9jYWwgY2FsbCBJRCIpCiAgICBjaGVjayhjYWxsLm1lZGlhID09IC5wZW5kaW5nTG9jYWwsICJMb2NhbCBpbmNvbWluZyBtZWRpYSBtdXN0IGJlIG9idGFpbmVkIGZyb20gaVBob25lIikKICAgIGxldCBzZWNyZXQgPSBEYXRhKHJlcGVhdGluZzogMHg0MiwgY291bnQ6IDMyKS5iYXNlNjRFbmNvZGVkU3RyaW5nKCkKICAgIGxldCBvdXRnb2luZyA9IHRyeSBXYXRjaFZvSVBDYWxsKG91dGdvaW5nUmVwbHk6IFsKICAgICAgICAiY2FsbF9pZCI6ICJsb2NhbC1vdXRnb2luZy13YXRjaCIsICJjYWxsX3V1aWQiOiBVVUlEKCkudXVpZFN0cmluZywKICAgICAgICAibnVtYmVyIjogIjEwMDg2IiwgIm1lZGlhX3JvdXRlIjogInZvd2xhbiIsICJwY21faG9zdCI6ICIxOTIuMTY4LjQzLjEiLAogICAgICAgICJwY21fcG9ydCI6IDc1OTEsICJwY21fc2VjcmV0Ijogc2VjcmV0LAogICAgXSkKICAgIGNoZWNrKG91dGdvaW5nLmlzT3V0Z29pbmcsICJFeHBlY3RlZCBXYXRjaCBvdXRnb2luZyBjYWxsIikKICAgIGNoZWNrKG91dGdvaW5nLmF1dGhlbnRpY2F0ZWRNZWRpYVVSTCA9PSBuaWwsICJMb2NhbCBtZWRpYSBjYW5ub3QgdXNlIGNsb3VkIFVSTCIpCiAgICBjaGVjayhXYXRjaExvY2FsUENNRW5kcG9pbnQoZGljdGlvbmFyeTogWwogICAgICAgICJwY21faG9zdCI6ICI4LjguOC44IiwgInBjbV9wb3J0IjogNzU5MSwgInBjbV9zZWNyZXQiOiBzZWNyZXQsCiAgICBdKSA9PSBuaWwsICJQdWJsaWMgUENNIGhvc3QgbXVzdCBiZSByZWplY3RlZCIpCn0gY2F0Y2ggewogICAgZmF0YWxFcnJvcigiV2F0Y2ggbG9jYWwgaW5jb21pbmcgcGF5bG9hZCByZWplY3RlZDogXChlcnJvcikiKQp9Cg==
+import Foundation
+
+func check(_ condition: @autoclosure () -> Bool, _ message: String) {
+    if !condition() { fatalError(message) }
+}
+
+do {
+    let now = ISO8601DateFormatter().date(from: "2026-09-27T10:00:00Z")!
+    let call = try WatchVoIPCall(userInfo: [
+        "event": "incoming_call",
+        "call_id": "local-incoming-watch",
+        "call_uuid": "D9B59660-05BB-4EA8-9AEB-4505B35C93F9",
+        "number": "10086",
+        "expires_at": "2026-09-27T10:00:45Z",
+    ], now: now)
+    check(call.callID == "local-incoming-watch", "Wrong local call ID")
+    check(call.media == .pendingLocal, "Local incoming media must be obtained from iPhone")
+    let secret = Data(repeating: 0x42, count: 32).base64EncodedString()
+    let outgoing = try WatchVoIPCall(outgoingReply: [
+        "call_id": "local-outgoing-watch", "call_uuid": UUID().uuidString,
+        "number": "10086", "media_route": "vowlan", "pcm_host": "192.168.43.1",
+        "pcm_port": 7591, "pcm_secret": secret,
+    ])
+    check(outgoing.isOutgoing, "Expected Watch outgoing call")
+    check(outgoing.authenticatedMediaURL == nil, "Local media cannot use cloud URL")
+    check(WatchLocalPCMEndpoint(dictionary: [
+        "pcm_host": "8.8.8.8", "pcm_port": 7591, "pcm_secret": secret,
+    ]) == nil, "Public PCM host must be rejected")
+} catch {
+    fatalError("Watch local incoming payload rejected: \(error)")
+}

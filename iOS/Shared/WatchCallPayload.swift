@@ -1,1 +1,271 @@
-aW1wb3J0IEZvdW5kYXRpb24KCmVudW0gV2F0Y2hDYWxsUGhhc2U6IFN0cmluZywgQ29kYWJsZSwgU2VuZGFibGUgewogICAgY2FzZSBpZGxlCiAgICBjYXNlIGluY29taW5nCiAgICBjYXNlIGNvbm5lY3RpbmcKICAgIGNhc2UgYWN0aXZlCiAgICBjYXNlIGVuZGVkCn0KCnN0cnVjdCBXYXRjaENhbGxQYXlsb2FkOiBFcXVhdGFibGUsIFNlbmRhYmxlIHsKICAgIGxldCBjYWxsSUQ6IFN0cmluZwogICAgbGV0IGNhbGxVVUlEOiBVVUlEPwogICAgbGV0IHBoYXNlOiBXYXRjaENhbGxQaGFzZQogICAgbGV0IG51bWJlcjogU3RyaW5nPwogICAgbGV0IGNhbGxlck5hbWU6IFN0cmluZz8KICAgIGxldCB1cGRhdGVkQXQ6IERhdGUKCiAgICB2YXIgZGljdGlvbmFyeTogW1N0cmluZzogQW55XSB7CiAgICAgICAgdmFyIHZhbHVlOiBbU3RyaW5nOiBBbnldID0gWwogICAgICAgICAgICAiZXZlbnQiOiAid2F0Y2hfY2FsbF9zdGF0ZSIsCiAgICAgICAgICAgICJjYWxsX2lkIjogY2FsbElELAogICAgICAgICAgICAiY2FsbF91dWlkIjogY2FsbFVVSUQ/LnV1aWRTdHJpbmcgPz8gIiIsCiAgICAgICAgICAgICJwaGFzZSI6IHBoYXNlLnJhd1ZhbHVlLAogICAgICAgICAgICAidXBkYXRlZF9hdCI6IHVwZGF0ZWRBdC50aW1lSW50ZXJ2YWxTaW5jZTE5NzAsCiAgICAgICAgXQogICAgICAgIGlmIGxldCBudW1iZXIsICFudW1iZXIuaXNFbXB0eSB7IHZhbHVlWyJudW1iZXIiXSA9IG51bWJlciB9CiAgICAgICAgaWYgbGV0IGNhbGxlck5hbWUsICFjYWxsZXJOYW1lLmlzRW1wdHkgeyB2YWx1ZVsiY2FsbGVyX25hbWUiXSA9IGNhbGxlck5hbWUgfQogICAgICAgIHJldHVybiB2YWx1ZQogICAgfQoKICAgIGluaXQoCiAgICAgICAgY2FsbElEOiBTdHJpbmcsCiAgICAgICAgY2FsbFVVSUQ6IFVVSUQ/LAogICAgICAgIHBoYXNlOiBXYXRjaENhbGxQaGFzZSwKICAgICAgICBudW1iZXI6IFN0cmluZz8sCiAgICAgICAgY2FsbGVyTmFtZTogU3RyaW5nPywKICAgICAgICB1cGRhdGVkQXQ6IERhdGUKICAgICkgewogICAgICAgIHNlbGYuY2FsbElEID0gY2FsbElECiAgICAgICAgc2VsZi5jYWxsVVVJRCA9IGNhbGxVVUlECiAgICAgICAgc2VsZi5waGFzZSA9IHBoYXNlCiAgICAgICAgc2VsZi5udW1iZXIgPSBudW1iZXIKICAgICAgICBzZWxmLmNhbGxlck5hbWUgPSBjYWxsZXJOYW1lCiAgICAgICAgc2VsZi51cGRhdGVkQXQgPSB1cGRhdGVkQXQKICAgIH0KCiAgICBpbml0PyhkaWN0aW9uYXJ5OiBbU3RyaW5nOiBBbnldKSB7CiAgICAgICAgZ3VhcmQgZGljdGlvbmFyeVsiZXZlbnQiXSBhcz8gU3RyaW5nID09ICJ3YXRjaF9jYWxsX3N0YXRlIiwKICAgICAgICAgICAgICBsZXQgcGhhc2VWYWx1ZSA9IGRpY3Rpb25hcnlbInBoYXNlIl0gYXM/IFN0cmluZywKICAgICAgICAgICAgICBsZXQgcGhhc2UgPSBXYXRjaENhbGxQaGFzZShyYXdWYWx1ZTogcGhhc2VWYWx1ZSksCiAgICAgICAgICAgICAgbGV0IHVwZGF0ZWRBdCA9IGRpY3Rpb25hcnlbInVwZGF0ZWRfYXQiXSBhcz8gVGltZUludGVydmFsIGVsc2UgeyByZXR1cm4gbmlsIH0KICAgICAgICBsZXQgY2FsbElEID0gZGljdGlvbmFyeVsiY2FsbF9pZCJdIGFzPyBTdHJpbmcgPz8gIiIKICAgICAgICBsZXQgdXVpZFZhbHVlID0gZGljdGlvbmFyeVsiY2FsbF91dWlkIl0gYXM/IFN0cmluZwogICAgICAgIHNlbGYuaW5pdCgKICAgICAgICAgICAgY2FsbElEOiBjYWxsSUQsCiAgICAgICAgICAgIGNhbGxVVUlEOiB1dWlkVmFsdWUuZmxhdE1hcChVVUlELmluaXQodXVpZFN0cmluZzopKSwKICAgICAgICAgICAgcGhhc2U6IHBoYXNlLAogICAgICAgICAgICBudW1iZXI6IGRpY3Rpb25hcnlbIm51bWJlciJdIGFzPyBTdHJpbmcsCiAgICAgICAgICAgIGNhbGxlck5hbWU6IGRpY3Rpb25hcnlbImNhbGxlcl9uYW1lIl0gYXM/IFN0cmluZywKICAgICAgICAgICAgdXBkYXRlZEF0OiBEYXRlKHRpbWVJbnRlcnZhbFNpbmNlMTk3MDogdXBkYXRlZEF0KQogICAgICAgICkKICAgIH0KfQoKZW51bSBXYXRjaFZvSVBQYXlsb2FkRXJyb3I6IExvY2FsaXplZEVycm9yIHsKICAgIGNhc2UgdW5zdXBwb3J0ZWRFdmVudAogICAgY2FzZSBtaXNzaW5nQ2FsbElECiAgICBjYXNlIGludmFsaWRDYWxsVVVJRAogICAgY2FzZSBtaXNzaW5nU2VjcmV0CiAgICBjYXNlIGludmFsaWRNZWRpYVVSTAogICAgY2FzZSBleHBpcmVkCiAgICBjYXNlIGludmFsaWRMb2NhbE1lZGlhCgogICAgdmFyIGVycm9yRGVzY3JpcHRpb246IFN0cmluZz8gewogICAgICAgIHN3aXRjaCBzZWxmIHsKICAgICAgICBjYXNlIC51bnN1cHBvcnRlZEV2ZW50OiByZXR1cm4gIuS4jeaYr+acieaViOeahOaJi+ihqOadpeeUteaOqOmAgSIKICAgICAgICBjYXNlIC5taXNzaW5nQ2FsbElEOiByZXR1cm4gIuaJi+ihqOadpeeUteaOqOmAgee8uuWwkSBjYWxsX2lkIgogICAgICAgIGNhc2UgLmludmFsaWRDYWxsVVVJRDogcmV0dXJuICLmiYvooajmnaXnlLXmjqjpgIHnvLrlsJHmnInmlYggY2FsbF91dWlkIgogICAgICAgIGNhc2UgLm1pc3NpbmdTZWNyZXQ6IHJldHVybiAi5omL6KGo5p2l55S15o6o6YCB57y65bCR5aqS5L2T5a+G6ZKlIgogICAgICAgIGNhc2UgLmludmFsaWRNZWRpYVVSTDogcmV0dXJuICLmiYvooajmnaXnlLXmjqjpgIHnvLrlsJHlronlhajlqpLkvZPlnLDlnYAiCiAgICAgICAgY2FzZSAuZXhwaXJlZDogcmV0dXJuICLmiYvooajmnaXnlLXmjqjpgIHlt7Lnu4/ov4fmnJ8iCiAgICAgICAgY2FzZSAuaW52YWxpZExvY2FsTWVkaWE6IHJldHVybiAi5omL6KGo5pys5Zyw6K+t6Z+z5Y+C5pWw5peg5pWIIgogICAgICAgIH0KICAgIH0KfQoKc3RydWN0IFdhdGNoTG9jYWxQQ01FbmRwb2ludDogRXF1YXRhYmxlLCBTZW5kYWJsZSB7CiAgICBsZXQgaG9zdDogU3RyaW5nCiAgICBsZXQgcG9ydDogVUludDE2CiAgICBsZXQgc2VjcmV0OiBEYXRhCgogICAgaW5pdD8oZGljdGlvbmFyeTogW1N0cmluZzogQW55XSkgewogICAgICAgIGd1YXJkIGxldCBob3N0ID0gZGljdGlvbmFyeVsicGNtX2hvc3QiXSBhcz8gU3RyaW5nLAogICAgICAgICAgICAgIGxldCByYXdQb3J0ID0gZGljdGlvbmFyeVsicGNtX3BvcnQiXSBhcz8gSW50LAogICAgICAgICAgICAgICgxMDI0Li4uNjU1MzUpLmNvbnRhaW5zKHJhd1BvcnQpLAogICAgICAgICAgICAgIGxldCBlbmNvZGVkID0gZGljdGlvbmFyeVsicGNtX3NlY3JldCJdIGFzPyBTdHJpbmcgZWxzZSB7IHJldHVybiBuaWwgfQogICAgICAgIGxldCBvY3RldHMgPSBob3N0LnNwbGl0KHNlcGFyYXRvcjogIi4iKS5jb21wYWN0TWFwIHsgVUludDgoJDApIH0KICAgICAgICBndWFyZCBvY3RldHMuY291bnQgPT0gNCwKICAgICAgICAgICAgICBvY3RldHNbMF0gPT0gMTAgfHwgKG9jdGV0c1swXSA9PSAxNzIgJiYgKDE2Li4uMzEpLmNvbnRhaW5zKG9jdGV0c1sxXSkpCiAgICAgICAgICAgICAgICB8fCAob2N0ZXRzWzBdID09IDE5MiAmJiBvY3RldHNbMV0gPT0gMTY4KSBlbHNlIHsgcmV0dXJuIG5pbCB9CiAgICAgICAgbGV0IGJhc2U2NCA9IGVuY29kZWQucmVwbGFjaW5nT2NjdXJyZW5jZXMob2Y6ICItIiwgd2l0aDogIisiKQogICAgICAgICAgICAucmVwbGFjaW5nT2NjdXJyZW5jZXMob2Y6ICJfIiwgd2l0aDogIi8iKQogICAgICAgIGxldCBwYWRkZWQgPSBiYXNlNjQgKyBTdHJpbmcocmVwZWF0aW5nOiAiPSIsIGNvdW50OiAoNCAtIGJhc2U2NC5jb3VudCAlIDQpICUgNCkKICAgICAgICBndWFyZCBsZXQgc2VjcmV0ID0gRGF0YShiYXNlNjRFbmNvZGVkOiBwYWRkZWQpLCBzZWNyZXQuY291bnQgPj0gMzIgZWxzZSB7IHJldHVybiBuaWwgfQogICAgICAgIHNlbGYuaG9zdCA9IGhvc3QKICAgICAgICBwb3J0ID0gVUludDE2KHJhd1BvcnQpCiAgICAgICAgc2VsZi5zZWNyZXQgPSBzZWNyZXQKICAgIH0KfQoKZW51bSBXYXRjaENhbGxNZWRpYTogRXF1YXRhYmxlLCBTZW5kYWJsZSB7CiAgICBjYXNlIGNsb3VkKFVSTCkKICAgIGNhc2UgbG9jYWwoV2F0Y2hMb2NhbFBDTUVuZHBvaW50KQogICAgLy8vIEFQTnMgZG9lcyBub3QgY2FycnkgdGhlIHBhaXJlZCBWb1dMQU4gc2VjcmV0OyBmZXRjaCBpdCBmcm9tIHRoZSBwYWlyZWQgaVBob25lIG9uIGFuc3dlci4KICAgIGNhc2UgcGVuZGluZ0xvY2FsCn0KCi8vLyBXYXRjaCDnm7TmjqXmjqXlkKzmiYDpnIDnmoTlrozmlbQgVm9JUCDkvJror53jgILlqpLkvZPlr4bpkqXlj6rkv53lrZjlnKjlhoXlrZjkuK3vvIwKLy8vIOS4jei/m+WFpSBXYXRjaENvbm5lY3Rpdml0eSDnirbmgIHplZzlg4/miJbpgJrnn6XmraPmlofjgIIKc3RydWN0IFdhdGNoVm9JUENhbGw6IEVxdWF0YWJsZSwgU2VuZGFibGUgewogICAgbGV0IGNhbGxJRDogU3RyaW5nCiAgICBsZXQgdXVpZDogVVVJRAogICAgbGV0IG51bWJlcjogU3RyaW5nPwogICAgbGV0IGNhbGxlck5hbWU6IFN0cmluZz8KICAgIGxldCBleHBpcmVzQXQ6IERhdGU/CiAgICBsZXQgbWVkaWE6IFdhdGNoQ2FsbE1lZGlhCiAgICBsZXQgaXNPdXRnb2luZzogQm9vbAoKICAgIHZhciBhdXRoZW50aWNhdGVkTWVkaWFVUkw6IFVSTD8gewogICAgICAgIGlmIGNhc2UgbGV0IC5jbG91ZCh1cmwpID0gbWVkaWEgeyByZXR1cm4gdXJsIH0KICAgICAgICByZXR1cm4gbmlsCiAgICB9CgogICAgdmFyIGRpc3BsYXlOYW1lOiBTdHJpbmcgeyBjYWxsZXJOYW1lID8/IG51bWJlciA/PyAiQWlyU0lNIiB9CgogICAgaW5pdCh1c2VySW5mbzogW0FueUhhc2hhYmxlOiBBbnldLCBub3c6IERhdGUgPSBEYXRlKCkpIHRocm93cyB7CiAgICAgICAgZ3VhcmQgdXNlckluZm9bImV2ZW50Il0gYXM/IFN0cmluZyA9PSAiaW5jb21pbmdfY2FsbCIgZWxzZSB7CiAgICAgICAgICAgIHRocm93IFdhdGNoVm9JUFBheWxvYWRFcnJvci51bnN1cHBvcnRlZEV2ZW50CiAgICAgICAgfQogICAgICAgIGd1YXJkIGxldCBjYWxsSUQgPSBTZWxmLm5vbkVtcHR5KHVzZXJJbmZvWyJjYWxsX2lkIl0gYXM/IFN0cmluZykgZWxzZSB7CiAgICAgICAgICAgIHRocm93IFdhdGNoVm9JUFBheWxvYWRFcnJvci5taXNzaW5nQ2FsbElECiAgICAgICAgfQogICAgICAgIGd1YXJkIGxldCByYXdVVUlEID0gdXNlckluZm9bImNhbGxfdXVpZCJdIGFzPyBTdHJpbmcsCiAgICAgICAgICAgICAgbGV0IHV1aWQgPSBVVUlEKHV1aWRTdHJpbmc6IHJhd1VVSUQpIGVsc2UgewogICAgICAgICAgICB0aHJvdyBXYXRjaFZvSVBQYXlsb2FkRXJyb3IuaW52YWxpZENhbGxVVUlECiAgICAgICAgfQogICAgICAgIGxldCBleHBpcmVzQXQgPSBTZWxmLmRhdGUoZnJvbTogdXNlckluZm9bImV4cGlyZXNfYXQiXSkKICAgICAgICBpZiBsZXQgZXhwaXJlc0F0LCBleHBpcmVzQXQgPD0gbm93IHsgdGhyb3cgV2F0Y2hWb0lQUGF5bG9hZEVycm9yLmV4cGlyZWQgfQogICAgICAgIGxldCBtZWRpYTogV2F0Y2hDYWxsTWVkaWEKICAgICAgICBpZiB1c2VySW5mb1sibWVkaWFfcm91dGUiXSBhcz8gU3RyaW5nID09ICJ2b3dsYW4iIHsKICAgICAgICAgICAgbGV0IGRpY3Rpb25hcnkgPSBEaWN0aW9uYXJ5KHVuaXF1ZUtleXNXaXRoVmFsdWVzOiB1c2VySW5mby5jb21wYWN0TWFwIHsga2V5LCB2YWx1ZSBpbgogICAgICAgICAgICAgICAgKGtleSBhcz8gU3RyaW5nKS5tYXAgeyAoJDAsIHZhbHVlKSB9CiAgICAgICAgICAgIH0pCiAgICAgICAgICAgIGd1YXJkIGxldCBlbmRwb2ludCA9IFdhdGNoTG9jYWxQQ01FbmRwb2ludChkaWN0aW9uYXJ5OiBkaWN0aW9uYXJ5KSBlbHNlIHsKICAgICAgICAgICAgICAgIHRocm93IFdhdGNoVm9JUFBheWxvYWRFcnJvci5pbnZhbGlkTG9jYWxNZWRpYQogICAgICAgICAgICB9CiAgICAgICAgICAgIG1lZGlhID0gLmxvY2FsKGVuZHBvaW50KQogICAgICAgIH0gZWxzZSBpZiB1c2VySW5mb1siY2FsbF9zZWNyZXQiXSAhPSBuaWwgfHwgdXNlckluZm9bIm1lZGlhX3VybCJdICE9IG5pbCB7CiAgICAgICAgICAgIGd1YXJkIGxldCBzZWNyZXQgPSBTZWxmLm5vbkVtcHR5KHVzZXJJbmZvWyJjYWxsX3NlY3JldCJdIGFzPyBTdHJpbmcpLAogICAgICAgICAgICAgICAgICBzZWNyZXQuY291bnQgPj0gMjQgZWxzZSB7IHRocm93IFdhdGNoVm9JUFBheWxvYWRFcnJvci5taXNzaW5nU2VjcmV0IH0KICAgICAgICAgICAgZ3VhcmQgbGV0IHJhd01lZGlhVVJMID0gU2VsZi5ub25FbXB0eSh1c2VySW5mb1sibWVkaWFfdXJsIl0gYXM/IFN0cmluZyksCiAgICAgICAgICAgICAgICAgIHZhciBjb21wb25lbnRzID0gVVJMQ29tcG9uZW50cyhzdHJpbmc6IHJhd01lZGlhVVJMKSwKICAgICAgICAgICAgICAgICAgY29tcG9uZW50cy5zY2hlbWU/Lmxvd2VyY2FzZWQoKSA9PSAid3NzIiwKICAgICAgICAgICAgICAgICAgY29tcG9uZW50cy5ob3N0Py5pc0VtcHR5ID09IGZhbHNlIGVsc2UgewogICAgICAgICAgICAgICAgdGhyb3cgV2F0Y2hWb0lQUGF5bG9hZEVycm9yLmludmFsaWRNZWRpYVVSTAogICAgICAgICAgICB9CiAgICAgICAgICAgIGNvbXBvbmVudHMucXVlcnlJdGVtcyA9IFsKICAgICAgICAgICAgICAgIFVSTFF1ZXJ5SXRlbShuYW1lOiAicm9sZSIsIHZhbHVlOiAid2F0Y2giKSwKICAgICAgICAgICAgICAgIFVSTFF1ZXJ5SXRlbShuYW1lOiAidG9rZW4iLCB2YWx1ZTogc2VjcmV0KSwKICAgICAgICAgICAgXQogICAgICAgICAgICBndWFyZCBsZXQgdXJsID0gY29tcG9uZW50cy51cmwgZWxzZSB7IHRocm93IFdhdGNoVm9JUFBheWxvYWRFcnJvci5pbnZhbGlkTWVkaWFVUkwgfQogICAgICAgICAgICBtZWRpYSA9IC5jbG91ZCh1cmwpCiAgICAgICAgfSBlbHNlIHsKICAgICAgICAgICAgbWVkaWEgPSAucGVuZGluZ0xvY2FsCiAgICAgICAgfQogICAgICAgIHNlbGYuY2FsbElEID0gY2FsbElECiAgICAgICAgc2VsZi51dWlkID0gdXVpZAogICAgICAgIG51bWJlciA9IFNlbGYubm9uRW1wdHkodXNlckluZm9bIm51bWJlciJdIGFzPyBTdHJpbmcpCiAgICAgICAgY2FsbGVyTmFtZSA9IFNlbGYubm9uRW1wdHkodXNlckluZm9bImNhbGxlcl9uYW1lIl0gYXM/IFN0cmluZykKICAgICAgICBzZWxmLmV4cGlyZXNBdCA9IGV4cGlyZXNBdAogICAgICAgIHNlbGYubWVkaWEgPSBtZWRpYQogICAgICAgIGlzT3V0Z29pbmcgPSBmYWxzZQogICAgfQoKICAgIGluaXQob3V0Z29pbmdSZXBseTogW1N0cmluZzogQW55XSkgdGhyb3dzIHsKICAgICAgICBndWFyZCBvdXRnb2luZ1JlcGx5WyJtZWRpYV9yb3V0ZSJdIGFzPyBTdHJpbmcgPT0gInZvd2xhbiIKICAgICAgICAgICAgICAgIHx8IG91dGdvaW5nUmVwbHlbImNhbGxfc2VjcmV0Il0gIT0gbmlsIGVsc2UgewogICAgICAgICAgICB0aHJvdyBXYXRjaFZvSVBQYXlsb2FkRXJyb3IubWlzc2luZ1NlY3JldAogICAgICAgIH0KICAgICAgICB2YXIgcGF5bG9hZDogW0FueUhhc2hhYmxlOiBBbnldID0gb3V0Z29pbmdSZXBseQogICAgICAgIHBheWxvYWRbImV2ZW50Il0gPSAiaW5jb21pbmdfY2FsbCIKICAgICAgICBsZXQgcGFyc2VkID0gdHJ5IFdhdGNoVm9JUENhbGwodXNlckluZm86IHBheWxvYWQpCiAgICAgICAgc2VsZiA9IFdhdGNoVm9JUENhbGwoCiAgICAgICAgICAgIGNhbGxJRDogcGFyc2VkLmNhbGxJRCwKICAgICAgICAgICAgdXVpZDogcGFyc2VkLnV1aWQsCiAgICAgICAgICAgIG51bWJlcjogcGFyc2VkLm51bWJlciwKICAgICAgICAgICAgY2FsbGVyTmFtZTogcGFyc2VkLmNhbGxlck5hbWUsCiAgICAgICAgICAgIGV4cGlyZXNBdDogcGFyc2VkLmV4cGlyZXNBdCwKICAgICAgICAgICAgbWVkaWE6IHBhcnNlZC5tZWRpYSwKICAgICAgICAgICAgaXNPdXRnb2luZzogdHJ1ZQogICAgICAgICkKICAgIH0KCiAgICBmdW5jIHVzaW5nTG9jYWxNZWRpYShfIGVuZHBvaW50OiBXYXRjaExvY2FsUENNRW5kcG9pbnQpIC0+IFdhdGNoVm9JUENhbGwgewogICAgICAgIFdhdGNoVm9JUENhbGwoCiAgICAgICAgICAgIGNhbGxJRDogY2FsbElELCB1dWlkOiB1dWlkLCBudW1iZXI6IG51bWJlciwgY2FsbGVyTmFtZTogY2FsbGVyTmFtZSwKICAgICAgICAgICAgZXhwaXJlc0F0OiBleHBpcmVzQXQsIG1lZGlhOiAubG9jYWwoZW5kcG9pbnQpLCBpc091dGdvaW5nOiBpc091dGdvaW5nCiAgICAgICAgKQogICAgfQoKICAgIHByaXZhdGUgaW5pdCgKICAgICAgICBjYWxsSUQ6IFN0cmluZywgdXVpZDogVVVJRCwgbnVtYmVyOiBTdHJpbmc/LCBjYWxsZXJOYW1lOiBTdHJpbmc/LAogICAgICAgIGV4cGlyZXNBdDogRGF0ZT8sIG1lZGlhOiBXYXRjaENhbGxNZWRpYSwgaXNPdXRnb2luZzogQm9vbAogICAgKSB7CiAgICAgICAgc2VsZi5jYWxsSUQgPSBjYWxsSUQKICAgICAgICBzZWxmLnV1aWQgPSB1dWlkCiAgICAgICAgc2VsZi5udW1iZXIgPSBudW1iZXIKICAgICAgICBzZWxmLmNhbGxlck5hbWUgPSBjYWxsZXJOYW1lCiAgICAgICAgc2VsZi5leHBpcmVzQXQgPSBleHBpcmVzQXQKICAgICAgICBzZWxmLm1lZGlhID0gbWVkaWEKICAgICAgICBzZWxmLmlzT3V0Z29pbmcgPSBpc091dGdvaW5nCiAgICB9CgogICAgcHJpdmF0ZSBzdGF0aWMgZnVuYyBub25FbXB0eShfIHZhbHVlOiBTdHJpbmc/KSAtPiBTdHJpbmc/IHsKICAgICAgICBndWFyZCBsZXQgdmFsdWUgPSB2YWx1ZT8udHJpbW1pbmdDaGFyYWN0ZXJzKGluOiAud2hpdGVzcGFjZXNBbmROZXdsaW5lcyksCiAgICAgICAgICAgICAgIXZhbHVlLmlzRW1wdHkgZWxzZSB7IHJldHVybiBuaWwgfQogICAgICAgIHJldHVybiB2YWx1ZQogICAgfQoKICAgIHByaXZhdGUgc3RhdGljIGZ1bmMgZGF0ZShmcm9tIHZhbHVlOiBBbnk/KSAtPiBEYXRlPyB7CiAgICAgICAgaWYgbGV0IHZhbHVlID0gdmFsdWUgYXM/IFRpbWVJbnRlcnZhbCB7IHJldHVybiBEYXRlKHRpbWVJbnRlcnZhbFNpbmNlMTk3MDogdmFsdWUpIH0KICAgICAgICBpZiBsZXQgdmFsdWUgPSB2YWx1ZSBhcz8gTlNOdW1iZXIgeyByZXR1cm4gRGF0ZSh0aW1lSW50ZXJ2YWxTaW5jZTE5NzA6IHZhbHVlLmRvdWJsZVZhbHVlKSB9CiAgICAgICAgZ3VhcmQgbGV0IHZhbHVlID0gdmFsdWUgYXM/IFN0cmluZyBlbHNlIHsgcmV0dXJuIG5pbCB9CiAgICAgICAgcmV0dXJuIElTTzg2MDFEYXRlRm9ybWF0dGVyKCkuZGF0ZShmcm9tOiB2YWx1ZSkKICAgIH0KfQoKZW51bSBXYXRjaERpYWxOdW1iZXIgewogICAgc3RhdGljIGZ1bmMgdmFsaWRhdGVkKF8gaW5wdXQ6IFN0cmluZykgLT4gU3RyaW5nPyB7CiAgICAgICAgbGV0IHZhbHVlID0gaW5wdXQudHJpbW1pbmdDaGFyYWN0ZXJzKGluOiAud2hpdGVzcGFjZXNBbmROZXdsaW5lcykKICAgICAgICBsZXQgYWxsb3dlZCA9IENoYXJhY3RlclNldChjaGFyYWN0ZXJzSW46ICIrKiMwMTIzNDU2Nzg5IikKICAgICAgICBndWFyZCAhdmFsdWUuaXNFbXB0eSwgdmFsdWUuY291bnQgPD0gODIsCiAgICAgICAgICAgICAgdmFsdWUudW5pY29kZVNjYWxhcnMuYWxsU2F0aXNmeSh7IGFsbG93ZWQuY29udGFpbnMoJDApIH0pIGVsc2UgeyByZXR1cm4gbmlsIH0KICAgICAgICByZXR1cm4gdmFsdWUKICAgIH0KfQoKc3RydWN0IFdhdGNoSW5jb21pbmdOb3RpZmljYXRpb25QbGFuOiBFcXVhdGFibGUsIFNlbmRhYmxlIHsKICAgIHN0YXRpYyBsZXQgbWF4aW11bURlbGl2ZXJ5QWdlOiBUaW1lSW50ZXJ2YWwgPSA0NQoKICAgIGxldCBpZGVudGlmaWVyOiBTdHJpbmcKICAgIGxldCB0aXRsZTogU3RyaW5nCiAgICBsZXQgYm9keTogU3RyaW5nCgogICAgaW5pdD8ocGF5bG9hZDogV2F0Y2hDYWxsUGF5bG9hZCwgbm93OiBEYXRlID0gRGF0ZSgpKSB7CiAgICAgICAgZ3VhcmQgcGF5bG9hZC5waGFzZSA9PSAuaW5jb21pbmcsICFwYXlsb2FkLmNhbGxJRC5pc0VtcHR5IGVsc2UgeyByZXR1cm4gbmlsIH0KICAgICAgICBsZXQgYWdlID0gbm93LnRpbWVJbnRlcnZhbFNpbmNlKHBheWxvYWQudXBkYXRlZEF0KQogICAgICAgIGd1YXJkIGFnZSA+PSAtNSwgYWdlIDw9IFNlbGYubWF4aW11bURlbGl2ZXJ5QWdlIGVsc2UgeyByZXR1cm4gbmlsIH0KICAgICAgICBsZXQgbmFtZSA9IHBheWxvYWQuY2FsbGVyTmFtZT8udHJpbW1pbmdDaGFyYWN0ZXJzKGluOiAud2hpdGVzcGFjZXNBbmROZXdsaW5lcykKICAgICAgICBsZXQgbnVtYmVyID0gcGF5bG9hZC5udW1iZXI/LnRyaW1taW5nQ2hhcmFjdGVycyhpbjogLndoaXRlc3BhY2VzQW5kTmV3bGluZXMpCiAgICAgICAgbGV0IHBhcnRzID0gW25hbWUsIG51bWJlcl0KICAgICAgICAgICAgLmNvbXBhY3RNYXAgeyB2YWx1ZSBpbiB2YWx1ZS5mbGF0TWFwIHsgJDAuaXNFbXB0eSA/IG5pbCA6ICQwIH0gfQogICAgICAgICAgICAucmVkdWNlKGludG86IFtTdHJpbmddKCkpIHsgcmVzdWx0LCB2YWx1ZSBpbgogICAgICAgICAgICAgICAgaWYgIXJlc3VsdC5jb250YWlucyh2YWx1ZSkgeyByZXN1bHQuYXBwZW5kKHZhbHVlKSB9CiAgICAgICAgICAgIH0KICAgICAgICBpZGVudGlmaWVyID0gImFpcnNpbS53YXRjaC5pbmNvbWluZy5cKHBheWxvYWQuY2FsbElEKSIKICAgICAgICB0aXRsZSA9ICJBaXJTSU0g5p2l55S1IgogICAgICAgIGJvZHkgPSBwYXJ0cy5pc0VtcHR5ID8gIuaooeWdl+aUtuWIsOadpeeUtSIgOiBwYXJ0cy5qb2luZWQoc2VwYXJhdG9yOiAiIMK3ICIpCiAgICB9Cn0K
+import Foundation
+
+enum WatchCallPhase: String, Codable, Sendable {
+    case idle
+    case incoming
+    case connecting
+    case active
+    case ended
+}
+
+struct WatchCallPayload: Equatable, Sendable {
+    let callID: String
+    let callUUID: UUID?
+    let phase: WatchCallPhase
+    let number: String?
+    let callerName: String?
+    let updatedAt: Date
+
+    var dictionary: [String: Any] {
+        var value: [String: Any] = [
+            "event": "watch_call_state",
+            "call_id": callID,
+            "call_uuid": callUUID?.uuidString ?? "",
+            "phase": phase.rawValue,
+            "updated_at": updatedAt.timeIntervalSince1970,
+        ]
+        if let number, !number.isEmpty { value["number"] = number }
+        if let callerName, !callerName.isEmpty { value["caller_name"] = callerName }
+        return value
+    }
+
+    init(
+        callID: String,
+        callUUID: UUID?,
+        phase: WatchCallPhase,
+        number: String?,
+        callerName: String?,
+        updatedAt: Date
+    ) {
+        self.callID = callID
+        self.callUUID = callUUID
+        self.phase = phase
+        self.number = number
+        self.callerName = callerName
+        self.updatedAt = updatedAt
+    }
+
+    init?(dictionary: [String: Any]) {
+        guard dictionary["event"] as? String == "watch_call_state",
+              let phaseValue = dictionary["phase"] as? String,
+              let phase = WatchCallPhase(rawValue: phaseValue),
+              let updatedAt = dictionary["updated_at"] as? TimeInterval else { return nil }
+        let callID = dictionary["call_id"] as? String ?? ""
+        let uuidValue = dictionary["call_uuid"] as? String
+        self.init(
+            callID: callID,
+            callUUID: uuidValue.flatMap(UUID.init(uuidString:)),
+            phase: phase,
+            number: dictionary["number"] as? String,
+            callerName: dictionary["caller_name"] as? String,
+            updatedAt: Date(timeIntervalSince1970: updatedAt)
+        )
+    }
+}
+
+enum WatchVoIPPayloadError: LocalizedError {
+    case unsupportedEvent
+    case missingCallID
+    case invalidCallUUID
+    case missingSecret
+    case invalidMediaURL
+    case expired
+    case invalidLocalMedia
+
+    var errorDescription: String? {
+        switch self {
+        case .unsupportedEvent: return "不是有效的手表来电推送"
+        case .missingCallID: return "手表来电推送缺少 call_id"
+        case .invalidCallUUID: return "手表来电推送缺少有效 call_uuid"
+        case .missingSecret: return "手表来电推送缺少媒体密钥"
+        case .invalidMediaURL: return "手表来电推送缺少安全媒体地址"
+        case .expired: return "手表来电推送已经过期"
+        case .invalidLocalMedia: return "手表本地语音参数无效"
+        }
+    }
+}
+
+struct WatchLocalPCMEndpoint: Equatable, Sendable {
+    let host: String
+    let port: UInt16
+    let secret: Data
+
+    init?(dictionary: [String: Any]) {
+        guard let host = dictionary["pcm_host"] as? String,
+              let rawPort = dictionary["pcm_port"] as? Int,
+              (1024...65535).contains(rawPort),
+              let encoded = dictionary["pcm_secret"] as? String else { return nil }
+        let octets = host.split(separator: ".").compactMap { UInt8($0) }
+        guard octets.count == 4,
+              octets[0] == 10 || (octets[0] == 172 && (16...31).contains(octets[1]))
+                || (octets[0] == 192 && octets[1] == 168) else { return nil }
+        let base64 = encoded.replacingOccurrences(of: "-", with: "+")
+            .replacingOccurrences(of: "_", with: "/")
+        let padded = base64 + String(repeating: "=", count: (4 - base64.count % 4) % 4)
+        guard let secret = Data(base64Encoded: padded), secret.count >= 32 else { return nil }
+        self.host = host
+        port = UInt16(rawPort)
+        self.secret = secret
+    }
+}
+
+enum WatchCallMedia: Equatable, Sendable {
+    case cloud(URL)
+    case local(WatchLocalPCMEndpoint)
+    /// APNs does not carry the paired VoWLAN secret; fetch it from the paired iPhone on answer.
+    case pendingLocal
+}
+
+/// Watch 直接接听所需的完整 VoIP 会话。媒体密钥只保存在内存中，
+/// 不进入 WatchConnectivity 状态镜像或通知正文。
+struct WatchVoIPCall: Equatable, Sendable {
+    let callID: String
+    let uuid: UUID
+    let number: String?
+    let callerName: String?
+    let expiresAt: Date?
+    let media: WatchCallMedia
+    let isOutgoing: Bool
+
+    var authenticatedMediaURL: URL? {
+        if case let .cloud(url) = media { return url }
+        return nil
+    }
+
+    var displayName: String { callerName ?? number ?? "AirSIM" }
+
+    init(userInfo: [AnyHashable: Any], now: Date = Date()) throws {
+        guard userInfo["event"] as? String == "incoming_call" else {
+            throw WatchVoIPPayloadError.unsupportedEvent
+        }
+        guard let callID = Self.nonEmpty(userInfo["call_id"] as? String) else {
+            throw WatchVoIPPayloadError.missingCallID
+        }
+        guard let rawUUID = userInfo["call_uuid"] as? String,
+              let uuid = UUID(uuidString: rawUUID) else {
+            throw WatchVoIPPayloadError.invalidCallUUID
+        }
+        let expiresAt = Self.date(from: userInfo["expires_at"])
+        if let expiresAt, expiresAt <= now { throw WatchVoIPPayloadError.expired }
+        let media: WatchCallMedia
+        if userInfo["media_route"] as? String == "vowlan" {
+            let dictionary = Dictionary(uniqueKeysWithValues: userInfo.compactMap { key, value in
+                (key as? String).map { ($0, value) }
+            })
+            guard let endpoint = WatchLocalPCMEndpoint(dictionary: dictionary) else {
+                throw WatchVoIPPayloadError.invalidLocalMedia
+            }
+            media = .local(endpoint)
+        } else if userInfo["call_secret"] != nil || userInfo["media_url"] != nil {
+            guard let secret = Self.nonEmpty(userInfo["call_secret"] as? String),
+                  secret.count >= 24 else { throw WatchVoIPPayloadError.missingSecret }
+            guard let rawMediaURL = Self.nonEmpty(userInfo["media_url"] as? String),
+                  var components = URLComponents(string: rawMediaURL),
+                  components.scheme?.lowercased() == "wss",
+                  components.host?.isEmpty == false else {
+                throw WatchVoIPPayloadError.invalidMediaURL
+            }
+            components.queryItems = [
+                URLQueryItem(name: "role", value: "watch"),
+                URLQueryItem(name: "token", value: secret),
+            ]
+            guard let url = components.url else { throw WatchVoIPPayloadError.invalidMediaURL }
+            media = .cloud(url)
+        } else {
+            media = .pendingLocal
+        }
+        self.callID = callID
+        self.uuid = uuid
+        number = Self.nonEmpty(userInfo["number"] as? String)
+        callerName = Self.nonEmpty(userInfo["caller_name"] as? String)
+        self.expiresAt = expiresAt
+        self.media = media
+        isOutgoing = false
+    }
+
+    init(outgoingReply: [String: Any]) throws {
+        guard outgoingReply["media_route"] as? String == "vowlan"
+                || outgoingReply["call_secret"] != nil else {
+            throw WatchVoIPPayloadError.missingSecret
+        }
+        var payload: [AnyHashable: Any] = outgoingReply
+        payload["event"] = "incoming_call"
+        let parsed = try WatchVoIPCall(userInfo: payload)
+        self = WatchVoIPCall(
+            callID: parsed.callID,
+            uuid: parsed.uuid,
+            number: parsed.number,
+            callerName: parsed.callerName,
+            expiresAt: parsed.expiresAt,
+            media: parsed.media,
+            isOutgoing: true
+        )
+    }
+
+    func usingLocalMedia(_ endpoint: WatchLocalPCMEndpoint) -> WatchVoIPCall {
+        WatchVoIPCall(
+            callID: callID, uuid: uuid, number: number, callerName: callerName,
+            expiresAt: expiresAt, media: .local(endpoint), isOutgoing: isOutgoing
+        )
+    }
+
+    private init(
+        callID: String, uuid: UUID, number: String?, callerName: String?,
+        expiresAt: Date?, media: WatchCallMedia, isOutgoing: Bool
+    ) {
+        self.callID = callID
+        self.uuid = uuid
+        self.number = number
+        self.callerName = callerName
+        self.expiresAt = expiresAt
+        self.media = media
+        self.isOutgoing = isOutgoing
+    }
+
+    private static func nonEmpty(_ value: String?) -> String? {
+        guard let value = value?.trimmingCharacters(in: .whitespacesAndNewlines),
+              !value.isEmpty else { return nil }
+        return value
+    }
+
+    private static func date(from value: Any?) -> Date? {
+        if let value = value as? TimeInterval { return Date(timeIntervalSince1970: value) }
+        if let value = value as? NSNumber { return Date(timeIntervalSince1970: value.doubleValue) }
+        guard let value = value as? String else { return nil }
+        return ISO8601DateFormatter().date(from: value)
+    }
+}
+
+enum WatchDialNumber {
+    static func validated(_ input: String) -> String? {
+        let value = input.trimmingCharacters(in: .whitespacesAndNewlines)
+        let allowed = CharacterSet(charactersIn: "+*#0123456789")
+        guard !value.isEmpty, value.count <= 82,
+              value.unicodeScalars.allSatisfy({ allowed.contains($0) }) else { return nil }
+        return value
+    }
+}
+
+struct WatchIncomingNotificationPlan: Equatable, Sendable {
+    static let maximumDeliveryAge: TimeInterval = 45
+
+    let identifier: String
+    let title: String
+    let body: String
+
+    init?(payload: WatchCallPayload, now: Date = Date()) {
+        guard payload.phase == .incoming, !payload.callID.isEmpty else { return nil }
+        let age = now.timeIntervalSince(payload.updatedAt)
+        guard age >= -5, age <= Self.maximumDeliveryAge else { return nil }
+        let name = payload.callerName?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let number = payload.number?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let parts = [name, number]
+            .compactMap { value in value.flatMap { $0.isEmpty ? nil : $0 } }
+            .reduce(into: [String]()) { result, value in
+                if !result.contains(value) { result.append(value) }
+            }
+        identifier = "airsim.watch.incoming.\(payload.callID)"
+        title = "AirSIM 来电"
+        body = parts.isEmpty ? "模块收到来电" : parts.joined(separator: " · ")
+    }
+}

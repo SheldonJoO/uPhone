@@ -1,1 +1,468 @@
-aW1wb3J0IEZvdW5kYXRpb24KaW1wb3J0IE5ldHdvcmsKCnN0cnVjdCBWb1dMQU5FbmRwb2ludDogRXF1YXRhYmxlLCBIYXNoYWJsZSwgU2VuZGFibGUgewogICAgbGV0IGhvc3Q6IFN0cmluZwogICAgbGV0IGNvbnRyb2xQb3J0OiBVSW50MTYKICAgIGxldCBwY21Qb3J0OiBVSW50MTYKCiAgICBpbml0KGhvc3Q6IFN0cmluZywgY29udHJvbFBvcnQ6IFVJbnQxNiwgcGNtUG9ydDogVUludDE2KSB0aHJvd3MgewogICAgICAgIGd1YXJkIFNlbGYuaXNQcml2YXRlSVB2NChob3N0KSwgY29udHJvbFBvcnQgPj0gMTAyNCwgcGNtUG9ydCA+PSAxMDI0IGVsc2UgewogICAgICAgICAgICB0aHJvdyBWb1dMQU5Db250cm9sbGVyRXJyb3IuaW52YWxpZEFkdmVydGlzZW1lbnQKICAgICAgICB9CiAgICAgICAgc2VsZi5ob3N0ID0gaG9zdAogICAgICAgIHNlbGYuY29udHJvbFBvcnQgPSBjb250cm9sUG9ydAogICAgICAgIHNlbGYucGNtUG9ydCA9IHBjbVBvcnQKICAgIH0KCiAgICB2YXIgY29udHJvbEJhc2VVUkw6IFVSTCB7IFVSTChzdHJpbmc6ICJodHRwOi8vXChob3N0KTpcKGNvbnRyb2xQb3J0KS8iKSEgfQoKICAgIHByaXZhdGUgc3RhdGljIGZ1bmMgaXNQcml2YXRlSVB2NChfIGhvc3Q6IFN0cmluZykgLT4gQm9vbCB7CiAgICAgICAgbGV0IGZpZWxkcyA9IGhvc3Quc3BsaXQoc2VwYXJhdG9yOiAiLiIpLmNvbXBhY3RNYXAgeyBVSW50OCgkMCkgfQogICAgICAgIGd1YXJkIGZpZWxkcy5jb3VudCA9PSA0IGVsc2UgeyByZXR1cm4gZmFsc2UgfQogICAgICAgIHJldHVybiBmaWVsZHNbMF0gPT0gMTAgfHwgKGZpZWxkc1swXSA9PSAxNzIgJiYgKDE2Li4uMzEpLmNvbnRhaW5zKGZpZWxkc1sxXSkpCiAgICAgICAgICAgIHx8IChmaWVsZHNbMF0gPT0gMTkyICYmIGZpZWxkc1sxXSA9PSAxNjgpCiAgICB9Cn0KCnN0cnVjdCBWb1dMQU5EaXNjb3ZlcmVkQWdlbnQ6IEVxdWF0YWJsZSwgSWRlbnRpZmlhYmxlLCBTZW5kYWJsZSB7CiAgICBsZXQgaWQ6IFN0cmluZwogICAgbGV0IGVuZHBvaW50OiBWb1dMQU5FbmRwb2ludAogICAgbGV0IGRldmljZU5hbWU6IFN0cmluZwogICAgbGV0IG1hbnVmYWN0dXJlcjogU3RyaW5nPwogICAgbGV0IG1vZGVsOiBTdHJpbmc/CiAgICBsZXQgcGhvbmVOdW1iZXI6IFN0cmluZz8KICAgIGxldCBhZ2VudEtpbmQ6IFN0cmluZz8KfQoKcHJpdmF0ZSBzdHJ1Y3QgVm9XTEFOSGVhbHRoSWRlbnRpdHk6IERlY29kYWJsZSB7CiAgICBsZXQgb2s6IEJvb2wKICAgIGxldCBhZ2VudElEOiBTdHJpbmc/CiAgICBsZXQgYWdlbnRLaW5kOiBTdHJpbmc/CiAgICBsZXQgZGV2aWNlTmFtZTogU3RyaW5nPwogICAgbGV0IG1hbnVmYWN0dXJlcjogU3RyaW5nPwogICAgbGV0IG1vZGVsOiBTdHJpbmc/CiAgICBsZXQgcGhvbmVOdW1iZXI6IFN0cmluZz8KCiAgICBlbnVtIENvZGluZ0tleXM6IFN0cmluZywgQ29kaW5nS2V5IHsKICAgICAgICBjYXNlIG9rCiAgICAgICAgY2FzZSBhZ2VudElEID0gImFnZW50X2lkIgogICAgICAgIGNhc2UgYWdlbnRLaW5kID0gImFnZW50X2tpbmQiCiAgICAgICAgY2FzZSBkZXZpY2VOYW1lID0gImRldmljZV9uYW1lIgogICAgICAgIGNhc2UgbWFudWZhY3R1cmVyLCBtb2RlbAogICAgICAgIGNhc2UgcGhvbmVOdW1iZXIgPSAicGhvbmVfbnVtYmVyIgogICAgfQp9CgplbnVtIFZvV0xBTkF2YWlsYWJpbGl0eTogRXF1YXRhYmxlLCBTZW5kYWJsZSB7CiAgICBjYXNlIHVucGFpcmVkCiAgICBjYXNlIGRpc2NvdmVyaW5nCiAgICBjYXNlIGRpc2NvdmVyZWQoVm9XTEFORW5kcG9pbnQsIGF0OiBEYXRlKQogICAgY2FzZSB2ZXJpZmllZChWb1dMQU5FbmRwb2ludCwgYXQ6IERhdGUpCiAgICBjYXNlIHVuYXZhaWxhYmxlKFN0cmluZykKCiAgICB2YXIgZW5kcG9pbnQ6IFZvV0xBTkVuZHBvaW50PyB7CiAgICAgICAgc3dpdGNoIHNlbGYgewogICAgICAgIGNhc2UgbGV0IC5kaXNjb3ZlcmVkKHZhbHVlLCBfKSwgbGV0IC52ZXJpZmllZCh2YWx1ZSwgXyk6IHJldHVybiB2YWx1ZQogICAgICAgIGRlZmF1bHQ6IHJldHVybiBuaWwKICAgICAgICB9CiAgICB9CgogICAgZnVuYyBpc1JlYWR5KGF0IG5vdzogRGF0ZSA9IERhdGUoKSkgLT4gQm9vbCB7CiAgICAgICAgZ3VhcmQgY2FzZSBsZXQgLnZlcmlmaWVkKF8sIHZlcmlmaWVkQXQpID0gc2VsZiBlbHNlIHsgcmV0dXJuIGZhbHNlIH0KICAgICAgICByZXR1cm4gbm93LnRpbWVJbnRlcnZhbFNpbmNlKHZlcmlmaWVkQXQpID49IDAgJiYgbm93LnRpbWVJbnRlcnZhbFNpbmNlKHZlcmlmaWVkQXQpIDw9IDEwCiAgICB9CgogICAgdmFyIGlzT25saW5lRm9yRGlzcGxheTogQm9vbCB7CiAgICAgICAgaWYgY2FzZSAudmVyaWZpZWQgPSBzZWxmIHsgcmV0dXJuIHRydWUgfQogICAgICAgIHJldHVybiBmYWxzZQogICAgfQoKICAgIC8vLyDmi6jlj7fliqjkvZzkvJrlnKjnnJ/mraPlj5HotbfliY3ph43mlrDmiafooYznrb7lkI3lgaXlurfmo4Dmn6XvvIzlm6DmraQgVUkg5Y+q6ZyA56Gu6K6k6K+l56uv54K5CiAgICAvLy8g5pu+6aqM6K+B5oiQ5Yqf77yb5LiN6IO955SoIDEwIOenkueahOS4peagvOW7uumTvuaXtuaViOawuOS5heemgeeUqOaLqOWPt+aMiemSruOAggogICAgdmFyIGFsbG93c0NhbGxBdHRlbXB0OiBCb29sIHsgaXNPbmxpbmVGb3JEaXNwbGF5IH0KfQoKZW51bSBDb25uZWN0aW9uU3RhdHVzSGVhZGxpbmUgewogICAgc3RhdGljIGZ1bmMgdGl0bGUoc3VtbWFyeTogTW9kdWxlQ29ubmVjdGlvblN1bW1hcnksIHZvd2xhbk9ubGluZTogQm9vbCkgLT4gU3RyaW5nIHsKICAgICAgICBpZiB2b3dsYW5PbmxpbmUgeyByZXR1cm4gIlZvV0xBTiDlnKjnur8iIH0KICAgICAgICBzd2l0Y2ggc3VtbWFyeSB7CiAgICAgICAgY2FzZSAubG9jYWxPbmxpbmU6IHJldHVybiBMMTBuLnQoIuWcqOe6vyIpCiAgICAgICAgY2FzZSAubG9jYWxPbmxpbmVOb1NlcnZpY2U6IHJldHVybiAi5Zyo57q/IMK3IOicgueqneaXoOacjeWKoSIKICAgICAgICBjYXNlIC5jbG91ZE9ubHk6IHJldHVybiAi5LqR56uv5Zyo57q/IMK3IFVTQiDph43ov57kuK0iCiAgICAgICAgY2FzZSAub2ZmbGluZTogcmV0dXJuIEwxMG4udCgi56a757q/IikKICAgICAgICB9CiAgICB9Cn0KCmVudW0gTW9kdWxlQ29ubmVjdGlvblByZXNlbnRhdGlvbkxldmVsOiBFcXVhdGFibGUgewogICAgY2FzZSBvbmxpbmUKICAgIGNhc2Ugd2FybmluZwogICAgY2FzZSBjbG91ZAogICAgY2FzZSBvZmZsaW5lCn0KCnN0cnVjdCBNb2R1bGVDb25uZWN0aW9uUHJlc2VudGF0aW9uOiBFcXVhdGFibGUgewogICAgbGV0IHRpdGxlOiBTdHJpbmcKICAgIGxldCByb3V0ZVRpdGxlOiBTdHJpbmcKICAgIGxldCBkZXNjcmlwdGlvbjogU3RyaW5nCiAgICBsZXQgbGV2ZWw6IE1vZHVsZUNvbm5lY3Rpb25QcmVzZW50YXRpb25MZXZlbAogICAgbGV0IHN5c3RlbUltYWdlOiBTdHJpbmcKCiAgICBzdGF0aWMgZnVuYyBtYWtlKAogICAgICAgIHN1bW1hcnk6IE1vZHVsZUNvbm5lY3Rpb25TdW1tYXJ5LAogICAgICAgIHZvd2xhbk9ubGluZTogQm9vbCwKICAgICAgICByZWNvbm5lY3Rpbmc6IEJvb2wsCiAgICAgICAgbWVzc2FnZTogU3RyaW5nPwogICAgKSAtPiBTZWxmIHsKICAgICAgICBpZiB2b3dsYW5PbmxpbmUgewogICAgICAgICAgICByZXR1cm4gU2VsZigKICAgICAgICAgICAgICAgIHRpdGxlOiAiVm9XTEFOIOWcqOe6vyIsCiAgICAgICAgICAgICAgICByb3V0ZVRpdGxlOiAi5ZCM5LiAIFdpLUZpIC8g5LiJ5pif54Ot54K5IiwKICAgICAgICAgICAgICAgIGRlc2NyaXB0aW9uOiAiVm9XTEFOIOW3sui/nuaOpe+8jOeKtuaAgeS8muiHquWKqOWIt+aWsCIsCiAgICAgICAgICAgICAgICBsZXZlbDogLm9ubGluZSwKICAgICAgICAgICAgICAgIHN5c3RlbUltYWdlOiAid2lmaSIKICAgICAgICAgICAgKQogICAgICAgIH0KICAgICAgICBzd2l0Y2ggc3VtbWFyeSB7CiAgICAgICAgY2FzZSAubG9jYWxPbmxpbmU6CiAgICAgICAgICAgIHJldHVybiBTZWxmKAogICAgICAgICAgICAgICAgdGl0bGU6ICLmqKHlnZflnKjnur8iLCByb3V0ZVRpdGxlOiAiVVNCIEVDTSDnm7Tov54iLAogICAgICAgICAgICAgICAgZGVzY3JpcHRpb246IG1lc3NhZ2UgPz8gIlVTQiBFQ00g5bey6L+e5o6l77yM54q25oCB5Lya6Ieq5Yqo5Yi35pawIiwKICAgICAgICAgICAgICAgIGxldmVsOiAub25saW5lLCBzeXN0ZW1JbWFnZTogImNoZWNrbWFyay5jaXJjbGUuZmlsbCIKICAgICAgICAgICAgKQogICAgICAgIGNhc2UgLmxvY2FsT25saW5lTm9TZXJ2aWNlOgogICAgICAgICAgICByZXR1cm4gU2VsZigKICAgICAgICAgICAgICAgIHRpdGxlOiAi5qih5Z2X5Zyo57q/IMK3IOaXoOacjeWKoSIsIHJvdXRlVGl0bGU6ICJVU0IgRUNNIOW3sui/nuaOpSIsCiAgICAgICAgICAgICAgICBkZXNjcmlwdGlvbjogbWVzc2FnZSA/PyAiVVNCIEVDTSDlt7Lov57mjqXvvIzonILnqp3nvZHnu5zmraPlnKjoh6rliqjmgaLlpI0iLAogICAgICAgICAgICAgICAgbGV2ZWw6IC53YXJuaW5nLCBzeXN0ZW1JbWFnZTogImFudGVubmEucmFkaW93YXZlcy5sZWZ0LmFuZC5yaWdodC5zbGFzaCIKICAgICAgICAgICAgKQogICAgICAgIGNhc2UgLmNsb3VkT25seToKICAgICAgICAgICAgcmV0dXJuIFNlbGYoCiAgICAgICAgICAgICAgICB0aXRsZTogIuS6keerr+WcqOe6vyIsIHJvdXRlVGl0bGU6ICLlhaznvZEgUmVsYXkiLAogICAgICAgICAgICAgICAgZGVzY3JpcHRpb246IG1lc3NhZ2UgPz8gIlVTQiBFQ00g5pys5Zyw6L+e5o6l5Lit5pat77yM5qih5Z2X5LuN5Y+v6YCa6L+H5YWs572R5o6l5pS25p2l55S15ZKM55+t5L+hIiwKICAgICAgICAgICAgICAgIGxldmVsOiAuY2xvdWQsIHN5c3RlbUltYWdlOiAiaWNsb3VkLmZpbGwiCiAgICAgICAgICAgICkKICAgICAgICBjYXNlIC5vZmZsaW5lOgogICAgICAgICAgICByZXR1cm4gU2VsZigKICAgICAgICAgICAgICAgIHRpdGxlOiByZWNvbm5lY3RpbmcgPyAi5q2j5Zyo6YeN5paw6L+e5o6lIiA6ICLmqKHlnZfnprvnur8iLAogICAgICAgICAgICAgICAgcm91dGVUaXRsZTogcmVjb25uZWN0aW5nID8gIuato+WcqOaBouWkjei/nuaOpSIgOiAi6L+e5o6l5LiN5Y+v55SoIiwKICAgICAgICAgICAgICAgIGRlc2NyaXB0aW9uOiBtZXNzYWdlID8/ICLor7fmo4Dmn6XmqKHlnZfkvpvnlLXjgIHonILnqp3nvZHnu5zkuI4gVVNCIEVDTSDov57mjqUiLAogICAgICAgICAgICAgICAgbGV2ZWw6IHJlY29ubmVjdGluZyA/IC53YXJuaW5nIDogLm9mZmxpbmUsCiAgICAgICAgICAgICAgICBzeXN0ZW1JbWFnZTogcmVjb25uZWN0aW5nID8gImFycm93LnRyaWFuZ2xlLjIuY2lyY2xlcGF0aCIgOiAiZXhjbGFtYXRpb25tYXJrLnRyaWFuZ2xlLmZpbGwiCiAgICAgICAgICAgICkKICAgICAgICB9CiAgICB9Cn0KCmVudW0gUHVzaFJlZ2lzdHJhdGlvblJvdXRlU2VsZWN0b3IgewogICAgc3RhdGljIGZ1bmMgc2VsZWN0PFJvdXRlPihwcmltYXJ5OiBSb3V0ZSwgdmVyaWZpZWRWb1dMQU46IFJvdXRlPykgLT4gUm91dGUgewogICAgICAgIHZlcmlmaWVkVm9XTEFOID8/IHByaW1hcnkKICAgIH0KfQoKZW51bSBWb1dMQU5TdGF0dXNDb3B5IHsKICAgIHN0YXRpYyBmdW5jIHRleHQoZm9yIGF2YWlsYWJpbGl0eTogVm9XTEFOQXZhaWxhYmlsaXR5LCBhY3RpdmVDYWxsOiBCb29sID0gZmFsc2UpIC0+IFN0cmluZyB7CiAgICAgICAgaWYgYWN0aXZlQ2FsbCB7IHJldHVybiAi6YCa6K+d5Lit77yIVm9XTEFO77yJIiB9CiAgICAgICAgc3dpdGNoIGF2YWlsYWJpbGl0eSB7CiAgICAgICAgY2FzZSAudW5wYWlyZWQ6IHJldHVybiAi5pyq6YWN5a+5IgogICAgICAgIGNhc2UgLmRpc2NvdmVyaW5nOiByZXR1cm4gIuato+WcqOWPkeeOsCIKICAgICAgICBjYXNlIC5kaXNjb3ZlcmVkOiByZXR1cm4gIuW3suWPkeeOsO+8jOato+WcqOmqjOivgSIKICAgICAgICBjYXNlIC52ZXJpZmllZDogcmV0dXJuICJWb1dMQU4g5bCx57uqIgogICAgICAgIGNhc2UgbGV0IC51bmF2YWlsYWJsZShyZWFzb24pOgogICAgICAgICAgICByZXR1cm4gcmVhc29uLmNvbnRhaW5zKCLlsYDln5/nvZHlt7Lmlq3lvIAiKSA/ICLlsYDln5/nvZHlt7Lmlq3lvIAgwrcg5bey5Zue6YCA5LqR56uv77yI5LiL5LiA6YCa77yJIiA6IHJlYXNvbgogICAgICAgIH0KICAgIH0KfQoKZW51bSBWb1dMQU5Db250cm9sbGVyRXJyb3I6IExvY2FsaXplZEVycm9yIHsKICAgIGNhc2UgaW52YWxpZEFkdmVydGlzZW1lbnQKICAgIGNhc2Ugbm90RGlzY292ZXJlZAogICAgY2FzZSBub3RQYWlyZWQKICAgIGNhc2UgYXV0aGVudGljYXRpb25GYWlsZWQKCiAgICB2YXIgZXJyb3JEZXNjcmlwdGlvbjogU3RyaW5nPyB7CiAgICAgICAgc3dpdGNoIHNlbGYgewogICAgICAgIGNhc2UgLmludmFsaWRBZHZlcnRpc2VtZW50OiByZXR1cm4gIlZvV0xBTiDlub/mkq3lhoXlrrnml6DmlYgiCiAgICAgICAgY2FzZSAubm90RGlzY292ZXJlZDogcmV0dXJuICLlsJrmnKrlj5HnjrDkuInmmJ8gVm9XTEFOIgogICAgICAgIGNhc2UgLm5vdFBhaXJlZDogcmV0dXJuICJWb1dMQU4g5bCa5pyq6YWN5a+5IgogICAgICAgIGNhc2UgLmF1dGhlbnRpY2F0aW9uRmFpbGVkOiByZXR1cm4gIlZvV0xBTiDpibTmnYPlpLHotKUiCiAgICAgICAgfQogICAgfQp9CgpATWFpbkFjdG9yCmVudW0gVm9XTEFOUHJvYmVSZWNvdmVyeSB7CiAgICBzdGF0aWMgZnVuYyBydW48VmFsdWU+KF8gb3BlcmF0aW9uOiAoKSBhc3luYyB0aHJvd3MgLT4gVmFsdWUpIGFzeW5jIHRocm93cyAtPiBWYWx1ZSB7CiAgICAgICAgZG8gewogICAgICAgICAgICByZXR1cm4gdHJ5IGF3YWl0IG9wZXJhdGlvbigpCiAgICAgICAgfSBjYXRjaCB7CiAgICAgICAgICAgIGd1YXJkIGlzRGVmdW5jdENvbm5lY3Rpb24oZXJyb3IpIGVsc2UgeyB0aHJvdyBlcnJvciB9CiAgICAgICAgICAgIHRyeT8gYXdhaXQgVGFzay5zbGVlcChmb3I6IC5taWxsaXNlY29uZHMoMjAwKSkKICAgICAgICAgICAgcmV0dXJuIHRyeSBhd2FpdCBvcGVyYXRpb24oKQogICAgICAgIH0KICAgIH0KCiAgICBzdGF0aWMgZnVuYyB1c2VyRmFjaW5nTWVzc2FnZShmb3IgZXJyb3I6IEVycm9yKSAtPiBTdHJpbmcgewogICAgICAgIGlmIGlzRGVmdW5jdENvbm5lY3Rpb24oZXJyb3IpIHsKICAgICAgICAgICAgcmV0dXJuICJWb1dMQU4g6L+e5o6l5bey5aSx5pWI77yM6K+35L+d5oyBIGlQaG9uZSDkuI7kuInmmJ/lpITkuo7lkIzkuIDlsYDln5/nvZEiCiAgICAgICAgfQogICAgICAgIHJldHVybiBlcnJvci5sb2NhbGl6ZWREZXNjcmlwdGlvbgogICAgfQoKICAgIHByaXZhdGUgc3RhdGljIGZ1bmMgaXNEZWZ1bmN0Q29ubmVjdGlvbihfIGVycm9yOiBFcnJvcikgLT4gQm9vbCB7CiAgICAgICAgbGV0IG1lc3NhZ2UgPSBlcnJvci5sb2NhbGl6ZWREZXNjcmlwdGlvbi5sb3dlcmNhc2VkKCkKICAgICAgICByZXR1cm4gbWVzc2FnZS5jb250YWlucygiZGVmdW5jdGNvbm5lY3Rpb24iKQogICAgICAgICAgICB8fCBtZXNzYWdlLmNvbnRhaW5zKCJkZWZ1bmN0IGNvbm5lY3Rpb24iKQogICAgICAgICAgICB8fCBtZXNzYWdlLmNvbnRhaW5zKCI2NTU2OSIpCiAgICB9Cn0KCnN0cnVjdCBWb1dMQU5Ccm93c2VyTGlmZWN5Y2xlIHsKICAgIHByaXZhdGUoc2V0KSB2YXIgZ2VuZXJhdGlvbjogVUludDY0ID0gMAogICAgcHJpdmF0ZShzZXQpIHZhciBpc1J1bm5pbmcgPSBmYWxzZQoKICAgIG11dGF0aW5nIGZ1bmMgc3RhcnRJZk5lZWRlZCgpIC0+IFVJbnQ2ND8gewogICAgICAgIGd1YXJkICFpc1J1bm5pbmcgZWxzZSB7IHJldHVybiBuaWwgfQogICAgICAgIHJldHVybiBiZWdpbigpCiAgICB9CgogICAgbXV0YXRpbmcgZnVuYyByZXN0YXJ0KCkgLT4gVUludDY0IHsgYmVnaW4oKSB9CgogICAgbXV0YXRpbmcgZnVuYyBzdG9wKCkgewogICAgICAgIGdlbmVyYXRpb24gJis9IDEKICAgICAgICBpc1J1bm5pbmcgPSBmYWxzZQogICAgfQoKICAgIG11dGF0aW5nIGZ1bmMgbWFya0ZhaWxlZChfIGNhbmRpZGF0ZTogVUludDY0KSAtPiBCb29sIHsKICAgICAgICBndWFyZCBhY2NlcHRzKGNhbmRpZGF0ZSkgZWxzZSB7IHJldHVybiBmYWxzZSB9CiAgICAgICAgaXNSdW5uaW5nID0gZmFsc2UKICAgICAgICByZXR1cm4gdHJ1ZQogICAgfQoKICAgIGZ1bmMgYWNjZXB0cyhfIGNhbmRpZGF0ZTogVUludDY0KSAtPiBCb29sIHsKICAgICAgICBpc1J1bm5pbmcgJiYgZ2VuZXJhdGlvbiA9PSBjYW5kaWRhdGUKICAgIH0KCiAgICBwcml2YXRlIG11dGF0aW5nIGZ1bmMgYmVnaW4oKSAtPiBVSW50NjQgewogICAgICAgIGdlbmVyYXRpb24gJis9IDEKICAgICAgICBpc1J1bm5pbmcgPSB0cnVlCiAgICAgICAgcmV0dXJuIGdlbmVyYXRpb24KICAgIH0KfQoKQE1haW5BY3RvcgpmaW5hbCBjbGFzcyBWb1dMQU5Db250cm9sbGVyOiBPYnNlcnZhYmxlT2JqZWN0IHsKICAgIEBQdWJsaXNoZWQgcHJpdmF0ZShzZXQpIHZhciBhdmFpbGFiaWxpdHk6IFZvV0xBTkF2YWlsYWJpbGl0eSA9CiAgICAgICAgVm9XTEFOQ3JlZGVudGlhbFN0b3JlLmxvYWQoKSA9PSBuaWwgPyAudW5wYWlyZWQgOiAuZGlzY292ZXJpbmcgewogICAgICAgIGRpZFNldCB7IG9uQXZhaWxhYmlsaXR5Q2hhbmdlPyhhdmFpbGFiaWxpdHkpIH0KICAgIH0KCiAgICB2YXIgb25BdmFpbGFiaWxpdHlDaGFuZ2U6ICgoVm9XTEFOQXZhaWxhYmlsaXR5KSAtPiBWb2lkKT8KCiAgICBAUHVibGlzaGVkIHByaXZhdGUoc2V0KSB2YXIgZGlzY292ZXJlZEFnZW50czogW1ZvV0xBTkRpc2NvdmVyZWRBZ2VudF0gPSBbXSB7CiAgICAgICAgZGlkU2V0IHsgb25EaXNjb3ZlcmVkQWdlbnRzQ2hhbmdlPygpIH0KICAgIH0KICAgIHZhciBvbkRpc2NvdmVyZWRBZ2VudHNDaGFuZ2U6ICgoKSAtPiBWb2lkKT8KCiAgICBwcml2YXRlIGxldCBxdWV1ZSA9IERpc3BhdGNoUXVldWUobGFiZWw6ICJjb20uZXhhbXBsZS5haXJzaW0udm93bGFuLmRpc2NvdmVyeSIpCiAgICBwcml2YXRlIHZhciBicm93c2VyOiBOV0Jyb3dzZXI/CiAgICBwcml2YXRlIHZhciBicm93c2VyTGlmZWN5Y2xlID0gVm9XTEFOQnJvd3NlckxpZmVjeWNsZSgpCiAgICBwcml2YXRlIHZhciBkaXNjb3ZlcmVkRW5kcG9pbnQ6IFZvV0xBTkVuZHBvaW50PwoKICAgIGZ1bmMgc3RhcnRCcm93c2luZygpIHsKICAgICAgICBndWFyZCBWb1dMQU5DcmVkZW50aWFsU3RvcmUubG9hZCgpICE9IG5pbCBlbHNlIHsKICAgICAgICAgICAgc3RvcEJyb3dzZXJTZXNzaW9uKCkKICAgICAgICAgICAgYXZhaWxhYmlsaXR5ID0gLnVucGFpcmVkCiAgICAgICAgICAgIHJldHVybgogICAgICAgIH0KICAgICAgICBndWFyZCBsZXQgZ2VuZXJhdGlvbiA9IGJyb3dzZXJMaWZlY3ljbGUuc3RhcnRJZk5lZWRlZCgpIGVsc2UgeyByZXR1cm4gfQogICAgICAgIGJlZ2luQnJvd3NpbmcoZ2VuZXJhdGlvbjogZ2VuZXJhdGlvbikKICAgIH0KCiAgICBmdW5jIHJlc3RhcnRCcm93c2luZygpIHsKICAgICAgICBndWFyZCBWb1dMQU5DcmVkZW50aWFsU3RvcmUubG9hZCgpICE9IG5pbCBlbHNlIHsKICAgICAgICAgICAgc3RvcEJyb3dzZXJTZXNzaW9uKCkKICAgICAgICAgICAgYXZhaWxhYmlsaXR5ID0gLnVucGFpcmVkCiAgICAgICAgICAgIHJldHVybgogICAgICAgIH0KICAgICAgICBsZXQgZ2VuZXJhdGlvbiA9IGJyb3dzZXJMaWZlY3ljbGUucmVzdGFydCgpCiAgICAgICAgc3RvcEN1cnJlbnRCcm93c2VyKCkKICAgICAgICBkaXNjb3ZlcmVkRW5kcG9pbnQgPSBuaWwKICAgICAgICBkaXNjb3ZlcmVkQWdlbnRzID0gW10KICAgICAgICBiZWdpbkJyb3dzaW5nKGdlbmVyYXRpb246IGdlbmVyYXRpb24pCiAgICAgICAgVGFzayB7CiAgICAgICAgICAgIGF3YWl0IEFnZW50VmVyYm9zZVRyYWNlUmVjb3JkZXIuc2hhcmVkLnJlY29yZEV2ZW50KAogICAgICAgICAgICAgICAgc291cmNlOiAiaW9zIiwgY2F0ZWdvcnk6ICJ2b3dsYW4iLCBwaGFzZTogImJyb3dzZXJfcmVzdGFydGVkIiwKICAgICAgICAgICAgICAgIHRpdGxlOiAiVm9XTEFOIOa1j+iniOWZqOW3sumHjeW7uiIsCiAgICAgICAgICAgICAgICBmaWVsZHM6IFsiZ2VuZXJhdGlvbiI6IFN0cmluZyhnZW5lcmF0aW9uKV0KICAgICAgICAgICAgKQogICAgICAgIH0KICAgIH0KCiAgICBwcml2YXRlIGZ1bmMgYmVnaW5Ccm93c2luZyhnZW5lcmF0aW9uOiBVSW50NjQpIHsKICAgICAgICBhdmFpbGFiaWxpdHkgPSAuZGlzY292ZXJpbmcKICAgICAgICBsZXQgcGFyYW1ldGVycyA9IE5XUGFyYW1ldGVycy50Y3AKICAgICAgICBwYXJhbWV0ZXJzLmluY2x1ZGVQZWVyVG9QZWVyID0gdHJ1ZQogICAgICAgIGxldCBhY3RpdmUgPSBOV0Jyb3dzZXIoCiAgICAgICAgICAgIGZvcjogLmJvbmpvdXJXaXRoVFhUUmVjb3JkKHR5cGU6ICJfYWlyc2ltLXZvd2xhbi5fdGNwIiwgZG9tYWluOiBuaWwpLAogICAgICAgICAgICB1c2luZzogcGFyYW1ldGVycwogICAgICAgICkKICAgICAgICBhY3RpdmUuYnJvd3NlUmVzdWx0c0NoYW5nZWRIYW5kbGVyID0geyBbd2VhayBzZWxmXSByZXN1bHRzLCBfIGluCiAgICAgICAgICAgIGxldCBhZ2VudHMgPSByZXN1bHRzLmNvbXBhY3RNYXAoU2VsZi5wYXJzZUFnZW50KQogICAgICAgICAgICBsZXQgZW5kcG9pbnRzID0gU2V0KGFnZW50cy5tYXAoXC5lbmRwb2ludCkpCiAgICAgICAgICAgIFRhc2sgeyBATWFpbkFjdG9yIFt3ZWFrIHNlbGZdIGluCiAgICAgICAgICAgICAgICBndWFyZCBsZXQgc2VsZiBlbHNlIHsgcmV0dXJuIH0KICAgICAgICAgICAgICAgIGd1YXJkIHNlbGYuYnJvd3NlckxpZmVjeWNsZS5hY2NlcHRzKGdlbmVyYXRpb24pIGVsc2UgeyByZXR1cm4gfQogICAgICAgICAgICAgICAgc2VsZi5kaXNjb3ZlcmVkQWdlbnRzID0gYWdlbnRzLnNvcnRlZCB7CiAgICAgICAgICAgICAgICAgICAgaWYgJDAuZGV2aWNlTmFtZSA9PSAkMS5kZXZpY2VOYW1lIHsgcmV0dXJuICQwLmlkIDwgJDEuaWQgfQogICAgICAgICAgICAgICAgICAgIHJldHVybiAkMC5kZXZpY2VOYW1lLmxvY2FsaXplZENhc2VJbnNlbnNpdGl2ZUNvbXBhcmUoJDEuZGV2aWNlTmFtZSkgPT0gLm9yZGVyZWRBc2NlbmRpbmcKICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgICAgIGxldCBlbmRwb2ludCA9IHNlbGYuZGlzY292ZXJlZEVuZHBvaW50LmZsYXRNYXAgeyBlbmRwb2ludHMuY29udGFpbnMoJDApID8gJDAgOiBuaWwgfQogICAgICAgICAgICAgICAgICAgID8/IGFnZW50cy5maXJzdD8uZW5kcG9pbnQKICAgICAgICAgICAgICAgIGlmIGxldCBlbmRwb2ludCB7CiAgICAgICAgICAgICAgICAgICAgc2VsZi5kaXNjb3ZlcmVkRW5kcG9pbnQgPSBlbmRwb2ludAogICAgICAgICAgICAgICAgICAgIGlmIHNlbGYuYXZhaWxhYmlsaXR5LmVuZHBvaW50ID09IGVuZHBvaW50LCBzZWxmLmF2YWlsYWJpbGl0eS5pc1JlYWR5KCkgeyByZXR1cm4gfQogICAgICAgICAgICAgICAgICAgIHNlbGYuYXZhaWxhYmlsaXR5ID0gLmRpc2NvdmVyZWQoZW5kcG9pbnQsIGF0OiBEYXRlKCkpCiAgICAgICAgICAgICAgICAgICAgYXdhaXQgQWdlbnRWZXJib3NlVHJhY2VSZWNvcmRlci5zaGFyZWQucmVjb3JkRXZlbnQoCiAgICAgICAgICAgICAgICAgICAgICAgIHNvdXJjZTogImlvcyIsIGNhdGVnb3J5OiAidm93bGFuIiwgcGhhc2U6ICJkaXNjb3ZlcmVkIiwKICAgICAgICAgICAgICAgICAgICAgICAgdGl0bGU6ICJWb1dMQU4g5bey5Y+R546wIiwKICAgICAgICAgICAgICAgICAgICAgICAgZmllbGRzOiBbImhvc3QiOiBlbmRwb2ludC5ob3N0LCAiY29udHJvbF9wb3J0IjogU3RyaW5nKGVuZHBvaW50LmNvbnRyb2xQb3J0KSwgInBjbV9wb3J0IjogU3RyaW5nKGVuZHBvaW50LnBjbVBvcnQpXQogICAgICAgICAgICAgICAgICAgICkKICAgICAgICAgICAgICAgICAgICBhd2FpdCBzZWxmLnByb2JlTm93KCkKICAgICAgICAgICAgICAgIH0gZWxzZSBpZiBzZWxmLmRpc2NvdmVyZWRFbmRwb2ludCAhPSBuaWwgewogICAgICAgICAgICAgICAgICAgIHNlbGYuZGlzY292ZXJlZEVuZHBvaW50ID0gbmlsCiAgICAgICAgICAgICAgICAgICAgc2VsZi5hdmFpbGFiaWxpdHkgPSAudW5hdmFpbGFibGUoIuWxgOWfn+e9keW3suaWreW8gCIpCiAgICAgICAgICAgICAgICB9IGVsc2UgaWYgIXNlbGYuYXZhaWxhYmlsaXR5LmlzUmVhZHkoKSB7CiAgICAgICAgICAgICAgICAgICAgc2VsZi5hdmFpbGFiaWxpdHkgPSAuZGlzY292ZXJpbmcKICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgfQogICAgICAgIH0KICAgICAgICBhY3RpdmUuc3RhdGVVcGRhdGVIYW5kbGVyID0geyBbd2VhayBzZWxmXSBzdGF0ZSBpbgogICAgICAgICAgICBpZiBjYXNlIGxldCAuZmFpbGVkKGVycm9yKSA9IHN0YXRlIHsKICAgICAgICAgICAgICAgIFRhc2sgeyBATWFpbkFjdG9yIFt3ZWFrIHNlbGZdIGluCiAgICAgICAgICAgICAgICAgICAgZ3VhcmQgbGV0IHNlbGYsIHNlbGYuYnJvd3NlckxpZmVjeWNsZS5tYXJrRmFpbGVkKGdlbmVyYXRpb24pIGVsc2UgeyByZXR1cm4gfQogICAgICAgICAgICAgICAgICAgIHNlbGYuc3RvcEN1cnJlbnRCcm93c2VyKCkKICAgICAgICAgICAgICAgICAgICBzZWxmLmRpc2NvdmVyZWRFbmRwb2ludCA9IG5pbAogICAgICAgICAgICAgICAgICAgIHNlbGYuYXZhaWxhYmlsaXR5ID0gLnVuYXZhaWxhYmxlKAogICAgICAgICAgICAgICAgICAgICAgICBWb1dMQU5Qcm9iZVJlY292ZXJ5LnVzZXJGYWNpbmdNZXNzYWdlKGZvcjogZXJyb3IpCiAgICAgICAgICAgICAgICAgICAgKQogICAgICAgICAgICAgICAgICAgIGF3YWl0IEFnZW50VmVyYm9zZVRyYWNlUmVjb3JkZXIuc2hhcmVkLnJlY29yZEV2ZW50KAogICAgICAgICAgICAgICAgICAgICAgICBzb3VyY2U6ICJpb3MiLCBjYXRlZ29yeTogInZvd2xhbiIsIHBoYXNlOiAiYnJvd3Nlcl9mYWlsZWQiLAogICAgICAgICAgICAgICAgICAgICAgICB0aXRsZTogIlZvV0xBTiDmtY/op4jlmajlpLHmlYgiLCBkZXRhaWw6IGVycm9yLmxvY2FsaXplZERlc2NyaXB0aW9uLAogICAgICAgICAgICAgICAgICAgICAgICBmaWVsZHM6IFsiZ2VuZXJhdGlvbiI6IFN0cmluZyhnZW5lcmF0aW9uKV0sIGlzRmFpbHVyZTogdHJ1ZQogICAgICAgICAgICAgICAgICAgICkKICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgfQogICAgICAgIH0KICAgICAgICBicm93c2VyID0gYWN0aXZlCiAgICAgICAgYWN0aXZlLnN0YXJ0KHF1ZXVlOiBxdWV1ZSkKICAgIH0KCiAgICBmdW5jIHN0b3BCcm93c2luZygpIHsKICAgICAgICBzdG9wQnJvd3NlclNlc3Npb24oKQogICAgICAgIGlmIFZvV0xBTkNyZWRlbnRpYWxTdG9yZS5sb2FkKCkgIT0gbmlsIHsgYXZhaWxhYmlsaXR5ID0gLmRpc2NvdmVyaW5nIH0KICAgIH0KCiAgICBwcml2YXRlIGZ1bmMgc3RvcEJyb3dzZXJTZXNzaW9uKCkgewogICAgICAgIGJyb3dzZXJMaWZlY3ljbGUuc3RvcCgpCiAgICAgICAgc3RvcEN1cnJlbnRCcm93c2VyKCkKICAgICAgICBkaXNjb3ZlcmVkRW5kcG9pbnQgPSBuaWwKICAgICAgICBkaXNjb3ZlcmVkQWdlbnRzID0gW10KICAgIH0KCiAgICBwcml2YXRlIGZ1bmMgc3RvcEN1cnJlbnRCcm93c2VyKCkgewogICAgICAgIGxldCBhY3RpdmUgPSBicm93c2VyCiAgICAgICAgYnJvd3NlciA9IG5pbAogICAgICAgIGFjdGl2ZT8uYnJvd3NlUmVzdWx0c0NoYW5nZWRIYW5kbGVyID0gbmlsCiAgICAgICAgYWN0aXZlPy5zdGF0ZVVwZGF0ZUhhbmRsZXIgPSBuaWwKICAgICAgICBhY3RpdmU/LmNhbmNlbCgpCiAgICB9CgogICAgZnVuYyByZWZyZXNoQWZ0ZXJQYWlyaW5nKCkgYXN5bmMgewogICAgICAgIHN0YXJ0QnJvd3NpbmcoKQogICAgICAgIGF3YWl0IHByb2JlTm93KCkKICAgIH0KCiAgICBmdW5jIHByb2JlTm93KCkgYXN5bmMgewogICAgICAgIGd1YXJkIGxldCBlbmRwb2ludCA9IGF2YWlsYWJpbGl0eS5lbmRwb2ludCA/PyBkaXNjb3ZlcmVkRW5kcG9pbnQgZWxzZSB7IHJldHVybiB9CiAgICAgICAgZ3VhcmQgbGV0IGNyZWRlbnRpYWwgPSBWb1dMQU5DcmVkZW50aWFsU3RvcmUubG9hZCgpIGVsc2UgewogICAgICAgICAgICBhdmFpbGFiaWxpdHkgPSAudW5wYWlyZWQKICAgICAgICAgICAgcmV0dXJuCiAgICAgICAgfQogICAgICAgIGRvIHsKICAgICAgICAgICAgbGV0IChkYXRhLCByZXNwb25zZSkgPSB0cnkgYXdhaXQgVm9XTEFOUHJvYmVSZWNvdmVyeS5ydW4gewogICAgICAgICAgICAgICAgbGV0IHNpZ25lZCA9IHRyeSBWb1dMQU5SZXF1ZXN0U2lnbmVyKHNlY3JldDogY3JlZGVudGlhbC5zZWNyZXQpLnNpZ24oCiAgICAgICAgICAgICAgICAgICAgbWV0aG9kOiAiR0VUIiwgcGF0aDogIi92MS9oZWFsdGgiLCBib2R5OiBEYXRhKCkKICAgICAgICAgICAgICAgICkKICAgICAgICAgICAgICAgIHZhciByZXF1ZXN0ID0gVVJMUmVxdWVzdCh1cmw6IGVuZHBvaW50LmNvbnRyb2xCYXNlVVJMLmFwcGVuZGluZ1BhdGhDb21wb25lbnQoInYxL2hlYWx0aCIpKQogICAgICAgICAgICAgICAgcmVxdWVzdC50aW1lb3V0SW50ZXJ2YWwgPSAzCiAgICAgICAgICAgICAgICByZXF1ZXN0LmNhY2hlUG9saWN5ID0gLnJlbG9hZElnbm9yaW5nTG9jYWxDYWNoZURhdGEKICAgICAgICAgICAgICAgIFNlbGYuYXBwbHkoc2lnbmVkLCB0bzogJnJlcXVlc3QpCiAgICAgICAgICAgICAgICBsZXQgY29uZmlndXJhdGlvbiA9IFVSTFNlc3Npb25Db25maWd1cmF0aW9uLmVwaGVtZXJhbAogICAgICAgICAgICAgICAgY29uZmlndXJhdGlvbi53YWl0c0ZvckNvbm5lY3Rpdml0eSA9IGZhbHNlCiAgICAgICAgICAgICAgICBsZXQgc2Vzc2lvbiA9IFVSTFNlc3Npb24oY29uZmlndXJhdGlvbjogY29uZmlndXJhdGlvbikKICAgICAgICAgICAgICAgIGRlZmVyIHsgc2Vzc2lvbi5maW5pc2hUYXNrc0FuZEludmFsaWRhdGUoKSB9CiAgICAgICAgICAgICAgICByZXR1cm4gdHJ5IGF3YWl0IHNlc3Npb24uZGF0YShmb3I6IHJlcXVlc3QpCiAgICAgICAgICAgIH0KICAgICAgICAgICAgZ3VhcmQgbGV0IGh0dHAgPSByZXNwb25zZSBhcz8gSFRUUFVSTFJlc3BvbnNlLCBodHRwLnN0YXR1c0NvZGUgPT0gMjAwLAogICAgICAgICAgICAgICAgICBsZXQgaWRlbnRpdHkgPSB0cnk/IEpTT05EZWNvZGVyKCkuZGVjb2RlKFZvV0xBTkhlYWx0aElkZW50aXR5LnNlbGYsIGZyb206IGRhdGEpLAogICAgICAgICAgICAgICAgICBpZGVudGl0eS5vayBlbHNlIHsKICAgICAgICAgICAgICAgIHRocm93IFZvV0xBTkNvbnRyb2xsZXJFcnJvci5hdXRoZW50aWNhdGlvbkZhaWxlZAogICAgICAgICAgICB9CiAgICAgICAgICAgIGlmIGxldCBpbmRleCA9IGRpc2NvdmVyZWRBZ2VudHMuZmlyc3RJbmRleCh3aGVyZTogeyAkMC5lbmRwb2ludCA9PSBlbmRwb2ludCB9KSB7CiAgICAgICAgICAgICAgICBsZXQgcHJldmlvdXMgPSBkaXNjb3ZlcmVkQWdlbnRzW2luZGV4XQogICAgICAgICAgICAgICAgZGlzY292ZXJlZEFnZW50c1tpbmRleF0gPSBWb1dMQU5EaXNjb3ZlcmVkQWdlbnQoCiAgICAgICAgICAgICAgICAgICAgaWQ6IGlkZW50aXR5LmFnZW50SUQ/LmlzRW1wdHkgPT0gZmFsc2UgPyBpZGVudGl0eS5hZ2VudElEISA6IHByZXZpb3VzLmlkLAogICAgICAgICAgICAgICAgICAgIGVuZHBvaW50OiBlbmRwb2ludCwKICAgICAgICAgICAgICAgICAgICBkZXZpY2VOYW1lOiBpZGVudGl0eS5kZXZpY2VOYW1lPy5pc0VtcHR5ID09IGZhbHNlID8gaWRlbnRpdHkuZGV2aWNlTmFtZSEgOiBwcmV2aW91cy5kZXZpY2VOYW1lLAogICAgICAgICAgICAgICAgICAgIG1hbnVmYWN0dXJlcjogaWRlbnRpdHkubWFudWZhY3R1cmVyID8/IHByZXZpb3VzLm1hbnVmYWN0dXJlciwKICAgICAgICAgICAgICAgICAgICBtb2RlbDogaWRlbnRpdHkubW9kZWwgPz8gcHJldmlvdXMubW9kZWwsCiAgICAgICAgICAgICAgICAgICAgcGhvbmVOdW1iZXI6IGlkZW50aXR5LnBob25lTnVtYmVyPy5pc0VtcHR5ID09IGZhbHNlID8gaWRlbnRpdHkucGhvbmVOdW1iZXIgOiBwcmV2aW91cy5waG9uZU51bWJlciwKICAgICAgICAgICAgICAgICAgICBhZ2VudEtpbmQ6IGlkZW50aXR5LmFnZW50S2luZCA/PyBwcmV2aW91cy5hZ2VudEtpbmQKICAgICAgICAgICAgICAgICkKICAgICAgICAgICAgfQogICAgICAgICAgICBhdmFpbGFiaWxpdHkgPSAudmVyaWZpZWQoZW5kcG9pbnQsIGF0OiBEYXRlKCkpCiAgICAgICAgICAgIGF3YWl0IEFnZW50VmVyYm9zZVRyYWNlUmVjb3JkZXIuc2hhcmVkLnJlY29yZEV2ZW50KAogICAgICAgICAgICAgICAgc291cmNlOiAiaW9zIiwgY2F0ZWdvcnk6ICJ2b3dsYW4iLCBwaGFzZTogInZlcmlmaWVkIiwKICAgICAgICAgICAgICAgIHRpdGxlOiAiVm9XTEFOIOetvuWQjeWBpeW6t+ajgOafpemAmui/hyIsCiAgICAgICAgICAgICAgICBmaWVsZHM6IFsiaG9zdCI6IGVuZHBvaW50Lmhvc3QsICJjb250cm9sX3BvcnQiOiBTdHJpbmcoZW5kcG9pbnQuY29udHJvbFBvcnQpXQogICAgICAgICAgICApCiAgICAgICAgfSBjYXRjaCB7CiAgICAgICAgICAgIGF2YWlsYWJpbGl0eSA9IC51bmF2YWlsYWJsZShWb1dMQU5Qcm9iZVJlY292ZXJ5LnVzZXJGYWNpbmdNZXNzYWdlKGZvcjogZXJyb3IpKQogICAgICAgICAgICBhd2FpdCBBZ2VudFZlcmJvc2VUcmFjZVJlY29yZGVyLnNoYXJlZC5yZWNvcmRFdmVudCgKICAgICAgICAgICAgICAgIHNvdXJjZTogImlvcyIsIGNhdGVnb3J5OiAidm93bGFuIiwgcGhhc2U6ICJmYWlsZWQiLAogICAgICAgICAgICAgICAgdGl0bGU6ICJWb1dMQU4g5YGl5bq35qOA5p+l5aSx6LSlIiwgZGV0YWlsOiBlcnJvci5sb2NhbGl6ZWREZXNjcmlwdGlvbiwKICAgICAgICAgICAgICAgIGlzRmFpbHVyZTogdHJ1ZQogICAgICAgICAgICApCiAgICAgICAgfQogICAgfQoKICAgIG5vbmlzb2xhdGVkIHN0YXRpYyBmdW5jIGFwcGx5KF8gc2lnbmVkOiBWb1dMQU5TaWduZWRSZXF1ZXN0LCB0byByZXF1ZXN0OiBpbm91dCBVUkxSZXF1ZXN0KSB7CiAgICAgICAgcmVxdWVzdC5zZXRWYWx1ZSgiMSIsIGZvckhUVFBIZWFkZXJGaWVsZDogIlgtQWlyU0lNLVZvV0xBTi1WZXJzaW9uIikKICAgICAgICByZXF1ZXN0LnNldFZhbHVlKFN0cmluZyhzaWduZWQudGltZXN0YW1wKSwgZm9ySFRUUEhlYWRlckZpZWxkOiAiWC1BaXJTSU0tVm9XTEFOLVRpbWVzdGFtcCIpCiAgICAgICAgcmVxdWVzdC5zZXRWYWx1ZShzaWduZWQubm9uY2UsIGZvckhUVFBIZWFkZXJGaWVsZDogIlgtQWlyU0lNLVZvV0xBTi1Ob25jZSIpCiAgICAgICAgcmVxdWVzdC5zZXRWYWx1ZShzaWduZWQuc2lnbmF0dXJlLCBmb3JIVFRQSGVhZGVyRmllbGQ6ICJYLUFpclNJTS1Wb1dMQU4tU2lnbmF0dXJlIikKICAgIH0KCiAgICBwcml2YXRlIG5vbmlzb2xhdGVkIHN0YXRpYyBmdW5jIHBhcnNlQWdlbnQoXyByZXN1bHQ6IE5XQnJvd3Nlci5SZXN1bHQpIC0+IFZvV0xBTkRpc2NvdmVyZWRBZ2VudD8gewogICAgICAgIGd1YXJkIGNhc2UgbGV0IC5ib25qb3VyKHJlY29yZCkgPSByZXN1bHQubWV0YWRhdGEsCiAgICAgICAgICAgICAgcmVjb3JkWyJ2Il0gPT0gIjEiLCBsZXQgaG9zdCA9IHJlY29yZFsiaG9zdCJdLAogICAgICAgICAgICAgIGxldCBjb250cm9sVGV4dCA9IHJlY29yZFsiY29udHJvbF9wb3J0Il0sIGxldCBjb250cm9sID0gVUludDE2KGNvbnRyb2xUZXh0KSwKICAgICAgICAgICAgICBsZXQgcGNtVGV4dCA9IHJlY29yZFsicGNtX3BvcnQiXSwgbGV0IHBjbSA9IFVJbnQxNihwY21UZXh0KSBlbHNlIHsgcmV0dXJuIG5pbCB9CiAgICAgICAgZ3VhcmQgbGV0IGVuZHBvaW50ID0gdHJ5PyBWb1dMQU5FbmRwb2ludChob3N0OiBob3N0LCBjb250cm9sUG9ydDogY29udHJvbCwgcGNtUG9ydDogcGNtKSBlbHNlIHsKICAgICAgICAgICAgcmV0dXJuIG5pbAogICAgICAgIH0KICAgICAgICBsZXQgZmFsbGJhY2tJRCA9ICJ2b3dsYW4tXChob3N0KS1cKGNvbnRyb2wpIgogICAgICAgIGxldCBkZXZpY2VOYW1lID0gcmVjb3JkWyJkZXZpY2VfbmFtZSJdPy50cmltbWluZ0NoYXJhY3RlcnMoaW46IC53aGl0ZXNwYWNlc0FuZE5ld2xpbmVzKQogICAgICAgIHJldHVybiBWb1dMQU5EaXNjb3ZlcmVkQWdlbnQoCiAgICAgICAgICAgIGlkOiByZWNvcmRbImFnZW50X2lkIl0/LmlzRW1wdHkgPT0gZmFsc2UgPyByZWNvcmRbImFnZW50X2lkIl0hIDogZmFsbGJhY2tJRCwKICAgICAgICAgICAgZW5kcG9pbnQ6IGVuZHBvaW50LAogICAgICAgICAgICBkZXZpY2VOYW1lOiBkZXZpY2VOYW1lPy5pc0VtcHR5ID09IGZhbHNlID8gZGV2aWNlTmFtZSEgOiAiQW5kcm9pZCDmiYvmnLoiLAogICAgICAgICAgICBtYW51ZmFjdHVyZXI6IHJlY29yZFsibWFudWZhY3R1cmVyIl0sCiAgICAgICAgICAgIG1vZGVsOiByZWNvcmRbIm1vZGVsIl0sCiAgICAgICAgICAgIHBob25lTnVtYmVyOiBuaWwsCiAgICAgICAgICAgIGFnZW50S2luZDogcmVjb3JkWyJhZ2VudF9raW5kIl0KICAgICAgICApCiAgICB9Cn0K
+import Foundation
+import Network
+
+struct VoWLANEndpoint: Equatable, Hashable, Sendable {
+    let host: String
+    let controlPort: UInt16
+    let pcmPort: UInt16
+
+    init(host: String, controlPort: UInt16, pcmPort: UInt16) throws {
+        guard Self.isPrivateIPv4(host), controlPort >= 1024, pcmPort >= 1024 else {
+            throw VoWLANControllerError.invalidAdvertisement
+        }
+        self.host = host
+        self.controlPort = controlPort
+        self.pcmPort = pcmPort
+    }
+
+    var controlBaseURL: URL { URL(string: "http://\(host):\(controlPort)/")! }
+
+    private static func isPrivateIPv4(_ host: String) -> Bool {
+        let fields = host.split(separator: ".").compactMap { UInt8($0) }
+        guard fields.count == 4 else { return false }
+        return fields[0] == 10 || (fields[0] == 172 && (16...31).contains(fields[1]))
+            || (fields[0] == 192 && fields[1] == 168)
+    }
+}
+
+struct VoWLANDiscoveredAgent: Equatable, Identifiable, Sendable {
+    let id: String
+    let endpoint: VoWLANEndpoint
+    let deviceName: String
+    let manufacturer: String?
+    let model: String?
+    let phoneNumber: String?
+    let agentKind: String?
+}
+
+private struct VoWLANHealthIdentity: Decodable {
+    let ok: Bool
+    let agentID: String?
+    let agentKind: String?
+    let deviceName: String?
+    let manufacturer: String?
+    let model: String?
+    let phoneNumber: String?
+
+    enum CodingKeys: String, CodingKey {
+        case ok
+        case agentID = "agent_id"
+        case agentKind = "agent_kind"
+        case deviceName = "device_name"
+        case manufacturer, model
+        case phoneNumber = "phone_number"
+    }
+}
+
+enum VoWLANAvailability: Equatable, Sendable {
+    case unpaired
+    case discovering
+    case discovered(VoWLANEndpoint, at: Date)
+    case verified(VoWLANEndpoint, at: Date)
+    case unavailable(String)
+
+    var endpoint: VoWLANEndpoint? {
+        switch self {
+        case let .discovered(value, _), let .verified(value, _): return value
+        default: return nil
+        }
+    }
+
+    func isReady(at now: Date = Date()) -> Bool {
+        guard case let .verified(_, verifiedAt) = self else { return false }
+        return now.timeIntervalSince(verifiedAt) >= 0 && now.timeIntervalSince(verifiedAt) <= 10
+    }
+
+    var isOnlineForDisplay: Bool {
+        if case .verified = self { return true }
+        return false
+    }
+
+    /// 拨号动作会在真正发起前重新执行签名健康检查，因此 UI 只需确认该端点
+    /// 曾验证成功；不能用 10 秒的严格建链时效永久禁用拨号按钮。
+    var allowsCallAttempt: Bool { isOnlineForDisplay }
+}
+
+enum ConnectionStatusHeadline {
+    static func title(summary: ModuleConnectionSummary, vowlanOnline: Bool) -> String {
+        if vowlanOnline { return "VoWLAN 在线" }
+        switch summary {
+        case .localOnline: return L10n.t("在线")
+        case .localOnlineNoService: return "在线 · 蜂窝无服务"
+        case .cloudOnly: return "云端在线 · USB 重连中"
+        case .offline: return L10n.t("离线")
+        }
+    }
+}
+
+enum ModuleConnectionPresentationLevel: Equatable {
+    case online
+    case warning
+    case cloud
+    case offline
+}
+
+struct ModuleConnectionPresentation: Equatable {
+    let title: String
+    let routeTitle: String
+    let description: String
+    let level: ModuleConnectionPresentationLevel
+    let systemImage: String
+
+    static func make(
+        summary: ModuleConnectionSummary,
+        vowlanOnline: Bool,
+        reconnecting: Bool,
+        message: String?
+    ) -> Self {
+        if vowlanOnline {
+            return Self(
+                title: "VoWLAN 在线",
+                routeTitle: "同一 Wi-Fi / 三星热点",
+                description: "VoWLAN 已连接，状态会自动刷新",
+                level: .online,
+                systemImage: "wifi"
+            )
+        }
+        switch summary {
+        case .localOnline:
+            return Self(
+                title: "模块在线", routeTitle: "USB ECM 直连",
+                description: message ?? "USB ECM 已连接，状态会自动刷新",
+                level: .online, systemImage: "checkmark.circle.fill"
+            )
+        case .localOnlineNoService:
+            return Self(
+                title: "模块在线 · 无服务", routeTitle: "USB ECM 已连接",
+                description: message ?? "USB ECM 已连接，蜂窝网络正在自动恢复",
+                level: .warning, systemImage: "antenna.radiowaves.left.and.right.slash"
+            )
+        case .cloudOnly:
+            return Self(
+                title: "云端在线", routeTitle: "公网 Relay",
+                description: message ?? "USB ECM 本地连接中断，模块仍可通过公网接收来电和短信",
+                level: .cloud, systemImage: "icloud.fill"
+            )
+        case .offline:
+            return Self(
+                title: reconnecting ? "正在重新连接" : "模块离线",
+                routeTitle: reconnecting ? "正在恢复连接" : "连接不可用",
+                description: message ?? "请检查模块供电、蜂窝网络与 USB ECM 连接",
+                level: reconnecting ? .warning : .offline,
+                systemImage: reconnecting ? "arrow.triangle.2.circlepath" : "exclamationmark.triangle.fill"
+            )
+        }
+    }
+}
+
+enum PushRegistrationRouteSelector {
+    static func select<Route>(primary: Route, verifiedVoWLAN: Route?) -> Route {
+        verifiedVoWLAN ?? primary
+    }
+}
+
+enum VoWLANStatusCopy {
+    static func text(for availability: VoWLANAvailability, activeCall: Bool = false) -> String {
+        if activeCall { return "通话中（VoWLAN）" }
+        switch availability {
+        case .unpaired: return "未配对"
+        case .discovering: return "正在发现"
+        case .discovered: return "已发现，正在验证"
+        case .verified: return "VoWLAN 就绪"
+        case let .unavailable(reason):
+            return reason.contains("局域网已断开") ? "局域网已断开 · 已回退云端（下一通）" : reason
+        }
+    }
+}
+
+enum VoWLANControllerError: LocalizedError {
+    case invalidAdvertisement
+    case notDiscovered
+    case notPaired
+    case authenticationFailed
+
+    var errorDescription: String? {
+        switch self {
+        case .invalidAdvertisement: return "VoWLAN 广播内容无效"
+        case .notDiscovered: return "尚未发现三星 VoWLAN"
+        case .notPaired: return "VoWLAN 尚未配对"
+        case .authenticationFailed: return "VoWLAN 鉴权失败"
+        }
+    }
+}
+
+@MainActor
+enum VoWLANProbeRecovery {
+    static func run<Value>(_ operation: () async throws -> Value) async throws -> Value {
+        do {
+            return try await operation()
+        } catch {
+            guard isDefunctConnection(error) else { throw error }
+            try? await Task.sleep(for: .milliseconds(200))
+            return try await operation()
+        }
+    }
+
+    static func userFacingMessage(for error: Error) -> String {
+        if isDefunctConnection(error) {
+            return "VoWLAN 连接已失效，请保持 iPhone 与三星处于同一局域网"
+        }
+        return error.localizedDescription
+    }
+
+    private static func isDefunctConnection(_ error: Error) -> Bool {
+        let message = error.localizedDescription.lowercased()
+        return message.contains("defunctconnection")
+            || message.contains("defunct connection")
+            || message.contains("65569")
+    }
+}
+
+struct VoWLANBrowserLifecycle {
+    private(set) var generation: UInt64 = 0
+    private(set) var isRunning = false
+
+    mutating func startIfNeeded() -> UInt64? {
+        guard !isRunning else { return nil }
+        return begin()
+    }
+
+    mutating func restart() -> UInt64 { begin() }
+
+    mutating func stop() {
+        generation &+= 1
+        isRunning = false
+    }
+
+    mutating func markFailed(_ candidate: UInt64) -> Bool {
+        guard accepts(candidate) else { return false }
+        isRunning = false
+        return true
+    }
+
+    func accepts(_ candidate: UInt64) -> Bool {
+        isRunning && generation == candidate
+    }
+
+    private mutating func begin() -> UInt64 {
+        generation &+= 1
+        isRunning = true
+        return generation
+    }
+}
+
+@MainActor
+final class VoWLANController: ObservableObject {
+    @Published private(set) var availability: VoWLANAvailability =
+        VoWLANCredentialStore.load() == nil ? .unpaired : .discovering {
+        didSet { onAvailabilityChange?(availability) }
+    }
+
+    var onAvailabilityChange: ((VoWLANAvailability) -> Void)?
+
+    @Published private(set) var discoveredAgents: [VoWLANDiscoveredAgent] = [] {
+        didSet { onDiscoveredAgentsChange?() }
+    }
+    var onDiscoveredAgentsChange: (() -> Void)?
+
+    private let queue = DispatchQueue(label: "com.sheldonjoo.uphone.vowlan.discovery")
+    private var browser: NWBrowser?
+    private var browserLifecycle = VoWLANBrowserLifecycle()
+    private var discoveredEndpoint: VoWLANEndpoint?
+
+    func startBrowsing() {
+        guard VoWLANCredentialStore.load() != nil else {
+            stopBrowserSession()
+            availability = .unpaired
+            return
+        }
+        guard let generation = browserLifecycle.startIfNeeded() else { return }
+        beginBrowsing(generation: generation)
+    }
+
+    func restartBrowsing() {
+        guard VoWLANCredentialStore.load() != nil else {
+            stopBrowserSession()
+            availability = .unpaired
+            return
+        }
+        let generation = browserLifecycle.restart()
+        stopCurrentBrowser()
+        discoveredEndpoint = nil
+        discoveredAgents = []
+        beginBrowsing(generation: generation)
+        Task {
+            await AgentVerboseTraceRecorder.shared.recordEvent(
+                source: "ios", category: "vowlan", phase: "browser_restarted",
+                title: "VoWLAN 浏览器已重建",
+                fields: ["generation": String(generation)]
+            )
+        }
+    }
+
+    private func beginBrowsing(generation: UInt64) {
+        availability = .discovering
+        let parameters = NWParameters.tcp
+        parameters.includePeerToPeer = true
+        let active = NWBrowser(
+            for: .bonjourWithTXTRecord(type: "_airsim-vowlan._tcp", domain: nil),
+            using: parameters
+        )
+        active.browseResultsChangedHandler = { [weak self] results, _ in
+            let agents = results.compactMap(Self.parseAgent)
+            let endpoints = Set(agents.map(\.endpoint))
+            Task { @MainActor [weak self] in
+                guard let self else { return }
+                guard self.browserLifecycle.accepts(generation) else { return }
+                self.discoveredAgents = agents.sorted {
+                    if $0.deviceName == $1.deviceName { return $0.id < $1.id }
+                    return $0.deviceName.localizedCaseInsensitiveCompare($1.deviceName) == .orderedAscending
+                }
+                let endpoint = self.discoveredEndpoint.flatMap { endpoints.contains($0) ? $0 : nil }
+                    ?? agents.first?.endpoint
+                if let endpoint {
+                    self.discoveredEndpoint = endpoint
+                    if self.availability.endpoint == endpoint, self.availability.isReady() { return }
+                    self.availability = .discovered(endpoint, at: Date())
+                    await AgentVerboseTraceRecorder.shared.recordEvent(
+                        source: "ios", category: "vowlan", phase: "discovered",
+                        title: "VoWLAN 已发现",
+                        fields: ["host": endpoint.host, "control_port": String(endpoint.controlPort), "pcm_port": String(endpoint.pcmPort)]
+                    )
+                    await self.probeNow()
+                } else if self.discoveredEndpoint != nil {
+                    self.discoveredEndpoint = nil
+                    self.availability = .unavailable("局域网已断开")
+                } else if !self.availability.isReady() {
+                    self.availability = .discovering
+                }
+            }
+        }
+        active.stateUpdateHandler = { [weak self] state in
+            if case let .failed(error) = state {
+                Task { @MainActor [weak self] in
+                    guard let self, self.browserLifecycle.markFailed(generation) else { return }
+                    self.stopCurrentBrowser()
+                    self.discoveredEndpoint = nil
+                    self.availability = .unavailable(
+                        VoWLANProbeRecovery.userFacingMessage(for: error)
+                    )
+                    await AgentVerboseTraceRecorder.shared.recordEvent(
+                        source: "ios", category: "vowlan", phase: "browser_failed",
+                        title: "VoWLAN 浏览器失效", detail: error.localizedDescription,
+                        fields: ["generation": String(generation)], isFailure: true
+                    )
+                }
+            }
+        }
+        browser = active
+        active.start(queue: queue)
+    }
+
+    func stopBrowsing() {
+        stopBrowserSession()
+        if VoWLANCredentialStore.load() != nil { availability = .discovering }
+    }
+
+    private func stopBrowserSession() {
+        browserLifecycle.stop()
+        stopCurrentBrowser()
+        discoveredEndpoint = nil
+        discoveredAgents = []
+    }
+
+    private func stopCurrentBrowser() {
+        let active = browser
+        browser = nil
+        active?.browseResultsChangedHandler = nil
+        active?.stateUpdateHandler = nil
+        active?.cancel()
+    }
+
+    func refreshAfterPairing() async {
+        startBrowsing()
+        await probeNow()
+    }
+
+    func probeNow() async {
+        guard let endpoint = availability.endpoint ?? discoveredEndpoint else { return }
+        guard let credential = VoWLANCredentialStore.load() else {
+            availability = .unpaired
+            return
+        }
+        do {
+            let (data, response) = try await VoWLANProbeRecovery.run {
+                let signed = try VoWLANRequestSigner(secret: credential.secret).sign(
+                    method: "GET", path: "/v1/health", body: Data()
+                )
+                var request = URLRequest(url: endpoint.controlBaseURL.appendingPathComponent("v1/health"))
+                request.timeoutInterval = 3
+                request.cachePolicy = .reloadIgnoringLocalCacheData
+                Self.apply(signed, to: &request)
+                let configuration = URLSessionConfiguration.ephemeral
+                configuration.waitsForConnectivity = false
+                let session = URLSession(configuration: configuration)
+                defer { session.finishTasksAndInvalidate() }
+                return try await session.data(for: request)
+            }
+            guard let http = response as? HTTPURLResponse, http.statusCode == 200,
+                  let identity = try? JSONDecoder().decode(VoWLANHealthIdentity.self, from: data),
+                  identity.ok else {
+                throw VoWLANControllerError.authenticationFailed
+            }
+            if let index = discoveredAgents.firstIndex(where: { $0.endpoint == endpoint }) {
+                let previous = discoveredAgents[index]
+                discoveredAgents[index] = VoWLANDiscoveredAgent(
+                    id: identity.agentID?.isEmpty == false ? identity.agentID! : previous.id,
+                    endpoint: endpoint,
+                    deviceName: identity.deviceName?.isEmpty == false ? identity.deviceName! : previous.deviceName,
+                    manufacturer: identity.manufacturer ?? previous.manufacturer,
+                    model: identity.model ?? previous.model,
+                    phoneNumber: identity.phoneNumber?.isEmpty == false ? identity.phoneNumber : previous.phoneNumber,
+                    agentKind: identity.agentKind ?? previous.agentKind
+                )
+            }
+            availability = .verified(endpoint, at: Date())
+            await AgentVerboseTraceRecorder.shared.recordEvent(
+                source: "ios", category: "vowlan", phase: "verified",
+                title: "VoWLAN 签名健康检查通过",
+                fields: ["host": endpoint.host, "control_port": String(endpoint.controlPort)]
+            )
+        } catch {
+            availability = .unavailable(VoWLANProbeRecovery.userFacingMessage(for: error))
+            await AgentVerboseTraceRecorder.shared.recordEvent(
+                source: "ios", category: "vowlan", phase: "failed",
+                title: "VoWLAN 健康检查失败", detail: error.localizedDescription,
+                isFailure: true
+            )
+        }
+    }
+
+    nonisolated static func apply(_ signed: VoWLANSignedRequest, to request: inout URLRequest) {
+        request.setValue("1", forHTTPHeaderField: "X-AirSIM-VoWLAN-Version")
+        request.setValue(String(signed.timestamp), forHTTPHeaderField: "X-AirSIM-VoWLAN-Timestamp")
+        request.setValue(signed.nonce, forHTTPHeaderField: "X-AirSIM-VoWLAN-Nonce")
+        request.setValue(signed.signature, forHTTPHeaderField: "X-AirSIM-VoWLAN-Signature")
+    }
+
+    private nonisolated static func parseAgent(_ result: NWBrowser.Result) -> VoWLANDiscoveredAgent? {
+        guard case let .bonjour(record) = result.metadata,
+              record["v"] == "1", let host = record["host"],
+              let controlText = record["control_port"], let control = UInt16(controlText),
+              let pcmText = record["pcm_port"], let pcm = UInt16(pcmText) else { return nil }
+        guard let endpoint = try? VoWLANEndpoint(host: host, controlPort: control, pcmPort: pcm) else {
+            return nil
+        }
+        let fallbackID = "vowlan-\(host)-\(control)"
+        let deviceName = record["device_name"]?.trimmingCharacters(in: .whitespacesAndNewlines)
+        return VoWLANDiscoveredAgent(
+            id: record["agent_id"]?.isEmpty == false ? record["agent_id"]! : fallbackID,
+            endpoint: endpoint,
+            deviceName: deviceName?.isEmpty == false ? deviceName! : "Android 手机",
+            manufacturer: record["manufacturer"],
+            model: record["model"],
+            phoneNumber: nil,
+            agentKind: record["agent_kind"]
+        )
+    }
+}

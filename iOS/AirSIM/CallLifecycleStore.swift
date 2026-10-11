@@ -1,1 +1,120 @@
-aW1wb3J0IEZvdW5kYXRpb24KCmVudW0gQ2FsbExpZmVjeWNsZVN0YXRlOiBTdHJpbmcsIENvZGFibGUsIEVxdWF0YWJsZSwgU2VuZGFibGUgewogICAgY2FzZSBpZGxlCiAgICBjYXNlIHJpbmdpbmcKICAgIGNhc2UgY29ubmVjdGluZwogICAgY2FzZSBhY3RpdmUKICAgIGNhc2UgZW5kaW5nCiAgICBjYXNlIGVuZGVkCiAgICBjYXNlIGZhaWxlZAoKICAgIHZhciBpc1Rlcm1pbmFsOiBCb29sIHsgc2VsZiA9PSAuZW5kZWQgfHwgc2VsZiA9PSAuZmFpbGVkIH0KICAgIHZhciByZXByZXNlbnRzQ2FsbDogQm9vbCB7IHNlbGYgIT0gLmlkbGUgJiYgIWlzVGVybWluYWwgfQoKICAgIHZhciBjYWxsUmVjb3JkU3RhdGU6IFN0cmluZyB7CiAgICAgICAgc3dpdGNoIHNlbGYgewogICAgICAgIGNhc2UgLmlkbGU6IHJldHVybiAiaWRsZSIKICAgICAgICBjYXNlIC5yaW5naW5nOiByZXR1cm4gImluY29taW5nIgogICAgICAgIGNhc2UgLmNvbm5lY3Rpbmc6IHJldHVybiAiZGlhbGluZyIKICAgICAgICBjYXNlIC5hY3RpdmU6IHJldHVybiAiYWN0aXZlIgogICAgICAgIGNhc2UgLmVuZGluZzogcmV0dXJuICJlbmRpbmciCiAgICAgICAgY2FzZSAuZW5kZWQ6IHJldHVybiAiZW5kZWQiCiAgICAgICAgY2FzZSAuZmFpbGVkOiByZXR1cm4gImZhaWxlZCIKICAgICAgICB9CiAgICB9Cn0KCmVudW0gQ2FsbExpZmVjeWNsZVNvdXJjZTogU3RyaW5nLCBDb2RhYmxlLCBFcXVhdGFibGUsIFNlbmRhYmxlIHsKICAgIGNhc2UgYXBwCiAgICBjYXNlIGNhbGxLaXQgPSAiY2FsbGtpdCIKICAgIGNhc2UgYWdlbnQKICAgIGNhc2UgcmVsYXkKfQoKc3RydWN0IENhbGxMaWZlY3ljbGVFdmVudDogRXF1YXRhYmxlLCBTZW5kYWJsZSB7CiAgICBsZXQgY2FsbElEOiBTdHJpbmcKICAgIGxldCBjYWxsVVVJRDogVVVJRAogICAgbGV0IGdlbmVyYXRpb246IFVJbnQ2NAogICAgbGV0IHN0YXRlOiBDYWxsTGlmZWN5Y2xlU3RhdGUKICAgIGxldCBzb3VyY2U6IENhbGxMaWZlY3ljbGVTb3VyY2UKICAgIGxldCB0aW1lc3RhbXA6IERhdGUKICAgIGxldCB0cmFjZUlEOiBTdHJpbmc/CiAgICBsZXQgZmFpbHVyZTogU3RyaW5nPwp9CgpzdHJ1Y3QgQ2FsbExpZmVjeWNsZVNuYXBzaG90OiBFcXVhdGFibGUsIFNlbmRhYmxlIHsKICAgIGxldCBjYWxsSUQ6IFN0cmluZz8KICAgIGxldCBjYWxsVVVJRDogVVVJRD8KICAgIGxldCBnZW5lcmF0aW9uOiBVSW50NjQKICAgIGxldCBzdGF0ZTogQ2FsbExpZmVjeWNsZVN0YXRlCiAgICBsZXQgc291cmNlOiBDYWxsTGlmZWN5Y2xlU291cmNlPwogICAgbGV0IHRpbWVzdGFtcDogRGF0ZT8KICAgIGxldCB0cmFjZUlEOiBTdHJpbmc/CiAgICBsZXQgZmFpbHVyZTogU3RyaW5nPwoKICAgIHN0YXRpYyBsZXQgaWRsZSA9IENhbGxMaWZlY3ljbGVTbmFwc2hvdCgKICAgICAgICBjYWxsSUQ6IG5pbCwKICAgICAgICBjYWxsVVVJRDogbmlsLAogICAgICAgIGdlbmVyYXRpb246IDAsCiAgICAgICAgc3RhdGU6IC5pZGxlLAogICAgICAgIHNvdXJjZTogbmlsLAogICAgICAgIHRpbWVzdGFtcDogbmlsLAogICAgICAgIHRyYWNlSUQ6IG5pbCwKICAgICAgICBmYWlsdXJlOiBuaWwKICAgICkKfQoKLy8vIOWNlemAmuivneeKtuaAgeeahOWUr+S4gOW9kuW5tuWZqOOAguaJgOacieadpea6kOWPquiDveaPkOS6pOS6i+S7tu+8jOS4jeiDveebtOaOpeaUueWGmeacgOe7iOeKtuaAgeOAggpzdHJ1Y3QgQ2FsbExpZmVjeWNsZVN0b3JlOiBTZW5kYWJsZSB7CiAgICBwcml2YXRlKHNldCkgdmFyIHNuYXBzaG90OiBDYWxsTGlmZWN5Y2xlU25hcHNob3QgPSAuaWRsZQoKICAgIEBkaXNjYXJkYWJsZVJlc3VsdAogICAgbXV0YXRpbmcgZnVuYyBhcHBseShfIGV2ZW50OiBDYWxsTGlmZWN5Y2xlRXZlbnQpIC0+IEJvb2wgewogICAgICAgIGd1YXJkICFldmVudC5jYWxsSUQuaXNFbXB0eSwgZXZlbnQuZ2VuZXJhdGlvbiA+IDAgZWxzZSB7IHJldHVybiBmYWxzZSB9CiAgICAgICAgbGV0IHNhbWVJZGVudGl0eSA9IHNuYXBzaG90LmNhbGxJRCA9PSBldmVudC5jYWxsSUQgJiYgc25hcHNob3QuY2FsbFVVSUQgPT0gZXZlbnQuY2FsbFVVSUQKICAgICAgICBpZiBzbmFwc2hvdC5nZW5lcmF0aW9uID4gMCwgIXNhbWVJZGVudGl0eSB7CiAgICAgICAgICAgIC8vIOaXp+WNj+iuruS8muaKiuavj+mAmueUteivneeahCBnZW5lcmF0aW9uIOmDveiuvuS4uiAx77yb5LiK5LiA6YCa6L+b5YWlIGVuZGluZyDmiJYKICAgICAgICAgICAgLy8g5piO56Gu57uI5q2i5ZCO77yM5omN5YWB6K645LiN5ZCM6Lqr5Lu955qE5pawIHJpbmdpbmcvY29ubmVjdGluZyDlu7rnq4vnlJ/lkb3lkajmnJ/jgIIKICAgICAgICAgICAgZ3VhcmQgc25hcHNob3Quc3RhdGUuaXNUZXJtaW5hbCB8fCBzbmFwc2hvdC5zdGF0ZSA9PSAuZW5kaW5nLAogICAgICAgICAgICAgICAgICBldmVudC5zdGF0ZSA9PSAucmluZ2luZyB8fCBldmVudC5zdGF0ZSA9PSAuY29ubmVjdGluZyBlbHNlIHsgcmV0dXJuIGZhbHNlIH0KICAgICAgICB9IGVsc2UgaWYgZXZlbnQuZ2VuZXJhdGlvbiA8IHNuYXBzaG90LmdlbmVyYXRpb24gewogICAgICAgICAgICByZXR1cm4gZmFsc2UKICAgICAgICB9IGVsc2UgaWYgZXZlbnQuZ2VuZXJhdGlvbiA9PSBzbmFwc2hvdC5nZW5lcmF0aW9uLCBzbmFwc2hvdC5nZW5lcmF0aW9uID4gMCB7CiAgICAgICAgICAgIGlmIGxldCB0aW1lc3RhbXAgPSBzbmFwc2hvdC50aW1lc3RhbXAsIGV2ZW50LnRpbWVzdGFtcCA8IHRpbWVzdGFtcCB7IHJldHVybiBmYWxzZSB9CiAgICAgICAgICAgIGd1YXJkIFNlbGYuYWxsb3dzKGZyb206IHNuYXBzaG90LnN0YXRlLCB0bzogZXZlbnQuc3RhdGUpIGVsc2UgeyByZXR1cm4gZmFsc2UgfQogICAgICAgIH0gZWxzZSBpZiBldmVudC5zdGF0ZSA9PSAuaWRsZSB7CiAgICAgICAgICAgIHJldHVybiBmYWxzZQogICAgICAgIH0KCiAgICAgICAgc25hcHNob3QgPSBDYWxsTGlmZWN5Y2xlU25hcHNob3QoCiAgICAgICAgICAgIGNhbGxJRDogZXZlbnQuY2FsbElELAogICAgICAgICAgICBjYWxsVVVJRDogZXZlbnQuY2FsbFVVSUQsCiAgICAgICAgICAgIGdlbmVyYXRpb246IGV2ZW50LmdlbmVyYXRpb24sCiAgICAgICAgICAgIHN0YXRlOiBldmVudC5zdGF0ZSwKICAgICAgICAgICAgc291cmNlOiBldmVudC5zb3VyY2UsCiAgICAgICAgICAgIHRpbWVzdGFtcDogZXZlbnQudGltZXN0YW1wLAogICAgICAgICAgICB0cmFjZUlEOiBldmVudC50cmFjZUlELAogICAgICAgICAgICBmYWlsdXJlOiBldmVudC5zdGF0ZSA9PSAuZmFpbGVkID8gZXZlbnQuZmFpbHVyZSA6IG5pbAogICAgICAgICkKICAgICAgICByZXR1cm4gdHJ1ZQogICAgfQoKICAgIHByaXZhdGUgc3RhdGljIGZ1bmMgYWxsb3dzKGZyb20gY3VycmVudDogQ2FsbExpZmVjeWNsZVN0YXRlLCB0byBuZXh0OiBDYWxsTGlmZWN5Y2xlU3RhdGUpIC0+IEJvb2wgewogICAgICAgIGlmIGN1cnJlbnQgPT0gbmV4dCB7IHJldHVybiB0cnVlIH0KICAgICAgICBzd2l0Y2ggY3VycmVudCB7CiAgICAgICAgY2FzZSAuaWRsZToKICAgICAgICAgICAgcmV0dXJuIFsucmluZ2luZywgLmNvbm5lY3RpbmcsIC5hY3RpdmUsIC5mYWlsZWRdLmNvbnRhaW5zKG5leHQpCiAgICAgICAgY2FzZSAucmluZ2luZzoKICAgICAgICAgICAgcmV0dXJuIFsuY29ubmVjdGluZywgLmFjdGl2ZSwgLmVuZGluZywgLmVuZGVkLCAuZmFpbGVkXS5jb250YWlucyhuZXh0KQogICAgICAgIGNhc2UgLmNvbm5lY3Rpbmc6CiAgICAgICAgICAgIHJldHVybiBbLmFjdGl2ZSwgLmVuZGluZywgLmVuZGVkLCAuZmFpbGVkXS5jb250YWlucyhuZXh0KQogICAgICAgIGNhc2UgLmFjdGl2ZToKICAgICAgICAgICAgcmV0dXJuIFsuZW5kaW5nLCAuZW5kZWQsIC5mYWlsZWRdLmNvbnRhaW5zKG5leHQpCiAgICAgICAgY2FzZSAuZW5kaW5nOgogICAgICAgICAgICByZXR1cm4gWy5lbmRlZCwgLmZhaWxlZF0uY29udGFpbnMobmV4dCkKICAgICAgICBjYXNlIC5lbmRlZCwgLmZhaWxlZDoKICAgICAgICAgICAgcmV0dXJuIGZhbHNlCiAgICAgICAgfQogICAgfQp9Cg==
+import Foundation
+
+enum CallLifecycleState: String, Codable, Equatable, Sendable {
+    case idle
+    case ringing
+    case connecting
+    case active
+    case ending
+    case ended
+    case failed
+
+    var isTerminal: Bool { self == .ended || self == .failed }
+    var representsCall: Bool { self != .idle && !isTerminal }
+
+    var callRecordState: String {
+        switch self {
+        case .idle: return "idle"
+        case .ringing: return "incoming"
+        case .connecting: return "dialing"
+        case .active: return "active"
+        case .ending: return "ending"
+        case .ended: return "ended"
+        case .failed: return "failed"
+        }
+    }
+}
+
+enum CallLifecycleSource: String, Codable, Equatable, Sendable {
+    case app
+    case callKit = "callkit"
+    case agent
+    case relay
+}
+
+struct CallLifecycleEvent: Equatable, Sendable {
+    let callID: String
+    let callUUID: UUID
+    let generation: UInt64
+    let state: CallLifecycleState
+    let source: CallLifecycleSource
+    let timestamp: Date
+    let traceID: String?
+    let failure: String?
+}
+
+struct CallLifecycleSnapshot: Equatable, Sendable {
+    let callID: String?
+    let callUUID: UUID?
+    let generation: UInt64
+    let state: CallLifecycleState
+    let source: CallLifecycleSource?
+    let timestamp: Date?
+    let traceID: String?
+    let failure: String?
+
+    static let idle = CallLifecycleSnapshot(
+        callID: nil,
+        callUUID: nil,
+        generation: 0,
+        state: .idle,
+        source: nil,
+        timestamp: nil,
+        traceID: nil,
+        failure: nil
+    )
+}
+
+/// 单通话状态的唯一归并器。所有来源只能提交事件，不能直接改写最终状态。
+struct CallLifecycleStore: Sendable {
+    private(set) var snapshot: CallLifecycleSnapshot = .idle
+
+    @discardableResult
+    mutating func apply(_ event: CallLifecycleEvent) -> Bool {
+        guard !event.callID.isEmpty, event.generation > 0 else { return false }
+        let sameIdentity = snapshot.callID == event.callID && snapshot.callUUID == event.callUUID
+        if snapshot.generation > 0, !sameIdentity {
+            // 旧协议会把每通电话的 generation 都设为 1；上一通进入 ending 或
+            // 明确终止后，才允许不同身份的新 ringing/connecting 建立生命周期。
+            guard snapshot.state.isTerminal || snapshot.state == .ending,
+                  event.state == .ringing || event.state == .connecting else { return false }
+        } else if event.generation < snapshot.generation {
+            return false
+        } else if event.generation == snapshot.generation, snapshot.generation > 0 {
+            if let timestamp = snapshot.timestamp, event.timestamp < timestamp { return false }
+            guard Self.allows(from: snapshot.state, to: event.state) else { return false }
+        } else if event.state == .idle {
+            return false
+        }
+
+        snapshot = CallLifecycleSnapshot(
+            callID: event.callID,
+            callUUID: event.callUUID,
+            generation: event.generation,
+            state: event.state,
+            source: event.source,
+            timestamp: event.timestamp,
+            traceID: event.traceID,
+            failure: event.state == .failed ? event.failure : nil
+        )
+        return true
+    }
+
+    private static func allows(from current: CallLifecycleState, to next: CallLifecycleState) -> Bool {
+        if current == next { return true }
+        switch current {
+        case .idle:
+            return [.ringing, .connecting, .active, .failed].contains(next)
+        case .ringing:
+            return [.connecting, .active, .ending, .ended, .failed].contains(next)
+        case .connecting:
+            return [.active, .ending, .ended, .failed].contains(next)
+        case .active:
+            return [.ending, .ended, .failed].contains(next)
+        case .ending:
+            return [.ended, .failed].contains(next)
+        case .ended, .failed:
+            return false
+        }
+    }
+}

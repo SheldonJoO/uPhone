@@ -1,1 +1,260 @@
-aW1wb3J0IEZvdW5kYXRpb24KCmVudW0gQWdlbnRWZXJib3NlVHJhY2VTdGFnZTogU3RyaW5nLCBDb2RhYmxlLCBTZW5kYWJsZSB7CiAgICBjYXNlIHJlcXVlc3QKICAgIGNhc2Ugcm91dGUKICAgIGNhc2UgcmVzcG9uc2UKICAgIGNhc2UgZXZlbnQKICAgIGNhc2UgZmFpbHVyZQp9CgpzdHJ1Y3QgQWdlbnRWZXJib3NlVHJhY2VDb250ZXh0OiBTZW5kYWJsZSB7CiAgICBsZXQgaWQ6IFN0cmluZwogICAgbGV0IG1ldGhvZDogU3RyaW5nCiAgICBsZXQgcGF0aDogU3RyaW5nCiAgICBsZXQgc3RhcnRlZEF0OiBEYXRlCn0KCnN0cnVjdCBBZ2VudFZlcmJvc2VUcmFjZUVudHJ5OiBDb2RhYmxlLCBJZGVudGlmaWFibGUsIFNlbmRhYmxlIHsKICAgIGxldCBpZDogVVVJRAogICAgbGV0IHRyYWNlSUQ6IFN0cmluZwogICAgbGV0IHRpbWVzdGFtcDogRGF0ZQogICAgbGV0IHN0YWdlOiBBZ2VudFZlcmJvc2VUcmFjZVN0YWdlCiAgICBsZXQgbWV0aG9kOiBTdHJpbmcKICAgIGxldCBwYXRoOiBTdHJpbmcKICAgIGxldCBkZXRhaWw6IFN0cmluZwogICAgbGV0IGVsYXBzZWRNaWxsaXNlY29uZHM6IEludD8KICAgIGxldCBzb3VyY2U6IFN0cmluZz8KICAgIGxldCBjYXRlZ29yeTogU3RyaW5nPwogICAgbGV0IGZpZWxkczogW1N0cmluZzogU3RyaW5nXT8KfQoKc3RydWN0IEFnZW50VmVyYm9zZVJlbW90ZUV2ZW50OiBTZW5kYWJsZSB7CiAgICBsZXQgc2VxdWVuY2U6IFVJbnQ2NAogICAgbGV0IHRpbWVzdGFtcDogU3RyaW5nCiAgICBsZXQgY2F0ZWdvcnk6IFN0cmluZwogICAgbGV0IGRpcmVjdGlvbjogU3RyaW5nCiAgICBsZXQgc3VtbWFyeTogU3RyaW5nCiAgICBsZXQgcGF5bG9hZDogU3RyaW5nCiAgICBsZXQgZmllbGRzOiBbU3RyaW5nOiBTdHJpbmddCn0KCmFjdG9yIEFnZW50VmVyYm9zZVRyYWNlUmVjb3JkZXIgewogICAgc3RhdGljIGxldCBwcmVmZXJlbmNlS2V5ID0gImFnZW50X3ZlcmJvc2VfdHJhY2VfZW5hYmxlZCIKICAgIHN0YXRpYyBsZXQgc2hhcmVkID0gQWdlbnRWZXJib3NlVHJhY2VSZWNvcmRlcigKICAgICAgICBpbml0aWFsbHlFbmFibGVkOiBVc2VyRGVmYXVsdHMuc3RhbmRhcmQuYm9vbChmb3JLZXk6IHByZWZlcmVuY2VLZXkpLAogICAgICAgIG1heEVudHJpZXM6IDFfMjAwLAogICAgICAgIHBlcnNpc3RlbmNlVVJMOiBkZWZhdWx0UGVyc2lzdGVuY2VVUkwoKQogICAgKQoKICAgIHByaXZhdGUgdmFyIGVuYWJsZWQ6IEJvb2wKICAgIHByaXZhdGUgbGV0IG1heEVudHJpZXM6IEludAogICAgcHJpdmF0ZSBsZXQgcGVyc2lzdGVuY2VVUkw6IFVSTD8KICAgIHByaXZhdGUgdmFyIGVudHJpZXM6IFtBZ2VudFZlcmJvc2VUcmFjZUVudHJ5XQoKICAgIGluaXQoaW5pdGlhbGx5RW5hYmxlZDogQm9vbCwgbWF4RW50cmllczogSW50LCBwZXJzaXN0ZW5jZVVSTDogVVJMPykgewogICAgICAgIGVuYWJsZWQgPSBpbml0aWFsbHlFbmFibGVkCiAgICAgICAgc2VsZi5tYXhFbnRyaWVzID0gbWF4KDEsIG1heEVudHJpZXMpCiAgICAgICAgc2VsZi5wZXJzaXN0ZW5jZVVSTCA9IHBlcnNpc3RlbmNlVVJMCiAgICAgICAgbGV0IGxvYWRlZCA9IFNlbGYubG9hZChmcm9tOiBwZXJzaXN0ZW5jZVVSTCkKICAgICAgICBlbnRyaWVzID0gbG9hZGVkLmNvdW50ID4gc2VsZi5tYXhFbnRyaWVzCiAgICAgICAgICAgID8gQXJyYXkobG9hZGVkLnN1ZmZpeChzZWxmLm1heEVudHJpZXMpKQogICAgICAgICAgICA6IGxvYWRlZAogICAgfQoKICAgIGZ1bmMgaXNFbmFibGVkKCkgLT4gQm9vbCB7IGVuYWJsZWQgfQoKICAgIGZ1bmMgc2V0RW5hYmxlZChfIGVuYWJsZWQ6IEJvb2wpIHsKICAgICAgICBzZWxmLmVuYWJsZWQgPSBlbmFibGVkCiAgICAgICAgaWYgcGVyc2lzdGVuY2VVUkwgIT0gbmlsIHsKICAgICAgICAgICAgVXNlckRlZmF1bHRzLnN0YW5kYXJkLnNldChlbmFibGVkLCBmb3JLZXk6IFNlbGYucHJlZmVyZW5jZUtleSkKICAgICAgICB9CiAgICB9CgogICAgZnVuYyBiZWdpbihtZXRob2Q6IFN0cmluZywgcGF0aDogU3RyaW5nLCBib2R5Qnl0ZXM6IEludCkgLT4gQWdlbnRWZXJib3NlVHJhY2VDb250ZXh0PyB7CiAgICAgICAgZ3VhcmQgZW5hYmxlZCBlbHNlIHsgcmV0dXJuIG5pbCB9CiAgICAgICAgbGV0IGNvbnRleHQgPSBBZ2VudFZlcmJvc2VUcmFjZUNvbnRleHQoCiAgICAgICAgICAgIGlkOiBTdHJpbmcoVVVJRCgpLnV1aWRTdHJpbmcucHJlZml4KDgpKS5sb3dlcmNhc2VkKCksCiAgICAgICAgICAgIG1ldGhvZDogbWV0aG9kLnVwcGVyY2FzZWQoKSwKICAgICAgICAgICAgcGF0aDogcGF0aCwKICAgICAgICAgICAgc3RhcnRlZEF0OiBEYXRlKCkKICAgICAgICApCiAgICAgICAgYXBwZW5kKAogICAgICAgICAgICBjb250ZXh0LAogICAgICAgICAgICBzdGFnZTogLnJlcXVlc3QsCiAgICAgICAgICAgIGRldGFpbDogYm9keUJ5dGVzID4gMCA/ICLlj5Hotbfor7fmsYIgwrcgYm9keSBcKGJvZHlCeXRlcykgQiIgOiAi5Y+R6LW36K+35rGCIgogICAgICAgICkKICAgICAgICByZXR1cm4gY29udGV4dAogICAgfQoKICAgIGZ1bmMgcmVjb3JkUm91dGUoXyBjb250ZXh0OiBBZ2VudFZlcmJvc2VUcmFjZUNvbnRleHQsIHJvdXRlOiBTdHJpbmcsIGF0dGVtcHQ6IEludCwgZXJyb3I6IFN0cmluZz8gPSBuaWwpIHsKICAgICAgICBndWFyZCBlbmFibGVkIGVsc2UgeyByZXR1cm4gfQogICAgICAgIHZhciBkZXRhaWwgPSAi56ysIFwoYXR0ZW1wdCkg5qyh5bCd6K+VIMK3IFwocm91dGUpIgogICAgICAgIGlmIGxldCBlcnJvciwgIWVycm9yLmlzRW1wdHkgeyBkZXRhaWwgKz0gIiDCtyBcKGVycm9yKSIgfQogICAgICAgIGFwcGVuZChjb250ZXh0LCBzdGFnZTogLnJvdXRlLCBkZXRhaWw6IGRldGFpbCkKICAgIH0KCiAgICBmdW5jIGZpbmlzaChfIGNvbnRleHQ6IEFnZW50VmVyYm9zZVRyYWNlQ29udGV4dCwgc3RhdHVzQ29kZTogSW50LCByZXNwb25zZUJ5dGVzOiBJbnQpIHsKICAgICAgICBndWFyZCBlbmFibGVkIGVsc2UgeyByZXR1cm4gfQogICAgICAgIGFwcGVuZCgKICAgICAgICAgICAgY29udGV4dCwKICAgICAgICAgICAgc3RhZ2U6IC5yZXNwb25zZSwKICAgICAgICAgICAgZGV0YWlsOiAiSFRUUCBcKHN0YXR1c0NvZGUpIMK3IHJlc3BvbnNlIFwocmVzcG9uc2VCeXRlcykgQiIsCiAgICAgICAgICAgIGVsYXBzZWRNaWxsaXNlY29uZHM6IGVsYXBzZWQoZnJvbTogY29udGV4dCkKICAgICAgICApCiAgICAgICAgcGVyc2lzdCgpCiAgICB9CgogICAgZnVuYyBmYWlsKF8gY29udGV4dDogQWdlbnRWZXJib3NlVHJhY2VDb250ZXh0LCBlcnJvcjogU3RyaW5nKSB7CiAgICAgICAgZ3VhcmQgZW5hYmxlZCBlbHNlIHsgcmV0dXJuIH0KICAgICAgICBhcHBlbmQoCiAgICAgICAgICAgIGNvbnRleHQsCiAgICAgICAgICAgIHN0YWdlOiAuZmFpbHVyZSwKICAgICAgICAgICAgZGV0YWlsOiBlcnJvciwKICAgICAgICAgICAgZWxhcHNlZE1pbGxpc2Vjb25kczogZWxhcHNlZChmcm9tOiBjb250ZXh0KQogICAgICAgICkKICAgICAgICBwZXJzaXN0KCkKICAgIH0KCiAgICBmdW5jIHJlY29yZEV2ZW50KAogICAgICAgIHNvdXJjZTogU3RyaW5nLAogICAgICAgIGNhdGVnb3J5OiBTdHJpbmcsCiAgICAgICAgcGhhc2U6IFN0cmluZywKICAgICAgICB0aXRsZTogU3RyaW5nLAogICAgICAgIGRldGFpbDogU3RyaW5nID0gIiIsCiAgICAgICAgZmllbGRzOiBbU3RyaW5nOiBTdHJpbmddID0gWzpdLAogICAgICAgIGlzRmFpbHVyZTogQm9vbCA9IGZhbHNlCiAgICApIHsKICAgICAgICBndWFyZCBlbmFibGVkIGVsc2UgeyByZXR1cm4gfQogICAgICAgIGxldCB0cmFjZUlEID0gZmllbGRzWyJ0cmFjZV9pZCJdID8/IGZpZWxkc1siY29tbWFuZF9pZCJdLm1hcCB7IFN0cmluZygkMC5wcmVmaXgoOCkpIH0KICAgICAgICBlbnRyaWVzLmFwcGVuZCgKICAgICAgICAgICAgQWdlbnRWZXJib3NlVHJhY2VFbnRyeSgKICAgICAgICAgICAgICAgIGlkOiBVVUlEKCksCiAgICAgICAgICAgICAgICB0cmFjZUlEOiB0cmFjZUlEID8/ICItLS0tLS0tLSIsCiAgICAgICAgICAgICAgICB0aW1lc3RhbXA6IERhdGUoKSwKICAgICAgICAgICAgICAgIHN0YWdlOiBpc0ZhaWx1cmUgPyAuZmFpbHVyZSA6IC5ldmVudCwKICAgICAgICAgICAgICAgIG1ldGhvZDogcGhhc2UudXBwZXJjYXNlZCgpLAogICAgICAgICAgICAgICAgcGF0aDogdGl0bGUsCiAgICAgICAgICAgICAgICBkZXRhaWw6IGRldGFpbCwKICAgICAgICAgICAgICAgIGVsYXBzZWRNaWxsaXNlY29uZHM6IG5pbCwKICAgICAgICAgICAgICAgIHNvdXJjZTogc291cmNlLnVwcGVyY2FzZWQoKSwKICAgICAgICAgICAgICAgIGNhdGVnb3J5OiBjYXRlZ29yeSwKICAgICAgICAgICAgICAgIGZpZWxkczogZmllbGRzCiAgICAgICAgICAgICkKICAgICAgICApCiAgICAgICAgdHJpbUlmTmVlZGVkKCkKICAgICAgICBwZXJzaXN0KCkKICAgIH0KCiAgICBmdW5jIHNuYXBzaG90KCkgLT4gW0FnZW50VmVyYm9zZVRyYWNlRW50cnldIHsgZW50cmllcyB9CgogICAgZnVuYyBjbGVhcigpIHsKICAgICAgICBlbnRyaWVzLnJlbW92ZUFsbChrZWVwaW5nQ2FwYWNpdHk6IHRydWUpCiAgICAgICAgcGVyc2lzdCgpCiAgICB9CgogICAgZnVuYyBleHBvcnRUZXh0KGFnZW50RXZlbnRzOiBbQWdlbnRWZXJib3NlUmVtb3RlRXZlbnRdKSAtPiBTdHJpbmcgewogICAgICAgIHZhciBsaW5lcyA9IFsKICAgICAgICAgICAgIkFpclNJTSBBZ2VudCBWZXJib3NlIFRyYWNlIiwKICAgICAgICAgICAgImV4cG9ydGVkX2F0PVwoU2VsZi5pc284NjAxLnN0cmluZyhmcm9tOiBEYXRlKCkpKSIsCiAgICAgICAgICAgICJsb2NhbF9lbnRyaWVzPVwoZW50cmllcy5jb3VudCkgYWdlbnRfZXZlbnRzPVwoYWdlbnRFdmVudHMuY291bnQpIiwKICAgICAgICAgICAgIiIKICAgICAgICBdCiAgICAgICAgZm9yIGVudHJ5IGluIGVudHJpZXMgewogICAgICAgICAgICBsZXQgZWxhcHNlZCA9IGVudHJ5LmVsYXBzZWRNaWxsaXNlY29uZHMubWFwIHsgIiBkdXJhdGlvbl9tcz1cKCQwKSIgfSA/PyAiIgogICAgICAgICAgICBsZXQgZmllbGRzID0gKGVudHJ5LmZpZWxkcyA/PyBbOl0pCiAgICAgICAgICAgICAgICAuZmlsdGVyIHsgJDAua2V5ICE9ICJ0cmFjZV9pZCIgfQogICAgICAgICAgICAgICAgLnNvcnRlZCB7ICQwLmtleSA8ICQxLmtleSB9CiAgICAgICAgICAgICAgICAubWFwIHsgIlwoJDAua2V5KT1cKCQwLnZhbHVlKSIgfQogICAgICAgICAgICAgICAgLmpvaW5lZChzZXBhcmF0b3I6ICIgIikKICAgICAgICAgICAgbGluZXMuYXBwZW5kKAogICAgICAgICAgICAgICAgIlwoU2VsZi5pc284NjAxLnN0cmluZyhmcm9tOiBlbnRyeS50aW1lc3RhbXApKSBbXChlbnRyeS5zb3VyY2UgPz8gIkFQUCIpXSAiICsKICAgICAgICAgICAgICAgICJ0cmFjZT1cKGVudHJ5LnRyYWNlSUQpIHN0YWdlPVwoZW50cnkuc3RhZ2UucmF3VmFsdWUpICIgKwogICAgICAgICAgICAgICAgIlwoZW50cnkubWV0aG9kKSBcKGVudHJ5LnBhdGgpXChlbGFwc2VkKSBcKGZpZWxkcykgXChlbnRyeS5kZXRhaWwpIgogICAgICAgICAgICApCiAgICAgICAgfQogICAgICAgIGZvciBldmVudCBpbiBhZ2VudEV2ZW50cyB7CiAgICAgICAgICAgIGxldCB0cmFjZSA9IGV2ZW50LmZpZWxkc1sidHJhY2VfaWQiXS5tYXAgeyAiIHRyYWNlPVwoJDApIiB9ID8/ICIiCiAgICAgICAgICAgIGxldCBmaWVsZHMgPSBldmVudC5maWVsZHMKICAgICAgICAgICAgICAgIC5maWx0ZXIgeyAkMC5rZXkgIT0gInRyYWNlX2lkIiB9CiAgICAgICAgICAgICAgICAuc29ydGVkIHsgJDAua2V5IDwgJDEua2V5IH0KICAgICAgICAgICAgICAgIC5tYXAgeyAiXCgkMC5rZXkpPVwoJDAudmFsdWUpIiB9CiAgICAgICAgICAgICAgICAuam9pbmVkKHNlcGFyYXRvcjogIiAiKQogICAgICAgICAgICBsaW5lcy5hcHBlbmQoCiAgICAgICAgICAgICAgICAiXChldmVudC50aW1lc3RhbXApIFtBR0VOVF0gc2VxPVwoZXZlbnQuc2VxdWVuY2UpXCh0cmFjZSkgIiArCiAgICAgICAgICAgICAgICAiXChldmVudC5jYXRlZ29yeSkvXChldmVudC5kaXJlY3Rpb24pIFwoZXZlbnQuc3VtbWFyeSkgXChmaWVsZHMpIgogICAgICAgICAgICApCiAgICAgICAgICAgIGlmICFldmVudC5wYXlsb2FkLmlzRW1wdHkgeyBsaW5lcy5hcHBlbmQoZXZlbnQucGF5bG9hZCkgfQogICAgICAgIH0KICAgICAgICByZXR1cm4gbGluZXMuam9pbmVkKHNlcGFyYXRvcjogIlxuIikKICAgIH0KCiAgICBwcml2YXRlIGZ1bmMgYXBwZW5kKAogICAgICAgIF8gY29udGV4dDogQWdlbnRWZXJib3NlVHJhY2VDb250ZXh0LAogICAgICAgIHN0YWdlOiBBZ2VudFZlcmJvc2VUcmFjZVN0YWdlLAogICAgICAgIGRldGFpbDogU3RyaW5nLAogICAgICAgIGVsYXBzZWRNaWxsaXNlY29uZHM6IEludD8gPSBuaWwKICAgICkgewogICAgICAgIGVudHJpZXMuYXBwZW5kKAogICAgICAgICAgICBBZ2VudFZlcmJvc2VUcmFjZUVudHJ5KAogICAgICAgICAgICAgICAgaWQ6IFVVSUQoKSwKICAgICAgICAgICAgICAgIHRyYWNlSUQ6IGNvbnRleHQuaWQsCiAgICAgICAgICAgICAgICB0aW1lc3RhbXA6IERhdGUoKSwKICAgICAgICAgICAgICAgIHN0YWdlOiBzdGFnZSwKICAgICAgICAgICAgICAgIG1ldGhvZDogY29udGV4dC5tZXRob2QsCiAgICAgICAgICAgICAgICBwYXRoOiBjb250ZXh0LnBhdGgsCiAgICAgICAgICAgICAgICBkZXRhaWw6IGRldGFpbCwKICAgICAgICAgICAgICAgIGVsYXBzZWRNaWxsaXNlY29uZHM6IGVsYXBzZWRNaWxsaXNlY29uZHMsCiAgICAgICAgICAgICAgICBzb3VyY2U6IG5pbCwKICAgICAgICAgICAgICAgIGNhdGVnb3J5OiBuaWwsCiAgICAgICAgICAgICAgICBmaWVsZHM6IG5pbAogICAgICAgICAgICApCiAgICAgICAgKQogICAgICAgIHRyaW1JZk5lZWRlZCgpCiAgICB9CgogICAgcHJpdmF0ZSBmdW5jIGVsYXBzZWQoZnJvbSBjb250ZXh0OiBBZ2VudFZlcmJvc2VUcmFjZUNvbnRleHQpIC0+IEludCB7CiAgICAgICAgbWF4KDAsIEludChEYXRlKCkudGltZUludGVydmFsU2luY2UoY29udGV4dC5zdGFydGVkQXQpICogMV8wMDApKQogICAgfQoKICAgIHByaXZhdGUgZnVuYyB0cmltSWZOZWVkZWQoKSB7CiAgICAgICAgaWYgZW50cmllcy5jb3VudCA+IG1heEVudHJpZXMgewogICAgICAgICAgICBlbnRyaWVzLnJlbW92ZUZpcnN0KGVudHJpZXMuY291bnQgLSBtYXhFbnRyaWVzKQogICAgICAgIH0KICAgIH0KCiAgICBwcml2YXRlIGZ1bmMgcGVyc2lzdCgpIHsKICAgICAgICBndWFyZCBsZXQgcGVyc2lzdGVuY2VVUkwgZWxzZSB7IHJldHVybiB9CiAgICAgICAgZG8gewogICAgICAgICAgICB0cnkgRmlsZU1hbmFnZXIuZGVmYXVsdC5jcmVhdGVEaXJlY3RvcnkoCiAgICAgICAgICAgICAgICBhdDogcGVyc2lzdGVuY2VVUkwuZGVsZXRpbmdMYXN0UGF0aENvbXBvbmVudCgpLAogICAgICAgICAgICAgICAgd2l0aEludGVybWVkaWF0ZURpcmVjdG9yaWVzOiB0cnVlCiAgICAgICAgICAgICkKICAgICAgICAgICAgdHJ5IEpTT05FbmNvZGVyKCkuZW5jb2RlKGVudHJpZXMpLndyaXRlKHRvOiBwZXJzaXN0ZW5jZVVSTCwgb3B0aW9uczogLmF0b21pYykKICAgICAgICB9IGNhdGNoIHsKICAgICAgICAgICAgLy8gVmVyYm9zZSB0cmFjaW5nIG11c3QgbmV2ZXIgYmxvY2sgdGhlIGNvbW1hbmQgaXQgaXMgb2JzZXJ2aW5nLgogICAgICAgIH0KICAgIH0KCiAgICBwcml2YXRlIHN0YXRpYyBmdW5jIGxvYWQoZnJvbSB1cmw6IFVSTD8pIC0+IFtBZ2VudFZlcmJvc2VUcmFjZUVudHJ5XSB7CiAgICAgICAgZ3VhcmQgbGV0IHVybCwKICAgICAgICAgICAgICBsZXQgZGF0YSA9IHRyeT8gRGF0YShjb250ZW50c09mOiB1cmwpLAogICAgICAgICAgICAgIGxldCBkZWNvZGVkID0gdHJ5PyBKU09ORGVjb2RlcigpLmRlY29kZShbQWdlbnRWZXJib3NlVHJhY2VFbnRyeV0uc2VsZiwgZnJvbTogZGF0YSkgZWxzZSB7CiAgICAgICAgICAgIHJldHVybiBbXQogICAgICAgIH0KICAgICAgICByZXR1cm4gZGVjb2RlZAogICAgfQoKICAgIHByaXZhdGUgc3RhdGljIGZ1bmMgZGVmYXVsdFBlcnNpc3RlbmNlVVJMKCkgLT4gVVJMPyB7CiAgICAgICAgRmlsZU1hbmFnZXIuZGVmYXVsdC51cmxzKGZvcjogLmFwcGxpY2F0aW9uU3VwcG9ydERpcmVjdG9yeSwgaW46IC51c2VyRG9tYWluTWFzaykKICAgICAgICAgICAgLmZpcnN0PwogICAgICAgICAgICAuYXBwZW5kaW5nUGF0aENvbXBvbmVudCgiQWlyU0lNIiwgaXNEaXJlY3Rvcnk6IHRydWUpCiAgICAgICAgICAgIC5hcHBlbmRpbmdQYXRoQ29tcG9uZW50KCJhZ2VudC12ZXJib3NlLXRyYWNlLmpzb24iKQogICAgfQoKICAgIHByaXZhdGUgc3RhdGljIGxldCBpc284NjAxOiBJU084NjAxRGF0ZUZvcm1hdHRlciA9IHsKICAgICAgICBsZXQgZm9ybWF0dGVyID0gSVNPODYwMURhdGVGb3JtYXR0ZXIoKQogICAgICAgIGZvcm1hdHRlci5mb3JtYXRPcHRpb25zID0gWy53aXRoSW50ZXJuZXREYXRlVGltZSwgLndpdGhGcmFjdGlvbmFsU2Vjb25kc10KICAgICAgICByZXR1cm4gZm9ybWF0dGVyCiAgICB9KCkKfQo=
+import Foundation
+
+enum AgentVerboseTraceStage: String, Codable, Sendable {
+    case request
+    case route
+    case response
+    case event
+    case failure
+}
+
+struct AgentVerboseTraceContext: Sendable {
+    let id: String
+    let method: String
+    let path: String
+    let startedAt: Date
+}
+
+struct AgentVerboseTraceEntry: Codable, Identifiable, Sendable {
+    let id: UUID
+    let traceID: String
+    let timestamp: Date
+    let stage: AgentVerboseTraceStage
+    let method: String
+    let path: String
+    let detail: String
+    let elapsedMilliseconds: Int?
+    let source: String?
+    let category: String?
+    let fields: [String: String]?
+}
+
+struct AgentVerboseRemoteEvent: Sendable {
+    let sequence: UInt64
+    let timestamp: String
+    let category: String
+    let direction: String
+    let summary: String
+    let payload: String
+    let fields: [String: String]
+}
+
+actor AgentVerboseTraceRecorder {
+    static let preferenceKey = "agent_verbose_trace_enabled"
+    static let shared = AgentVerboseTraceRecorder(
+        initiallyEnabled: UserDefaults.standard.bool(forKey: preferenceKey),
+        maxEntries: 1_200,
+        persistenceURL: defaultPersistenceURL()
+    )
+
+    private var enabled: Bool
+    private let maxEntries: Int
+    private let persistenceURL: URL?
+    private var entries: [AgentVerboseTraceEntry]
+
+    init(initiallyEnabled: Bool, maxEntries: Int, persistenceURL: URL?) {
+        enabled = initiallyEnabled
+        self.maxEntries = max(1, maxEntries)
+        self.persistenceURL = persistenceURL
+        let loaded = Self.load(from: persistenceURL)
+        entries = loaded.count > self.maxEntries
+            ? Array(loaded.suffix(self.maxEntries))
+            : loaded
+    }
+
+    func isEnabled() -> Bool { enabled }
+
+    func setEnabled(_ enabled: Bool) {
+        self.enabled = enabled
+        if persistenceURL != nil {
+            UserDefaults.standard.set(enabled, forKey: Self.preferenceKey)
+        }
+    }
+
+    func begin(method: String, path: String, bodyBytes: Int) -> AgentVerboseTraceContext? {
+        guard enabled else { return nil }
+        let context = AgentVerboseTraceContext(
+            id: String(UUID().uuidString.prefix(8)).lowercased(),
+            method: method.uppercased(),
+            path: path,
+            startedAt: Date()
+        )
+        append(
+            context,
+            stage: .request,
+            detail: bodyBytes > 0 ? "发起请求 · body \(bodyBytes) B" : "发起请求"
+        )
+        return context
+    }
+
+    func recordRoute(_ context: AgentVerboseTraceContext, route: String, attempt: Int, error: String? = nil) {
+        guard enabled else { return }
+        var detail = "第 \(attempt) 次尝试 · \(route)"
+        if let error, !error.isEmpty { detail += " · \(error)" }
+        append(context, stage: .route, detail: detail)
+    }
+
+    func finish(_ context: AgentVerboseTraceContext, statusCode: Int, responseBytes: Int) {
+        guard enabled else { return }
+        append(
+            context,
+            stage: .response,
+            detail: "HTTP \(statusCode) · response \(responseBytes) B",
+            elapsedMilliseconds: elapsed(from: context)
+        )
+        persist()
+    }
+
+    func fail(_ context: AgentVerboseTraceContext, error: String) {
+        guard enabled else { return }
+        append(
+            context,
+            stage: .failure,
+            detail: error,
+            elapsedMilliseconds: elapsed(from: context)
+        )
+        persist()
+    }
+
+    func recordEvent(
+        source: String,
+        category: String,
+        phase: String,
+        title: String,
+        detail: String = "",
+        fields: [String: String] = [:],
+        isFailure: Bool = false
+    ) {
+        guard enabled else { return }
+        let traceID = fields["trace_id"] ?? fields["command_id"].map { String($0.prefix(8)) }
+        entries.append(
+            AgentVerboseTraceEntry(
+                id: UUID(),
+                traceID: traceID ?? "--------",
+                timestamp: Date(),
+                stage: isFailure ? .failure : .event,
+                method: phase.uppercased(),
+                path: title,
+                detail: detail,
+                elapsedMilliseconds: nil,
+                source: source.uppercased(),
+                category: category,
+                fields: fields
+            )
+        )
+        trimIfNeeded()
+        persist()
+    }
+
+    func snapshot() -> [AgentVerboseTraceEntry] { entries }
+
+    func clear() {
+        entries.removeAll(keepingCapacity: true)
+        persist()
+    }
+
+    func exportText(agentEvents: [AgentVerboseRemoteEvent]) -> String {
+        var lines = [
+            "AirSIM Agent Verbose Trace",
+            "exported_at=\(Self.iso8601.string(from: Date()))",
+            "local_entries=\(entries.count) agent_events=\(agentEvents.count)",
+            ""
+        ]
+        for entry in entries {
+            let elapsed = entry.elapsedMilliseconds.map { " duration_ms=\($0)" } ?? ""
+            let fields = (entry.fields ?? [:])
+                .filter { $0.key != "trace_id" }
+                .sorted { $0.key < $1.key }
+                .map { "\($0.key)=\($0.value)" }
+                .joined(separator: " ")
+            lines.append(
+                "\(Self.iso8601.string(from: entry.timestamp)) [\(entry.source ?? "APP")] " +
+                "trace=\(entry.traceID) stage=\(entry.stage.rawValue) " +
+                "\(entry.method) \(entry.path)\(elapsed) \(fields) \(entry.detail)"
+            )
+        }
+        for event in agentEvents {
+            let trace = event.fields["trace_id"].map { " trace=\($0)" } ?? ""
+            let fields = event.fields
+                .filter { $0.key != "trace_id" }
+                .sorted { $0.key < $1.key }
+                .map { "\($0.key)=\($0.value)" }
+                .joined(separator: " ")
+            lines.append(
+                "\(event.timestamp) [AGENT] seq=\(event.sequence)\(trace) " +
+                "\(event.category)/\(event.direction) \(event.summary) \(fields)"
+            )
+            if !event.payload.isEmpty { lines.append(event.payload) }
+        }
+        return lines.joined(separator: "\n")
+    }
+
+    private func append(
+        _ context: AgentVerboseTraceContext,
+        stage: AgentVerboseTraceStage,
+        detail: String,
+        elapsedMilliseconds: Int? = nil
+    ) {
+        entries.append(
+            AgentVerboseTraceEntry(
+                id: UUID(),
+                traceID: context.id,
+                timestamp: Date(),
+                stage: stage,
+                method: context.method,
+                path: context.path,
+                detail: detail,
+                elapsedMilliseconds: elapsedMilliseconds,
+                source: nil,
+                category: nil,
+                fields: nil
+            )
+        )
+        trimIfNeeded()
+    }
+
+    private func elapsed(from context: AgentVerboseTraceContext) -> Int {
+        max(0, Int(Date().timeIntervalSince(context.startedAt) * 1_000))
+    }
+
+    private func trimIfNeeded() {
+        if entries.count > maxEntries {
+            entries.removeFirst(entries.count - maxEntries)
+        }
+    }
+
+    private func persist() {
+        guard let persistenceURL else { return }
+        do {
+            try FileManager.default.createDirectory(
+                at: persistenceURL.deletingLastPathComponent(),
+                withIntermediateDirectories: true
+            )
+            try JSONEncoder().encode(entries).write(to: persistenceURL, options: .atomic)
+        } catch {
+            // Verbose tracing must never block the command it is observing.
+        }
+    }
+
+    private static func load(from url: URL?) -> [AgentVerboseTraceEntry] {
+        guard let url,
+              let data = try? Data(contentsOf: url),
+              let decoded = try? JSONDecoder().decode([AgentVerboseTraceEntry].self, from: data) else {
+            return []
+        }
+        return decoded
+    }
+
+    private static func defaultPersistenceURL() -> URL? {
+        FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)
+            .first?
+            .appendingPathComponent("AirSIM", isDirectory: true)
+            .appendingPathComponent("agent-verbose-trace.json")
+    }
+
+    private static let iso8601: ISO8601DateFormatter = {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return formatter
+    }()
+}

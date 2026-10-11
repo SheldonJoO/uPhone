@@ -1,1 +1,89 @@
-PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPCFET0NUWVBFIHBsaXN0IFBVQkxJQyAiLS8vQXBwbGUvL0RURCBQTElTVCAxLjAvL0VOIiAiaHR0cDovL3d3dy5hcHBsZS5jb20vRFREcy9Qcm9wZXJ0eUxpc3QtMS4wLmR0ZCI+CjxwbGlzdCB2ZXJzaW9uPSIxLjAiPgo8ZGljdD4KCTxrZXk+Q0ZCdW5kbGVEZXZlbG9wbWVudFJlZ2lvbjwva2V5PgoJPHN0cmluZz56aF9DTjwvc3RyaW5nPgoJPGtleT5DRkJ1bmRsZURpc3BsYXlOYW1lPC9rZXk+Cgk8c3RyaW5nPkFpclNJTTwvc3RyaW5nPgoJPGtleT5DRkJ1bmRsZUV4ZWN1dGFibGU8L2tleT4KCTxzdHJpbmc+JChFWEVDVVRBQkxFX05BTUUpPC9zdHJpbmc+Cgk8a2V5PkNGQnVuZGxlSWRlbnRpZmllcjwva2V5PgoJPHN0cmluZz4kKFBST0RVQ1RfQlVORExFX0lERU5USUZJRVIpPC9zdHJpbmc+Cgk8a2V5PkNGQnVuZGxlSW5mb0RpY3Rpb25hcnlWZXJzaW9uPC9rZXk+Cgk8c3RyaW5nPjYuMDwvc3RyaW5nPgoJPGtleT5DRkJ1bmRsZVVSTFR5cGVzPC9rZXk+Cgk8YXJyYXk+CgkJPGRpY3Q+CgkJCTxrZXk+Q0ZCdW5kbGVUeXBlUm9sZTwva2V5PgoJCQk8c3RyaW5nPkVkaXRvcjwvc3RyaW5nPgoJCQk8a2V5PkNGQnVuZGxlVVJMTmFtZTwva2V5PgoJCQk8c3RyaW5nPiQoUFJPRFVDVF9CVU5ETEVfSURFTlRJRklFUikubWVzc2FnaW5nPC9zdHJpbmc+CgkJCTxrZXk+Q0ZCdW5kbGVVUkxTY2hlbWVzPC9rZXk+CgkJCTxhcnJheT4KCQkJCTxzdHJpbmc+aW08L3N0cmluZz4KCQkJPC9hcnJheT4KCQk8L2RpY3Q+Cgk8L2FycmF5PgoJPGtleT5DRkJ1bmRsZU5hbWU8L2tleT4KCTxzdHJpbmc+JChQUk9EVUNUX05BTUUpPC9zdHJpbmc+Cgk8a2V5PkNGQnVuZGxlUGFja2FnZVR5cGU8L2tleT4KCTxzdHJpbmc+QVBQTDwvc3RyaW5nPgoJPGtleT5DRkJ1bmRsZVNob3J0VmVyc2lvblN0cmluZzwva2V5PgoJPHN0cmluZz4kKE1BUktFVElOR19WRVJTSU9OKTwvc3RyaW5nPgoJPGtleT5DRkJ1bmRsZVZlcnNpb248L2tleT4KCTxzdHJpbmc+JChDVVJSRU5UX1BST0pFQ1RfVkVSU0lPTik8L3N0cmluZz4KCTxrZXk+QWlyU0lNUHVzaFJlbGF5VVJMPC9rZXk+Cgk8c3RyaW5nPiQoQUlSU0lNX1BVU0hfUkVMQVlfVVJMKTwvc3RyaW5nPgoJPGtleT5BaXJTSU1BUE5TRW52aXJvbm1lbnQ8L2tleT4KCTxzdHJpbmc+JChBSVJTSU1fQVBOU19FTlZJUk9OTUVOVCk8L3N0cmluZz4KCTxrZXk+SVRTQXBwVXNlc05vbkV4ZW1wdEVuY3J5cHRpb248L2tleT4KCTxmYWxzZS8+Cgk8a2V5PkxTUmVxdWlyZXNJUGhvbmVPUzwva2V5PgoJPHRydWUvPgoJPGtleT5OU0FwcFRyYW5zcG9ydFNlY3VyaXR5PC9rZXk+Cgk8ZGljdD4KCQk8IS0tIOS7heaUvuihjOacrOWcsOe9kee7nO+8jOWFrOe9keivt+axguS7jeWPlyBBVFMg5L+d5oqk44CCIC0tPgoJCTxrZXk+TlNBbGxvd3NMb2NhbE5ldHdvcmtpbmc8L2tleT4KCQk8dHJ1ZS8+Cgk8L2RpY3Q+Cgk8a2V5Pk5TQ29udGFjdHNVc2FnZURlc2NyaXB0aW9uPC9rZXk+Cgk8c3RyaW5nPueUqOS6juWcqOaLqOWPt+OAgeacgOi/kemAmuivneWSjOefreS/oeS4reaYvuekuuiBlOezu+S6uuWnk+WQje+8jOW5tuaUr+aMgeS7jumAmuiur+W9leebtOaOpeaLqOWPt+OAgjwvc3RyaW5nPgoJPGtleT5OU0JvbmpvdXJTZXJ2aWNlczwva2V5PgoJPGFycmF5PgoJCTxzdHJpbmc+X2FpcnNpbS1wYWlyLl90Y3A8L3N0cmluZz4KCQk8c3RyaW5nPl9haXJzaW0tdm93bGFuLl90Y3A8L3N0cmluZz4KCTwvYXJyYXk+Cgk8a2V5Pk5TTG9jYWxOZXR3b3JrVXNhZ2VEZXNjcmlwdGlvbjwva2V5PgoJPHN0cmluZz7nlKjkuo7lnKjkuInmmJ/ng63ngrnlhoXlj5HnjrDlubblronlhajphY3lr7kgQWlyU0lNIOeUteivneahpeOAgjwvc3RyaW5nPgoJPGtleT5OU01pY3JvcGhvbmVVc2FnZURlc2NyaXB0aW9uPC9rZXk+Cgk8c3RyaW5nPueUqOS6jumAmui/hyBBaXJTSU0gVm9XTEFOIOaIluS6keerr+aooeW8j+i/m+ihjOWPjOWQkeivremfs+mAmuivneOAgjwvc3RyaW5nPgoJPGtleT5OU1N1cHBvcnRzTGl2ZUFjdGl2aXRpZXM8L2tleT4KCTx0cnVlLz4KCTxrZXk+VUlCYWNrZ3JvdW5kTW9kZXM8L2tleT4KCTxhcnJheT4KCQk8c3RyaW5nPmF1ZGlvPC9zdHJpbmc+CgkJPCEtLSBQdXNoS2l0IOadpeeUteWUpOmGkumcgOimgSBWb0lQIOWQjuWPsOiDveWKm++8m+WqkuS9k+S7jeeUsSBhdWRpbyDmqKHlvI/kv53mtLvjgIIgLS0+CgkJPHN0cmluZz52b2lwPC9zdHJpbmc+CgkJPCEtLSDmma7pgJogQVBOcyDnn63kv6HpgJrnn6XliLDovr7ml7bvvIzlnKjns7vnu5/lhYHorrjnmoTlkI7lj7Dml7bpl7TlhoXlkIzmraXmnKzlnLDljoblj7LjgIIgLS0+CgkJPHN0cmluZz5yZW1vdGUtbm90aWZpY2F0aW9uPC9zdHJpbmc+Cgk8L2FycmF5PgoJPGtleT5VSUxhdW5jaFNjcmVlbjwva2V5PgoJPGRpY3QvPgoJPGtleT5VSVJlcXVpcmVkRGV2aWNlQ2FwYWJpbGl0aWVzPC9rZXk+Cgk8YXJyYXk+CgkJPHN0cmluZz5hcm02NDwvc3RyaW5nPgoJPC9hcnJheT4KCTxrZXk+VUlTdXBwb3J0ZWRJbnRlcmZhY2VPcmllbnRhdGlvbnM8L2tleT4KCTxhcnJheT4KCQk8c3RyaW5nPlVJSW50ZXJmYWNlT3JpZW50YXRpb25Qb3J0cmFpdDwvc3RyaW5nPgoJPC9hcnJheT4KCTxrZXk+VUlTdXBwb3J0ZWRJbnRlcmZhY2VPcmllbnRhdGlvbnN+aXBhZDwva2V5PgoJPGFycmF5PgoJCTxzdHJpbmc+VUlJbnRlcmZhY2VPcmllbnRhdGlvblBvcnRyYWl0PC9zdHJpbmc+CgkJPHN0cmluZz5VSUludGVyZmFjZU9yaWVudGF0aW9uUG9ydHJhaXRVcHNpZGVEb3duPC9zdHJpbmc+CgkJPHN0cmluZz5VSUludGVyZmFjZU9yaWVudGF0aW9uTGFuZHNjYXBlTGVmdDwvc3RyaW5nPgoJCTxzdHJpbmc+VUlJbnRlcmZhY2VPcmllbnRhdGlvbkxhbmRzY2FwZVJpZ2h0PC9zdHJpbmc+Cgk8L2FycmF5Pgo8L2RpY3Q+CjwvcGxpc3Q+Cg==
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>zh_CN</string>
+	<key>CFBundleDisplayName</key>
+	<string>üPhone</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>$(PRODUCT_BUNDLE_IDENTIFIER).messaging</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>im</string>
+			</array>
+		</dict>
+	</array>
+	<key>CFBundleName</key>
+	<string>$(PRODUCT_NAME)</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>$(MARKETING_VERSION)</string>
+	<key>CFBundleVersion</key>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>AirSIMPushRelayURL</key>
+	<string>$(AIRSIM_PUSH_RELAY_URL)</string>
+	<key>AirSIMAPNSEnvironment</key>
+	<string>$(AIRSIM_APNS_ENVIRONMENT)</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+	<key>LSRequiresIPhoneOS</key>
+	<true/>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<!-- 仅放行本地网络，公网请求仍受 ATS 保护。 -->
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
+	<key>NSContactsUsageDescription</key>
+	<string>用于在拨号、最近通话和短信中显示联系人姓名，并支持从通讯录直接拨号。</string>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_airsim-pair._tcp</string>
+		<string>_airsim-vowlan._tcp</string>
+	</array>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>用于在三星热点内发现并安全配对 AirSIM 电话桥。</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>用于通过 AirSIM VoWLAN 或云端模式进行双向语音通话。</string>
+	<key>NSSupportsLiveActivities</key>
+	<true/>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>audio</string>
+		<!-- PushKit 来电唤醒需要 VoIP 后台能力；媒体仍由 audio 模式保活。 -->
+		<string>voip</string>
+		<!-- 普通 APNs 短信通知到达时，在系统允许的后台时间内同步本地历史。 -->
+		<string>remote-notification</string>
+	</array>
+	<key>UILaunchScreen</key>
+	<dict/>
+	<key>UIRequiredDeviceCapabilities</key>
+	<array>
+		<string>arm64</string>
+	</array>
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+	</array>
+	<key>UISupportedInterfaceOrientations~ipad</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+</dict>
+</plist>

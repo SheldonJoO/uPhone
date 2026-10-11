@@ -1,1 +1,39 @@
-aW1wb3J0IFN3aWZ0VUkKCi8vLyBBaXJTSU0gaVBob25lL2lQYWQg5YWl5Y+j77ya5LiJ5pifIFZvV0xBTiDkuI7ni6znq4vkupHnq68gUmVsYXnjgIIKQG1haW4Kc3RydWN0IEFpclNJTUlQYWRBcHA6IEFwcCB7CiAgICBAVUlBcHBsaWNhdGlvbkRlbGVnYXRlQWRhcHRvcihBaXJTSU1Ob3RpZmljYXRpb25EZWxlZ2F0ZS5zZWxmKSBwcml2YXRlIHZhciBhcHBEZWxlZ2F0ZQogICAgQFN0YXRlT2JqZWN0IHByaXZhdGUgdmFyIG1vZGVsID0gQXBwTW9kZWwoKQogICAgQFN0YXRlT2JqZWN0IHByaXZhdGUgdmFyIHNldHRpbmdzID0gQXBwU2V0dGluZ3MoKQogICAgQEVudmlyb25tZW50KFwuc2NlbmVQaGFzZSkgcHJpdmF0ZSB2YXIgc2NlbmVQaGFzZQoKICAgIHZhciBib2R5OiBzb21lIFNjZW5lIHsKICAgICAgICBXaW5kb3dHcm91cCB7CiAgICAgICAgICAgIFJvb3RWaWV3KCkKICAgICAgICAgICAgICAgIC5lbnZpcm9ubWVudE9iamVjdChtb2RlbCkKICAgICAgICAgICAgICAgIC5lbnZpcm9ubWVudE9iamVjdChtb2RlbC5jb250YWN0cykKICAgICAgICAgICAgICAgIC5lbnZpcm9ubWVudE9iamVjdChtb2RlbC5hdWRpbykKICAgICAgICAgICAgICAgIC5lbnZpcm9ubWVudE9iamVjdChzZXR0aW5ncykKICAgICAgICAgICAgICAgIC5vbkFwcGVhciB7CiAgICAgICAgICAgICAgICAgICAgV2F0Y2hDYWxsQ29vcmRpbmF0b3Iuc2hhcmVkLmNvbmZpZ3VyZShtb2RlbDogbW9kZWwpCiAgICAgICAgICAgICAgICAgICAgV2F0Y2hDYWxsQ29vcmRpbmF0b3Iuc2hhcmVkLnN0YXJ0KCkKICAgICAgICAgICAgICAgICAgICBtb2RlbC5zdGFydCgpCiAgICAgICAgICAgICAgICB9CiAgICAgICAgfQogICAgICAgIC5vbkNoYW5nZShvZjogc2NlbmVQaGFzZSkgeyBwaGFzZSBpbgogICAgICAgICAgICBzd2l0Y2ggcGhhc2UgewogICAgICAgICAgICBjYXNlIC5hY3RpdmU6CiAgICAgICAgICAgICAgICBtb2RlbC5kaWRCZWNvbWVBY3RpdmUoKQogICAgICAgICAgICBjYXNlIC5pbmFjdGl2ZToKICAgICAgICAgICAgICAgIC8vIOW/hemhu+WcqOecn+ato+i/m+WFpeWQjuWPsOWJjeWQr+WKqOmfs+mikeS8muivne+8m+etieWIsCAuYmFja2dyb3VuZCDmiY3lkK/liqjml7bvvIwKICAgICAgICAgICAgICAgIC8vIGlPUyDlj6/og73lt7Lnu4/lhrvnu5Pov5vnqIvvvIzlkI7nu63mnaXnlLXlkoznn63kv6Hkuovku7bkvr/ml6Dms5Xnu6fnu63nrYnlvoXjgIIKICAgICAgICAgICAgICAgIG1vZGVsLndpbGxSZXNpZ25BY3RpdmUoKQogICAgICAgICAgICBjYXNlIC5iYWNrZ3JvdW5kOgogICAgICAgICAgICAgICAgbW9kZWwuZGlkRW50ZXJCYWNrZ3JvdW5kKCkKICAgICAgICAgICAgZGVmYXVsdDoKICAgICAgICAgICAgICAgIGJyZWFrCiAgICAgICAgICAgIH0KICAgICAgICB9CiAgICB9Cn0K
+import SwiftUI
+
+/// AirSIM iPhone/iPad 入口：三星 VoWLAN 与独立云端 Relay。
+@main
+struct AirSIMIPadApp: App {
+    @UIApplicationDelegateAdaptor(AirSIMNotificationDelegate.self) private var appDelegate
+    @StateObject private var model = AppModel()
+    @StateObject private var settings = AppSettings()
+    @Environment(\.scenePhase) private var scenePhase
+
+    var body: some Scene {
+        WindowGroup {
+            RootView()
+                .environmentObject(model)
+                .environmentObject(model.contacts)
+                .environmentObject(model.audio)
+                .environmentObject(settings)
+                .onAppear {
+                    WatchCallCoordinator.shared.configure(model: model)
+                    WatchCallCoordinator.shared.start()
+                    model.start()
+                }
+        }
+        .onChange(of: scenePhase) { phase in
+            switch phase {
+            case .active:
+                model.didBecomeActive()
+            case .inactive:
+                // 必须在真正进入后台前启动音频会话；等到 .background 才启动时，
+                // iOS 可能已经冻结进程，后续来电和短信事件便无法继续等待。
+                model.willResignActive()
+            case .background:
+                model.didEnterBackground()
+            default:
+                break
+            }
+        }
+    }
+}

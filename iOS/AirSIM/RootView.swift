@@ -1,1 +1,384 @@
-aW1wb3J0IFN3aWZ0VUkKCmVudW0gU3lzdGVtQ29tbXVuaWNhdGlvbkRlc3RpbmF0aW9uOiBFcXVhdGFibGUgewogICAgY2FzZSBjYWxsKFN0cmluZykKICAgIGNhc2UgbWVzc2FnZShTdHJpbmcpCn0KCmVudW0gU3lzdGVtQ29tbXVuaWNhdGlvblVSTCB7CiAgICBzdGF0aWMgZnVuYyBkZXN0aW5hdGlvbihmb3IgdXJsOiBVUkwpIC0+IFN5c3RlbUNvbW11bmljYXRpb25EZXN0aW5hdGlvbj8gewogICAgICAgIGd1YXJkIGxldCBzY2hlbWUgPSB1cmwuc2NoZW1lPy5sb3dlcmNhc2VkKCksIHNjaGVtZSA9PSAidGVsIiB8fCBzY2hlbWUgPT0gImltIiBlbHNlIHsKICAgICAgICAgICAgcmV0dXJuIG5pbAogICAgICAgIH0KICAgICAgICBsZXQgcHJlZml4TGVuZ3RoID0gc2NoZW1lLmNvdW50ICsgMQogICAgICAgIGd1YXJkIHVybC5hYnNvbHV0ZVN0cmluZy5jb3VudCA+IHByZWZpeExlbmd0aCBlbHNlIHsgcmV0dXJuIG5pbCB9CiAgICAgICAgdmFyIHRhcmdldCA9IFN0cmluZyh1cmwuYWJzb2x1dGVTdHJpbmcuZHJvcEZpcnN0KHByZWZpeExlbmd0aCkpCiAgICAgICAgd2hpbGUgdGFyZ2V0Lmhhc1ByZWZpeCgiLy8iKSB7IHRhcmdldC5yZW1vdmVGaXJzdCgyKSB9CiAgICAgICAgdGFyZ2V0ID0gU3RyaW5nKHRhcmdldC5zcGxpdChzZXBhcmF0b3I6ICI/IiwgbWF4U3BsaXRzOiAxKS5maXJzdCA/PyAiIikKICAgICAgICB0YXJnZXQgPSB0YXJnZXQucmVtb3ZpbmdQZXJjZW50RW5jb2RpbmcgPz8gdGFyZ2V0CiAgICAgICAgdGFyZ2V0ID0gdGFyZ2V0LnRyaW1taW5nQ2hhcmFjdGVycyhpbjogLndoaXRlc3BhY2VzQW5kTmV3bGluZXMpCiAgICAgICAgZ3VhcmQgIXRhcmdldC5pc0VtcHR5IGVsc2UgeyByZXR1cm4gbmlsIH0KICAgICAgICByZXR1cm4gc2NoZW1lID09ICJ0ZWwiID8gLmNhbGwodGFyZ2V0KSA6IC5tZXNzYWdlKHRhcmdldCkKICAgIH0KfQoKZW51bSBQaG9uZVRhYjogU3RyaW5nLCBDYXNlSXRlcmFibGUsIElkZW50aWZpYWJsZSB7CiAgICBjYXNlIGRpYWwgPSAi5ouo5Y+3IgogICAgY2FzZSByZWNlbnRzID0gIuacgOi/kemAmuivnSIKICAgIGNhc2UgbWVzc2FnZXMgPSAi55+t5L+hIgogICAgY2FzZSBjb250YWN0cyA9ICLpgJrorq/lvZUiCiAgICBjYXNlIHNldHRpbmdzID0gIuiuvue9riIKCiAgICB2YXIgaWQ6IFN0cmluZyB7IHJhd1ZhbHVlIH0KCiAgICB2YXIgaWNvbjogU3RyaW5nIHsKICAgICAgICBzd2l0Y2ggc2VsZiB7CiAgICAgICAgY2FzZSAuZGlhbDogcmV0dXJuICJjaXJjbGUuZ3JpZC4zeDMiCiAgICAgICAgY2FzZSAucmVjZW50czogcmV0dXJuICJjbG9jayIKICAgICAgICBjYXNlIC5tZXNzYWdlczogcmV0dXJuICJtZXNzYWdlIgogICAgICAgIGNhc2UgLmNvbnRhY3RzOiByZXR1cm4gInBlcnNvbi5jcm9wLmNpcmNsZSIKICAgICAgICBjYXNlIC5zZXR0aW5nczogcmV0dXJuICJnZWFyc2hhcGUiCiAgICAgICAgfQogICAgfQoKICAgIHZhciB0YWJUaXRsZTogU3RyaW5nIHsKICAgICAgICBzd2l0Y2ggc2VsZiB7CiAgICAgICAgY2FzZSAucmVjZW50czogcmV0dXJuICLmnIDov5EiCiAgICAgICAgY2FzZSAuY29udGFjdHM6IHJldHVybiAi6IGU57O75Lq6IgogICAgICAgIGRlZmF1bHQ6IHJldHVybiByYXdWYWx1ZQogICAgICAgIH0KICAgIH0KfQoKLy8vIOS6lOS4quS4u+imgeebrueahOWcsOS9v+eUqOezu+e7nyBUYWJWaWV377ybaU9TIDI2IOWOn+eUn+agh+etvuagj+i0n+i0oyBMaXF1aWQgR2xhc3PjgIEKLy8vIOmVv+aMieaUvuWkp+S4jumAieS4reaAgeS6pOS6ku+8jOmBv+WFjeWIhumhteaJi+WKv+WSjOiHque7mOaMiemSruS6ieaKouaoquWQkea7keWKqOOAggpzdHJ1Y3QgUm9vdFZpZXc6IFZpZXcgewogICAgQEVudmlyb25tZW50T2JqZWN0IHByaXZhdGUgdmFyIG1vZGVsOiBBcHBNb2RlbAogICAgQEVudmlyb25tZW50T2JqZWN0IHByaXZhdGUgdmFyIHNldHRpbmdzOiBBcHBTZXR0aW5ncwogICAgQEFwcFN0b3JhZ2UoImFpcnNpbS5zZWxlY3RlZC10YWIiKSBwcml2YXRlIHZhciBzZWxlY3RlZFRhYlJhd1ZhbHVlID0gUGhvbmVUYWIuZGlhbC5yYXdWYWx1ZQogICAgQFN0YXRlIHByaXZhdGUgdmFyIHBlbmRpbmdTTVNSZWNpcGllbnQ6IFN0cmluZz8KICAgIEBTdGF0ZSBwcml2YXRlIHZhciBwZW5kaW5nU01TQ29udmVyc2F0aW9uOiBTdHJpbmc/CiAgICBAQXBwU3RvcmFnZSgiYWlyc2ltLmZpcnN0LWNvbm5lY3Rpb24tY29tcGxldGUiKSBwcml2YXRlIHZhciBmaXJzdENvbm5lY3Rpb25Db21wbGV0ZSA9IGZhbHNlCgogICAgdmFyIGJvZHk6IHNvbWUgVmlldyB7CiAgICAgICAgWlN0YWNrKGFsaWdubWVudDogLnRvcFRyYWlsaW5nKSB7CiAgICAgICAgICAgIFRhYlZpZXcoc2VsZWN0aW9uOiBzZWxlY3RlZFRhYkJpbmRpbmcpIHsKICAgICAgICAgICAgICAgIERpYWxQYWRWaWV3KCkKICAgICAgICAgICAgICAgICAgICAudGFnKFBob25lVGFiLmRpYWwpCiAgICAgICAgICAgICAgICAgICAgLnRhYkl0ZW0geyBMYWJlbChMMTBuLnQoUGhvbmVUYWIuZGlhbC50YWJUaXRsZSksIHN5c3RlbUltYWdlOiBQaG9uZVRhYi5kaWFsLmljb24pIH0KCiAgICAgICAgICAgICAgICBSZWNlbnRzVmlldyhvbkNhbGw6IGRpYWwsIG9uTWVzc2FnZTogY29tcG9zZU1lc3NhZ2UpCiAgICAgICAgICAgICAgICAgICAgLnRhZyhQaG9uZVRhYi5yZWNlbnRzKQogICAgICAgICAgICAgICAgICAgIC50YWJJdGVtIHsgTGFiZWwoTDEwbi50KFBob25lVGFiLnJlY2VudHMudGFiVGl0bGUpLCBzeXN0ZW1JbWFnZTogUGhvbmVUYWIucmVjZW50cy5pY29uKSB9CgogICAgICAgICAgICAgICAgTWVzc2FnZXNWaWV3KAogICAgICAgICAgICAgICAgICAgIHBlbmRpbmdSZWNpcGllbnQ6ICRwZW5kaW5nU01TUmVjaXBpZW50LAogICAgICAgICAgICAgICAgICAgIHBlbmRpbmdDb252ZXJzYXRpb246ICRwZW5kaW5nU01TQ29udmVyc2F0aW9uCiAgICAgICAgICAgICAgICApCiAgICAgICAgICAgICAgICAgICAgLnRhZyhQaG9uZVRhYi5tZXNzYWdlcykKICAgICAgICAgICAgICAgICAgICAudGFiSXRlbSB7IExhYmVsKEwxMG4udChQaG9uZVRhYi5tZXNzYWdlcy50YWJUaXRsZSksIHN5c3RlbUltYWdlOiBQaG9uZVRhYi5tZXNzYWdlcy5pY29uKSB9CgogICAgICAgICAgICAgICAgQ29udGFjdHNWaWV3KG9uQ2FsbDogZGlhbCwgb25NZXNzYWdlOiBjb21wb3NlTWVzc2FnZSkKICAgICAgICAgICAgICAgICAgICAudGFnKFBob25lVGFiLmNvbnRhY3RzKQogICAgICAgICAgICAgICAgICAgIC50YWJJdGVtIHsgTGFiZWwoTDEwbi50KFBob25lVGFiLmNvbnRhY3RzLnRhYlRpdGxlKSwgc3lzdGVtSW1hZ2U6IFBob25lVGFiLmNvbnRhY3RzLmljb24pIH0KCiAgICAgICAgICAgICAgICBBaXJTSU1TZXR0aW5nc1ZpZXcoKQogICAgICAgICAgICAgICAgICAgIC50YWcoUGhvbmVUYWIuc2V0dGluZ3MpCiAgICAgICAgICAgICAgICAgICAgLnRhYkl0ZW0geyBMYWJlbChMMTBuLnQoUGhvbmVUYWIuc2V0dGluZ3MudGFiVGl0bGUpLCBzeXN0ZW1JbWFnZTogUGhvbmVUYWIuc2V0dGluZ3MuaWNvbikgfQogICAgICAgICAgICB9CiAgICAgICAgICAgIC5waG9uZVRhYkJhck1pbmltaXplT25TY3JvbGwoKQogICAgICAgICAgICAucGhvbmVUYWJTZWxlY3Rpb25GZWVkYmFjayhzZWxlY3RlZFRhYlJhd1ZhbHVlKQogICAgICAgICAgICAudGludCguYmx1ZSkKCiAgICAgICAgICAgIGlmIGxldCBjYWxsID0gbW9kZWwuaW5BcHBQcmVzZW50ZWRDYWxsIHsKICAgICAgICAgICAgICAgIEFjdGl2ZUNhbGxWaWV3KGNhbGw6IGNhbGwpCiAgICAgICAgICAgICAgICAgICAgLnRyYW5zaXRpb24oLm9wYWNpdHkuY29tYmluZWQod2l0aDogLnNjYWxlKHNjYWxlOiAwLjk4KSkpCiAgICAgICAgICAgIH0KICAgICAgICB9CiAgICAgICAgLmJhY2tncm91bmQoUGhvbmVCYWNrZHJvcCgpKQogICAgICAgIC5hbmltYXRpb24oLmVhc2VJbk91dChkdXJhdGlvbjogMC4yKSwgdmFsdWU6IG1vZGVsLmluQXBwUHJlc2VudGVkQ2FsbD8uaWQpCiAgICAgICAgLnByZWZlcnJlZENvbG9yU2NoZW1lKHNldHRpbmdzLmFwcGVhcmFuY2UuY29sb3JTY2hlbWUpCiAgICAgICAgLmZ1bGxTY3JlZW5Db3Zlcihpc1ByZXNlbnRlZDogQmluZGluZygKICAgICAgICAgICAgZ2V0OiB7ICFmaXJzdENvbm5lY3Rpb25Db21wbGV0ZSB9LAogICAgICAgICAgICBzZXQ6IHsgaWYgISQwIHsgZmlyc3RDb25uZWN0aW9uQ29tcGxldGUgPSB0cnVlIH0gfQogICAgICAgICkpIHsKICAgICAgICAgICAgQWlyU0lNRmlyc3RDb25uZWN0aW9uVmlldygpCiAgICAgICAgICAgICAgICAuZW52aXJvbm1lbnRPYmplY3QobW9kZWwpCiAgICAgICAgfQogICAgICAgIC5vbk9wZW5VUkwocGVyZm9ybTogaGFuZGxlU3lzdGVtQ29tbXVuaWNhdGlvblVSTCkKICAgICAgICAub25BcHBlYXIgewogICAgICAgICAgICBpZiBsZXQgc2VuZGVyID0gSW5jb21pbmdTTVNQcmVzZW50YXRpb25SZXF1ZXN0LmNvbnN1bWUoKSB7CiAgICAgICAgICAgICAgICBvcGVuU01TQ29udmVyc2F0aW9uKHNlbmRlcikKICAgICAgICAgICAgfQogICAgICAgIH0KICAgICAgICAub25SZWNlaXZlKE5vdGlmaWNhdGlvbkNlbnRlci5kZWZhdWx0LnB1Ymxpc2hlcihmb3I6IC5haXJzaW1SZW1vdGVTTVNSZWNlaXZlZCkpIHsgXyBpbgogICAgICAgICAgICBtb2RlbC5yZWxvYWRNZXNzYWdlc0Zyb21Mb2NhbFN0b3JlKCkKICAgICAgICB9CiAgICAgICAgLm9uUmVjZWl2ZShOb3RpZmljYXRpb25DZW50ZXIuZGVmYXVsdC5wdWJsaXNoZXIoZm9yOiAuYWlyc2ltT3BlblNNU0NvbnZlcnNhdGlvbikpIHsgbm90aWZpY2F0aW9uIGluCiAgICAgICAgICAgIGxldCBzZW5kZXIgPSBJbmNvbWluZ1NNU1ByZXNlbnRhdGlvblJlcXVlc3QuY29uc3VtZSgpCiAgICAgICAgICAgICAgICA/PyBub3RpZmljYXRpb24udXNlckluZm8/WyJzZW5kZXIiXSBhcz8gU3RyaW5nCiAgICAgICAgICAgIGd1YXJkIGxldCBzZW5kZXIgZWxzZSB7CiAgICAgICAgICAgICAgICBzZWxlY3RlZFRhYiA9IC5tZXNzYWdlcwogICAgICAgICAgICAgICAgcmV0dXJuCiAgICAgICAgICAgIH0KICAgICAgICAgICAgb3BlblNNU0NvbnZlcnNhdGlvbihzZW5kZXIpCiAgICAgICAgfQogICAgICAgIC5vblJlY2VpdmUoTm90aWZpY2F0aW9uQ2VudGVyLmRlZmF1bHQucHVibGlzaGVyKGZvcjogLmFpcnNpbU9wZW5JbmNvbWluZ0NhbGwpKSB7IF8gaW4KICAgICAgICAgICAgbW9kZWwucHJlc2VudEN1cnJlbnRDYWxsSW5BcHAoKQogICAgICAgIH0KICAgICAgICAuYWxlcnQoTDEwbi50KCLplJnor68iKSwgaXNQcmVzZW50ZWQ6IGVycm9yQmluZGluZykgewogICAgICAgICAgICBCdXR0b24oIk9LIikgeyBtb2RlbC5lcnJvck1lc3NhZ2UgPSBuaWwgfQogICAgICAgIH0gbWVzc2FnZTogewogICAgICAgICAgICBUZXh0KG1vZGVsLmVycm9yTWVzc2FnZSA/PyAiIikKICAgICAgICB9CiAgICB9CgogICAgcHJpdmF0ZSB2YXIgZXJyb3JCaW5kaW5nOiBCaW5kaW5nPEJvb2w+IHsKICAgICAgICBCaW5kaW5nKAogICAgICAgICAgICBnZXQ6IHsgbW9kZWwuZXJyb3JNZXNzYWdlPy5pc0VtcHR5ID09IGZhbHNlIH0sCiAgICAgICAgICAgIHNldDogeyBpZiAhJDAgeyBtb2RlbC5lcnJvck1lc3NhZ2UgPSBuaWwgfSB9CiAgICAgICAgKQogICAgfQoKICAgIHByaXZhdGUgdmFyIHNlbGVjdGVkVGFiQmluZGluZzogQmluZGluZzxQaG9uZVRhYj4gewogICAgICAgIEJpbmRpbmcoCiAgICAgICAgICAgIGdldDogeyBQaG9uZVRhYihyYXdWYWx1ZTogc2VsZWN0ZWRUYWJSYXdWYWx1ZSkgPz8gLmRpYWwgfSwKICAgICAgICAgICAgc2V0OiB7IG5ld1RhYiBpbgogICAgICAgICAgICAgICAgZ3VhcmQgbmV3VGFiLnJhd1ZhbHVlICE9IHNlbGVjdGVkVGFiUmF3VmFsdWUgZWxzZSB7IHJldHVybiB9CiAgICAgICAgICAgICAgICBzZWxlY3RlZFRhYlJhd1ZhbHVlID0gbmV3VGFiLnJhd1ZhbHVlCiAgICAgICAgICAgIH0KICAgICAgICApCiAgICB9CgogICAgcHJpdmF0ZSB2YXIgc2VsZWN0ZWRUYWI6IFBob25lVGFiIHsKICAgICAgICBnZXQgeyBQaG9uZVRhYihyYXdWYWx1ZTogc2VsZWN0ZWRUYWJSYXdWYWx1ZSkgPz8gLmRpYWwgfQogICAgICAgIG5vbm11dGF0aW5nIHNldCB7IHNlbGVjdGVkVGFiUmF3VmFsdWUgPSBuZXdWYWx1ZS5yYXdWYWx1ZSB9CiAgICB9CgogICAgcHJpdmF0ZSBmdW5jIGRpYWwoXyBudW1iZXI6IFN0cmluZykgewogICAgICAgIG1vZGVsLm51bWJlcklucHV0ID0gbnVtYmVyCiAgICAgICAgc2VsZWN0ZWRUYWIgPSAuZGlhbAogICAgICAgIFRhc2sgeyBhd2FpdCBtb2RlbC5kaWFsKCkgfQogICAgfQoKICAgIHByaXZhdGUgZnVuYyBjb21wb3NlTWVzc2FnZShfIG51bWJlcjogU3RyaW5nKSB7CiAgICAgICAgcGVuZGluZ1NNU1JlY2lwaWVudCA9IG51bWJlcgogICAgICAgIHNlbGVjdGVkVGFiID0gLm1lc3NhZ2VzCiAgICB9CgogICAgcHJpdmF0ZSBmdW5jIG9wZW5TTVNDb252ZXJzYXRpb24oXyBzZW5kZXI6IFN0cmluZykgewogICAgICAgIG1vZGVsLnJlbG9hZE1lc3NhZ2VzRnJvbUxvY2FsU3RvcmUoKQogICAgICAgIHBlbmRpbmdTTVNDb252ZXJzYXRpb24gPSBzZW5kZXIKICAgICAgICBzZWxlY3RlZFRhYiA9IC5tZXNzYWdlcwogICAgfQoKICAgIHByaXZhdGUgZnVuYyBoYW5kbGVTeXN0ZW1Db21tdW5pY2F0aW9uVVJMKF8gdXJsOiBVUkwpIHsKICAgICAgICBzd2l0Y2ggU3lzdGVtQ29tbXVuaWNhdGlvblVSTC5kZXN0aW5hdGlvbihmb3I6IHVybCkgewogICAgICAgIGNhc2UgbGV0IC5jYWxsKG51bWJlcik6CiAgICAgICAgICAgIGRpYWwobnVtYmVyKQogICAgICAgIGNhc2UgbGV0IC5tZXNzYWdlKHJlY2lwaWVudCk6CiAgICAgICAgICAgIGNvbXBvc2VNZXNzYWdlKHJlY2lwaWVudCkKICAgICAgICBjYXNlIG5pbDoKICAgICAgICAgICAgYnJlYWsKICAgICAgICB9CiAgICB9Cn0KCi8vLyDmtYXoibLmqKHlvI/kvb/nlKjns7vnu5/nlLXor53lvI/nuq/nmb3lupXvvJvmt7HoibLmqKHlvI/miY3nu5jliLbmt7Hok53pu5HlupXpg6jnjq/looPlhYnjgIIKc3RydWN0IFBob25lQmFja2Ryb3A6IFZpZXcgewogICAgQEVudmlyb25tZW50KFwuY29sb3JTY2hlbWUpIHByaXZhdGUgdmFyIGNvbG9yU2NoZW1lCgogICAgdmFyIGJvZHk6IHNvbWUgVmlldyB7CiAgICAgICAgWlN0YWNrIHsKICAgICAgICAgICAgaWYgY29sb3JTY2hlbWUgPT0gLmRhcmsgewogICAgICAgICAgICAgICAgQ29sb3IocmVkOiAwLjAwOCwgZ3JlZW46IDAuMDE2LCBibHVlOiAwLjAzNSkKICAgICAgICAgICAgICAgIExpbmVhckdyYWRpZW50KAogICAgICAgICAgICAgICAgICAgIGNvbG9yczogWwogICAgICAgICAgICAgICAgICAgICAgICBDb2xvci5jbGVhciwKICAgICAgICAgICAgICAgICAgICAgICAgQ29sb3IocmVkOiAwLjAxOCwgZ3JlZW46IDAuMDc1LCBibHVlOiAwLjE2KS5vcGFjaXR5KDAuNzIpLAogICAgICAgICAgICAgICAgICAgICAgICBDb2xvcihyZWQ6IDAuMDI1LCBncmVlbjogMC4yMCwgYmx1ZTogMC40OCkub3BhY2l0eSgwLjYyKSwKICAgICAgICAgICAgICAgICAgICBdLAogICAgICAgICAgICAgICAgICAgIHN0YXJ0UG9pbnQ6IC50b3AsCiAgICAgICAgICAgICAgICAgICAgZW5kUG9pbnQ6IC5ib3R0b20KICAgICAgICAgICAgICAgICkKICAgICAgICAgICAgfSBlbHNlIHsKICAgICAgICAgICAgICAgIENvbG9yLndoaXRlCiAgICAgICAgICAgIH0KICAgICAgICB9CiAgICAgICAgLmlnbm9yZXNTYWZlQXJlYSgpCiAgICB9Cn0KCi8vLyDlhbPplK7lhoXlrrnooajpnaLkvb/nlKjns7vnu5/ljp/nlJ8gTGlxdWlkIEdsYXNz77yM5pen57O757uf5Zue6YCA5Li657O757uf5p2Q6LSo44CCCnN0cnVjdCBQaG9uZUNhcmQ6IFZpZXdNb2RpZmllciB7CiAgICBAVmlld0J1aWxkZXIKICAgIGZ1bmMgYm9keShjb250ZW50OiBDb250ZW50KSAtPiBzb21lIFZpZXcgewogICAgICAgIGlmICNhdmFpbGFibGUoaU9TIDI2LjAsICopIHsKICAgICAgICAgICAgY29udGVudAogICAgICAgICAgICAgICAgLnBhZGRpbmcoMTYpCiAgICAgICAgICAgICAgICAuZnJhbWUobWF4V2lkdGg6IC5pbmZpbml0eSwgYWxpZ25tZW50OiAubGVhZGluZykKICAgICAgICAgICAgICAgIC5nbGFzc0VmZmVjdCgKICAgICAgICAgICAgICAgICAgICAucmVndWxhciwKICAgICAgICAgICAgICAgICAgICBpbjogUm91bmRlZFJlY3RhbmdsZShjb3JuZXJSYWRpdXM6IDE4LCBzdHlsZTogLmNvbnRpbnVvdXMpCiAgICAgICAgICAgICAgICApCiAgICAgICAgfSBlbHNlIHsKICAgICAgICAgICAgY29udGVudAogICAgICAgICAgICAgICAgLnBhZGRpbmcoMTYpCiAgICAgICAgICAgICAgICAuZnJhbWUobWF4V2lkdGg6IC5pbmZpbml0eSwgYWxpZ25tZW50OiAubGVhZGluZykKICAgICAgICAgICAgICAgIC5iYWNrZ3JvdW5kKAogICAgICAgICAgICAgICAgICAgIENvbG9yKHVpQ29sb3I6IC5zZWNvbmRhcnlTeXN0ZW1Hcm91cGVkQmFja2dyb3VuZCksCiAgICAgICAgICAgICAgICAgICAgaW46IFJvdW5kZWRSZWN0YW5nbGUoY29ybmVyUmFkaXVzOiAxNCwgc3R5bGU6IC5jb250aW51b3VzKQogICAgICAgICAgICAgICAgKQogICAgICAgIH0KICAgIH0KfQoKc3RydWN0IFBob25lR2xhc3NTdXJmYWNlOiBWaWV3TW9kaWZpZXIgewogICAgbGV0IGNvcm5lclJhZGl1czogQ0dGbG9hdAogICAgbGV0IHRpbnQ6IENvbG9yPwogICAgbGV0IGludGVyYWN0aXZlOiBCb29sCgogICAgQFZpZXdCdWlsZGVyCiAgICBmdW5jIGJvZHkoY29udGVudDogQ29udGVudCkgLT4gc29tZSBWaWV3IHsKICAgICAgICBpZiAjYXZhaWxhYmxlKGlPUyAyNi4wLCAqKSB7CiAgICAgICAgICAgIGxldCBnbGFzcyA9IGludGVyYWN0aXZlCiAgICAgICAgICAgICAgICA/IEdsYXNzLnJlZ3VsYXIudGludCh0aW50KS5pbnRlcmFjdGl2ZSgpCiAgICAgICAgICAgICAgICA6IEdsYXNzLnJlZ3VsYXIudGludCh0aW50KQogICAgICAgICAgICBjb250ZW50LmdsYXNzRWZmZWN0KAogICAgICAgICAgICAgICAgZ2xhc3MsCiAgICAgICAgICAgICAgICBpbjogUm91bmRlZFJlY3RhbmdsZShjb3JuZXJSYWRpdXM6IGNvcm5lclJhZGl1cywgc3R5bGU6IC5jb250aW51b3VzKQogICAgICAgICAgICApCiAgICAgICAgfSBlbHNlIHsKICAgICAgICAgICAgY29udGVudAogICAgICAgICAgICAgICAgLmJhY2tncm91bmQoCiAgICAgICAgICAgICAgICAgICAgLnJlZ3VsYXJNYXRlcmlhbCwKICAgICAgICAgICAgICAgICAgICBpbjogUm91bmRlZFJlY3RhbmdsZShjb3JuZXJSYWRpdXM6IGNvcm5lclJhZGl1cywgc3R5bGU6IC5jb250aW51b3VzKQogICAgICAgICAgICAgICAgKQogICAgICAgICAgICAgICAgLm92ZXJsYXkgewogICAgICAgICAgICAgICAgICAgIFJvdW5kZWRSZWN0YW5nbGUoY29ybmVyUmFkaXVzOiBjb3JuZXJSYWRpdXMsIHN0eWxlOiAuY29udGludW91cykKICAgICAgICAgICAgICAgICAgICAgICAgLnN0cm9rZUJvcmRlcigucHJpbWFyeS5vcGFjaXR5KDAuMDgpKQogICAgICAgICAgICAgICAgfQogICAgICAgIH0KICAgIH0KfQoKLy8vIOiHquWumuS5ieW3peWFt+agj+adkOi0qOS7heeUqOS6jumakOiXj+S6huezu+e7n+WFseS6q+iDjOaZr+eahCBUb29sYmFySXRlbe+8jOehruS/neWni+e7iOWPquacieS4gOWxgueOu+eSg+OAggpwcml2YXRlIHN0cnVjdCBQaG9uZVRvb2xiYXJHbGFzc01vcnBoOiBWaWV3TW9kaWZpZXIgewogICAgbGV0IGlkOiBTdHJpbmcKICAgIEBOYW1lc3BhY2UgcHJpdmF0ZSB2YXIgZ2xhc3NOYW1lc3BhY2UKCiAgICBAVmlld0J1aWxkZXIKICAgIGZ1bmMgYm9keShjb250ZW50OiBDb250ZW50KSAtPiBzb21lIFZpZXcgewogICAgICAgIGlmICNhdmFpbGFibGUoaU9TIDI2LjAsICopIHsKICAgICAgICAgICAgR2xhc3NFZmZlY3RDb250YWluZXIoc3BhY2luZzogMTQpIHsKICAgICAgICAgICAgICAgIGNvbnRlbnQKICAgICAgICAgICAgICAgICAgICAuYnV0dG9uU3R5bGUoLnBsYWluKQogICAgICAgICAgICAgICAgICAgIC5wYWRkaW5nKC5ob3Jpem9udGFsLCAxMCkKICAgICAgICAgICAgICAgICAgICAuZnJhbWUobWluV2lkdGg6IDQwLCBtaW5IZWlnaHQ6IDQwKQogICAgICAgICAgICAgICAgICAgIC5jb250ZW50U2hhcGUoQ2Fwc3VsZSgpKQogICAgICAgICAgICAgICAgICAgIC5nbGFzc0VmZmVjdCgucmVndWxhci5pbnRlcmFjdGl2ZSgpLCBpbjogQ2Fwc3VsZSgpKQogICAgICAgICAgICAgICAgICAgIC5nbGFzc0VmZmVjdElEKGlkLCBpbjogZ2xhc3NOYW1lc3BhY2UpCiAgICAgICAgICAgICAgICAgICAgLmdsYXNzRWZmZWN0VHJhbnNpdGlvbigubWF0ZXJpYWxpemUpCiAgICAgICAgICAgIH0KICAgICAgICAgICAgLnRyYW5zaXRpb24oLm9wYWNpdHkuY29tYmluZWQod2l0aDogLnNjYWxlKHNjYWxlOiAwLjgyKSkpCiAgICAgICAgfSBlbHNlIHsKICAgICAgICAgICAgY29udGVudAogICAgICAgIH0KICAgIH0KfQoKLy8vIGlPUyAyNiDpmpDol4/lr7zoiKrmoI/oh6rliqjnlJ/miJDnmoTlhbHkuqvmjInpkq7og4zmma/vvIzlho3kvb/nlKjkuIrpnaLnmoTljZXlsYLlj6/lj5jlvaLnjrvnkoPvvJsKLy8vIOaXp+ezu+e7n+e7p+e7reS6pOe7mSBUb29sYmFySXRlbSDkvb/nlKjlubPlj7Dpu5jorqTmoLflvI/jgIIKQFRvb2xiYXJDb250ZW50QnVpbGRlcgpmdW5jIHBob25lTW9ycGhpbmdUb29sYmFySXRlbTxDb250ZW50OiBWaWV3PigKICAgIHBsYWNlbWVudDogVG9vbGJhckl0ZW1QbGFjZW1lbnQsCiAgICBpZDogU3RyaW5nLAogICAgQFZpZXdCdWlsZGVyIGNvbnRlbnQ6ICgpIC0+IENvbnRlbnQKKSAtPiBzb21lIFRvb2xiYXJDb250ZW50IHsKICAgIGlmICNhdmFpbGFibGUoaU9TIDI2LjAsICopIHsKICAgICAgICBUb29sYmFySXRlbShwbGFjZW1lbnQ6IHBsYWNlbWVudCkgewogICAgICAgICAgICBjb250ZW50KCkucGhvbmVUb29sYmFyR2xhc3NNb3JwaChpZDogaWQpCiAgICAgICAgfQogICAgICAgIC5zaGFyZWRCYWNrZ3JvdW5kVmlzaWJpbGl0eSguaGlkZGVuKQogICAgfSBlbHNlIHsKICAgICAgICBUb29sYmFySXRlbShwbGFjZW1lbnQ6IHBsYWNlbWVudCwgY29udGVudDogY29udGVudCkKICAgIH0KfQoKZXh0ZW5zaW9uIFZpZXcgewogICAgZnVuYyBwaG9uZUNhcmQoKSAtPiBzb21lIFZpZXcgeyBtb2RpZmllcihQaG9uZUNhcmQoKSkgfQoKICAgIGZ1bmMgcGhvbmVHbGFzc1N1cmZhY2UoCiAgICAgICAgY29ybmVyUmFkaXVzOiBDR0Zsb2F0ID0gMTgsCiAgICAgICAgdGludDogQ29sb3I/ID0gbmlsLAogICAgICAgIGludGVyYWN0aXZlOiBCb29sID0gZmFsc2UKICAgICkgLT4gc29tZSBWaWV3IHsKICAgICAgICBtb2RpZmllcihQaG9uZUdsYXNzU3VyZmFjZSgKICAgICAgICAgICAgY29ybmVyUmFkaXVzOiBjb3JuZXJSYWRpdXMsCiAgICAgICAgICAgIHRpbnQ6IHRpbnQsCiAgICAgICAgICAgIGludGVyYWN0aXZlOiBpbnRlcmFjdGl2ZQogICAgICAgICkpCiAgICB9CgogICAgQFZpZXdCdWlsZGVyCiAgICBmdW5jIHBob25lVGFiQmFyTWluaW1pemVPblNjcm9sbCgpIC0+IHNvbWUgVmlldyB7CiAgICAgICAgaWYgI2F2YWlsYWJsZShpT1MgMjYuMCwgKikgewogICAgICAgICAgICBzZWxmLnRhYkJhck1pbmltaXplQmVoYXZpb3IoLm9uU2Nyb2xsRG93bikKICAgICAgICB9IGVsc2UgewogICAgICAgICAgICBzZWxmCiAgICAgICAgfQogICAgfQoKICAgIGZ1bmMgcGhvbmVUb29sYmFyR2xhc3NNb3JwaChpZDogU3RyaW5nKSAtPiBzb21lIFZpZXcgewogICAgICAgIG1vZGlmaWVyKFBob25lVG9vbGJhckdsYXNzTW9ycGgoaWQ6IGlkKSkKICAgIH0KCiAgICBAVmlld0J1aWxkZXIKICAgIGZ1bmMgcGhvbmVUYWJTZWxlY3Rpb25GZWVkYmFjayhfIHRyaWdnZXI6IFN0cmluZykgLT4gc29tZSBWaWV3IHsKICAgICAgICBpZiAjYXZhaWxhYmxlKGlPUyAxNy4wLCAqKSB7CiAgICAgICAgICAgIHNlbnNvcnlGZWVkYmFjayguc2VsZWN0aW9uLCB0cmlnZ2VyOiB0cmlnZ2VyKQogICAgICAgIH0gZWxzZSB7CiAgICAgICAgICAgIHNlbGYKICAgICAgICB9CiAgICB9Cn0KCnByaXZhdGUgc3RydWN0IFBob25lVGFiQmFyQ29tcGFjdFN0YXRlQWN0aW9uS2V5OiBFbnZpcm9ubWVudEtleSB7CiAgICBzdGF0aWMgbGV0IGRlZmF1bHRWYWx1ZTogKEJvb2wpIC0+IFZvaWQgPSB7IF8gaW4gfQp9CgpleHRlbnNpb24gRW52aXJvbm1lbnRWYWx1ZXMgewogICAgZmlsZXByaXZhdGUgdmFyIHBob25lVGFiQmFyQ29tcGFjdFN0YXRlQWN0aW9uOiAoQm9vbCkgLT4gVm9pZCB7CiAgICAgICAgZ2V0IHsgc2VsZltQaG9uZVRhYkJhckNvbXBhY3RTdGF0ZUFjdGlvbktleS5zZWxmXSB9CiAgICAgICAgc2V0IHsgc2VsZltQaG9uZVRhYkJhckNvbXBhY3RTdGF0ZUFjdGlvbktleS5zZWxmXSA9IG5ld1ZhbHVlIH0KICAgIH0KfQoKcHJpdmF0ZSBzdHJ1Y3QgUGhvbmVUYWJCYXJDb21wYWN0U2Nyb2xsUmVwb3J0ZXI6IFZpZXdNb2RpZmllciB7CiAgICBARW52aXJvbm1lbnQoXC5waG9uZVRhYkJhckNvbXBhY3RTdGF0ZUFjdGlvbikgcHJpdmF0ZSB2YXIgcmVwb3J0Q29tcGFjdFN0YXRlCgogICAgZnVuYyBib2R5KGNvbnRlbnQ6IENvbnRlbnQpIC0+IHNvbWUgVmlldyB7CiAgICAgICAgaWYgI2F2YWlsYWJsZShpT1MgMTguMCwgKikgewogICAgICAgICAgICBjb250ZW50Lm9uU2Nyb2xsR2VvbWV0cnlDaGFuZ2UoZm9yOiBDR0Zsb2F0LnNlbGYpIHsgZ2VvbWV0cnkgaW4KICAgICAgICAgICAgICAgIG1heCgwLCBnZW9tZXRyeS5jb250ZW50T2Zmc2V0LnkgKyBnZW9tZXRyeS5jb250ZW50SW5zZXRzLnRvcCkKICAgICAgICAgICAgfSBhY3Rpb246IHsgb2xkT2Zmc2V0LCBuZXdPZmZzZXQgaW4KICAgICAgICAgICAgICAgIGxldCBkZWx0YSA9IG5ld09mZnNldCAtIG9sZE9mZnNldAogICAgICAgICAgICAgICAgaWYgbmV3T2Zmc2V0IDwgMiB7CiAgICAgICAgICAgICAgICAgICAgcmVwb3J0Q29tcGFjdFN0YXRlKGZhbHNlKQogICAgICAgICAgICAgICAgfSBlbHNlIGlmIGRlbHRhID4gMiB7CiAgICAgICAgICAgICAgICAgICAgcmVwb3J0Q29tcGFjdFN0YXRlKHRydWUpCiAgICAgICAgICAgICAgICB9IGVsc2UgaWYgZGVsdGEgPCAtMiB7CiAgICAgICAgICAgICAgICAgICAgcmVwb3J0Q29tcGFjdFN0YXRlKGZhbHNlKQogICAgICAgICAgICAgICAgfQogICAgICAgICAgICB9CiAgICAgICAgfSBlbHNlIHsKICAgICAgICAgICAgY29udGVudAogICAgICAgIH0KICAgIH0KfQoKZXh0ZW5zaW9uIFZpZXcgewogICAgZnVuYyBwaG9uZVJlcG9ydHNUYWJCYXJDb21wYWN0U3RhdGUoKSAtPiBzb21lIFZpZXcgewogICAgICAgIG1vZGlmaWVyKFBob25lVGFiQmFyQ29tcGFjdFNjcm9sbFJlcG9ydGVyKCkpCiAgICB9Cn0K
+import SwiftUI
+
+enum SystemCommunicationDestination: Equatable {
+    case call(String)
+    case message(String)
+}
+
+enum SystemCommunicationURL {
+    static func destination(for url: URL) -> SystemCommunicationDestination? {
+        guard let scheme = url.scheme?.lowercased(), scheme == "tel" || scheme == "im" else {
+            return nil
+        }
+        let prefixLength = scheme.count + 1
+        guard url.absoluteString.count > prefixLength else { return nil }
+        var target = String(url.absoluteString.dropFirst(prefixLength))
+        while target.hasPrefix("//") { target.removeFirst(2) }
+        target = String(target.split(separator: "?", maxSplits: 1).first ?? "")
+        target = target.removingPercentEncoding ?? target
+        target = target.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !target.isEmpty else { return nil }
+        return scheme == "tel" ? .call(target) : .message(target)
+    }
+}
+
+enum PhoneTab: String, CaseIterable, Identifiable {
+    case dial = "拨号"
+    case recents = "最近通话"
+    case messages = "短信"
+    case contacts = "通讯录"
+    case settings = "设置"
+
+    var id: String { rawValue }
+
+    var icon: String {
+        switch self {
+        case .dial: return "circle.grid.3x3"
+        case .recents: return "clock"
+        case .messages: return "message"
+        case .contacts: return "person.crop.circle"
+        case .settings: return "gearshape"
+        }
+    }
+
+    var tabTitle: String {
+        switch self {
+        case .recents: return "最近"
+        case .contacts: return "联系人"
+        default: return rawValue
+        }
+    }
+}
+
+/// 五个主要目的地使用系统 TabView；iOS 26 原生标签栏负责 Liquid Glass、
+/// 长按放大与选中态交互，避免分页手势和自绘按钮争抢横向滑动。
+struct RootView: View {
+    @EnvironmentObject private var model: AppModel
+    @EnvironmentObject private var settings: AppSettings
+    @AppStorage("airsim.selected-tab") private var selectedTabRawValue = PhoneTab.dial.rawValue
+    @State private var pendingSMSRecipient: String?
+    @State private var pendingSMSConversation: String?
+    @AppStorage("airsim.first-connection-complete") private var firstConnectionComplete = false
+
+    var body: some View {
+        ZStack(alignment: .topTrailing) {
+            TabView(selection: selectedTabBinding) {
+                DialPadView()
+                    .tag(PhoneTab.dial)
+                    .tabItem { Label(L10n.t(PhoneTab.dial.tabTitle), systemImage: PhoneTab.dial.icon) }
+
+                RecentsView(onCall: dial, onMessage: composeMessage)
+                    .tag(PhoneTab.recents)
+                    .tabItem { Label(L10n.t(PhoneTab.recents.tabTitle), systemImage: PhoneTab.recents.icon) }
+
+                MessagesView(
+                    pendingRecipient: $pendingSMSRecipient,
+                    pendingConversation: $pendingSMSConversation
+                )
+                    .tag(PhoneTab.messages)
+                    .tabItem { Label(L10n.t(PhoneTab.messages.tabTitle), systemImage: PhoneTab.messages.icon) }
+
+                ContactsView(onCall: dial, onMessage: composeMessage)
+                    .tag(PhoneTab.contacts)
+                    .tabItem { Label(L10n.t(PhoneTab.contacts.tabTitle), systemImage: PhoneTab.contacts.icon) }
+
+                AirSIMSettingsView()
+                    .tag(PhoneTab.settings)
+                    .tabItem { Label(L10n.t(PhoneTab.settings.tabTitle), systemImage: PhoneTab.settings.icon) }
+            }
+            .phoneTabBarMinimizeOnScroll()
+            .phoneTabSelectionFeedback(selectedTabRawValue)
+            .tint(.blue)
+
+            if let call = model.inAppPresentedCall {
+                ActiveCallView(call: call)
+                    .transition(.opacity.combined(with: .scale(scale: 0.98)))
+            }
+        }
+        .background(PhoneBackdrop())
+        .animation(.easeInOut(duration: 0.2), value: model.inAppPresentedCall?.id)
+        .preferredColorScheme(settings.appearance.colorScheme)
+        .fullScreenCover(isPresented: Binding(
+            get: { !firstConnectionComplete },
+            set: { if !$0 { firstConnectionComplete = true } }
+        )) {
+            AirSIMFirstConnectionView()
+                .environmentObject(model)
+        }
+        .onOpenURL(perform: handleSystemCommunicationURL)
+        .onAppear {
+            if let sender = IncomingSMSPresentationRequest.consume() {
+                openSMSConversation(sender)
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .airsimRemoteSMSReceived)) { _ in
+            model.reloadMessagesFromLocalStore()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .airsimOpenSMSConversation)) { notification in
+            let sender = IncomingSMSPresentationRequest.consume()
+                ?? notification.userInfo?["sender"] as? String
+            guard let sender else {
+                selectedTab = .messages
+                return
+            }
+            openSMSConversation(sender)
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .airsimOpenIncomingCall)) { _ in
+            model.presentCurrentCallInApp()
+        }
+        .alert(L10n.t("错误"), isPresented: errorBinding) {
+            Button("OK") { model.errorMessage = nil }
+        } message: {
+            Text(model.errorMessage ?? "")
+        }
+    }
+
+    private var errorBinding: Binding<Bool> {
+        Binding(
+            get: { model.errorMessage?.isEmpty == false },
+            set: { if !$0 { model.errorMessage = nil } }
+        )
+    }
+
+    private var selectedTabBinding: Binding<PhoneTab> {
+        Binding(
+            get: { PhoneTab(rawValue: selectedTabRawValue) ?? .dial },
+            set: { newTab in
+                guard newTab.rawValue != selectedTabRawValue else { return }
+                selectedTabRawValue = newTab.rawValue
+            }
+        )
+    }
+
+    private var selectedTab: PhoneTab {
+        get { PhoneTab(rawValue: selectedTabRawValue) ?? .dial }
+        nonmutating set { selectedTabRawValue = newValue.rawValue }
+    }
+
+    private func dial(_ number: String) {
+        model.numberInput = number
+        selectedTab = .dial
+        Task { await model.dial() }
+    }
+
+    private func composeMessage(_ number: String) {
+        pendingSMSRecipient = number
+        selectedTab = .messages
+    }
+
+    private func openSMSConversation(_ sender: String) {
+        model.reloadMessagesFromLocalStore()
+        pendingSMSConversation = sender
+        selectedTab = .messages
+    }
+
+    private func handleSystemCommunicationURL(_ url: URL) {
+        switch SystemCommunicationURL.destination(for: url) {
+        case let .call(number):
+            dial(number)
+        case let .message(recipient):
+            composeMessage(recipient)
+        case nil:
+            break
+        }
+    }
+}
+
+/// 浅色模式使用系统电话式纯白底；深色模式才绘制深蓝黑底部环境光。
+struct PhoneBackdrop: View {
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        ZStack {
+            if colorScheme == .dark {
+                Color(red: 0.008, green: 0.016, blue: 0.035)
+                LinearGradient(
+                    colors: [
+                        Color.clear,
+                        Color(red: 0.018, green: 0.075, blue: 0.16).opacity(0.72),
+                        Color(red: 0.025, green: 0.20, blue: 0.48).opacity(0.62),
+                    ],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+            } else {
+                Color.white
+            }
+        }
+        .ignoresSafeArea()
+    }
+}
+
+/// 关键内容表面使用系统原生 Liquid Glass，旧系统回退为系统材质。
+struct PhoneCard: ViewModifier {
+    @ViewBuilder
+    func body(content: Content) -> some View {
+        if #available(iOS 26.0, *) {
+            content
+                .padding(16)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .glassEffect(
+                    .regular,
+                    in: RoundedRectangle(cornerRadius: 18, style: .continuous)
+                )
+        } else {
+            content
+                .padding(16)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(
+                    Color(uiColor: .secondarySystemGroupedBackground),
+                    in: RoundedRectangle(cornerRadius: 14, style: .continuous)
+                )
+        }
+    }
+}
+
+struct PhoneGlassSurface: ViewModifier {
+    let cornerRadius: CGFloat
+    let tint: Color?
+    let interactive: Bool
+
+    @ViewBuilder
+    func body(content: Content) -> some View {
+        if #available(iOS 26.0, *) {
+            let glass = interactive
+                ? Glass.regular.tint(tint).interactive()
+                : Glass.regular.tint(tint)
+            content.glassEffect(
+                glass,
+                in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+            )
+        } else {
+            content
+                .background(
+                    .regularMaterial,
+                    in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                )
+                .overlay {
+                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                        .strokeBorder(.primary.opacity(0.08))
+                }
+        }
+    }
+}
+
+/// 自定义工具栏材质仅用于隐藏了系统共享背景的 ToolbarItem，确保始终只有一层玻璃。
+private struct PhoneToolbarGlassMorph: ViewModifier {
+    let id: String
+    @Namespace private var glassNamespace
+
+    @ViewBuilder
+    func body(content: Content) -> some View {
+        if #available(iOS 26.0, *) {
+            GlassEffectContainer(spacing: 14) {
+                content
+                    .buttonStyle(.plain)
+                    .padding(.horizontal, 10)
+                    .frame(minWidth: 40, minHeight: 40)
+                    .contentShape(Capsule())
+                    .glassEffect(.regular.interactive(), in: Capsule())
+                    .glassEffectID(id, in: glassNamespace)
+                    .glassEffectTransition(.materialize)
+            }
+            .transition(.opacity.combined(with: .scale(scale: 0.82)))
+        } else {
+            content
+        }
+    }
+}
+
+/// iOS 26 隐藏导航栏自动生成的共享按钮背景，再使用上面的单层可变形玻璃；
+/// 旧系统继续交给 ToolbarItem 使用平台默认样式。
+@ToolbarContentBuilder
+func phoneMorphingToolbarItem<Content: View>(
+    placement: ToolbarItemPlacement,
+    id: String,
+    @ViewBuilder content: () -> Content
+) -> some ToolbarContent {
+    if #available(iOS 26.0, *) {
+        ToolbarItem(placement: placement) {
+            content().phoneToolbarGlassMorph(id: id)
+        }
+        .sharedBackgroundVisibility(.hidden)
+    } else {
+        ToolbarItem(placement: placement, content: content)
+    }
+}
+
+extension View {
+    func phoneCard() -> some View { modifier(PhoneCard()) }
+
+    func phoneGlassSurface(
+        cornerRadius: CGFloat = 18,
+        tint: Color? = nil,
+        interactive: Bool = false
+    ) -> some View {
+        modifier(PhoneGlassSurface(
+            cornerRadius: cornerRadius,
+            tint: tint,
+            interactive: interactive
+        ))
+    }
+
+    @ViewBuilder
+    func phoneTabBarMinimizeOnScroll() -> some View {
+        if #available(iOS 26.0, *) {
+            self.tabBarMinimizeBehavior(.onScrollDown)
+        } else {
+            self
+        }
+    }
+
+    func phoneToolbarGlassMorph(id: String) -> some View {
+        modifier(PhoneToolbarGlassMorph(id: id))
+    }
+
+    @ViewBuilder
+    func phoneTabSelectionFeedback(_ trigger: String) -> some View {
+        if #available(iOS 17.0, *) {
+            sensoryFeedback(.selection, trigger: trigger)
+        } else {
+            self
+        }
+    }
+}
+
+private struct PhoneTabBarCompactStateActionKey: EnvironmentKey {
+    static let defaultValue: (Bool) -> Void = { _ in }
+}
+
+extension EnvironmentValues {
+    fileprivate var phoneTabBarCompactStateAction: (Bool) -> Void {
+        get { self[PhoneTabBarCompactStateActionKey.self] }
+        set { self[PhoneTabBarCompactStateActionKey.self] = newValue }
+    }
+}
+
+private struct PhoneTabBarCompactScrollReporter: ViewModifier {
+    @Environment(\.phoneTabBarCompactStateAction) private var reportCompactState
+
+    func body(content: Content) -> some View {
+        if #available(iOS 18.0, *) {
+            content.onScrollGeometryChange(for: CGFloat.self) { geometry in
+                max(0, geometry.contentOffset.y + geometry.contentInsets.top)
+            } action: { oldOffset, newOffset in
+                let delta = newOffset - oldOffset
+                if newOffset < 2 {
+                    reportCompactState(false)
+                } else if delta > 2 {
+                    reportCompactState(true)
+                } else if delta < -2 {
+                    reportCompactState(false)
+                }
+            }
+        } else {
+            content
+        }
+    }
+}
+
+extension View {
+    func phoneReportsTabBarCompactState() -> some View {
+        modifier(PhoneTabBarCompactScrollReporter())
+    }
+}

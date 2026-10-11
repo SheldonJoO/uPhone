@@ -1,1 +1,124 @@
-aW1wb3J0IENyeXB0b0tpdAppbXBvcnQgRm91bmRhdGlvbgppbXBvcnQgU2VjdXJpdHkKCnN0cnVjdCBWb1dMQU5DcmVkZW50aWFsOiBFcXVhdGFibGUsIFNlbmRhYmxlIHsKICAgIGxldCBzZWNyZXQ6IERhdGEKCiAgICB2YXIgZW5jb2RlZFNlY3JldDogU3RyaW5nIHsgc2VjcmV0LmJhc2U2NFVSTCB9CgogICAgaW5pdChzZWNyZXQ6IERhdGEpIHRocm93cyB7CiAgICAgICAgZ3VhcmQgc2VjcmV0LmNvdW50ID49IDMyIGVsc2UgeyB0aHJvdyBWb1dMQU5BdXRoRXJyb3IuaW52YWxpZFNlY3JldCB9CiAgICAgICAgc2VsZi5zZWNyZXQgPSBzZWNyZXQKICAgIH0KfQoKc3RydWN0IFZvV0xBTlNpZ25lZFJlcXVlc3Q6IEVxdWF0YWJsZSwgU2VuZGFibGUgewogICAgbGV0IHRpbWVzdGFtcDogSW50NjQKICAgIGxldCBub25jZTogU3RyaW5nCiAgICBsZXQgY2Fub25pY2FsOiBTdHJpbmcKICAgIGxldCBzaWduYXR1cmU6IFN0cmluZwp9CgplbnVtIFZvV0xBTkF1dGhFcnJvcjogTG9jYWxpemVkRXJyb3IgewogICAgY2FzZSBpbnZhbGlkU2VjcmV0CiAgICBjYXNlIHJhbmRvbVVuYXZhaWxhYmxlCgogICAgdmFyIGVycm9yRGVzY3JpcHRpb246IFN0cmluZz8gewogICAgICAgIHN3aXRjaCBzZWxmIHsKICAgICAgICBjYXNlIC5pbnZhbGlkU2VjcmV0OiByZXR1cm4gIlZvV0xBTiDphY3lr7nlr4bpkqXml6DmlYgiCiAgICAgICAgY2FzZSAucmFuZG9tVW5hdmFpbGFibGU6IHJldHVybiAi5peg5rOV55Sf5oiQIFZvV0xBTiDlronlhajpmo/mnLrmlbAiCiAgICAgICAgfQogICAgfQp9CgpzdHJ1Y3QgVm9XTEFOUmVxdWVzdFNpZ25lcjogU2VuZGFibGUgewogICAgbGV0IGNyZWRlbnRpYWw6IFZvV0xBTkNyZWRlbnRpYWwKCiAgICBpbml0KHNlY3JldDogRGF0YSkgdGhyb3dzIHsKICAgICAgICBjcmVkZW50aWFsID0gdHJ5IFZvV0xBTkNyZWRlbnRpYWwoc2VjcmV0OiBzZWNyZXQpCiAgICB9CgogICAgZnVuYyBzaWduKAogICAgICAgIG1ldGhvZDogU3RyaW5nLAogICAgICAgIHBhdGg6IFN0cmluZywKICAgICAgICBib2R5OiBEYXRhLAogICAgICAgIHRpbWVzdGFtcDogSW50NjQgPSBJbnQ2NChEYXRlKCkudGltZUludGVydmFsU2luY2UxOTcwKSwKICAgICAgICBub25jZTogU3RyaW5nID0gVm9XTEFOUmVxdWVzdFNpZ25lci5tYWtlTm9uY2UoKQogICAgKSB0aHJvd3MgLT4gVm9XTEFOU2lnbmVkUmVxdWVzdCB7CiAgICAgICAgZ3VhcmQgIW5vbmNlLmlzRW1wdHkgZWxzZSB7IHRocm93IFZvV0xBTkF1dGhFcnJvci5yYW5kb21VbmF2YWlsYWJsZSB9CiAgICAgICAgbGV0IGRpZ2VzdCA9IFNIQTI1Ni5oYXNoKGRhdGE6IGJvZHkpLm1hcCB7IFN0cmluZyhmb3JtYXQ6ICIlMDJ4IiwgJDApIH0uam9pbmVkKCkKICAgICAgICBsZXQgY2Fub25pY2FsID0gIlwobWV0aG9kLnVwcGVyY2FzZWQoKSlcblwocGF0aClcblwoZGlnZXN0KVxuXCh0aW1lc3RhbXApXG5cKG5vbmNlKSIKICAgICAgICBsZXQga2V5ID0gU3ltbWV0cmljS2V5KGRhdGE6IGNyZWRlbnRpYWwuc2VjcmV0KQogICAgICAgIGxldCBtYWMgPSBITUFDPFNIQTI1Nj4uYXV0aGVudGljYXRpb25Db2RlKGZvcjogRGF0YShjYW5vbmljYWwudXRmOCksIHVzaW5nOiBrZXkpCiAgICAgICAgcmV0dXJuIFZvV0xBTlNpZ25lZFJlcXVlc3QoCiAgICAgICAgICAgIHRpbWVzdGFtcDogdGltZXN0YW1wLAogICAgICAgICAgICBub25jZTogbm9uY2UsCiAgICAgICAgICAgIGNhbm9uaWNhbDogY2Fub25pY2FsLAogICAgICAgICAgICBzaWduYXR1cmU6IERhdGEobWFjKS5iYXNlNjRVUkwKICAgICAgICApCiAgICB9CgogICAgc3RhdGljIGZ1bmMgbWFrZU5vbmNlKCkgLT4gU3RyaW5nIHsKICAgICAgICB2YXIgYnl0ZXMgPSBbVUludDhdKHJlcGVhdGluZzogMCwgY291bnQ6IDE2KQogICAgICAgIGd1YXJkIFNlY1JhbmRvbUNvcHlCeXRlcyhrU2VjUmFuZG9tRGVmYXVsdCwgYnl0ZXMuY291bnQsICZieXRlcykgPT0gZXJyU2VjU3VjY2VzcyBlbHNlIHsgcmV0dXJuICIiIH0KICAgICAgICByZXR1cm4gRGF0YShieXRlcykuYmFzZTY0VVJMCiAgICB9Cn0KCmVudW0gVm9XTEFOQ3JlZGVudGlhbFN0b3JlIHsKICAgIHByaXZhdGUgc3RhdGljIGxldCBzZXJ2aWNlID0gImNvbS5leGFtcGxlLmFpcnNpbS52b3dsYW4iCiAgICBwcml2YXRlIHN0YXRpYyBsZXQgYWNjb3VudCA9ICJwYWlyZWQtc2VjcmV0LXYxIgoKICAgIHN0YXRpYyBmdW5jIGxvYWRPckNyZWF0ZSgpIHRocm93cyAtPiBWb1dMQU5DcmVkZW50aWFsIHsKICAgICAgICBpZiBsZXQgZXhpc3RpbmcgPSBsb2FkKCkgeyByZXR1cm4gZXhpc3RpbmcgfQogICAgICAgIHZhciBieXRlcyA9IFtVSW50OF0ocmVwZWF0aW5nOiAwLCBjb3VudDogMzIpCiAgICAgICAgZ3VhcmQgU2VjUmFuZG9tQ29weUJ5dGVzKGtTZWNSYW5kb21EZWZhdWx0LCBieXRlcy5jb3VudCwgJmJ5dGVzKSA9PSBlcnJTZWNTdWNjZXNzIGVsc2UgewogICAgICAgICAgICB0aHJvdyBWb1dMQU5BdXRoRXJyb3IucmFuZG9tVW5hdmFpbGFibGUKICAgICAgICB9CiAgICAgICAgbGV0IGNyZWRlbnRpYWwgPSB0cnkgVm9XTEFOQ3JlZGVudGlhbChzZWNyZXQ6IERhdGEoYnl0ZXMpKQogICAgICAgIGxldCBxdWVyeTogW1N0cmluZzogQW55XSA9IFsKICAgICAgICAgICAga1NlY0NsYXNzIGFzIFN0cmluZzoga1NlY0NsYXNzR2VuZXJpY1Bhc3N3b3JkLAogICAgICAgICAgICBrU2VjQXR0clNlcnZpY2UgYXMgU3RyaW5nOiBzZXJ2aWNlLAogICAgICAgICAgICBrU2VjQXR0ckFjY291bnQgYXMgU3RyaW5nOiBhY2NvdW50LAogICAgICAgICAgICBrU2VjVmFsdWVEYXRhIGFzIFN0cmluZzogY3JlZGVudGlhbC5zZWNyZXQsCiAgICAgICAgICAgIGtTZWNBdHRyQWNjZXNzaWJsZSBhcyBTdHJpbmc6IGtTZWNBdHRyQWNjZXNzaWJsZUFmdGVyRmlyc3RVbmxvY2tUaGlzRGV2aWNlT25seSwKICAgICAgICBdCiAgICAgICAgU2VjSXRlbURlbGV0ZShxdWVyeVdpdGhvdXRWYWx1ZSgpIGFzIENGRGljdGlvbmFyeSkKICAgICAgICBndWFyZCBTZWNJdGVtQWRkKHF1ZXJ5IGFzIENGRGljdGlvbmFyeSwgbmlsKSA9PSBlcnJTZWNTdWNjZXNzIGVsc2UgewogICAgICAgICAgICB0aHJvdyBWb1dMQU5BdXRoRXJyb3IucmFuZG9tVW5hdmFpbGFibGUKICAgICAgICB9CiAgICAgICAgcmV0dXJuIGNyZWRlbnRpYWwKICAgIH0KCiAgICBzdGF0aWMgZnVuYyBsb2FkKCkgLT4gVm9XTEFOQ3JlZGVudGlhbD8gewogICAgICAgIHZhciBxdWVyeSA9IHF1ZXJ5V2l0aG91dFZhbHVlKCkKICAgICAgICBxdWVyeVtrU2VjUmV0dXJuRGF0YSBhcyBTdHJpbmddID0gdHJ1ZQogICAgICAgIHF1ZXJ5W2tTZWNNYXRjaExpbWl0IGFzIFN0cmluZ10gPSBrU2VjTWF0Y2hMaW1pdE9uZQogICAgICAgIHZhciBpdGVtOiBDRlR5cGVSZWY/CiAgICAgICAgZ3VhcmQgU2VjSXRlbUNvcHlNYXRjaGluZyhxdWVyeSBhcyBDRkRpY3Rpb25hcnksICZpdGVtKSA9PSBlcnJTZWNTdWNjZXNzLAogICAgICAgICAgICAgIGxldCBkYXRhID0gaXRlbSBhcz8gRGF0YSBlbHNlIHsgcmV0dXJuIG5pbCB9CiAgICAgICAgcmV0dXJuIHRyeT8gVm9XTEFOQ3JlZGVudGlhbChzZWNyZXQ6IGRhdGEpCiAgICB9CgogICAgc3RhdGljIGZ1bmMgcmVtb3ZlKCkgewogICAgICAgIFNlY0l0ZW1EZWxldGUocXVlcnlXaXRob3V0VmFsdWUoKSBhcyBDRkRpY3Rpb25hcnkpCiAgICB9CgogICAgcHJpdmF0ZSBzdGF0aWMgZnVuYyBxdWVyeVdpdGhvdXRWYWx1ZSgpIC0+IFtTdHJpbmc6IEFueV0gewogICAgICAgIFsKICAgICAgICAgICAga1NlY0NsYXNzIGFzIFN0cmluZzoga1NlY0NsYXNzR2VuZXJpY1Bhc3N3b3JkLAogICAgICAgICAgICBrU2VjQXR0clNlcnZpY2UgYXMgU3RyaW5nOiBzZXJ2aWNlLAogICAgICAgICAgICBrU2VjQXR0ckFjY291bnQgYXMgU3RyaW5nOiBhY2NvdW50LAogICAgICAgIF0KICAgIH0KfQoKcHJpdmF0ZSBleHRlbnNpb24gRGF0YSB7CiAgICB2YXIgYmFzZTY0VVJMOiBTdHJpbmcgewogICAgICAgIGJhc2U2NEVuY29kZWRTdHJpbmcoKQogICAgICAgICAgICAucmVwbGFjaW5nT2NjdXJyZW5jZXMob2Y6ICIrIiwgd2l0aDogIi0iKQogICAgICAgICAgICAucmVwbGFjaW5nT2NjdXJyZW5jZXMob2Y6ICIvIiwgd2l0aDogIl8iKQogICAgICAgICAgICAucmVwbGFjaW5nT2NjdXJyZW5jZXMob2Y6ICI9Iiwgd2l0aDogIiIpCiAgICB9Cn0K
+import CryptoKit
+import Foundation
+import Security
+
+struct VoWLANCredential: Equatable, Sendable {
+    let secret: Data
+
+    var encodedSecret: String { secret.base64URL }
+
+    init(secret: Data) throws {
+        guard secret.count >= 32 else { throw VoWLANAuthError.invalidSecret }
+        self.secret = secret
+    }
+}
+
+struct VoWLANSignedRequest: Equatable, Sendable {
+    let timestamp: Int64
+    let nonce: String
+    let canonical: String
+    let signature: String
+}
+
+enum VoWLANAuthError: LocalizedError {
+    case invalidSecret
+    case randomUnavailable
+
+    var errorDescription: String? {
+        switch self {
+        case .invalidSecret: return "VoWLAN 配对密钥无效"
+        case .randomUnavailable: return "无法生成 VoWLAN 安全随机数"
+        }
+    }
+}
+
+struct VoWLANRequestSigner: Sendable {
+    let credential: VoWLANCredential
+
+    init(secret: Data) throws {
+        credential = try VoWLANCredential(secret: secret)
+    }
+
+    func sign(
+        method: String,
+        path: String,
+        body: Data,
+        timestamp: Int64 = Int64(Date().timeIntervalSince1970),
+        nonce: String = VoWLANRequestSigner.makeNonce()
+    ) throws -> VoWLANSignedRequest {
+        guard !nonce.isEmpty else { throw VoWLANAuthError.randomUnavailable }
+        let digest = SHA256.hash(data: body).map { String(format: "%02x", $0) }.joined()
+        let canonical = "\(method.uppercased())\n\(path)\n\(digest)\n\(timestamp)\n\(nonce)"
+        let key = SymmetricKey(data: credential.secret)
+        let mac = HMAC<SHA256>.authenticationCode(for: Data(canonical.utf8), using: key)
+        return VoWLANSignedRequest(
+            timestamp: timestamp,
+            nonce: nonce,
+            canonical: canonical,
+            signature: Data(mac).base64URL
+        )
+    }
+
+    static func makeNonce() -> String {
+        var bytes = [UInt8](repeating: 0, count: 16)
+        guard SecRandomCopyBytes(kSecRandomDefault, bytes.count, &bytes) == errSecSuccess else { return "" }
+        return Data(bytes).base64URL
+    }
+}
+
+enum VoWLANCredentialStore {
+    private static let service = "com.sheldonjoo.uphone.vowlan"
+    private static let account = "paired-secret-v1"
+
+    static func loadOrCreate() throws -> VoWLANCredential {
+        if let existing = load() { return existing }
+        var bytes = [UInt8](repeating: 0, count: 32)
+        guard SecRandomCopyBytes(kSecRandomDefault, bytes.count, &bytes) == errSecSuccess else {
+            throw VoWLANAuthError.randomUnavailable
+        }
+        let credential = try VoWLANCredential(secret: Data(bytes))
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: account,
+            kSecValueData as String: credential.secret,
+            kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly,
+        ]
+        SecItemDelete(queryWithoutValue() as CFDictionary)
+        guard SecItemAdd(query as CFDictionary, nil) == errSecSuccess else {
+            throw VoWLANAuthError.randomUnavailable
+        }
+        return credential
+    }
+
+    static func load() -> VoWLANCredential? {
+        var query = queryWithoutValue()
+        query[kSecReturnData as String] = true
+        query[kSecMatchLimit as String] = kSecMatchLimitOne
+        var item: CFTypeRef?
+        guard SecItemCopyMatching(query as CFDictionary, &item) == errSecSuccess,
+              let data = item as? Data else { return nil }
+        return try? VoWLANCredential(secret: data)
+    }
+
+    static func remove() {
+        SecItemDelete(queryWithoutValue() as CFDictionary)
+    }
+
+    private static func queryWithoutValue() -> [String: Any] {
+        [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: account,
+        ]
+    }
+}
+
+private extension Data {
+    var base64URL: String {
+        base64EncodedString()
+            .replacingOccurrences(of: "+", with: "-")
+            .replacingOccurrences(of: "/", with: "_")
+            .replacingOccurrences(of: "=", with: "")
+    }
+}
