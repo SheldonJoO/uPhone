@@ -14,9 +14,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-
-      - name: Show Xcode version
-        run: xcodebuild -version
+      - name: Select Xcode 26
+        run: |
+          ls /Applications/ | grep -i xcode
+          sudo xcode-select -s /Applications/Xcode_26.app/Contents/Developer || sudo xcode-select -s /Applications/Xcode_26.0.app/Contents/Developer || echo "Xcode 26 not found, using default"
+          xcodebuild -version
 
       - name: Build unsigned app
         run: |
@@ -28,14 +30,27 @@ jobs:
             -derivedDataPath build \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
-            build
+            build 2>&1 | tee xcodebuild.log
+          echo "=== ERRORS ==="
+          grep -i "^error:" xcodebuild.log | head -20 || echo "No error lines found"
+
+      - name: Upload build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: xcodebuild-log
+          path: iOS/xcodebuild.log
+          if-no-files-found: warn
 
       - name: Package IPA
         run: |
           APP_DIR="iOS/build/Build/Products/Release-iphoneos"
           ls "$APP_DIR"
+          # Find the .app (could be AirSIM.app or uPhone.app)
+          APP_NAME=$(ls "$APP_DIR" | grep "\.app$" | head -1)
+          echo "Found app: $APP_NAME"
           mkdir -p "$APP_DIR/Payload"
-          cp -r "$APP_DIR/uPhone.app" "$APP_DIR/Payload/"
+          cp -r "$APP_DIR/$APP_NAME" "$APP_DIR/Payload/"
           cd "$APP_DIR"
           zip -qry uPhone-unsigned.ipa Payload
 
