@@ -81,13 +81,19 @@ fi
 "$BUILD_TOOLS/zipalign" -f 4 "$OUT/unsigned.apk" "$OUT/aligned.apk"
 
 if [ "$BUILD_VARIANT" = debug ]; then
-  KEYSTORE="$ROOT/build/debug.keystore"
+  # 固定签名（CI）：AIRSIM_ANDROID_DEBUG_KEYSTORE 指向外部 keystore 时优先使用，
+  # 保证每次构建签名一致，手机端可直接覆盖安装无需卸载。
+  KEYSTORE="${AIRSIM_ANDROID_DEBUG_KEYSTORE:-$ROOT/build/debug.keystore}"
+  KS_PASS="${AIRSIM_ANDROID_DEBUG_KEYSTORE_PASSWORD:-android}"
+  KS_ALIAS="${AIRSIM_ANDROID_DEBUG_KEY_ALIAS:-androiddebugkey}"
+  KEY_PASS="${AIRSIM_ANDROID_DEBUG_KEY_PASSWORD:-$KS_PASS}"
   if [ ! -f "$KEYSTORE" ]; then
-    "$JAVA_HOME/bin/keytool" -genkeypair -keystore "$KEYSTORE" -storepass android -keypass android \
-      -alias androiddebugkey -dname "CN=AirSIM Debug,O=AirSIM,C=CN" -keyalg RSA -keysize 2048 -validity 3650 >/dev/null 2>&1
+    "$JAVA_HOME/bin/keytool" -genkeypair -keystore "$KEYSTORE" -storepass "$KS_PASS" -keypass "$KEY_PASS" \
+      -alias "$KS_ALIAS" -dname "CN=AirSIM Debug,O=AirSIM,C=CN" -keyalg RSA -keysize 2048 -validity 3650 >/dev/null 2>&1
   fi
   OUTPUT_APK="$OUT/$OUTPUT_BASENAME-debug.apk"
-  "$BUILD_TOOLS/apksigner" sign --ks "$KEYSTORE" --ks-pass pass:android --key-pass pass:android \
+  "$BUILD_TOOLS/apksigner" sign --ks "$KEYSTORE" --ks-key-alias "$KS_ALIAS" \
+    --ks-pass "pass:$KS_PASS" --key-pass "pass:$KEY_PASS" \
     --out "$OUTPUT_APK" "$OUT/aligned.apk"
 else
   : "${AIRSIM_ANDROID_KEYSTORE:?set AIRSIM_ANDROID_KEYSTORE for a release build}"

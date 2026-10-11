@@ -32,10 +32,20 @@ jobs:
           yes | "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
           "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" "build-tools;35.0.0" "platforms;android-35"
 
+      - name: Restore persistent debug keystore
+        run: |
+          set -e
+          mkdir -p "$HOME/uphone-keystore"
+          echo "${{ secrets.UPHONE_DEBUG_KEYSTORE_B64 }}" | base64 -d > "$HOME/uphone-keystore/uphone-debug.keystore"
+          ls -lh "$HOME/uphone-keystore/uphone-debug.keystore"
+
       - name: Build APK
         run: |
           set -e
           export ANDROID_SDK_ROOT="$HOME/android-sdk"
+          export AIRSIM_ANDROID_DEBUG_KEYSTORE="$HOME/uphone-keystore/uphone-debug.keystore"
+          export AIRSIM_ANDROID_DEBUG_KEYSTORE_PASSWORD="${{ secrets.UPHONE_DEBUG_KEYSTORE_PASSWORD }}"
+          export AIRSIM_ANDROID_DEBUG_KEY_ALIAS="uphone-debug"
           cd android/phone-control-app
           bash build.sh
           ls -lh build/android/*.apk
