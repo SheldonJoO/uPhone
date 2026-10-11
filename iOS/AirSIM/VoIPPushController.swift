@@ -1395,6 +1395,13 @@ final class VoIPPushController: NSObject {
             guard let secret = try? VoWLANCredentialStore.loadOrCreate().encodedSecret else { return nil }
             return .local(vowlanSecret: secret)
         }
+        // 侧载测试跳过模式：无 PushKit token 时用最小注册体配对
+        if UserDefaults.standard.bool(forKey: "sideloadSkipPushCredentials"),
+           let sideload = sideloadTestRegistration() {
+            var registration = sideload
+            registration.vowlanSecret = (try? VoWLANCredentialStore.loadOrCreate().encodedSecret)
+            return registration
+        }
         guard var registration = currentRegistration() else { return nil }
         registration.vowlanSecret = (try? VoWLANCredentialStore.loadOrCreate().encodedSecret)
         return registration

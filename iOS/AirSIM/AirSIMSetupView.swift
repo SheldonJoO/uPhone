@@ -100,7 +100,7 @@ struct AirSIMSettingsView: View {
     @State private var selfTestPhase: SelfTestPhase = .idle
     @State private var selfTestReport: CloudSelfTestReport?
     @State private var selfTestTask: Task<Void, Never>?
-    @State private var skipPushForSelfTest = false
+    @AppStorage("sideloadSkipPushCredentials") private var skipPushForSelfTest = false
 
     var body: some View {
         NavigationStack {
