@@ -43,7 +43,7 @@ jobs:
           cd iOS
           set -o pipefail
           xcodebuild -project AirSIM.xcodeproj \
-            -scheme AirSIM \
+            -target AirSIM \
             -configuration Release \
             -destination 'generic/platform=iOS' \
             -derivedDataPath build \
