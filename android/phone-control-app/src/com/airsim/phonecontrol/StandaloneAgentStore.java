@@ -145,7 +145,10 @@ final class StandaloneAgentStore {
                 }
             }
         }
-        if (!hasToken) throw new IllegalArgumentException("至少需要一个 APNs token");
+        // 侧载测试模式：iPhone 无法取得 PushKit token，允许无 APNs token 注册
+        // （中继服务器同样认可 sideload_test 标记放行）
+        if (!hasToken && !value.optBoolean("sideload_test", false))
+            throw new IllegalArgumentException("至少需要一个 APNs token");
         String watchToken = value.optString("watch_voip_token", "");
         if (!watchToken.isEmpty() && !(bundleID + ".watchkitapp").equals(value.optString("watch_bundle_id", ""))) {
             throw new IllegalArgumentException("watch_bundle_id 与主应用不匹配");
