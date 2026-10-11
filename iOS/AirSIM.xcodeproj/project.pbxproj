@@ -555,7 +555,7 @@
 				INFOPLIST_FILE = "AirSIM/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 16.3;
 				MARKETING_VERSION = 0.9.5;
-				PRODUCT_BUNDLE_IDENTIFIER = com.example.airsim;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sheldonjoo.uphone;
 				PRODUCT_NAME = AirSIM;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
@@ -581,7 +581,7 @@
 				INFOPLIST_FILE = "AirSIM/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 16.3;
 				MARKETING_VERSION = 0.9.5;
-				PRODUCT_BUNDLE_IDENTIFIER = com.example.airsim;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sheldonjoo.uphone;
 				PRODUCT_NAME = AirSIM;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
@@ -607,7 +607,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 0.9.5;
-				PRODUCT_BUNDLE_IDENTIFIER = com.example.airsim.liveactivity;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sheldonjoo.uphone.liveactivity;
 				PRODUCT_NAME = AirSIMLiveActivityExtension;
 				SKIP_INSTALL = YES;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -633,7 +633,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 0.9.5;
-				PRODUCT_BUNDLE_IDENTIFIER = com.example.airsim.liveactivity;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sheldonjoo.uphone.liveactivity;
 				PRODUCT_NAME = AirSIMLiveActivityExtension;
 				SKIP_INSTALL = YES;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -651,7 +651,7 @@
 				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.3;
-				PRODUCT_BUNDLE_IDENTIFIER = com.example.airsim.tests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sheldonjoo.uphone.tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -667,7 +667,7 @@
 				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.3;
-				PRODUCT_BUNDLE_IDENTIFIER = com.example.airsim.tests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sheldonjoo.uphone.tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -689,10 +689,10 @@
 				INFOPLIST_FILE = "AirSIMWatchApp/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = AirSIM;
 				INFOPLIST_KEY_CFBundleIconName = AppIcon;
-				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.example.airsim;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.sheldonjoo.uphone;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MARKETING_VERSION = 0.9.5;
-				PRODUCT_BUNDLE_IDENTIFIER = com.example.airsim.watchkitapp;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sheldonjoo.uphone.watchkitapp;
 				PRODUCT_NAME = AirSIMWatchApp;
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
@@ -717,10 +717,10 @@
 				INFOPLIST_FILE = "AirSIMWatchApp/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = AirSIM;
 				INFOPLIST_KEY_CFBundleIconName = AppIcon;
-				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.example.airsim;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.sheldonjoo.uphone;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MARKETING_VERSION = 0.9.5;
-				PRODUCT_BUNDLE_IDENTIFIER = com.example.airsim.watchkitapp;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sheldonjoo.uphone.watchkitapp;
 				PRODUCT_NAME = AirSIMWatchApp;
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;

@@ -1,26 +1,23 @@
 {
   "fill" : {
-    "automatic-gradient" : "display-p3:1.00000,1.00000,1.00000,1.00000"
+    "automatic-gradient" : "display-p3:0.12000,0.12000,0.13000,1.00000"
   },
   "groups" : [
     {
       "layers" : [
         {
-          "fill" : {
-            "automatic-gradient" : "display-p3:0.18431,0.50196,0.92941,1.00000"
-          },
-          "image-name" : "phone-fill-system.png",
-          "name" : "Phone",
+          "image-name" : "uphone-avatar.png",
+          "name" : "Avatar",
           "position" : {
-            "scale" : 0.74,
+            "scale" : 1.0,
             "translation-in-points" : [
-              20.02625000000012,
-              12.012187499999982
+              0,
+              0
             ]
           }
         }
       ],
-      "name" : "Phone Symbol",
+      "name" : "Avatar",
       "shadow" : {
         "kind" : "neutral",
         "opacity" : 0
