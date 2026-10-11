@@ -37,6 +37,9 @@
 		<meta-data
 			android:name="moe.shizuku.client.V3_SUPPORT"
 			android:value="true" />
+		<meta-data
+			android:name="com.airsim.phonecontrol.STANDALONE_AGENT"
+			android:value="true" />
 
 		<provider
 			android:name="rikka.shizuku.ShizukuProvider"
