@@ -179,17 +179,42 @@ struct DialPadView: View {
                     }
                     .padding(.horizontal, 12)
 
+                    if let currentAgent = model.currentAndroidAgent {
+                        DialPadCurrentAgentCard(
+                            agent: currentAgent,
+                            agentCount: model.pairedAndroidAgents.count,
+                            cloudModeEnabled: CloudModePreference.isEnabled()
+                        ) {
+                            pairedAgentListPresentation = PairedAgentListPresentation()
+                        }
+                    } else if !model.pairedAndroidAgents.isEmpty {
+                        Button {
+                            pairedAgentListPresentation = PairedAgentListPresentation()
+                        } label: {
+                            HStack(spacing: 10) {
+                                Image(systemName: "smartphone.slash")
+                                    .foregroundStyle(.secondary)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("已配对 Android Agent · \(model.pairedAndroidAgents.count)")
+                                        .font(.subheadline.weight(.semibold))
+                                    Text("当前没有可用的拨号路由")
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .font(.caption.weight(.semibold))
+                                    .foregroundStyle(.tertiary)
+                            }
+                            .padding(12)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        }
+                        .buttonStyle(.plain)
+                    }
+
                     dialKeyGrid(metrics: metrics)
                     dialActions(metrics: metrics)
-
-                    // 状态条收到底部：紧凑显示传输状态 + 双卡选择，不再挤占拨号区。
-                    DialPadBottomStrip(
-                        currentAgent: model.currentAndroidAgent,
-                        agentCount: model.pairedAndroidAgents.count,
-                        cloudModeEnabled: CloudModePreference.isEnabled()
-                    ) {
-                        pairedAgentListPresentation = PairedAgentListPresentation()
-                    }
                 }
                 .frame(maxWidth: 520)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
@@ -360,121 +385,66 @@ private struct PairedAgentListPresentation: Identifiable {
     let id = "paired-android-agents"
 }
 
-/// 拨号盘底部紧凑状态条：传输状态 + 双卡选择 + Agent 列表入口。
-/// 一行搞定，不挤占拨号区；点状态部分弹出已配对 Agent 列表。
-private struct DialPadBottomStrip: View {
-    let currentAgent: AndroidAgentPresentation?
+private struct DialPadCurrentAgentCard: View {
+    let agent: AndroidAgentPresentation
     let agentCount: Int
     let cloudModeEnabled: Bool
     let showAll: () -> Void
 
-    @State private var selectedSimID: Int? = SimSelectionStore.selectedSubscriptionID()
-
-    private var simCards: [SimCard] { currentAgent?.simCards ?? [] }
-
-    private var transportText: String {
-        guard let agent = currentAgent else { return "未连接" }
-        if agent.vowlanOnline { return "VoWLAN 在线" }
-        if agent.cloudOnline { return "云端在线" }
-        return "离线"
-    }
-
-    private var transportOnline: Bool {
-        guard let agent = currentAgent else { return false }
-        return agent.vowlanOnline || agent.cloudOnline
-    }
-
     var body: some View {
-        HStack(spacing: 8) {
-            // 左：状态，点击弹出 Agent 列表
-            Button(action: showAll) {
-                HStack(spacing: 6) {
-                    Circle()
-                        .fill(transportOnline ? Color.green : Color.gray)
-                        .frame(width: 7, height: 7)
-                    Text(transportText)
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(transportOnline ? .primary : .secondary)
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 10) {
+                Image(systemName: "smartphone")
+                    .font(.headline)
+                    .foregroundStyle(.green)
+                    .frame(width: 34, height: 34)
+                    .background(Color.green.opacity(0.12), in: Circle())
+
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack(spacing: 6) {
+                        Text(agent.deviceName)
+                            .font(.subheadline.weight(.semibold))
+                            .lineLimit(1)
+                        Text("当前")
+                            .font(.caption2.weight(.bold))
+                            .foregroundStyle(.green)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(Color.green.opacity(0.12), in: Capsule())
+                    }
+                    Text(agent.phoneNumber ?? "号码未提供")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                         .lineLimit(1)
-                    if agentCount > 1 {
-                        Image(systemName: "chevron.up.chevron.down")
-                            .font(.caption2)
-                            .foregroundStyle(.tertiary)
-                    }
                 }
-                .padding(.horizontal, 10)
-                .padding(.vertical, 7)
-                .background(.thinMaterial, in: Capsule())
-            }
-            .buttonStyle(.plain)
 
-            Spacer(minLength: 4)
+                Spacer(minLength: 4)
 
-            // 右：双卡选择（只有多卡时显示）
-            if simCards.count > 1 {
-                HStack(spacing: 6) {
-                    ForEach(simCards) { sim in
-                        Button {
-                            let newID = (selectedSimID == sim.subscriptionID) ? nil : sim.subscriptionID
-                            selectedSimID = newID
-                            SimSelectionStore.select(subscriptionID: newID)
-                        } label: {
-                            HStack(spacing: 4) {
-                                Text(sim.shortLabel)
-                                    .font(.caption.weight(.semibold))
-                                if !sim.carrierName.isEmpty {
-                                    Text(sim.carrierName)
-                                        .font(.caption2)
-                                        .opacity(0.8)
-                                        .lineLimit(1)
-                                }
-                            }
-                            .foregroundStyle(
-                                isSimSelected(sim) ? .white : .primary
-                            )
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 7)
-                            .background(
-                                isSimSelected(sim) ? Color.green : Color.primary.opacity(0.08),
-                                in: Capsule()
-                            )
-                        }
+                if agentCount > 1 {
+                    Button("全部 \(agentCount)", action: showAll)
+                        .font(.caption.weight(.semibold))
                         .buttonStyle(.plain)
-                    }
+                        .foregroundStyle(.blue)
                 }
-            } else if let sim = simCards.first {
-                HStack(spacing: 4) {
-                    Text(sim.shortLabel)
-                    if !sim.carrierName.isEmpty {
-                        Text("· \(sim.carrierName)")
-                    }
-                }
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .padding(.horizontal, 10)
-                .padding(.vertical, 7)
-                .background(Color.primary.opacity(0.06), in: Capsule())
+            }
+
+            HStack(spacing: 8) {
+                AgentTransportPill(title: "VoWLAN", online: agent.vowlanOnline, enabled: true)
+                AgentTransportPill(title: "云端", online: agent.cloudOnline, enabled: cloudModeEnabled)
+                Spacer(minLength: 0)
+                Text(agent.agentKindTitle)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
             }
         }
-        .frame(maxWidth: .infinity)
-        .padding(.horizontal, 4)
-        .onReceive(NotificationCenter.default.publisher(for: .simCardsUpdated)) { _ in
-            selectedSimID = SimSelectionStore.selectedSubscriptionID()
-            // 已选的 SIM 不在当前列表里时，回到默认（不指定）
-            if let selectedSimID, !simCards.contains(where: { $0.subscriptionID == selectedSimID }) {
-                self.selectedSimID = nil
-                SimSelectionStore.select(subscriptionID: nil)
-            }
+        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .stroke(Color.primary.opacity(0.07), lineWidth: 0.5)
         }
     }
-
-    private func isSimSelected(_ sim: SimCard) -> Bool {
-        selectedSimID == sim.subscriptionID
-    }
-}
-
-extension Notification.Name {
-    static let simCardsUpdated = Notification.Name("uphone.simCardsUpdated")
 }
 
 private struct AgentTransportPill: View {
@@ -898,19 +868,9 @@ struct MessagesView: View {
                     size: PhoneListMetrics.avatarSize
                 )
                 VStack(alignment: .leading, spacing: 3) {
-                    HStack(spacing: 6) {
-                        Text(displayName)
-                            .font(.body.weight(.semibold))
-                            .lineLimit(1)
-                        if let simLabel = messages.last?.simLabel {
-                            Text(simLabel)
-                                .font(.caption2.weight(.bold))
-                                .foregroundStyle(.blue)
-                                .padding(.horizontal, 5)
-                                .padding(.vertical, 1)
-                                .background(Color.blue.opacity(0.1), in: Capsule())
-                        }
-                    }
+                    Text(displayName)
+                        .font(.body.weight(.semibold))
+                        .lineLimit(1)
                     Text(messages.last?.content ?? "")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
@@ -952,26 +912,6 @@ private struct MessageThreadView: View {
                                     alignment: message.isOutgoing ? .trailing : .leading,
                                     spacing: 3
                                 ) {
-                                    // 验证码一键复制：自动提取 4-8 位数字验证码
-                                    if !message.isOutgoing, let code = message.verificationCode {
-                                        Button {
-                                            UIPasteboard.general.string = code
-                                        } label: {
-                                            HStack(spacing: 6) {
-                                                Image(systemName: "key.fill")
-                                                    .font(.caption2)
-                                                Text(code)
-                                                    .font(.body.weight(.bold).monospacedDigit())
-                                                Text("复制")
-                                                    .font(.caption.weight(.semibold))
-                                            }
-                                            .foregroundStyle(.blue)
-                                            .padding(.horizontal, 12)
-                                            .padding(.vertical, 7)
-                                            .background(Color.blue.opacity(0.1), in: Capsule())
-                                        }
-                                        .buttonStyle(.plain)
-                                    }
                                     Text(message.content)
                                         .padding(.horizontal, 14)
                                         .padding(.vertical, 9)
@@ -986,10 +926,6 @@ private struct MessageThreadView: View {
                                         Text(L10n.t("已发送"))
                                             .font(.caption2)
                                             .foregroundStyle(.secondary)
-                                    } else if let simLabel = message.simLabel {
-                                        Text("来自 \(simLabel)")
-                                            .font(.caption2)
-                                            .foregroundStyle(.tertiary)
                                     }
                                 }
                                 if !message.isOutgoing { Spacer(minLength: 48) }
@@ -1050,17 +986,6 @@ private struct MessageComposer: View {
         !recipient.trimmingCharacters(in: .whitespaces).isEmpty
             && !content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
             && !sending
-    }
-
-    /// 当前选中的发送 SIM 标签（双卡时显示）。
-    private var sendingSimLabel: String? {
-        let sims = model.currentAndroidAgent?.simCards ?? []
-        guard sims.count > 1 else { return nil }
-        if let selected = SimSelectionStore.selectedSubscriptionID(),
-           let sim = sims.first(where: { $0.subscriptionID == selected }) {
-            return sim.fullLabel
-        }
-        return "默认 SIM"
     }
 
     var body: some View {
@@ -1173,19 +1098,6 @@ private struct MessageComposer: View {
 
     private var messageInputBar: some View {
         VStack(spacing: 5) {
-            // 双卡时显示将用哪张卡发送
-            if let simLabel = sendingSimLabel {
-                HStack {
-                    Spacer()
-                    Text("将通过 \(simLabel) 发送")
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 3)
-                        .background(Color.primary.opacity(0.06), in: Capsule())
-                }
-                .padding(.horizontal, 4)
-            }
             HStack(alignment: .bottom, spacing: 9) {
                 TextField(L10n.t("短信内容"), text: $content, axis: .vertical)
                     .textFieldStyle(.plain)

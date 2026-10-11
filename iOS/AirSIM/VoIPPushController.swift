@@ -632,8 +632,6 @@ struct IncomingRemoteSMS: Equatable, Sendable {
     let code: String?
     let timestamp: Date
     let contentTruncated: Bool
-    let subscriptionID: Int?
-    let slotIndex: Int?
 
     init(userInfo: [AnyHashable: Any]) throws {
         guard userInfo["event"] as? String == "incoming_sms" else {
@@ -654,8 +652,6 @@ struct IncomingRemoteSMS: Equatable, Sendable {
         code = Self.nonEmpty(userInfo["code"] as? String)
         self.timestamp = timestamp
         contentTruncated = userInfo["content_truncated"] as? Bool ?? false
-        subscriptionID = userInfo["subscription_id"] as? Int
-        slotIndex = userInfo["slot_index"] as? Int
     }
 
     private static func parseTimestamp(_ value: String) -> Date? {
@@ -675,9 +671,7 @@ struct IncomingRemoteSMS: Equatable, Sendable {
             code: code,
             timestamp: timestamp,
             deliveryID: deliveryID,
-            direction: .incoming,
-            subscriptionID: subscriptionID,
-            slotIndex: slotIndex
+            direction: .incoming
         )
     }
 
@@ -701,7 +695,7 @@ final class VoIPPushController: NSObject {
         static let liveActivityPushToStartToken = "airsim.live-activity-push-to-start-token"
         static let deviceID = "airsim.push-device-id"
         static let relayURL = "airsim.push-relay-url"
-        static let keychainService = "com.sheldonjoo.uphone.push"
+        static let keychainService = "com.example.airsim.push"
         static let keychainAccount = "device-secret"
     }
 
@@ -1171,8 +1165,7 @@ final class VoIPPushController: NSObject {
             type: "dial",
             number: number,
             message: nil,
-            mediaTransport: mediaTransport,
-            subscriptionID: SimSelectionStore.selectedSubscriptionID()
+            mediaTransport: mediaTransport
         )
         guard enqueue.accepted, let call = enqueue.call,
               let uuid = UUID(uuidString: call.callUUID),
@@ -1200,8 +1193,7 @@ final class VoIPPushController: NSObject {
             commandID: commandID,
             type: "send_sms",
             number: number,
-            message: message,
-            subscriptionID: SimSelectionStore.selectedSubscriptionID()
+            message: message
         )
         guard enqueue.accepted else { throw CloudCommandError.invalidResponse }
         let outcome = try await waitForCloudCommand(commandID: commandID, timeout: 5 * 60)
@@ -1231,8 +1223,7 @@ final class VoIPPushController: NSObject {
         type: String,
         number: String,
         message: String?,
-        mediaTransport: CloudMediaTransport? = nil,
-        subscriptionID: Int? = nil
+        mediaTransport: CloudMediaTransport? = nil
     ) async throws -> CloudCommandEnqueueResponse {
         guard CloudModePreference.isEnabled() else { throw CloudCommandError.cloudModeDisabled }
         guard let registration = currentRegistration(),
@@ -1248,7 +1239,6 @@ final class VoIPPushController: NSObject {
         ]
         if let message { body["message"] = message }
         if let mediaTransport { body["media_transport"] = mediaTransport.rawValue }
-        if let subscriptionID { body["subscription_id"] = String(subscriptionID) }
         return try await relayRequest(url: url, body: body, as: CloudCommandEnqueueResponse.self)
     }
 
@@ -1416,9 +1406,9 @@ final class VoIPPushController: NSObject {
             token: token,
             alertToken: defaults.string(forKey: Keys.alertToken) ?? "",
             watchVoIPToken: defaults.string(forKey: Keys.watchVoIPToken) ?? "",
-            watchBundleID: defaults.string(forKey: Keys.watchBundleID) ?? "com.sheldonjoo.uphone.watchkitapp",
+            watchBundleID: defaults.string(forKey: Keys.watchBundleID) ?? "com.example.airsim.watchkitapp",
             liveActivityPushToStartToken: defaults.string(forKey: Keys.liveActivityPushToStartToken) ?? "",
-            bundleID: Bundle.main.bundleIdentifier ?? "com.sheldonjoo.uphone",
+            bundleID: Bundle.main.bundleIdentifier ?? "com.example.airsim",
             environment: APNsEnvironment.current,
             relayURL: relayURL,
             mediaTransport: CloudMediaTransportPreference.requested().rawValue,

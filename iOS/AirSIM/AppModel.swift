@@ -206,8 +206,7 @@ final class AppModel: ObservableObject {
                 agentKind: agent.agentKind,
                 cloudOnline: agent.cloudOnline,
                 vowlanOnline: false,
-                isCurrent: false,
-                simCards: agent.simCards
+                isCurrent: false
             )
         }
 
@@ -220,8 +219,7 @@ final class AppModel: ObservableObject {
                 agentKind: local.agentKind ?? previous?.agentKind,
                 cloudOnline: previous?.cloudOnline ?? false,
                 vowlanOnline: true,
-                isCurrent: false,
-                simCards: previous?.simCards ?? []
+                isCurrent: false
             )
         }
 
@@ -276,7 +274,6 @@ final class AppModel: ObservableObject {
         } catch {
             cloudAgentDirectory = nil
         }
-        NotificationCenter.default.post(name: .simCardsUpdated, object: nil)
     }
 
     @discardableResult
@@ -2111,4 +2108,3 @@ private enum ModuleSetupError: LocalizedError {
         }
     }
 }
-// build-trigger

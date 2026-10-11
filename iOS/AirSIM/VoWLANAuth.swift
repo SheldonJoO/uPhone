@@ -67,7 +67,7 @@ struct VoWLANRequestSigner: Sendable {
 }
 
 enum VoWLANCredentialStore {
-    private static let service = "com.sheldonjoo.uphone.vowlan"
+    private static let service = "com.example.airsim.vowlan"
     private static let account = "paired-secret-v1"
 
     static func loadOrCreate() throws -> VoWLANCredential {
