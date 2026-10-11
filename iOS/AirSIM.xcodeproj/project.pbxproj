@@ -557,7 +557,7 @@
 				INFOPLIST_FILE = "AirSIM/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 16.3;
 				MARKETING_VERSION = 0.9.5;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sheldonjoo.uphone;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.airsim;
 				PRODUCT_NAME = AirSIM;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
@@ -583,7 +583,7 @@
 				INFOPLIST_FILE = "AirSIM/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 16.3;
 				MARKETING_VERSION = 0.9.5;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sheldonjoo.uphone;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.airsim;
 				PRODUCT_NAME = AirSIM;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
@@ -609,7 +609,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 0.9.5;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sheldonjoo.uphone.liveactivity;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.airsim.liveactivity;
 				PRODUCT_NAME = AirSIMLiveActivityExtension;
 				SKIP_INSTALL = YES;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -635,7 +635,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 0.9.5;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sheldonjoo.uphone.liveactivity;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.airsim.liveactivity;
 				PRODUCT_NAME = AirSIMLiveActivityExtension;
 				SKIP_INSTALL = YES;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
