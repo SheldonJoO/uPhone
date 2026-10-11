@@ -1698,7 +1698,9 @@ export function validateRegistration(device, allowedBundleID) {
       (liveActivity && !TOKEN_PATTERN.test(liveActivity))) {
     return "invalid APNs token";
   }
-  if (device.bundle_id !== allowedBundleID) return "bundle id is not allowed";
+  // 免费侧载时 bundle ID 会被重签名工具改掉（Apple 要求每个账号唯一），
+  // 不再硬校验精确匹配；device_secret 才是真正的身份凭证。
+  if (!nonEmpty(device.bundle_id)) return "bundle id is required";
   if (watchVoIP && device.watch_bundle_id !== `${allowedBundleID}.watchkitapp`) {
     return "watch bundle id is not allowed";
   }
