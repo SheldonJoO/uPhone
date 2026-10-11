@@ -1,0 +1,13 @@
+name: Test Project
+on: workflow_dispatch
+jobs:
+  test:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Xcode version
+        run: xcodebuild -version
+      - name: List project
+        run: |
+          cd iOS
+          xcodebuild -list -project AirSIM.xcodeproj
