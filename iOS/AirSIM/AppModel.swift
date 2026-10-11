@@ -701,7 +701,7 @@ final class AppModel: ObservableObject {
             ) else { return }
 
             // 用最后实际成功的本地路线复核健康状态。VoWLAN 的长轮询偶发断开时，
-            // 不能再转去探测 USB 默认地址并据此把三星 Agent 判为离线。
+            // 不能再转去探测 USB 默认地址并据此把安卓 Agent 判为离线。
             let healthAPI = lastSuccessfulLocalAPI ?? verifiedVoWLANAPI()
             let health = try? await healthAPI?.health()
             guard ModuleConnectivityPolicy.shouldMarkOffline(
@@ -1959,7 +1959,7 @@ extension AppModel: CallKitActionHandling {
         }
         if currentCallTransport == .vowlan,
            case .unavailable = vowlan.availability {
-            // 三星端在热点接口消失时直接通过 Telecom 结束所属通话；这里让
+            // 安卓端在热点接口消失时直接通过 Telecom 结束所属通话；这里让
             // CallKit 事务立即成功，避免因已断开的控制 socket 把系统界面卡住。
             clearLockedTransport()
             backgroundStandby.resumeAfterCall()
@@ -2111,3 +2111,4 @@ private enum ModuleSetupError: LocalizedError {
         }
     }
 }
+// build-trigger

@@ -10,7 +10,7 @@ struct SamsungPairingService: Identifiable {
     var id: String { sessionID }
     var displayName: String {
         if case let .service(name, _, _, _) = endpoint { return name }
-        return "Samsung Phone Bridge"
+        return "安卓手机桥"
     }
 }
 
@@ -34,8 +34,8 @@ final class SamsungPairingBrowser: ObservableObject {
             Task { @MainActor in
                 guard let self else { return }
                 switch state {
-                case .ready: self.stateText = "正在等待三星配对广播…"
-                case .waiting: self.stateText = "请确认 iPhone 与三星处于同一 Wi-Fi 或三星热点"
+                case .ready: self.stateText = "正在等待安卓配对广播…"
+                case .waiting: self.stateText = "请确认 iPhone 与安卓处于同一 Wi-Fi 或安卓热点"
                 case .failed(let error): self.stateText = "局域网扫描失败：\(error.localizedDescription)"
                 case .cancelled: self.stateText = "扫描已停止"
                 default: break
@@ -209,11 +209,11 @@ enum SamsungPairingClientError: LocalizedError {
     case invalidCode, expired, rejected, responseTooLarge, connectionClosed, registrationUnavailable
     var errorDescription: String? {
         switch self {
-        case .invalidCode: return "请输入三星屏幕上的 6 位验证码"
-        case .expired: return "三星配对窗口已过期，请重新开始"
-        case .rejected: return "三星拒绝了配对，请核对验证码后重试"
-        case .responseTooLarge: return "三星返回的数据异常"
-        case .connectionClosed: return "与三星的局域网连接已断开"
+        case .invalidCode: return "请输入安卓屏幕上的 6 位验证码"
+        case .expired: return "安卓配对窗口已过期，请重新开始"
+        case .rejected: return "安卓拒绝了配对，请核对验证码后重试"
+        case .responseTooLarge: return "安卓返回的数据异常"
+        case .connectionClosed: return "与安卓的局域网连接已断开"
         case .registrationUnavailable: return "本机尚未取得 PushKit 凭据，请先允许通知并等待注册"
         }
     }

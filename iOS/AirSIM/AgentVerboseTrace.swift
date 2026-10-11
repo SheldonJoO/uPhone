@@ -155,7 +155,7 @@ actor AgentVerboseTraceRecorder {
 
     func exportText(agentEvents: [AgentVerboseRemoteEvent]) -> String {
         var lines = [
-            "AirSIM Agent Verbose Trace",
+            "uPhone Agent Verbose Trace",
             "exported_at=\(Self.iso8601.string(from: Date()))",
             "local_entries=\(entries.count) agent_events=\(agentEvents.count)",
             ""

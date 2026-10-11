@@ -268,7 +268,7 @@ final class AirSIMNotificationDelegate: NSObject, UIApplicationDelegate, @precon
 
     private static func reportActionFailure(_ error: Error) {
         let content = UNMutableNotificationContent()
-        content.title = "AirSIM 操作失败"
+        content.title = "uPhone 操作失败"
         content.body = error.localizedDescription
         content.sound = .default
         UNUserNotificationCenter.current().add(
@@ -576,7 +576,7 @@ final class IncomingCallNotifier {
         let content = UNMutableNotificationContent()
         let number = call.number?.isEmpty == false ? call.number! : "未知号码"
         let displayName = callerName?.isEmpty == false ? callerName! : number
-        content.title = "AirSIM 来电"
+        content.title = "uPhone 来电"
         // 同时保留姓名和号码，用户可以在锁屏直接确认来电者。
         content.body = displayName == number ? number : "\(displayName) · \(number)"
         content.sound = .default

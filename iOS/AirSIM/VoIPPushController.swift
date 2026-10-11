@@ -259,7 +259,7 @@ struct ConnectionModePresentation: Equatable, Sendable {
                 mode: .vowlan,
                 title: "VoWLAN",
                 status: "已连接",
-                detail: cloudOnline ? "局域网优先，云端可回退" : "同一 Wi-Fi / 三星热点"
+                detail: cloudOnline ? "局域网优先，云端可回退" : "同一 Wi-Fi / 安卓热点"
             )
         }
         if cloudModeEnabled {
@@ -1016,6 +1016,7 @@ final class VoIPPushController: NSObject {
 
     /// 只验证控制面，不发起电话或短信：本机凭据 → Relay 身份 → 注册鉴权 → Agent 心跳。
     func runCloudSelfTest(
+        skipPushCredentials: Bool = false,
         onUpdate: @MainActor @escaping (CloudSelfTestReport) -> Void = { _ in }
     ) async -> CloudSelfTestReport {
         var report = CloudSelfTestReport.initial
@@ -1027,9 +1028,14 @@ final class VoIPPushController: NSObject {
         if !CloudModePreference.isEnabled() { missing.append("云端模式未开启") }
         if !readiness.relayURLReady { missing.append("Relay HTTPS 地址无效") }
         if !readiness.deviceIdentityReady { missing.append("设备身份未生成") }
-        if !readiness.voIPTokenReady { missing.append("PushKit token 未就绪") }
-        if !readiness.alertTokenReady { missing.append("通知 token 未就绪") }
-        guard missing.isEmpty, let registration = currentRegistration() else {
+        if !skipPushCredentials {
+            if !readiness.voIPTokenReady { missing.append("PushKit token 未就绪") }
+            if !readiness.alertTokenReady { missing.append("通知 token 未就绪") }
+        }
+        let registration: AgentPushRegistration? = skipPushCredentials
+            ? sideloadTestRegistration()
+            : currentRegistration()
+        guard missing.isEmpty, let registration else {
             report.fail(.configuration, detail: missing.isEmpty ? "设备注册信息不完整" : missing.joined(separator: "；"))
             onUpdate(report)
             return report
@@ -1037,11 +1043,11 @@ final class VoIPPushController: NSObject {
         report.update(
             .configuration,
             state: .passed,
-            detail: "设备 \(readiness.deviceIDHint ?? "已生成") · APNs \(readiness.environment)"
+            detail: "设备 \(readiness.deviceIDHint ?? "已生成") · APNs \(readiness.environment)" + (skipPushCredentials ? " · 已跳过 Push 凭据（侧载测试）" : "")
         )
         onUpdate(report)
 
-        report.update(.relayIdentity, state: .running, detail: "验证 AirSIM Relay 服务身份")
+        report.update(.relayIdentity, state: .running, detail: "验证 uPhone Relay 服务身份")
         onUpdate(report)
         do {
             let version = try await fetchRelayHealthVersion(registration: registration)
@@ -1418,6 +1424,36 @@ final class VoIPPushController: NSObject {
             watchVoIPToken: defaults.string(forKey: Keys.watchVoIPToken) ?? "",
             watchBundleID: defaults.string(forKey: Keys.watchBundleID) ?? "com.sheldonjoo.uphone.watchkitapp",
             liveActivityPushToStartToken: defaults.string(forKey: Keys.liveActivityPushToStartToken) ?? "",
+            bundleID: Bundle.main.bundleIdentifier ?? "com.sheldonjoo.uphone",
+            environment: APNsEnvironment.current,
+            relayURL: relayURL,
+            mediaTransport: CloudMediaTransportPreference.requested().rawValue,
+            appMediaCapabilities: [CloudMediaTransport.legacyPCM.rawValue],
+            forceLegacyPCM: CloudMediaTransportPreference.forceLegacy(),
+            vowlanSecret: nil
+        )
+    }
+
+    /// 侧载测试专用：无 PushKit 凭据时的最小注册体，仅用于自检链路，
+    /// 来电推送唤醒在此模式下不可用。
+    private func sideloadTestRegistration() -> AgentPushRegistration? {
+        guard !LocalModePreference.isEnabled() else { return nil }
+        let defaults = UserDefaults.standard
+        guard let secret = Self.loadOrCreateDeviceSecret() else { return nil }
+        let deviceID = PushDeviceIdentity.deviceID(deviceSecret: secret)
+        defaults.set(deviceID, forKey: Keys.deviceID)
+        let relayURL = configuredRelayURL()
+        let capabilities = CloudModeCapabilities(isEnabled: CloudModePreference.isEnabled())
+        return AgentPushRegistration(
+            cloudModeEnabled: capabilities.notificationRelay,
+            localMode: false,
+            deviceID: deviceID,
+            deviceSecret: secret,
+            token: "",
+            alertToken: "",
+            watchVoIPToken: "",
+            watchBundleID: Bundle.main.bundleIdentifier ?? "com.sheldonjoo.uphone",
+            liveActivityPushToStartToken: "",
             bundleID: Bundle.main.bundleIdentifier ?? "com.sheldonjoo.uphone",
             environment: APNsEnvironment.current,
             relayURL: relayURL,

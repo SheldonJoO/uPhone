@@ -55,7 +55,7 @@
 		<string>_airsim-vowlan._tcp</string>
 	</array>
 	<key>NSLocalNetworkUsageDescription</key>
-	<string>用于在三星热点内发现并安全配对 AirSIM 电话桥。</string>
+	<string>用于在安卓热点内发现并安全配对 uPhone 电话桥。</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>用于通过 AirSIM VoWLAN 或云端模式进行双向语音通话。</string>
 	<key>NSSupportsLiveActivities</key>

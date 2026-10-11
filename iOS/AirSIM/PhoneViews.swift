@@ -51,7 +51,7 @@ struct DialPadTransportPresentation: Equatable {
         if vowlanOnline {
             return DialPadTransportPresentation(
                 title: "VoWLAN",
-                detail: "拨号及通话音频将通过同一 Wi-Fi 或三星热点",
+                detail: "拨号及通话音频将通过同一 Wi-Fi 或安卓热点",
                 systemImage: "wifi",
                 transport: .vowlan
             )
@@ -743,7 +743,7 @@ struct RecentsView: View {
                     HStack(spacing: 4) {
                         Image(systemName: call.direction == "incoming" ? "arrow.down.left" : "arrow.up.right")
                             .font(.caption2.weight(.semibold))
-                        Text(call.missed ? L10n.t("未接") : "AirSIM 音频")
+                        Text(call.missed ? L10n.t("未接") : "uPhone 音频")
                     }
                     .font(.subheadline)
                     .foregroundStyle(call.missed ? .red : .secondary)
@@ -1693,7 +1693,7 @@ struct ActiveCallView: View {
 
     private var incomingSurface: some View {
         VStack(spacing: 0) {
-            callHeader(title: "AirSIM 来电", showsRecording: false)
+            callHeader(title: "uPhone 来电", showsRecording: false)
 
             Spacer(minLength: isCompact ? 36 : 54)
 
@@ -1760,7 +1760,7 @@ struct ActiveCallView: View {
 
     private var connectedSurface: some View {
         VStack(spacing: 0) {
-            callHeader(title: "AirSIM 通话", showsRecording: true)
+            callHeader(title: "uPhone 通话", showsRecording: true)
 
             Spacer(minLength: isCompact ? 24 : 42)
 

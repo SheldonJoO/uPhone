@@ -54,7 +54,7 @@ private final class AgentVerboseTraceViewModel: ObservableObject {
     @Published var agentEvents: [ModuleDebugEvent] = []
     @Published var agentState = "未连接"
     @Published var errorMessage: String?
-    @Published var exportText = "AirSIM Agent Verbose Trace\n"
+    @Published var exportText = "uPhone Agent Verbose Trace\n"
 
     private let api: AirSIMAPI
     private var lastSequence: UInt64 = 0

@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// AirSIM iPhone/iPad 入口：三星 VoWLAN 与独立云端 Relay。
+/// AirSIM iPhone/iPad 入口：安卓 VoWLAN 与独立云端 Relay。
 @main
 struct AirSIMIPadApp: App {
     @UIApplicationDelegateAdaptor(AirSIMNotificationDelegate.self) private var appDelegate

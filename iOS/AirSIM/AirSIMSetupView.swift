@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// AirSIM 只引导三星配对；不检查旧模块 USB ECM、AT 或 QDC507 固件。
+/// AirSIM 只引导安卓配对；不检查旧模块 USB ECM、AT 或 QDC507 固件。
 struct AirSIMFirstConnectionView: View {
     @EnvironmentObject private var model: AppModel
     @AppStorage("airsim.first-connection-complete") private var completed = false
@@ -18,16 +18,16 @@ struct AirSIMFirstConnectionView: View {
                     .background(.blue.opacity(0.1), in: RoundedRectangle(cornerRadius: 22))
 
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("连接三星手机")
+                    Text("连接安卓手机")
                         .font(.largeTitle.bold())
-                    Text("AirSIM 通过同一 Wi-Fi 或三星热点建立 VoWLAN；离开局域网时可使用独立云端 Relay。")
+                    Text("uPhone 通过同一 Wi-Fi 或安卓热点建立 VoWLAN；离开局域网时可使用独立云端 Relay。")
                         .foregroundStyle(.secondary)
                 }
 
                 VStack(alignment: .leading, spacing: 18) {
-                    Label("在三星手机启动 AirSIM 和音频桥", systemImage: "1.circle.fill")
+                    Label("在安卓手机启动 uPhone 和音频桥", systemImage: "1.circle.fill")
                     Label("将两台设备连接到同一局域网", systemImage: "2.circle.fill")
-                    Label("输入三星显示的六位配对码", systemImage: "3.circle.fill")
+                    Label("输入安卓显示的六位配对码", systemImage: "3.circle.fill")
                 }
                 .font(.body.weight(.medium))
                 .padding(20)
@@ -61,7 +61,7 @@ struct AirSIMFirstConnectionView: View {
                     .frame(maxWidth: .infinity)
             }
             .padding(24)
-            .navigationTitle("AirSIM")
+            .navigationTitle("uPhone")
             .navigationBarTitleDisplayMode(.inline)
             .sheet(isPresented: $showingPairing, onDismiss: {
                 if model.vowlan.availability.isOnlineForDisplay { completed = true }
@@ -100,6 +100,7 @@ struct AirSIMSettingsView: View {
     @State private var selfTestPhase: SelfTestPhase = .idle
     @State private var selfTestReport: CloudSelfTestReport?
     @State private var selfTestTask: Task<Void, Never>?
+    @State private var skipPushForSelfTest = false
 
     var body: some View {
         NavigationStack {
@@ -145,7 +146,7 @@ struct AirSIMSettingsView: View {
                     }
                 }
 
-                Section("三星连接") {
+                Section("安卓连接") {
                     LabeledContent("VoWLAN", value: VoWLANStatusCopy.text(for: model.vowlan.availability))
                     NavigationLink {
                         SamsungPairingView()
@@ -200,7 +201,7 @@ struct AirSIMSettingsView: View {
                 } header: {
                     Text("云端 Relay")
                 } footer: {
-                    Text("云端关闭后，局域网内的三星 VoWLAN 仍可使用；公网拨打、接听和短信需要云端 Relay 与有效设备注册。")
+                    Text("云端关闭后，局域网内的安卓 VoWLAN 仍可使用；公网拨打、接听和短信需要云端 Relay 与有效设备注册。")
                 }
 
                 Section {
@@ -216,6 +217,11 @@ struct AirSIMSettingsView: View {
                         }
                     }
                     .disabled(localModeEnabled || selfTestPhase == .running)
+
+                    Toggle("侧载测试：跳过 Push 凭据检查", isOn: $skipPushForSelfTest)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                        .disabled(localModeEnabled || selfTestPhase == .running)
 
                     if let report = selfTestReport {
                         ForEach(report.steps) { step in
@@ -242,11 +248,11 @@ struct AirSIMSettingsView: View {
                 } footer: {
                     Text(localModeEnabled
                         ? "本地模式不运行云端自检。"
-                        : "依次验证本机 Push 凭据、AirSIM Relay 身份、设备注册和 Agent 最近 90 秒心跳；不会拨号或发送短信。")
+                        : "依次验证本机 Push 凭据、uPhone Relay 身份、设备注册和 Agent 最近 90 秒心跳；不会拨号或发送短信。免费侧载无 PushKit 能力时可打开上方跳过开关。")
                 }
 
                 Section("关于") {
-                    LabeledContent("项目", value: "AirSIM · Samsung")
+                    LabeledContent("项目", value: "uPhone · 安卓")
                     Picker("外观", selection: $settings.appearance) {
                         ForEach(AppAppearance.allCases) { appearance in
                             Text(appearance.title).tag(appearance)
@@ -273,7 +279,8 @@ struct AirSIMSettingsView: View {
         selfTestPhase = .running
         selfTestReport = .initial
         selfTestTask = Task { @MainActor in
-            let report = await VoIPPushController.shared.runCloudSelfTest { update in
+            let skipPush = skipPushForSelfTest
+            let report = await VoIPPushController.shared.runCloudSelfTest(skipPushCredentials: skipPush) { update in
                 guard !Task.isCancelled else { return }
                 selfTestReport = update
             }

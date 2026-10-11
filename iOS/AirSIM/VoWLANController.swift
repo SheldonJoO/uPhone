@@ -118,7 +118,7 @@ struct ModuleConnectionPresentation: Equatable {
         if vowlanOnline {
             return Self(
                 title: "VoWLAN 在线",
-                routeTitle: "同一 Wi-Fi / 三星热点",
+                routeTitle: "同一 Wi-Fi / 安卓热点",
                 description: "VoWLAN 已连接，状态会自动刷新",
                 level: .online,
                 systemImage: "wifi"
@@ -184,7 +184,7 @@ enum VoWLANControllerError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .invalidAdvertisement: return "VoWLAN 广播内容无效"
-        case .notDiscovered: return "尚未发现三星 VoWLAN"
+        case .notDiscovered: return "尚未发现安卓 VoWLAN"
         case .notPaired: return "VoWLAN 尚未配对"
         case .authenticationFailed: return "VoWLAN 鉴权失败"
         }
@@ -205,7 +205,7 @@ enum VoWLANProbeRecovery {
 
     static func userFacingMessage(for error: Error) -> String {
         if isDefunctConnection(error) {
-            return "VoWLAN 连接已失效，请保持 iPhone 与三星处于同一局域网"
+            return "VoWLAN 连接已失效，请保持 iPhone 与安卓处于同一局域网"
         }
         return error.localizedDescription
     }

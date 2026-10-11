@@ -146,7 +146,7 @@ public final class PairingServer implements Closeable {
         NsdServiceInfo info = new NsdServiceInfo();
         // Android NSD 的注销是异步的；用户快速重开窗口时固定服务名可能仍被
         // 系统占用并返回 ALREADY_ACTIVE。会话短 ID 保证每个一次性窗口唯一。
-        info.setServiceName("AirSIM-Samsung-" + created.id().substring(0, 8));
+        info.setServiceName("uPhone-安卓-" + created.id().substring(0, 8));
         info.setServiceType("_airsim-pair._tcp.");
         info.setPort(port);
         info.setAttribute("v", "1");
