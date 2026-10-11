@@ -189,7 +189,7 @@ struct AirSIMAPI: Sendable {
         if let sim = SimSelectionStore.selectedSubscriptionID() {
             body["subscription_id"] = String(sim)
         }
-        try await postDecoded("api/sms/send", body, timeout: 80)
+        return try await postDecoded("api/sms/send", body, timeout: 80)
     }
     func refreshSMS() async throws { try await post("api/sms/refresh", EmptyBody()) }
     func clearModuleSMS() async throws { try await post("api/sms/clear-module", EmptyBody()) }
