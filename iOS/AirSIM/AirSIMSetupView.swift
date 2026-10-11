@@ -150,7 +150,7 @@ struct AirSIMSettingsView: View {
                     NavigationLink {
                         SamsungPairingView()
                     } label: {
-                        Label("配对三星手机", systemImage: "personalhotspot")
+                        Label("值守配对", systemImage: "personalhotspot")
                     }
                     Button("重新发现", systemImage: "arrow.clockwise") {
                         model.vowlan.restartBrowsing()

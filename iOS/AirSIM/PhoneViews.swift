@@ -179,42 +179,17 @@ struct DialPadView: View {
                     }
                     .padding(.horizontal, 12)
 
-                    if let currentAgent = model.currentAndroidAgent {
-                        DialPadCurrentAgentCard(
-                            agent: currentAgent,
-                            agentCount: model.pairedAndroidAgents.count,
-                            cloudModeEnabled: CloudModePreference.isEnabled()
-                        ) {
-                            pairedAgentListPresentation = PairedAgentListPresentation()
-                        }
-                    } else if !model.pairedAndroidAgents.isEmpty {
-                        Button {
-                            pairedAgentListPresentation = PairedAgentListPresentation()
-                        } label: {
-                            HStack(spacing: 10) {
-                                Image(systemName: "smartphone.slash")
-                                    .foregroundStyle(.secondary)
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text("已配对 Android Agent · \(model.pairedAndroidAgents.count)")
-                                        .font(.subheadline.weight(.semibold))
-                                    Text("当前没有可用的拨号路由")
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                }
-                                Spacer()
-                                Image(systemName: "chevron.right")
-                                    .font(.caption.weight(.semibold))
-                                    .foregroundStyle(.tertiary)
-                            }
-                            .padding(12)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-                        }
-                        .buttonStyle(.plain)
-                    }
-
                     dialKeyGrid(metrics: metrics)
                     dialActions(metrics: metrics)
+
+                    // 状态条收到底部：紧凑显示传输状态，不挤占号码区域。
+                    DialPadBottomStrip(
+                        currentAgent: model.currentAndroidAgent,
+                        agentCount: model.pairedAndroidAgents.count,
+                        cloudModeEnabled: CloudModePreference.isEnabled()
+                    ) {
+                        pairedAgentListPresentation = PairedAgentListPresentation()
+                    }
                 }
                 .frame(maxWidth: 520)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
@@ -385,65 +360,55 @@ private struct PairedAgentListPresentation: Identifiable {
     let id = "paired-android-agents"
 }
 
-private struct DialPadCurrentAgentCard: View {
-    let agent: AndroidAgentPresentation
+/// 拨号盘底部紧凑状态条：传输状态 + Agent 列表入口。
+/// 一行搞定，不挤占拨号区；点状态部分弹出已配对 Agent 列表。
+/// （双卡选择在第三批加入。）
+private struct DialPadBottomStrip: View {
+    let currentAgent: AndroidAgentPresentation?
     let agentCount: Int
     let cloudModeEnabled: Bool
     let showAll: () -> Void
 
+    private var transportText: String {
+        guard let agent = currentAgent else { return "未连接" }
+        if agent.vowlanOnline { return "VoWLAN 在线" }
+        if agent.cloudOnline { return "云端在线" }
+        return "离线"
+    }
+
+    private var transportOnline: Bool {
+        guard let agent = currentAgent else { return false }
+        return agent.vowlanOnline || agent.cloudOnline
+    }
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack(spacing: 10) {
-                Image(systemName: "smartphone")
-                    .font(.headline)
-                    .foregroundStyle(.green)
-                    .frame(width: 34, height: 34)
-                    .background(Color.green.opacity(0.12), in: Circle())
-
-                VStack(alignment: .leading, spacing: 2) {
-                    HStack(spacing: 6) {
-                        Text(agent.deviceName)
-                            .font(.subheadline.weight(.semibold))
-                            .lineLimit(1)
-                        Text("当前")
-                            .font(.caption2.weight(.bold))
-                            .foregroundStyle(.green)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(Color.green.opacity(0.12), in: Capsule())
-                    }
-                    Text(agent.phoneNumber ?? "号码未提供")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
-                }
-
-                Spacer(minLength: 4)
-
-                if agentCount > 1 {
-                    Button("全部 \(agentCount)", action: showAll)
+        HStack(spacing: 8) {
+            // 左：状态，点击弹出 Agent 列表
+            Button(action: showAll) {
+                HStack(spacing: 6) {
+                    Circle()
+                        .fill(transportOnline ? Color.green : Color.gray)
+                        .frame(width: 7, height: 7)
+                    Text(transportText)
                         .font(.caption.weight(.semibold))
-                        .buttonStyle(.plain)
-                        .foregroundStyle(.blue)
+                        .foregroundStyle(transportOnline ? .primary : .secondary)
+                        .lineLimit(1)
+                    if agentCount > 1 {
+                        Image(systemName: "chevron.up.chevron.down")
+                            .font(.caption2)
+                            .foregroundStyle(.tertiary)
+                    }
                 }
+                .padding(.horizontal, 10)
+                .padding(.vertical, 7)
+                .background(.thinMaterial, in: Capsule())
             }
+            .buttonStyle(.plain)
 
-            HStack(spacing: 8) {
-                AgentTransportPill(title: "VoWLAN", online: agent.vowlanOnline, enabled: true)
-                AgentTransportPill(title: "云端", online: agent.cloudOnline, enabled: cloudModeEnabled)
-                Spacer(minLength: 0)
-                Text(agent.agentKindTitle)
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-            }
+            Spacer(minLength: 4)
         }
-        .padding(12)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .stroke(Color.primary.opacity(0.07), lineWidth: 0.5)
-        }
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, 4)
     }
 }
 
