@@ -1598,6 +1598,7 @@ public final class MainActivity extends Activity {
     @Override protected void onResume() {
         super.onResume();
         refreshShizukuStatus();
+        if (RuntimeMode.isStandalone(this)) StandaloneAgentService.start(this);
     }
 
     @Override public void onBackPressed() {
