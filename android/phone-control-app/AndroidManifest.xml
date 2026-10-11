@@ -84,6 +84,11 @@
             android:foregroundServiceType="remoteMessaging" />
 
         <service
+            android:name=".StandaloneAgentService"
+            android:exported="false"
+            android:foregroundServiceType="remoteMessaging" />
+
+        <service
             android:name=".VoWLANGatewayService"
             android:exported="false"
             android:foregroundServiceType="remoteMessaging" />
