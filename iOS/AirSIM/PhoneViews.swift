@@ -582,12 +582,82 @@ struct RecentsView: View {
     @State private var selectedCall: CallRecord?
     @State private var suppressNextCallTap = false
     @State private var toastText: String?
+    @State private var recentsTab = 0
+    @AppStorage("favoriteNumbers") private var favoriteNumbersData: String = ""
+
+    /// 收藏的号码列表
+    private var favoriteNumbers: [String] {
+        favoriteNumbersData.isEmpty ? [] : favoriteNumbersData.components(separatedBy: ",")
+    }
+
+    private func isFavorite(_ number: String?) -> Bool {
+        guard let number, !number.isEmpty else { return false }
+        return favoriteNumbers.contains(number)
+    }
+
+    private func toggleFavorite(_ number: String?) {
+        guard let number, !number.isEmpty else { return }
+        var favs = favoriteNumbers
+        if favs.contains(number) {
+            favs.removeAll { $0 == number }
+        } else {
+            favs.append(number)
+        }
+        favoriteNumbersData = favs.joined(separator: ",")
+    }
 
     var body: some View {
         ZStack {
             NavigationStack {
                 Group {
-                    if model.callHistory.isEmpty {
+                    if recentsTab == 1 {
+                        // 个人收藏 Tab
+                        if favoriteNumbers.isEmpty {
+                            EmptyStateView(
+                                title: L10n.t("暂无收藏"),
+                                systemImage: "star"
+                            )
+                        } else {
+                            List(favoriteNumbers, id: \.self) { number in
+                                let contact = contacts.contact(for: number)
+                                HStack {
+                                    Button {
+                                        if let dialNumber = RecentCallDialPolicy.numberToDial(number) {
+                                            onCall(dialNumber)
+                                        }
+                                    } label: {
+                                        HStack {
+                                            Image(systemName: "star.fill")
+                                                .foregroundStyle(.yellow)
+                                            VStack(alignment: .leading) {
+                                                Text(contact?.name ?? contacts.displayName(for: number))
+                                                    .font(.headline)
+                                                Text(number)
+                                                    .font(.caption)
+                                                    .foregroundStyle(.secondary)
+                                            }
+                                        }
+                                    }
+                                    .buttonStyle(.plain)
+                                    Spacer()
+                                    Button {
+                                        onMessage(number)
+                                    } label: {
+                                        Image(systemName: "message.fill")
+                                            .foregroundStyle(.blue)
+                                    }
+                                    .buttonStyle(.plain)
+                                    Button {
+                                        toggleFavorite(number)
+                                    } label: {
+                                        Image(systemName: "star.slash")
+                                            .foregroundStyle(.secondary)
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                            }
+                        }
+                    } else if model.callHistory.isEmpty {
                         EmptyStateView(
                             title: L10n.t("暂无通话记录"),
                             systemImage: "phone.arrow.up.right"
@@ -654,6 +724,15 @@ struct RecentsView: View {
                                         Label(L10n.t("拉黑"), systemImage: "nosign")
                                     }
                                     .tint(.red)
+                                    Button {
+                                        toggleFavorite(number)
+                                    } label: {
+                                        Label(
+                                            isFavorite(number) ? L10n.t("取消收藏") : L10n.t("收藏"),
+                                            systemImage: isFavorite(number) ? "star.slash" : "star.fill"
+                                        )
+                                    }
+                                    .tint(.yellow)
                                 }
                             }
                         }
@@ -665,6 +744,15 @@ struct RecentsView: View {
                 }
                 .background(PhoneBackdrop())
                 .navigationTitle(L10n.t("最近通话"))
+                .safeAreaInset(edge: .top) {
+                    Picker("", selection: $recentsTab) {
+                        Text(L10n.t("通话记录")).tag(0)
+                        Text(L10n.t("个人收藏")).tag(1)
+                    }
+                    .pickerStyle(.segmented)
+                    .padding(.horizontal, PhoneListMetrics.horizontalInset)
+                    .padding(.vertical, 6)
+                }
                 .toolbar {
                     ToolbarItem(placement: .topBarTrailing) {
                         NavigationLink {
@@ -1064,6 +1152,13 @@ struct MessagesView: View {
             .sorted { $0.timestamp > $1.timestamp }
     }
 
+    /// 取件码集合：所有取件码短信，按时间倒序。
+    private var pickupMessages: [SMSMessage] {
+        model.messages
+            .filter { !$0.isOutgoing && $0.isPickup }
+            .sorted { $0.timestamp > $1.timestamp }
+    }
+
     /// 未取件的取件码短信（最新一条），用于顶部置顶卡片。
     private var unpickedPickup: SMSMessage? {
         model.messages
@@ -1080,7 +1175,25 @@ struct MessagesView: View {
     var body: some View {
         NavigationStack(path: $conversationPath) {
             List {
-                if messageTab == 1 {
+                if messageTab == 2 {
+                    if pickupMessages.isEmpty {
+                        EmptyStateView(title: L10n.t("暂无取件码"), systemImage: "shippingbox")
+                            .listRowBackground(Color.clear)
+                    } else {
+                        ForEach(pickupMessages) { message in
+                            PickupCodeRow(message: message) {
+                                markPickedUp(message)
+                            }
+                            .listRowBackground(Color.clear)
+                            .listRowInsets(.init(
+                                top: 0,
+                                leading: PhoneListMetrics.horizontalInset,
+                                bottom: 0,
+                                trailing: PhoneListMetrics.horizontalInset
+                            ))
+                        }
+                    }
+                } else if messageTab == 1 {
                     if codeMessages.isEmpty {
                         EmptyStateView(title: L10n.t("暂无验证码"), systemImage: "key.fill")
                             .listRowBackground(Color.clear)
@@ -1128,6 +1241,7 @@ struct MessagesView: View {
                     Picker("", selection: $messageTab) {
                         Text(L10n.t("短信")).tag(0)
                         Text(L10n.t("验证码")).tag(1)
+                        Text(L10n.t("取件码")).tag(2)
                     }
                     .pickerStyle(.segmented)
                     .padding(.horizontal, PhoneListMetrics.horizontalInset)
@@ -1390,6 +1504,51 @@ private struct PickupCodeCard: View {
         .background(Color.orange.opacity(0.12), in: RoundedRectangle(cornerRadius: 14))
         .padding(.horizontal, PhoneListMetrics.horizontalInset)
         .padding(.bottom, 6)
+    }
+}
+
+/// 取件码列表行（取件码 Tab 用）。
+private struct PickupCodeRow: View {
+    @EnvironmentObject private var model: AppModel
+    let message: SMSMessage
+    var onPickedUp: () -> Void
+    @State private var copied = false
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: "shippingbox.fill")
+                .foregroundStyle(.orange)
+            VStack(alignment: .leading, spacing: 2) {
+                HStack(spacing: 8) {
+                    Text(message.pickupCode ?? "")
+                        .font(.headline.monospacedDigit())
+                    Button {
+                        if let code = message.pickupCode {
+                            UIPasteboard.general.string = code
+                            copied = true
+                            Task {
+                                try? await Task.sleep(for: .seconds(1.5))
+                                copied = false
+                            }
+                        }
+                    } label: {
+                        Image(systemName: copied ? "checkmark.circle.fill" : "doc.on.doc")
+                            .foregroundStyle(copied ? .green : .secondary)
+                            .font(.caption)
+                    }
+                    .buttonStyle(.plain)
+                }
+                Text(model.contacts.displayName(for: message.sender))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+            }
+            Spacer()
+            Button(L10n.t("已取")) { onPickedUp() }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
+        }
+        .padding(.vertical, 6)
     }
 }
 
