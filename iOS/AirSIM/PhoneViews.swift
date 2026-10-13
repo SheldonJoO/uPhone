@@ -590,6 +590,8 @@ struct RecentsView: View {
     @State private var newContactNumber: String?
     @State private var longPressNumber: String?
     @State private var showLongPressMenu = false
+    @State private var dialBackNumber: String?
+    @State private var showDialBackMenu = false
 
     private struct NewContactItem: Identifiable {
         let id = UUID()
@@ -761,11 +763,12 @@ struct RecentsView: View {
                             }
                             .swipeActions(edge: .leading, allowsFullSwipe: true) {
                                 if let number = call.number,
-                                   let dialNumber = RecentCallDialPolicy.numberToDial(number) {
+                                   RecentCallDialPolicy.numberToDial(number) != nil {
                                     Button {
-                                        onCall(dialNumber)
+                                        dialBackNumber = number
+                                        showDialBackMenu = true
                                     } label: {
-                                        Label(L10n.t("回拨"), systemImage: "phone.fill")
+                                        Label(L10n.t("选择回拨"), systemImage: "phone.fill")
                                     }
                                     .tint(.green)
                                 }
@@ -810,6 +813,25 @@ struct RecentsView: View {
                     Button(L10n.t("复制号码")) {
                         UIPasteboard.general.string = number
                         toastText = L10n.t("已复制号码")
+                    }
+                    Button(L10n.t("取消"), role: .cancel) {}
+                }
+            }
+            .confirmationDialog(L10n.t("选择回拨号码"), isPresented: $showDialBackMenu, titleVisibility: .visible) {
+                if let number = dialBackNumber,
+                   let dialNumber = RecentCallDialPolicy.numberToDial(number) {
+                    let sims = model.currentAgent?.simCards ?? []
+                    if sims.count > 1 {
+                        ForEach(sims) { sim in
+                            Button(sim.displayName) {
+                                SimSelectionStore.select(subscriptionID: sim.subscriptionID)
+                                onCall(dialNumber)
+                            }
+                        }
+                    } else {
+                        Button(L10n.t("回拨")) {
+                            onCall(dialNumber)
+                        }
                     }
                     Button(L10n.t("取消"), role: .cancel) {}
                 }
