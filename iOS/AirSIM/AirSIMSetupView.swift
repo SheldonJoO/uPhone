@@ -80,6 +80,23 @@ struct AirSIMFirstConnectionView: View {
     }
 }
 
+// MARK: - 短信铃声选项
+enum SMSRingtoneOption: String, CaseIterable, Identifiable {
+    case followSystem = "follow_system"
+    case `default` = "default"
+    case silent = "silent"
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .followSystem: return "跟随系统"
+        case .default: return "默认"
+        case .silent: return "静音"
+        }
+    }
+}
+
 struct AirSIMSettingsView: View {
     private enum SelfTestPhase {
         case idle
@@ -91,6 +108,7 @@ struct AirSIMSettingsView: View {
     @EnvironmentObject private var settings: AppSettings
     @AppStorage(LocalModePreference.key) private var localModeEnabled = false
     @AppStorage(CloudModePreference.key) private var cloudModeEnabled = true
+    @AppStorage("smsRingtoneOption") private var smsRingtone: SMSRingtoneOption = .followSystem
     @State private var relayURL = RelayConfiguration.effectiveURL(
         stored: UserDefaults.standard.string(forKey: "airsim.push-relay-url"),
         buildSetting: Bundle.main.object(forInfoDictionaryKey: "AirSIMPushRelayURL") as? String,
@@ -262,6 +280,33 @@ struct AirSIMSettingsView: View {
                     Text("黑名单自动拒接；白名单模式下非名单号码一律拒接；静默时段内来电不响铃直接挂断，事件照常记录。")
                         .font(.caption)
                         .foregroundStyle(.secondary)
+                }
+
+                Section("声音") {
+                    Button {
+                        if let url = URL(string: UIApplication.openSettingsURLString) {
+                            UIApplication.shared.open(url)
+                        }
+                    } label: {
+                        LabeledContent {
+                            Text("跟随 iPhone 系统铃声")
+                                .foregroundStyle(.secondary)
+                        } label: {
+                            Label("来电铃声", systemImage: "bell")
+                        }
+                    }
+                    .buttonStyle(.plain)
+                    Text("VoIP 来电铃声跟随系统设置。前往 iPhone 设置 > 声音与触感 > 电话铃声 更改。")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Picker(selection: $smsRingtone) {
+                        ForEach(SMSRingtoneOption.allCases) { option in
+                            Text(option.title).tag(option)
+                        }
+                    } label: {
+                        Label("短信铃声", systemImage: "message.badge")
+                    }
+                    .pickerStyle(.navigationLink)
                 }
 
                 Section("关于") {
