@@ -28,6 +28,17 @@ struct IncomingVoIPCall: Equatable, Sendable {
     let uuid: UUID
     let generation: UInt64
     let number: String?
+    /// Which Android 值守机 this call came from (multi-device).
+    let deviceID: String?
+    let deviceName: String?
+
+    /// Caller display name with device attribution, e.g. "张三 · TCL-深圳".
+    var attributedCallerName: String? {
+        let base = callerName ?? number
+        guard let deviceName, !deviceName.isEmpty else { return base }
+        guard let base, !base.isEmpty else { return deviceName }
+        return "\(base) · \(deviceName)"
+    }
     let callerName: String?
     let expiresAt: Date?
     /// Dashboard 虚拟来电仅使用本机 TTS，不触发模块 AT 或公网 PCM。
@@ -59,6 +70,8 @@ struct IncomingVoIPCall: Equatable, Sendable {
         generation = Self.positiveUInt64(from: userInfo["generation"]) ?? 1
         number = Self.nonEmpty(userInfo["number"] as? String)
         callerName = Self.nonEmpty(userInfo["caller_name"] as? String)
+        deviceID = Self.nonEmpty(userInfo["device_id"] as? String)
+        deviceName = Self.nonEmpty(userInfo["device_name"] as? String)
         self.expiresAt = expiresAt
         isVirtual = userInfo["virtual_call"] as? Bool == true
         isOutgoing = false
@@ -104,6 +117,8 @@ struct IncomingVoIPCall: Equatable, Sendable {
         self.generation = max(1, generation)
         self.number = number
         callerName = nil
+        deviceID = nil
+        deviceName = nil
         expiresAt = Date().addingTimeInterval(5 * 60 * 60)
         isVirtual = false
         isOutgoing = true
@@ -1407,6 +1422,31 @@ final class VoIPPushController: NSObject {
         return registration
     }
 
+    /// Registration for pairing an ADDITIONAL Android device. Always uses a freshly
+    /// staged secret so every Android gets unique relay credentials (multi-device).
+    /// Call DeviceRegistry.activateStagedDevice after the pairing succeeds.
+    func pairingRegistrationForNewDevice() -> AgentPushRegistration? {
+        if LocalModePreference.isEnabled() {
+            guard let secret = try? VoWLANCredentialStore.loadOrCreate().encodedSecret else { return nil }
+            return .local(vowlanSecret: secret)
+        }
+        guard let secret = DeviceRegistry.stageNewDeviceSecret() else {
+#if DEBUG
+            print("[AirSIM PushKit] 无法创建新设备密钥")
+#endif
+            return nil
+        }
+        // 侧载测试跳过模式：无 PushKit token 时用最小注册体配对（新设备独立凭证）
+        if UserDefaults.standard.bool(forKey: "sideloadSkipPushCredentials"),
+           var sideload = sideloadTestRegistration(deviceSecret: secret, commitActiveSlots: false) {
+            sideload.vowlanSecret = (try? VoWLANCredentialStore.loadOrCreate().encodedSecret)
+            return sideload
+        }
+        guard var registration = buildRegistration(deviceSecret: secret, commitActiveSlots: false) else { return nil }
+        registration.vowlanSecret = (try? VoWLANCredentialStore.loadOrCreate().encodedSecret)
+        return registration
+    }
+
     private func currentRegistration() -> AgentPushRegistration? {
         guard !LocalModePreference.isEnabled() else { return nil }
         guard let token = UserDefaults.standard.string(forKey: Keys.token), !token.isEmpty else {
@@ -1422,8 +1462,29 @@ final class VoIPPushController: NSObject {
 #endif
             return nil
         }
+        return buildRegistration(deviceSecret: secret, token: token, defaults: defaults)
+    }
+
+    private func buildRegistration(deviceSecret secret: String, token: String? = nil,
+                                   defaults: UserDefaults = .standard,
+                                   commitActiveSlots: Bool = true) -> AgentPushRegistration? {
+        guard !LocalModePreference.isEnabled() else { return nil }
+        let resolvedToken: String
+        if let token, !token.isEmpty {
+            resolvedToken = token
+        } else {
+            guard let t = defaults.string(forKey: Keys.token), !t.isEmpty else {
+#if DEBUG
+                print("[AirSIM PushKit] 暂无 VoIP token，跳过同步")
+#endif
+                return nil
+            }
+            resolvedToken = t
+        }
         let deviceID = PushDeviceIdentity.deviceID(deviceSecret: secret)
-        defaults.set(deviceID, forKey: Keys.deviceID)
+        if commitActiveSlots {
+            defaults.set(deviceID, forKey: Keys.deviceID)
+        }
         let relayURL = configuredRelayURL()
         let capabilities = CloudModeCapabilities(isEnabled: CloudModePreference.isEnabled())
         return AgentPushRegistration(
@@ -1448,19 +1509,28 @@ final class VoIPPushController: NSObject {
 
     /// 侧载测试专用：无 PushKit 凭据时的最小注册体，仅用于自检链路，
     /// 来电推送唤醒在此模式下不可用。
-    private func sideloadTestRegistration() -> AgentPushRegistration? {
+    private func sideloadTestRegistration(deviceSecret secret: String? = nil,
+                                          commitActiveSlots: Bool = true) -> AgentPushRegistration? {
         guard !LocalModePreference.isEnabled() else { return nil }
         let defaults = UserDefaults.standard
-        guard let secret = Self.loadOrCreateDeviceSecret() else { return nil }
-        let deviceID = PushDeviceIdentity.deviceID(deviceSecret: secret)
-        defaults.set(deviceID, forKey: Keys.deviceID)
+        let resolvedSecret: String
+        if let secret, !secret.isEmpty {
+            resolvedSecret = secret
+        } else {
+            guard let s = Self.loadOrCreateDeviceSecret() else { return nil }
+            resolvedSecret = s
+        }
+        let deviceID = PushDeviceIdentity.deviceID(deviceSecret: resolvedSecret)
+        if commitActiveSlots {
+            defaults.set(deviceID, forKey: Keys.deviceID)
+        }
         let relayURL = configuredRelayURL()
         let capabilities = CloudModeCapabilities(isEnabled: CloudModePreference.isEnabled())
         return AgentPushRegistration(
             cloudModeEnabled: capabilities.notificationRelay,
             localMode: false,
             deviceID: deviceID,
-            deviceSecret: secret,
+            deviceSecret: resolvedSecret,
             token: "",
             alertToken: "",
             watchVoIPToken: "",

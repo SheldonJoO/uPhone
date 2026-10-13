@@ -74,7 +74,12 @@ struct SamsungPairingView: View {
 #endif
         defer { pairingServiceID = nil }
         do {
-            guard let registration = VoIPPushController.shared.pairingRegistration() else {
+            // 已有配对设备时：为新 Android 生成独立 relay 凭证（多设备），
+            // 配对成功后自动归档旧设备并切换到新设备。
+            let isAdditionalDevice = !DeviceRegistry.allDevices().isEmpty
+            guard let registration = isAdditionalDevice
+                ? VoIPPushController.shared.pairingRegistrationForNewDevice()
+                : VoIPPushController.shared.pairingRegistration() else {
                 throw SamsungPairingClientError.registrationUnavailable
             }
             message = try await SamsungPairingCompletionCoordinator.complete(
@@ -89,6 +94,16 @@ struct SamsungPairingView: View {
                     await model.vowlan.refreshAfterPairing()
                 }
             )
+            if isAdditionalDevice {
+                if DeviceRegistry.activateStagedDevice(deviceName: service.displayName,
+                                                       relayURL: registration.relayURL) != nil {
+                    await VoIPPushController.shared.forceRegistrationSync()
+                    message = "配对成功，已切换到新设备（\(service.displayName)）"
+                }
+            } else {
+                // 首台设备：登记进设备列表（幂等）
+                DeviceRegistry.archiveActiveDeviceIfNeeded()
+            }
 #if DEBUG
             print("[AirSIM Pair] claim_completed session=\(service.sessionID)")
 #endif

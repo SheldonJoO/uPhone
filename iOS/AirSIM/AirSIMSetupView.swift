@@ -159,6 +159,8 @@ struct AirSIMSettingsView: View {
                     }
                 }
 
+                PairedDevicesSection()
+
                 Section {
                     Toggle(isOn: $cloudModeEnabled) {
                         Label("远程通话与短信", systemImage: "cloud")
@@ -307,5 +309,96 @@ struct AirSIMSettingsView: View {
         case .passed: return .green
         case .failed: return .red
         }
+    }
+}
+
+/// 多设备管理：配对过的安卓值守机列表，点选切换当前设备。
+struct PairedDevicesSection: View {
+    @EnvironmentObject private var model: AppModel
+    @State private var devices: [PairedDevice] = []
+    @State private var activeID: String?
+    @State private var renamingDevice: PairedDevice?
+    @State private var renameText = ""
+    @State private var switching = false
+
+    var body: some View {
+        Section {
+            ForEach(devices) { device in
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(device.displayName).font(.headline)
+                        Text("…\(device.deviceID.suffix(8))")
+                            .font(.caption).foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                    if device.deviceID == activeID {
+                        Image(systemName: "checkmark.circle.fill").foregroundStyle(.green)
+                    }
+                }
+                .contentShape(Rectangle())
+                .onTapGesture { switchTo(device) }
+                .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                    Button("改名") {
+                        renamingDevice = device
+                        renameText = device.deviceName
+                    }.tint(.blue)
+                    Button("删除", role: .destructive) { remove(device) }
+                }
+            }
+            NavigationLink {
+                SamsungPairingView()
+            } label: {
+                Label("配对新设备", systemImage: "plus.circle")
+            }
+        } header: {
+            Text("值守设备")
+        } footer: {
+            Text("点选切换当前使用的值守机；多台设备的来电会标注来源。")
+        }
+        .onAppear(perform: refresh)
+        .alert("重命名设备", isPresented: renamePresented) {
+            TextField("设备名称，如 TCL-深圳", text: $renameText)
+            Button("取消", role: .cancel) {}
+            Button("保存") {
+                if let device = renamingDevice {
+                    DeviceRegistry.rename(deviceID: device.deviceID, to: renameText)
+                    refresh()
+                }
+            }
+        }
+    }
+
+    private var renamePresented: Binding<Bool> {
+        Binding(
+            get: { renamingDevice != nil },
+            set: { if !$0 { renamingDevice = nil } }
+        )
+    }
+
+    private func refresh() {
+        DeviceRegistry.archiveActiveDeviceIfNeeded()
+        devices = DeviceRegistry.allDevices()
+        activeID = DeviceRegistry.activeDeviceID()
+    }
+
+    private func switchTo(_ device: PairedDevice) {
+        guard device.deviceID != activeID, !switching else { return }
+        switching = true
+        Task {
+            let ok = DeviceRegistry.switchTo(deviceID: device.deviceID)
+            if ok {
+                await VoIPPushController.shared.forceRegistrationSync()
+                await model.refreshCloudStatusForDiagnostics()
+            }
+            await MainActor.run {
+                refresh()
+                switching = false
+            }
+        }
+    }
+
+    private func remove(_ device: PairedDevice) {
+        DeviceRegistry.remove(deviceID: device.deviceID)
+        refresh()
     }
 }

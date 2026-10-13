@@ -209,7 +209,7 @@ final class CallKitController: NSObject {
                 return
             }
             incomingReportCompletions.append(completion)
-            reportIncomingIfNeeded(number: currentNumber, callerName: call.callerName, source: "PushKit 重投")
+            reportIncomingIfNeeded(number: currentNumber, callerName: call.attributedCallerName, source: "PushKit 重投")
             handler?.callKitDidReceiveIncoming(call)
             return
         }
@@ -223,7 +223,7 @@ final class CallKitController: NSObject {
         missingCallPolls = 0
         endActionFulfilled = false
         incomingReportCompletions.append(completion)
-        reportIncomingIfNeeded(number: call.number, callerName: call.callerName, source: "PushKit")
+        reportIncomingIfNeeded(number: call.number, callerName: call.attributedCallerName, source: "PushKit")
         handler?.callKitDidReceiveIncoming(call)
     }
 
