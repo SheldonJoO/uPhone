@@ -1220,12 +1220,19 @@ final class AppModel: ObservableObject {
     }
 
     private func startLocalRecording() {
-        if CallRecordingCenter.shared.start() {
-            isRecording = true
-            recordingStartDate = Date()
-            errorMessage = nil
-        } else {
-            errorMessage = "录音启动失败"
+        // 文件 IO 移出主线程，避免阻塞导致看门狗杀进程。
+        Task.detached { [weak self] in
+            let success = CallRecordingCenter.shared.start()
+            await MainActor.run { [weak self] in
+                guard let self else { return }
+                if success {
+                    self.isRecording = true
+                    self.recordingStartDate = Date()
+                    self.errorMessage = nil
+                } else {
+                    self.errorMessage = "录音启动失败"
+                }
+            }
         }
     }
 
