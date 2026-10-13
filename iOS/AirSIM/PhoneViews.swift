@@ -596,7 +596,7 @@ struct RecentsView: View {
     /// 已删除的通话记录 ID（持久化）
     private var deletedCallIDs: Set<String> {
         get { Set(deletedCallIDsData.isEmpty ? [] : deletedCallIDsData.components(separatedBy: ",")) }
-        set { deletedCallIDsData = newValue.joined(separator: ",") }
+        nonmutating set { deletedCallIDsData = newValue.joined(separator: ",") }
     }
 
     private struct NewContactItem: Identifiable {
@@ -679,7 +679,7 @@ struct RecentsView: View {
         .confirmationDialog(L10n.t("选择回拨号码"), isPresented: $showDialBackMenu, titleVisibility: .visible) {
             if let number = dialBackNumber,
                let dialNumber = RecentCallDialPolicy.numberToDial(number) {
-                let sims = model.currentAgent?.simCards ?? []
+                let sims = model.currentAndroidAgent?.simCards ?? []
                 if sims.count > 1 {
                     ForEach(sims) { sim in
                         Button(sim.displayName) {
