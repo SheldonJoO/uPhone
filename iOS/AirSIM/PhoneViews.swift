@@ -586,23 +586,22 @@ struct RecentsView: View {
     @State private var toastText: String?
     @State private var recentsTab = 0
     @AppStorage("favoriteNumbers") private var favoriteNumbersData: String = ""
-    @State private var deletedCallIDs: Set<String> = []
-    @State private var newContactNumber: String?
+    @AppStorage("deletedCallIDs") private var deletedCallIDsData: String = ""
     @State private var longPressNumber: String?
     @State private var showLongPressMenu = false
     @State private var dialBackNumber: String?
     @State private var showDialBackMenu = false
+    @State private var newContactItem: NewContactItem?
+
+    /// 已删除的通话记录 ID（持久化）
+    private var deletedCallIDs: Set<String> {
+        get { Set(deletedCallIDsData.isEmpty ? [] : deletedCallIDsData.components(separatedBy: ",")) }
+        set { deletedCallIDsData = newValue.joined(separator: ",") }
+    }
 
     private struct NewContactItem: Identifiable {
         let id = UUID()
         let number: String
-    }
-
-    private var newContactNumberItem: Binding<NewContactItem?> {
-        Binding(
-            get: { newContactNumber.map { NewContactItem(number: $0) } },
-            set: { newContactNumber = $0?.number }
-        )
     }
 
     /// 过滤掉已删除的通话记录
@@ -735,7 +734,9 @@ struct RecentsView: View {
                                     }
                                     .tint(.blue)
                                     Button(role: .destructive) {
-                                        deletedCallIDs.insert(call.id)
+                                        var ids = deletedCallIDs
+                                        ids.insert(call.id)
+                                        deletedCallIDs = ids
                                     } label: {
                                         Label(L10n.t("删除"), systemImage: "trash.fill")
                                     }
@@ -802,13 +803,13 @@ struct RecentsView: View {
                     }
                 }
             }
-            .sheet(item: $newContactNumberItem) { item in
+            .sheet(item: $newContactItem) { item in
                 NewContactView(phoneNumber: item.number)
             }
             .confirmationDialog("", isPresented: $showLongPressMenu, titleVisibility: .hidden) {
                 if let number = longPressNumber {
                     Button(L10n.t("新建联系人")) {
-                        newContactNumber = number
+                        newContactItem = NewContactItem(number: number)
                     }
                     Button(L10n.t("复制号码")) {
                         UIPasteboard.general.string = number
