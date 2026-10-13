@@ -1660,6 +1660,9 @@ struct ActiveCallView: View {
     }
     private var controlSize: CGFloat { isCompact ? 62 : 68 }
     private var displayName: String { model.contacts.displayName(for: call.number) }
+    private var attributionText: String? {
+        PhoneAttribution.shared.lookup(call.number)?.displayText
+    }
     private var contactPhotoData: Data? {
         guard let number = call.number else { return nil }
         return model.contacts.contact(for: number)?.photoData
@@ -1719,6 +1722,12 @@ struct ActiveCallView: View {
                         .font(.title3.weight(.regular).monospacedDigit())
                         .foregroundStyle(.white.opacity(0.68))
                         .textSelection(.enabled)
+                }
+
+                if let attributionText {
+                    Text(attributionText)
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(.white.opacity(0.55))
                 }
 
                 Text(L10n.t("等待接听"))
@@ -1781,6 +1790,11 @@ struct ActiveCallView: View {
                         .font(.title3.monospacedDigit())
                         .foregroundStyle(.white.opacity(0.66))
                         .textSelection(.enabled)
+                }
+                if let attributionText {
+                    Text(attributionText)
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(.white.opacity(0.55))
                 }
                 if content.showsDuration {
                     TimelineView(.periodic(from: .now, by: 1)) { context in

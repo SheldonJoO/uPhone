@@ -425,6 +425,10 @@ final class CallKitController: NSObject {
         update.remoteHandle = CXHandle(type: .phoneNumber, value: value)
         if let callerName, !callerName.isEmpty, callerName != number {
             update.localizedCallerName = callerName
+        } else if let attribution = PhoneAttribution.shared.lookup(value),
+                  let masked = PhoneAttribution.masked(value) {
+            // 无备注名时显示归属地 + 脱敏号码，如“北京 138****1234”
+            update.localizedCallerName = "\(attribution.shortPlace) \(masked)"
         }
         update.supportsHolding = false
         update.supportsGrouping = false

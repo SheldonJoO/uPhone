@@ -52,6 +52,9 @@
 		A10000000000000000000032 /* QRPairingScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000032 /* QRPairingScannerView.swift */; };
 		A1000000000000000000002B /* CallLifecycleStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000002B /* CallLifecycleStore.swift */; };
 		A30000000000000000000001 /* AirSIMTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30000000000000000000001 /* AirSIMTests.swift */; };
+		A10000000000000000000033 /* CallRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000033 /* CallRecorder.swift */; };
+		A10000000000000000000034 /* PhoneAttribution.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000034 /* PhoneAttribution.swift */; };
+		A10000000000000000000035 /* phone.dat in Resources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000035 /* phone.dat */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -147,6 +150,9 @@
 		B10000000000000000000030 /* VoWLANController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoWLANController.swift; sourceTree = "<group>"; };
 		B30000000000000000000001 /* AirSIMTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirSIMTests.swift; sourceTree = "<group>"; };
 		B30000000000000000000002 /* AirSIMTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AirSIMTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		B10000000000000000000033 /* CallRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallRecorder.swift; sourceTree = "<group>"; };
+		B10000000000000000000034 /* PhoneAttribution.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneAttribution.swift; sourceTree = "<group>"; };
+		B10000000000000000000035 /* phone.dat */ = {isa = PBXFileReference; lastKnownFileType = data; path = phone.dat; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -228,6 +234,9 @@
 				B10000000000000000000019 /* AppIcon.icon */,
 				B1000000000000000000000B /* Info.plist */,
 				B1000000000000000000001C /* AirSIM.entitlements */,
+				B10000000000000000000033 /* CallRecorder.swift */,
+				B10000000000000000000034 /* PhoneAttribution.swift */,
+				B10000000000000000000035 /* phone.dat */,
 			);
 			path = "AirSIM";
 			sourceTree = "<group>";
@@ -403,6 +412,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A10000000000000000000018 /* AppIcon.icon in Resources */,
+				A10000000000000000000035 /* phone.dat in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -466,6 +476,8 @@
 				A1000000000000000000001B /* WatchCallCoordinator.swift in Sources */,
 				A1000000000000000000001C /* WatchCallPayload.swift in Sources */,
 				A10000000000000000000017 /* LocalHistoryStore.swift in Sources */,
+				A10000000000000000000033 /* CallRecorder.swift in Sources */,
+				A10000000000000000000034 /* PhoneAttribution.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
