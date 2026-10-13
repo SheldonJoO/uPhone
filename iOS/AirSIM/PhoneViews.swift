@@ -582,13 +582,12 @@ struct RecentsView: View {
     let onCall: (String) -> Void
     let onMessage: (String) -> Void
     @State private var selectedCall: CallRecord?
-    @State private var suppressNextCallTap = false
     @State private var toastText: String?
     @State private var recentsTab = 0
     @AppStorage("favoriteNumbers") private var favoriteNumbersData: String = ""
     @AppStorage("deletedCallIDs") private var deletedCallIDsData: String = ""
-    @State private var longPressNumber: String?
-    @State private var showLongPressMenu = false
+    @State private var contactPickerNumber: String?
+    @State private var showContactPicker = false
     @State private var dialBackNumber: String?
     @State private var showDialBackMenu = false
     @State private var newContactItem: NewContactItem?
@@ -630,6 +629,30 @@ struct RecentsView: View {
         favoriteNumbersData = favs.joined(separator: ",")
     }
 
+    /// 把号码追加到已选择的现有联系人（系统联系人选择器选人后直接保存）。
+    private func addNumberToExistingContact(_ number: String, contact: CNContact) {
+        guard let mutable = contact.mutableCopy() as? CNMutableContact else {
+            toastText = L10n.t("添加失败")
+            return
+        }
+        if mutable.phoneNumbers.contains(where: { $0.value.stringValue == number }) {
+            toastText = L10n.t("该号码已在联系人中")
+            return
+        }
+        var numbers = mutable.phoneNumbers
+        numbers.append(CNLabeledValue(label: CNLabelPhoneNumberMobile, value: CNPhoneNumber(stringValue: number)))
+        mutable.phoneNumbers = numbers
+        let request = CNSaveRequest()
+        request.update(mutable)
+        do {
+            try CNContactStore().execute(request)
+            let name = CNContactFormatter.string(from: mutable, style: .fullName) ?? L10n.t("联系人")
+            toastText = L10n.t("已添加到") + name
+        } catch {
+            toastText = L10n.t("添加失败")
+        }
+    }
+
     var body: some View {
         ZStack {
             mainContent
@@ -664,17 +687,20 @@ struct RecentsView: View {
         .sheet(item: $newContactItem) { item in
             NewContactView(phoneNumber: item.number)
         }
-        .confirmationDialog("", isPresented: $showLongPressMenu, titleVisibility: .hidden) {
-            if let number = longPressNumber {
-                Button(L10n.t("新建联系人")) {
-                    newContactItem = NewContactItem(number: number)
+        .sheet(isPresented: $showContactPicker) {
+            ContactPickerView(
+                onSelect: { contact in
+                    showContactPicker = false
+                    if let number = contactPickerNumber {
+                        addNumberToExistingContact(number, contact: contact)
+                    }
+                    contactPickerNumber = nil
+                },
+                onCancel: {
+                    showContactPicker = false
+                    contactPickerNumber = nil
                 }
-                Button(L10n.t("复制号码")) {
-                    UIPasteboard.general.string = number
-                    toastText = L10n.t("已复制号码")
-                }
-                Button(L10n.t("取消"), role: .cancel) {}
-            }
+            )
         }
         .confirmationDialog(L10n.t("选择回拨号码"), isPresented: $showDialBackMenu, titleVisibility: .visible) {
             if let number = dialBackNumber,
@@ -789,10 +815,6 @@ struct RecentsView: View {
     private func historyRow(for call: CallRecord) -> some View {
         let contact = call.number.flatMap { contacts.contact(for: $0) }
         return Button {
-            if suppressNextCallTap {
-                suppressNextCallTap = false
-                return
-            }
             if let number = RecentCallDialPolicy.numberToDial(call.number) {
                 onCall(number)
             }
@@ -806,15 +828,27 @@ struct RecentsView: View {
         }
         .buttonStyle(.plain)
         .disabled(RecentCallDialPolicy.numberToDial(call.number) == nil)
-        .simultaneousGesture(
-            LongPressGesture(minimumDuration: 0.38).onEnded { _ in
-                guard let number = call.number, !number.isEmpty else { return }
-                suppressNextCallTap = true
-                UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-                longPressNumber = number
-                showLongPressMenu = true
+        .contextMenu {
+            if let number = call.number, !number.isEmpty {
+                Button {
+                    newContactItem = NewContactItem(number: number)
+                } label: {
+                    Label(L10n.t("新建联系人"), systemImage: "person.crop.circle.badge.plus")
+                }
+                Button {
+                    contactPickerNumber = number
+                    showContactPicker = true
+                } label: {
+                    Label(L10n.t("添加到现有联系人"), systemImage: "person.crop.circle.badge.checkmark")
+                }
+                Button {
+                    UIPasteboard.general.string = number
+                    toastText = L10n.t("已复制号码")
+                } label: {
+                    Label(L10n.t("复制号码"), systemImage: "doc.on.doc")
+                }
             }
-        )
+        }
         .accessibilityHint("轻点回拨，按住查看详情")
         .listRowBackground(Color.clear)
         .listRowInsets(.init(
@@ -2953,6 +2987,42 @@ private struct NewContactView: UIViewControllerRepresentable {
         init(dismiss: DismissAction) { self.dismiss = dismiss }
         func contactViewController(_ viewController: CNContactViewController, didCompleteWith contact: CNContact?) {
             dismiss()
+        }
+    }
+}
+
+/// 系统联系人选择器（用于“添加到现有联系人”）。
+private struct ContactPickerView: UIViewControllerRepresentable {
+    let onSelect: (CNContact) -> Void
+    let onCancel: () -> Void
+
+    func makeUIViewController(context: Context) -> CNContactPickerViewController {
+        let vc = CNContactPickerViewController()
+        vc.delegate = context.coordinator
+        return vc
+    }
+
+    func updateUIViewController(_ uiViewController: CNContactPickerViewController, context: Context) {}
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(onSelect: onSelect, onCancel: onCancel)
+    }
+
+    final class Coordinator: NSObject, CNContactPickerDelegate {
+        let onSelect: (CNContact) -> Void
+        let onCancel: () -> Void
+
+        init(onSelect: @escaping (CNContact) -> Void, onCancel: @escaping () -> Void) {
+            self.onSelect = onSelect
+            self.onCancel = onCancel
+        }
+
+        func contactPicker(_ picker: CNContactPickerViewController, didSelect contact: CNContact) {
+            onSelect(contact)
+        }
+
+        func contactPickerDidCancel(_ picker: CNContactPickerViewController) {
+            onCancel()
         }
     }
 }

@@ -3,18 +3,25 @@ import Foundation
 /// iOS 端通话录音：在传输层抓取双向 8kHz 16-bit PCM（上行=本机麦克风，下行=远端声音），
 /// 写入立体声 WAV（左声道=本机，右声道=远端），保存在 Documents/CallRecordings。
 ///
-/// 线程模型：所有可变状态收敛在一条专用串行后台队列上。音频 tap 回调（实时线程）
-/// 只做 queue.async 入队，绝不阻塞、不做文件 IO；stop() 用 queue.sync 等待队列排空，
-/// 保证所有已入队音频都落盘后再回填 WAV 头。
+/// 线程模型（2026-10-14 重设计，替代之前的逐回调交错方案）：
+/// - 实时音频线程（tap 回调）永不拿锁、永不阻塞：CallRecordingCenter 的 write
+///   路径用 lock.try()，拿不到锁就丢这一帧（约 120ms），绝不在实时线程上等锁。
+///   之前闪退的根因就是实时线程拿 NSLock：锁持有者在文件 IO 时被抢占，
+///   实时线程优先级反转，被系统看门狗杀进程（必须重开 App）。
+/// - 所有可变状态收敛在一条专用串行后台队列上；混音只在该队列批量做
+///   （每 2 秒交错落盘一次），stop() 时收尾并补零对齐。内存有界（每侧 ≤30 秒）。
 final class CallRecorder: @unchecked Sendable {
     static let sampleRate: UInt32 = 8_000
     static let channels: UInt16 = 2
     static let bitsPerSample: UInt16 = 16
+    /// 每侧缓冲上限 30 秒（内存有界）；对齐部分每 2 秒批量落盘一次。
+    private static let maxBufferedSeconds = 30
+    private static let flushSeconds = 2
 
     private let queue = DispatchQueue(label: "uphone.callrecorder", qos: .utility)
     private var handle: FileHandle?
-    private var pendingUp = Data()
-    private var pendingDown = Data()
+    private var up = Data()
+    private var down = Data()
     private var dataBytes: UInt32 = 0
     private var stopped = false
     let fileURL: URL
@@ -38,13 +45,13 @@ final class CallRecorder: @unchecked Sendable {
         self.handle = handle
     }
 
-    /// 写入上行（本机麦克风）16-bit PCM mono 数据。实时线程安全：仅入队。
+    /// 写入上行（本机麦克风）16-bit PCM mono。只做 async 入队，实时线程安全。
     func writeUplink(_ pcm: Data) {
         guard !pcm.isEmpty else { return }
         queue.async { [weak self] in self?.append(pcm, uplink: true) }
     }
 
-    /// 写入下行（远端声音）16-bit PCM mono 数据。实时线程安全：仅入队。
+    /// 写入下行（远端声音）16-bit PCM mono。只做 async 入队，实时线程安全。
     func writeDownlink(_ pcm: Data) {
         guard !pcm.isEmpty else { return }
         queue.async { [weak self] in self?.append(pcm, uplink: false) }
@@ -53,31 +60,41 @@ final class CallRecorder: @unchecked Sendable {
     private func append(_ pcm: Data, uplink: Bool) {
         dispatchPrecondition(condition: .onQueue(queue))
         guard !stopped, handle != nil else { return }
-        if uplink { pendingUp.append(pcm) } else { pendingDown.append(pcm) }
-        // 防声道时间错位：单侧堆积超过 1 秒时丢弃最旧的多余数据
-        //（如下行长时间静音），保持双声道时间对齐。
-        let maxPending = Int(Self.sampleRate) * 2 // 1 秒 mono 16-bit
-        if pendingUp.count > pendingDown.count + maxPending {
-            pendingUp.removeFirst(pendingUp.count - pendingDown.count - maxPending)
-        } else if pendingDown.count > pendingUp.count + maxPending {
-            pendingDown.removeFirst(pendingDown.count - pendingUp.count - maxPending)
-        }
-        interleave()
+        var chunk = pcm
+        if chunk.count % 2 == 1 { chunk.removeLast() }  // 保证 16-bit 对齐
+        if uplink { up.append(chunk) } else { down.append(chunk) }
+        // 内存有界：每侧最多保留 30 秒
+        let cap = Int(Self.sampleRate) * 2 * Self.maxBufferedSeconds
+        if up.count > cap { up.removeFirst(up.count - cap) }
+        if down.count > cap { down.removeFirst(down.count - cap) }
+        // 批量落盘：两侧对齐部分攒够 2 秒写一次
+        let frames = min(up.count, down.count) / 2
+        guard frames >= Int(Self.sampleRate) * Self.flushSeconds else { return }
+        writeInterleaved(frames: frames)
+        up.removeFirst(frames * 2)
+        down.removeFirst(frames * 2)
     }
 
-    /// 把两侧 pending 按帧交错写入（左=上行，右=下行）；短的一侧补零对齐。
-    /// 仅在后台队列执行，文件 IO 不阻塞音频线程。
-    private func interleave() {
+    /// 按帧交错写入（左=上行，右=下行）。调用方保证 up/down 各至少 frames 帧。
+    private func writeInterleaved(frames: Int) {
         dispatchPrecondition(condition: .onQueue(queue))
-        var out = Data()
-        out.reserveCapacity(min(pendingUp.count, pendingDown.count) * 2)
-        while pendingUp.count >= 2 && pendingDown.count >= 2 {
-            out.append(pendingUp[0])
-            out.append(pendingUp[1])
-            out.append(pendingDown[0])
-            out.append(pendingDown[1])
-            pendingUp.removeFirst(2)
-            pendingDown.removeFirst(2)
+        guard frames > 0 else { return }
+        var out = Data(count: frames * 4)
+        out.withUnsafeMutableBytes { destRaw in
+            up.withUnsafeBytes { upRaw in
+                down.withUnsafeBytes { downRaw in
+                    let dest = destRaw.bindMemory(to: UInt8.self)
+                    let ub = upRaw.bindMemory(to: UInt8.self)
+                    let db = downRaw.bindMemory(to: UInt8.self)
+                    for i in 0..<frames {
+                        let o = i * 4, s = i * 2
+                        dest[o] = ub[s]
+                        dest[o + 1] = ub[s + 1]
+                        dest[o + 2] = db[s]
+                        dest[o + 3] = db[s + 1]
+                    }
+                }
+            }
         }
         writeData(out)
     }
@@ -96,29 +113,43 @@ final class CallRecorder: @unchecked Sendable {
         }
     }
 
-    /// 结束录音：等待队列排空、补齐尾部、回填 WAV 头长度，返回文件 URL。
+    /// 结束录音：等待队列排空、尾部补零对齐、回填 WAV 头长度，返回文件 URL。
     /// 数据不足 1 秒视为无效录音，删除文件并返回 nil。
     func stop() -> URL? {
         queue.sync {
             dispatchPrecondition(condition: .onQueue(self.queue))
             guard !stopped else { return nil }
             stopped = true
-            // 尾部对齐：短的一侧补零
-            var tail = Data()
-            let upFrames = pendingUp.count / 2
-            let downFrames = pendingDown.count / 2
+            // 尾部：两侧按帧对齐，不足的声道补零
+            let upFrames = up.count / 2
+            let downFrames = down.count / 2
             let frames = max(upFrames, downFrames)
-            tail.reserveCapacity(frames * 4)
-            for i in 0..<frames {
-                let u0 = i < upFrames ? pendingUp[i * 2] : 0
-                let u1 = i < upFrames ? pendingUp[i * 2 + 1] : 0
-                let d0 = i < downFrames ? pendingDown[i * 2] : 0
-                let d1 = i < downFrames ? pendingDown[i * 2 + 1] : 0
-                tail.append(contentsOf: [u0, u1, d0, d1])
+            if frames > 0 {
+                var out = Data(count: frames * 4)
+                out.withUnsafeMutableBytes { destRaw in
+                    up.withUnsafeBytes { upRaw in
+                        down.withUnsafeBytes { downRaw in
+                            let dest = destRaw.bindMemory(to: UInt8.self)
+                            let ub = upRaw.bindMemory(to: UInt8.self)
+                            let db = downRaw.bindMemory(to: UInt8.self)
+                            for i in 0..<frames {
+                                let o = i * 4, s = i * 2
+                                if i < upFrames {
+                                    dest[o] = ub[s]
+                                    dest[o + 1] = ub[s + 1]
+                                }
+                                if i < downFrames {
+                                    dest[o + 2] = db[s]
+                                    dest[o + 3] = db[s + 1]
+                                }
+                            }
+                        }
+                    }
+                }
+                writeData(out)
             }
-            pendingUp.removeAll()
-            pendingDown.removeAll()
-            writeData(tail)
+            up.removeAll(keepingCapacity: false)
+            down.removeAll(keepingCapacity: false)
             // 回填头
             if let handle {
                 do {
@@ -175,6 +206,9 @@ final class CallRecorder: @unchecked Sendable {
 /// 录音中心（单例）：两种音频传输（云端 IPhoneCloudCallSession / 本地 AudioSessionController）
 /// 共用一个录音器。任一通话音频路径只需在上下行 PCM 处调用 write，start/stop 由 AppModel 控制，
 /// 通话结束时各音频类的 teardown 调用 finishIfRecording() 自动收尾一次。
+///
+/// 注意：writeUplink/writeDownlink 会被实时音频线程（tap 回调）调用，
+/// 因此内部用 lock.try() 永不阻塞；start/stop/isRecording 只在主线程/后台线程调用，用普通 lock。
 final class CallRecordingCenter: @unchecked Sendable {
     static let shared = CallRecordingCenter()
 
@@ -194,18 +228,18 @@ final class CallRecordingCenter: @unchecked Sendable {
         return true
     }
 
+    /// 实时线程调用：tryLock 拿不到就丢这一帧，绝不阻塞。
     func writeUplink(_ pcm: Data) {
-        lock.lock()
-        let current = recorder
-        lock.unlock()
-        current?.writeUplink(pcm)
+        guard lock.try() else { return }
+        defer { lock.unlock() }
+        recorder?.writeUplink(pcm)
     }
 
+    /// 实时线程调用：tryLock 拿不到就丢这一帧，绝不阻塞。
     func writeDownlink(_ pcm: Data) {
-        lock.lock()
-        let current = recorder
-        lock.unlock()
-        current?.writeDownlink(pcm)
+        guard lock.try() else { return }
+        defer { lock.unlock() }
+        recorder?.writeDownlink(pcm)
     }
 
     /// 停止录音并返回文件 URL；没有录音时返回 nil。

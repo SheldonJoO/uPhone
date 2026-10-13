@@ -289,14 +289,14 @@ struct AirSIMSettingsView: View {
                         }
                     } label: {
                         LabeledContent {
-                            Text("跟随 iPhone 系统铃声")
+                            Text("跟随系统")
                                 .foregroundStyle(.secondary)
                         } label: {
                             Label("来电铃声", systemImage: "bell")
                         }
                     }
                     .buttonStyle(.plain)
-                    Text("VoIP 来电铃声跟随系统设置。前往 iPhone 设置 > 声音与触感 > 电话铃声 更改。")
+                    Text("系统来电界面播放 iPhone 电话铃声（前往 iPhone 设置 > 声音与触感 > 电话铃声更改）；App 内来电界面播放应用内铃声，并跟随静音开关。")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                     Picker(selection: $smsRingtone) {

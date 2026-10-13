@@ -23,7 +23,7 @@ final class PhoneAttribution {
     private var loaded = false
     /// 排序后的索引：(7 位号段, 记录区偏移, 卡类型)
     private var index: [(prefix: Int, offset: Int, card: UInt8)] = []
-    private var recordBytes: [UInt8] = []
+    private var fileBytes: [UInt8] = []
 
     private init() {}
 
@@ -59,10 +59,10 @@ final class PhoneAttribution {
     // MARK: - 私有
 
     private func result(for entry: (prefix: Int, offset: Int, card: UInt8)) -> PhoneAttributionResult? {
-        guard entry.offset < recordBytes.count else { return nil }
+        guard entry.offset < fileBytes.count else { return nil }
         var end = entry.offset
-        while end < recordBytes.count && recordBytes[end] != 0 { end += 1 }
-        let slice = recordBytes[entry.offset..<end]
+        while end < fileBytes.count && fileBytes[end] != 0 { end += 1 }
+        let slice = fileBytes[entry.offset..<end]
         guard let text = String(bytes: slice, encoding: .utf8) else { return nil }
         // 记录格式：省份|城市|邮编|区号
         let parts = text.split(separator: "|", omittingEmptySubsequences: false)
@@ -121,7 +121,8 @@ final class PhoneAttribution {
             | (Int(bytes[6]) << 16)
             | (Int(bytes[7]) << 24)
         guard firstIndexOffset > 8, firstIndexOffset < bytes.count else { return }
-        recordBytes = Array(bytes[8..<firstIndexOffset])
+        // 注意：索引中的记录偏移是文件绝对偏移（从文件头算起），不是记录区相对偏移。
+        fileBytes = Array(bytes[0..<firstIndexOffset])
         var entries: [(Int, Int, UInt8)] = []
         entries.reserveCapacity((bytes.count - firstIndexOffset) / 9)
         var offset = firstIndexOffset

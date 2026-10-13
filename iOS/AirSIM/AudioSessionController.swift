@@ -437,8 +437,17 @@ final class AudioSessionController: ObservableObject {
 
         do {
             let session = AVAudioSession.sharedInstance()
-            // 模块来电属于电话提醒，使用 playback 确保手机静音时仍能听到，并压低其他音频。
-            try session.setCategory(.playback, mode: .default, options: [.duckOthers])
+            switch tone {
+            case .incoming:
+                // 来电铃声跟随系统：soloAmbient 让静音开关生效（静音时不响），
+                // 而不是像之前用 playback 强制盖过静音——那正是“铃声没有跟随系统”的原因。
+                // 注意：iOS 不开放用户自选电话铃声的播放接口，真正的系统铃声只在
+                // CallKit 上报成功时由系统播放；这里是 CallKit 不可用时的应用内兜底。
+                try session.setCategory(.soloAmbient, mode: .default)
+            default:
+                // 去电等待音/设置页试听：用户主动触发，确保能听到，用 playback。
+                try session.setCategory(.playback, mode: .default, options: [.duckOthers])
+            }
             try session.setActive(true)
             let player = try AVAudioPlayer(data: SynthesizedCallTone.wavData(for: tone))
             player.numberOfLoops = looping ? -1 : 0
