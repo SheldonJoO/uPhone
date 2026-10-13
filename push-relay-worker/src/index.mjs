@@ -982,6 +982,9 @@ async function registerDevice(request, env) {
     bundle_id: device.bundle_id,
     environment: device.environment,
     registered_at: new Date().toISOString(),
+    ...(nonEmpty(device.android_device_name)
+      ? { device_name: device.android_device_name.trim().slice(0, 64) }
+      : (existing?.device_name ? { device_name: existing.device_name } : {})),
     media_transport_requested: MEDIA_TRANSPORTS.has(device.media_transport)
       ? device.media_transport : (existing?.media_transport_requested || "legacy_pcm"),
     app_media_capabilities: normalizedMediaCapabilities(
@@ -1107,6 +1110,8 @@ async function receiveCall(request, env) {
     call_id: call.call_id,
     call_uuid: call.call_uuid,
     generation,
+    device_id: authenticated.device.device_id,
+    device_name: stringValue(authenticated.device.device_name),
     number: stringValue(call.number),
     caller_name: stringValue(call.caller_name),
     issued_at: call.issued_at,
@@ -1156,6 +1161,8 @@ async function receiveCall(request, env) {
         event: "incoming_call_mirror",
         call_id: call.call_id,
         call_uuid: call.call_uuid,
+        device_id: authenticated.device.device_id,
+        device_name: stringValue(authenticated.device.device_name),
         number: stringValue(call.number),
         caller_name: stringValue(call.caller_name),
         issued_at: call.issued_at,
@@ -1258,10 +1265,13 @@ async function receiveSMS(request, env) {
     },
     event: "incoming_sms",
     delivery_id: message.delivery_id,
+    device_id: authenticated.device.device_id,
+    device_name: stringValue(authenticated.device.device_name),
     sender: message.sender,
     content,
     content_truncated: truncated,
     code: stringValue(message.code),
+    category: stringValue(message.category),
     timestamp: message.timestamp,
     subscription_id: Number.isInteger(message.subscription_id) ? message.subscription_id : null,
     slot_index: Number.isInteger(message.slot_index) ? message.slot_index : null,
