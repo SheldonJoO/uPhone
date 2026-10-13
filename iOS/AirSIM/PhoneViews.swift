@@ -778,6 +778,7 @@ struct MessagesView: View {
     @State private var conversationPath: [String] = []
     @State private var showingComposer = false
     @State private var showingClearConfirmation = false
+    @State private var messageTab = 0
 
     private var conversations: [(sender: String, messages: [SMSMessage])] {
         Dictionary(grouping: model.messages, by: \.sender)
@@ -785,10 +786,36 @@ struct MessagesView: View {
             .sorted { ($0.messages.last?.timestamp ?? .distantPast) > ($1.messages.last?.timestamp ?? .distantPast) }
     }
 
+    /// 验证码集合：所有含验证码的收件短信，按时间倒序。
+    private var codeMessages: [SMSMessage] {
+        model.messages
+            .filter { !$0.isOutgoing && $0.verificationCode != nil }
+            .sorted { $0.timestamp > $1.timestamp }
+    }
+
     var body: some View {
         NavigationStack(path: $conversationPath) {
             List {
-                if conversations.isEmpty {
+                if messageTab == 1 {
+                    if codeMessages.isEmpty {
+                        EmptyStateView(title: L10n.t("暂无验证码"), systemImage: "key.fill")
+                            .listRowBackground(Color.clear)
+                    } else {
+                        ForEach(codeMessages) { message in
+                            CodeCenterRow(message: message)
+                                .listRowBackground(Color.clear)
+                                .listRowInsets(.init(
+                                    top: 0,
+                                    leading: PhoneListMetrics.horizontalInset,
+                                    bottom: 0,
+                                    trailing: PhoneListMetrics.horizontalInset
+                                ))
+                                .alignmentGuide(.listRowSeparatorLeading) { _ in
+                                    PhoneListMetrics.separatorLeading
+                                }
+                        }
+                    }
+                } else if conversations.isEmpty {
                     EmptyStateView(title: L10n.t("暂无短信"), systemImage: "message")
                         .listRowBackground(Color.clear)
                 } else {
@@ -812,6 +839,15 @@ struct MessagesView: View {
             }
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
+            .safeAreaInset(edge: .top) {
+                Picker("", selection: $messageTab) {
+                    Text(L10n.t("短信")).tag(0)
+                    Text(L10n.t("验证码")).tag(1)
+                }
+                .pickerStyle(.segmented)
+                .padding(.horizontal, PhoneListMetrics.horizontalInset)
+                .padding(.vertical, 6)
+            }
             .environment(\.defaultMinListRowHeight, PhoneListMetrics.rowHeight)
             .phoneReportsTabBarCompactState()
             .background(PhoneBackdrop())
@@ -926,6 +962,67 @@ struct MessagesView: View {
             }
             .frame(minHeight: PhoneListMetrics.rowHeight)
         }
+    }
+}
+
+/// 验证码集合页的一行：大字验证码 + 发件人/时间/SIM，点击复制；超 10 分钟置灰。
+private struct CodeCenterRow: View {
+    @EnvironmentObject private var model: AppModel
+    let message: SMSMessage
+    @State private var copied = false
+
+    private var isExpired: Bool {
+        Date().timeIntervalSince(message.timestamp) > 10 * 60
+    }
+
+    private var displayName: String {
+        model.contacts.displayName(for: message.sender)
+    }
+
+    var body: some View {
+        Button {
+            if let code = message.verificationCode {
+                UIPasteboard.general.string = code
+                copied = true
+                Task {
+                    try? await Task.sleep(for: .seconds(1.5))
+                    copied = false
+                }
+            }
+        } label: {
+            HStack(spacing: 12) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(message.verificationCode ?? "")
+                        .font(.title.weight(.bold).monospacedDigit())
+                    HStack(spacing: 6) {
+                        Text(displayName)
+                            .font(.subheadline)
+                            .lineLimit(1)
+                        if let sim = message.simLabel {
+                            Text(sim)
+                                .font(.caption2.weight(.semibold))
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
+                                .background(Color.blue.opacity(0.12), in: Capsule())
+                        }
+                        Text(message.timestamp, style: .relative)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    if isExpired {
+                        Text(L10n.t("已超过 10 分钟，可能已失效"))
+                            .font(.caption2)
+                            .foregroundStyle(.orange)
+                    }
+                }
+                Spacer()
+                Image(systemName: copied ? "checkmark.circle.fill" : "doc.on.doc")
+                    .foregroundStyle(copied ? .green : .secondary)
+            }
+            .padding(.vertical, 8)
+            .opacity(isExpired ? 0.55 : 1)
+        }
+        .buttonStyle(.plain)
     }
 }
 
