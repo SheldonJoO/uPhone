@@ -7,6 +7,8 @@ struct SamsungPairingView: View {
     @State private var code = ""
     @State private var pairingServiceID: String?
     @State private var message = ""
+    @State private var showingScanner = false
+    @State private var scannedService: SamsungPairingService?
 
     var body: some View {
         Form {
@@ -24,6 +26,20 @@ struct SamsungPairingView: View {
                 Label("让安卓与本机连接同一 Wi-Fi", systemImage: "wifi")
                 Label("也可让本机连接安卓移动热点", systemImage: "personalhotspot")
                 Label("在安卓 App 点击“开始一次性配对”", systemImage: "key")
+            }
+
+            Section {
+                Button {
+                    showingScanner = true
+                } label: {
+                    Label("扫码配对", systemImage: "qrcode.viewfinder")
+                }
+                .buttonStyle(.borderedProminent)
+                Text("用相机扫描安卓屏幕上的二维码，免输配对码。")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            } header: {
+                Text("快捷配对")
             }
 
             Section("发现的设备") {
@@ -61,6 +77,29 @@ struct SamsungPairingView: View {
         .navigationBarTitleDisplayMode(.inline)
         .onAppear { browser.start() }
         .onDisappear { browser.stop() }
+        .sheet(isPresented: $showingScanner) {
+            NavigationStack {
+                QRPairingScannerView(
+                    onScanned: { service, scannedCode in
+                        showingScanner = false
+                        scannedService = service
+                        code = scannedCode
+                        Task { await pair(service) }
+                    },
+                    onError: { error in
+                        showingScanner = false
+                        message = error
+                    }
+                )
+                .navigationTitle("扫描配对二维码")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("取消") { showingScanner = false }
+                    }
+                }
+            }
+        }
     }
 
     @MainActor

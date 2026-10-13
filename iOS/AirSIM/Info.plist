@@ -58,6 +58,8 @@
 	<string>用于在安卓热点内发现并安全配对 uPhone 电话桥。</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>用于通过 AirSIM VoWLAN 或云端模式进行双向语音通话。</string>
+	<key>NSCameraUsageDescription</key>
+	<string>用于扫描安卓手机上的配对二维码，快速完成配对。</string>
 	<key>NSSupportsLiveActivities</key>
 	<true/>
 	<key>UIBackgroundModes</key>

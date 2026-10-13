@@ -48,6 +48,8 @@ download_verified "https://repo1.maven.org/maven2/dev/rikka/shizuku/provider/$SH
   "$DEPS/shizuku-provider.aar" b0f18cd9812464ec171c53cac93a819fe411718a3965c311f01eb4de265381b3
 download_verified "https://dl.google.com/dl/android/maven2/androidx/annotation/annotation/1.3.0/annotation-1.3.0.jar" \
   "$DEPS/androidx-annotation.jar" 97dc45afefe3a1e421da42b8b6e9f90491477c45fc6178203e3a5e8a05ee8553
+download_verified "https://repo1.maven.org/maven2/com/google/zxing/core/3.5.3/core-3.5.3.jar" \
+  "$DEPS/zxing-core.jar" 8d8064c1636fdaef7189dd9055c7d59950a8940a12f2293956446ec3c109fd82
 
 SHIZUKU_JARS=()
 for artifact in api aidl shared provider; do
@@ -56,6 +58,7 @@ for artifact in api aidl shared provider; do
   SHIZUKU_JARS+=("$jar_path")
 done
 SHIZUKU_JARS+=("$DEPS/androidx-annotation.jar")
+SHIZUKU_JARS+=("$DEPS/zxing-core.jar")
 CLASSPATH="$ANDROID_JAR:$(IFS=:; echo "${SHIZUKU_JARS[*]}")"
 
 SOURCES=()

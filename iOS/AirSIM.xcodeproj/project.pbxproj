@@ -47,7 +47,9 @@
 		A1000000000000000000002F /* VoWLANAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000002F /* VoWLANAuth.swift */; };
 		A10000000000000000000030 /* VoWLANController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000030 /* VoWLANController.swift */; };
 		B10000000000000000000031 /* DeviceRegistry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceRegistry.swift; sourceTree = "<group>"; };
+		B10000000000000000000032 /* QRPairingScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRPairingScannerView.swift; sourceTree = "<group>"; };
 		A10000000000000000000031 /* DeviceRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000031 /* DeviceRegistry.swift */; };
+		A10000000000000000000032 /* QRPairingScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000032 /* QRPairingScannerView.swift */; };
 		A1000000000000000000002B /* CallLifecycleStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000002B /* CallLifecycleStore.swift */; };
 		A30000000000000000000001 /* AirSIMTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30000000000000000000001 /* AirSIMTests.swift */; };
 /* End PBXBuildFile section */
@@ -203,6 +205,7 @@
 				B10000000000000000000004 /* AppSettings.swift */,
 				B10000000000000000000005 /* ContactStore.swift */,
 				B10000000000000000000031 /* DeviceRegistry.swift */,
+				B10000000000000000000032 /* QRPairingScannerView.swift */,
 				B10000000000000000000006 /* AudioSessionController.swift */,
 				B10000000000000000000007 /* AppModel.swift */,
 				B10000000000000000000010 /* CallKitController.swift */,
@@ -442,6 +445,7 @@
 				A10000000000000000000004 /* AppSettings.swift in Sources */,
 				A10000000000000000000005 /* ContactStore.swift in Sources */,
 				A10000000000000000000031 /* DeviceRegistry.swift in Sources */,
+				A10000000000000000000032 /* QRPairingScannerView.swift in Sources */,
 				A10000000000000000000006 /* AudioSessionController.swift in Sources */,
 				A10000000000000000000007 /* AppModel.swift in Sources */,
 				A10000000000000000000008 /* RootView.swift in Sources */,

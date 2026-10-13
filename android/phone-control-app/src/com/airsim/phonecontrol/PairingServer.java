@@ -29,7 +29,7 @@ import java.util.concurrent.TimeUnit;
 
 public final class PairingServer implements Closeable {
     public interface Listener {
-        void onStarted(String code, String address, long expiresAtMillis);
+        void onStarted(String code, String address, long expiresAtMillis, String qrPayload);
         void onSucceeded(String agentResponse);
         void onFailed(String message);
     }
@@ -59,7 +59,8 @@ public final class PairingServer implements Closeable {
                 session = created;
                 advertise(server.getLocalPort(), created);
                 String address = preferredPrivateIPv4() + ":" + server.getLocalPort();
-                listener.onStarted(created.code(), address, created.expiresAtMillis());
+                listener.onStarted(created.code(), address, created.expiresAtMillis(),
+                        qrPayload(created, address));
                 timer.schedule(() -> {
                     listener.onFailed("配对窗口已过期");
                     closeQuietly();
@@ -214,6 +215,31 @@ public final class PairingServer implements Closeable {
         output.write(headers);
         output.write(body);
         output.flush();
+    }
+
+    /**
+     * QR payload for iPhone扫码配对. Contains everything the iPhone needs to
+     * connect directly: session, server public key, IP/port, code, expiry.
+     * Format: {"v":1,"session":"...","key":"...","ip":"...","port":1234,"code":"123456","expires":...}
+     */
+    static String qrPayload(PairingSession session, String address) {
+        try {
+            int colon = address.lastIndexOf(':');
+            String ip = colon > 0 ? address.substring(0, colon) : address;
+            int port = colon > 0 ? Integer.parseInt(address.substring(colon + 1)) : 0;
+            org.json.JSONObject json = new org.json.JSONObject();
+            json.put("v", 1);
+            json.put("session", session.id());
+            json.put("key", PairingCrypto.base64URL(session.publicKey()));
+            json.put("ip", ip);
+            json.put("port", port);
+            json.put("code", session.code());
+            json.put("expires", session.expiresAtMillis());
+            return json.toString();
+        } catch (Exception error) {
+            BridgeLog.info("qr_payload_failed reason=" + error.getClass().getSimpleName());
+            return "";
+        }
     }
 
     static String preferredPrivateIPv4() throws IOException {

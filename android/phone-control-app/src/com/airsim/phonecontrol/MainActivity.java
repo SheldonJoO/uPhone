@@ -83,6 +83,7 @@ public final class MainActivity extends Activity {
 	private TextView installerStatus;
     private TextView pairingStatus;
     private TextView pairingCodeView;
+    private ImageView pairingQrView;
     private TextView pairingCountdownView;
     private LinearLayout debugRows;
     private String lastRenderedDebugLog;
@@ -588,6 +589,15 @@ public final class MainActivity extends Activity {
         pairingCodeView.setBackground(rounded(Color.rgb(20, 32, 45), 18, BORDER, 1));
         pairingCodeView.setPadding(dp(18), dp(18), dp(18), dp(18));
         pairingCard.addView(pairingCodeView, matchWithTop(18));
+
+        pairingQrView = new ImageView(this);
+        pairingQrView.setContentDescription("扫码配对二维码");
+        LinearLayout.LayoutParams qrParams = new LinearLayout.LayoutParams(dp(200), dp(200));
+        qrParams.topMargin = dp(16);
+        qrParams.gravity = Gravity.CENTER_HORIZONTAL;
+        pairingCard.addView(pairingQrView, qrParams);
+        pairingCard.addView(label("iPhone 用 uPhone 扫码配对（或手动输入上方配对码）", 13, MUTED, Gravity.CENTER),
+                matchWithTop(8));
 
         pairingCountdownView = label("正在生成安全密钥…", 14, Color.rgb(135, 183, 238), Gravity.CENTER);
         pairingCard.addView(pairingCountdownView, matchWithTop(16));
@@ -1204,13 +1214,17 @@ public final class MainActivity extends Activity {
         stopPairingServer();
         if (pairingStatus != null) pairingStatus.setText("正在检查局域网并生成临时密钥…");
         pairingServer = new PairingServer(this, new PairingServer.Listener() {
-            @Override public void onStarted(String code, String address, long expiresAtMillis) {
+            @Override public void onStarted(String code, String address, long expiresAtMillis, String qrPayload) {
                 BridgeLog.info("pairing_started address=" + address + " expires_at=" + expiresAtMillis);
                 pairingCode = code;
                 pairingExpiresAt = expiresAtMillis;
                 runOnUiThread(() -> {
                     if (pairingCodeView != null) pairingCodeView.setText(
                             MainScreenPresentation.formatPairingCode(code));
+                    if (pairingQrView != null) {
+                        android.graphics.Bitmap qr = QrCodeBitmap.encode(qrPayload, dp(200));
+                        if (qr != null) pairingQrView.setImageBitmap(qr);
+                    }
                     if (pairingStatus != null) pairingStatus.setText("等待 iPhone 连接…\n" + address);
                     startPairingCountdown();
                 });
