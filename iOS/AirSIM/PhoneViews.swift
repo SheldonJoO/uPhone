@@ -1,5 +1,6 @@
 import SwiftUI
 import UIKit
+import AVFoundation
 
 enum RecentCallTimeFormatter {
     static func string(
@@ -644,6 +645,16 @@ struct RecentsView: View {
                 }
                 .background(PhoneBackdrop())
                 .navigationTitle(L10n.t("最近通话"))
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        NavigationLink {
+                            RecordingsView()
+                        } label: {
+                            Image(systemName: "waveform")
+                        }
+                        .accessibilityLabel(L10n.t("通话录音"))
+                    }
+                }
             }
             .allowsHitTesting(selectedCall == nil)
 
@@ -765,6 +776,212 @@ struct RecentsView: View {
                     .background(Color(uiColor: .secondarySystemBackground), in: Circle())
             }
             .frame(minHeight: PhoneListMetrics.rowHeight)
+        }
+    }
+}
+
+// MARK: - 通话录音管理
+
+/// Documents/CallRecordings 下的 WAV 录音文件。
+struct CallRecordingFile: Identifiable {
+    /// 8kHz 立体声 16-bit，每秒 32000 字节。
+    private static let bytesPerSecond = 32000.0
+
+    let url: URL
+    let date: Date
+    let duration: TimeInterval
+    let size: Int
+
+    var id: String { url.lastPathComponent }
+
+    var durationText: String {
+        let total = Int(duration)
+        return String(format: "%d:%02d", total / 60, total % 60)
+    }
+
+    var sizeText: String {
+        ByteCountFormatter.string(fromByteCount: Int64(size), countStyle: .file)
+    }
+
+    static func all() -> [CallRecordingFile] {
+        let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("CallRecordings", isDirectory: true)
+        guard let urls = try? FileManager.default.contentsOfDirectory(
+            at: dir, includingPropertiesForKeys: [.contentModificationDateKey, .fileSizeKey])
+        else { return [] }
+        return urls
+            .filter { $0.pathExtension.lowercased() == "wav" }
+            .compactMap { url -> CallRecordingFile? in
+                guard let values = try? url.resourceValues(forKeys: [.contentModificationDateKey, .fileSizeKey]),
+                      let size = values.fileSize
+                else { return nil }
+                let date = Self.date(from: url) ?? values.contentModificationDate ?? .distantPast
+                let duration = size > 44 ? Double(size - 44) / bytesPerSecond : 0
+                return CallRecordingFile(url: url, date: date, duration: duration, size: size)
+            }
+            .sorted { $0.date > $1.date }
+    }
+
+    /// 从文件名 uPhone_yyyyMMdd_HHmmss.wav 解析时间。
+    private static func date(from url: URL) -> Date? {
+        let name = url.deletingPathExtension().lastPathComponent
+        guard name.hasPrefix("uPhone_") else { return nil }
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyyMMdd_HHmmss"
+        return formatter.date(from: String(name.dropFirst("uPhone_".count)))
+    }
+}
+
+/// 录音播放器：同一时间只播一个；来电打断时自动停止。
+@MainActor
+private final class RecordingPlayer: NSObject, ObservableObject, AVAudioPlayerDelegate {
+    @Published var playingID: String?
+    private var player: AVAudioPlayer?
+
+    func toggle(_ file: CallRecordingFile) {
+        if playingID == file.id { stop(); return }
+        stop()
+        do {
+            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
+            let p = try AVAudioPlayer(contentsOf: file.url)
+            p.delegate = self
+            p.play()
+            player = p
+            playingID = file.id
+        } catch {
+            stop()
+        }
+    }
+
+    func stop() {
+        player?.stop()
+        player = nil
+        playingID = nil
+    }
+
+    func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
+        stop()
+    }
+
+    func audioPlayerBeginInterruption(_ player: AVAudioPlayer) {
+        stop()
+    }
+}
+
+/// 通话录音列表：播放、分享、删除。
+struct RecordingsView: View {
+    @State private var files: [CallRecordingFile] = []
+    @StateObject private var player = RecordingPlayer()
+    @State private var shareURL: URL?
+    @State private var showShare = false
+
+    var body: some View {
+        Group {
+            if files.isEmpty {
+                EmptyStateView(title: L10n.t("暂无录音"), systemImage: "waveform")
+            } else {
+                List(files) { file in
+                    RecordingRow(
+                        file: file,
+                        isPlaying: player.playingID == file.id,
+                        onTap: { player.toggle(file) }
+                    )
+                    .listRowBackground(Color.clear)
+                    .listRowInsets(.init(
+                        top: 0,
+                        leading: PhoneListMetrics.horizontalInset,
+                        bottom: 0,
+                        trailing: PhoneListMetrics.horizontalInset
+                    ))
+                    .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                        Button {
+                            shareURL = file.url
+                            showShare = true
+                        } label: {
+                            Label(L10n.t("分享"), systemImage: "square.and.arrow.up")
+                        }
+                        .tint(.blue)
+                        Button(role: .destructive) {
+                            delete(file)
+                        } label: {
+                            Label(L10n.t("删除"), systemImage: "trash")
+                        }
+                    }
+                }
+                .listStyle(.plain)
+                .scrollContentBackground(.hidden)
+            }
+        }
+        .background(PhoneBackdrop())
+        .navigationTitle(L10n.t("通话录音"))
+        .navigationBarTitleDisplayMode(.inline)
+        .onAppear(perform: reload)
+        .sheet(isPresented: $showShare) {
+            if let url = shareURL {
+                RecordingShareSheet(url: url)
+            }
+        }
+    }
+
+    private func reload() {
+        files = CallRecordingFile.all()
+    }
+
+    private func delete(_ file: CallRecordingFile) {
+        if player.playingID == file.id { player.stop() }
+        try? FileManager.default.removeItem(at: file.url)
+        reload()
+    }
+}
+
+private struct RecordingRow: View {
+    let file: CallRecordingFile
+    let isPlaying: Bool
+    var onTap: () -> Void
+
+    var body: some View {
+        Button(action: onTap) {
+            HStack(spacing: 12) {
+                Image(systemName: isPlaying ? "stop.circle.fill" : "play.circle.fill")
+                    .font(.title2)
+                    .foregroundStyle(isPlaying ? .red : .blue)
+                    .frame(width: 32)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(file.date, format: .dateTime.month().day().hour().minute())
+                        .font(.headline)
+                    Text("\(file.durationText) · \(file.sizeText)")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .monospacedDigit()
+                }
+                Spacer()
+                if isPlaying {
+                    AudioWaveformView()
+                }
+            }
+            .padding(.vertical, 6)
+            .frame(minHeight: PhoneListMetrics.rowHeight)
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+/// 播放中的简易波形动画。
+private struct AudioWaveformView: View {
+    @State private var phase = 0.0
+
+    var body: some View {
+        HStack(spacing: 2.5) {
+            ForEach(0..<5, id: \.self) { i in
+                RoundedRectangle(cornerRadius: 1)
+                    .fill(Color.red.opacity(0.75))
+                    .frame(width: 2.5, height: 6 + 10 * abs(sin(phase + Double(i) * 0.9)))
+            }
+        }
+        .onAppear {
+            withAnimation(.linear(duration: 0.9).repeatForever(autoreverses: false)) {
+                phase = .pi * 2
+            }
         }
     }
 }
