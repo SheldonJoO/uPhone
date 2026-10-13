@@ -632,165 +632,23 @@ struct RecentsView: View {
 
     var body: some View {
         ZStack {
-            NavigationStack {
-                Group {
-                    if recentsTab == 1 {
-                        // 个人收藏 Tab
-                        if favoriteNumbers.isEmpty {
-                            EmptyStateView(
-                                title: L10n.t("暂无收藏"),
-                                systemImage: "star"
-                            )
-                        } else {
-                            List(favoriteNumbers, id: \.self) { number in
-                                let contact = contacts.contact(for: number)
-                                HStack {
-                                    Button {
-                                        if let dialNumber = RecentCallDialPolicy.numberToDial(number) {
-                                            onCall(dialNumber)
-                                        }
-                                    } label: {
-                                        HStack {
-                                            Image(systemName: "star.fill")
-                                                .foregroundStyle(.yellow)
-                                            VStack(alignment: .leading) {
-                                                Text(contact?.name ?? contacts.displayName(for: number))
-                                                    .font(.headline)
-                                                Text(number)
-                                                    .font(.caption)
-                                                    .foregroundStyle(.secondary)
-                                            }
-                                        }
-                                    }
-                                    .buttonStyle(.plain)
-                                    Spacer()
-                                    Button {
-                                        onMessage(number)
-                                    } label: {
-                                        Image(systemName: "message.fill")
-                                            .foregroundStyle(.blue)
-                                    }
-                                    .buttonStyle(.plain)
-                                    Button {
-                                        toggleFavorite(number)
-                                    } label: {
-                                        Image(systemName: "star.slash")
-                                            .foregroundStyle(.secondary)
-                                    }
-                                    .buttonStyle(.plain)
-                                }
-                            }
-                        }
-                    } else if visibleCallHistory.isEmpty {
-                        EmptyStateView(
-                            title: L10n.t("暂无通话记录"),
-                            systemImage: "phone.arrow.up.right"
-                        )
-                    } else {
-                        List(visibleCallHistory) { call in
-                            let contact = call.number.flatMap { contacts.contact(for: $0) }
-                            Button {
-                                if suppressNextCallTap {
-                                    suppressNextCallTap = false
-                                    return
-                                }
-                                if let number = RecentCallDialPolicy.numberToDial(call.number) {
-                                    onCall(number)
-                                }
-                            } label: {
-                                CallHistoryRow(
-                                    call: call,
-                                    contact: contact,
-                                    displayName: contact?.name ?? contacts.displayName(for: call.number)
-                                )
-                                .contentShape(Rectangle())
-                            }
-                            .buttonStyle(.plain)
-                            .disabled(RecentCallDialPolicy.numberToDial(call.number) == nil)
-                            .simultaneousGesture(
-                                LongPressGesture(minimumDuration: 0.38).onEnded { _ in
-                                    guard let number = call.number, !number.isEmpty else { return }
-                                    suppressNextCallTap = true
-                                    UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-                                    longPressNumber = number
-                                    showLongPressMenu = true
-                                }
-                            )
-                            .accessibilityHint("轻点回拨，按住查看详情")
-                            .listRowBackground(Color.clear)
-                            .listRowInsets(.init(
-                                top: 0,
-                                leading: PhoneListMetrics.horizontalInset,
-                                bottom: 0,
-                                trailing: PhoneListMetrics.horizontalInset
-                            ))
-                            .alignmentGuide(.listRowSeparatorLeading) { _ in
-                                PhoneListMetrics.separatorLeading
-                            }
-                            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                                if let number = call.number {
-                                    Button { onMessage(number) } label: {
-                                        Label(L10n.t("短信"), systemImage: "message.fill")
-                                    }
-                                    .tint(.blue)
-                                    Button(role: .destructive) {
-                                        var ids = deletedCallIDs
-                                        ids.insert(call.id)
-                                        deletedCallIDs = ids
-                                    } label: {
-                                        Label(L10n.t("删除"), systemImage: "trash.fill")
-                                    }
-                                    .tint(.red)
-                                    Button {
-                                        if CallPolicyStore.shared.addToBlacklist(number) {
-                                            toastText = L10n.t("已加入黑名单")
-                                        } else {
-                                            toastText = L10n.t("已在黑名单中")
-                                        }
-                                    } label: {
-                                        Label(L10n.t("拉黑"), systemImage: "nosign")
-                                    }
-                                    .tint(.red)
-                                    Button {
-                                        toggleFavorite(number)
-                                    } label: {
-                                        Label(
-                                            isFavorite(number) ? L10n.t("取消收藏") : L10n.t("收藏"),
-                                            systemImage: isFavorite(number) ? "star.slash" : "star.fill"
-                                        )
-                                    }
-                                    .tint(.yellow)
-                                }
-                            }
-                            .swipeActions(edge: .leading, allowsFullSwipe: true) {
-                                if let number = call.number,
-                                   RecentCallDialPolicy.numberToDial(number) != nil {
-                                    Button {
-                                        dialBackNumber = number
-                                        showDialBackMenu = true
-                                    } label: {
-                                        Label(L10n.t("选择回拨"), systemImage: "phone.fill")
-                                    }
-                                    .tint(.green)
-                                }
-                            }
-                        }
-                        .listStyle(.plain)
-                        .scrollContentBackground(.hidden)
-                        .environment(\.defaultMinListRowHeight, PhoneListMetrics.rowHeight)
-                        .phoneReportsTabBarCompactState()
-                    }
-                }
+            mainContent
+            callDetailsOverlay
+            toastOverlay
+        }
+        .animation(.easeInOut(duration: 0.2), value: selectedCall?.id)
+        .animation(.easeInOut(duration: 0.25), value: toastText)
+    }
+
+    // MARK: - 最近通话视图拆分（避免 body 类型检查超时）
+
+    private var mainContent: some View {
+        NavigationStack {
+            recentsTabContent
                 .background(PhoneBackdrop())
                 .navigationTitle(L10n.t("最近通话"))
                 .safeAreaInset(edge: .top) {
-                    Picker("", selection: $recentsTab) {
-                        Text(L10n.t("通话记录")).tag(0)
-                        Text(L10n.t("个人收藏")).tag(1)
-                    }
-                    .pickerStyle(.segmented)
-                    .padding(.horizontal, PhoneListMetrics.horizontalInset)
-                    .padding(.vertical, 6)
+                    tabPicker
                 }
                 .toolbar {
                     ToolbarItem(placement: .topBarTrailing) {
@@ -802,77 +660,267 @@ struct RecentsView: View {
                         .accessibilityLabel(L10n.t("通话录音"))
                     }
                 }
-            }
-            .sheet(item: $newContactItem) { item in
-                NewContactView(phoneNumber: item.number)
-            }
-            .confirmationDialog("", isPresented: $showLongPressMenu, titleVisibility: .hidden) {
-                if let number = longPressNumber {
-                    Button(L10n.t("新建联系人")) {
-                        newContactItem = NewContactItem(number: number)
-                    }
-                    Button(L10n.t("复制号码")) {
-                        UIPasteboard.general.string = number
-                        toastText = L10n.t("已复制号码")
-                    }
-                    Button(L10n.t("取消"), role: .cancel) {}
+        }
+        .sheet(item: $newContactItem) { item in
+            NewContactView(phoneNumber: item.number)
+        }
+        .confirmationDialog("", isPresented: $showLongPressMenu, titleVisibility: .hidden) {
+            if let number = longPressNumber {
+                Button(L10n.t("新建联系人")) {
+                    newContactItem = NewContactItem(number: number)
                 }
+                Button(L10n.t("复制号码")) {
+                    UIPasteboard.general.string = number
+                    toastText = L10n.t("已复制号码")
+                }
+                Button(L10n.t("取消"), role: .cancel) {}
             }
-            .confirmationDialog(L10n.t("选择回拨号码"), isPresented: $showDialBackMenu, titleVisibility: .visible) {
-                if let number = dialBackNumber,
-                   let dialNumber = RecentCallDialPolicy.numberToDial(number) {
-                    let sims = model.currentAgent?.simCards ?? []
-                    if sims.count > 1 {
-                        ForEach(sims) { sim in
-                            Button(sim.displayName) {
-                                SimSelectionStore.select(subscriptionID: sim.subscriptionID)
-                                onCall(dialNumber)
-                            }
-                        }
-                    } else {
-                        Button(L10n.t("回拨")) {
+        }
+        .confirmationDialog(L10n.t("选择回拨号码"), isPresented: $showDialBackMenu, titleVisibility: .visible) {
+            if let number = dialBackNumber,
+               let dialNumber = RecentCallDialPolicy.numberToDial(number) {
+                let sims = model.currentAgent?.simCards ?? []
+                if sims.count > 1 {
+                    ForEach(sims) { sim in
+                        Button(sim.displayName) {
+                            SimSelectionStore.select(subscriptionID: sim.subscriptionID)
                             onCall(dialNumber)
                         }
                     }
-                    Button(L10n.t("取消"), role: .cancel) {}
-                }
-            }
-            .allowsHitTesting(selectedCall == nil)
-
-            if let call = selectedCall,
-               let number = RecentCallDialPolicy.numberToDial(call.number) {
-                Color.black.opacity(0.18)
-                    .ignoresSafeArea()
-                    .onTapGesture(perform: dismissCallDetails)
-                    .transition(.opacity)
-
-                callDetailsCard(call: call, number: number)
-                    .padding(.horizontal, 28)
-                    .transition(.scale(scale: 0.88).combined(with: .opacity))
-            }
-
-            if let toastText {
-                VStack {
-                    Text(toastText)
-                        .font(.subheadline.weight(.medium))
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 10)
-                        .background(.ultraThinMaterial, in: Capsule())
-                        .shadow(radius: 4)
-                    Spacer()
-                }
-                .padding(.top, 8)
-                .transition(.move(edge: .top).combined(with: .opacity))
-                .onAppear {
-                    Task {
-                        try? await Task.sleep(for: .seconds(1.8))
-                        self.toastText = nil
+                } else {
+                    Button(L10n.t("回拨")) {
+                        onCall(dialNumber)
                     }
+                }
+                Button(L10n.t("取消"), role: .cancel) {}
+            }
+        }
+        .allowsHitTesting(selectedCall == nil)
+    }
+
+    @ViewBuilder
+    private var recentsTabContent: some View {
+        if recentsTab == 1 {
+            favoritesTab
+        } else if visibleCallHistory.isEmpty {
+            EmptyStateView(
+                title: L10n.t("暂无通话记录"),
+                systemImage: "phone.arrow.up.right"
+            )
+        } else {
+            historyList
+        }
+    }
+
+    private var tabPicker: some View {
+        Picker("", selection: $recentsTab) {
+            Text(L10n.t("通话记录")).tag(0)
+            Text(L10n.t("个人收藏")).tag(1)
+        }
+        .pickerStyle(.segmented)
+        .padding(.horizontal, PhoneListMetrics.horizontalInset)
+        .padding(.vertical, 6)
+    }
+
+    private var favoritesTab: some View {
+        Group {
+            if favoriteNumbers.isEmpty {
+                EmptyStateView(
+                    title: L10n.t("暂无收藏"),
+                    systemImage: "star"
+                )
+            } else {
+                List(favoriteNumbers, id: \.self) { number in
+                    favoriteRow(for: number)
                 }
             }
         }
-        .animation(.easeInOut(duration: 0.2), value: selectedCall?.id)
-        .animation(.easeInOut(duration: 0.25), value: toastText)
+    }
+
+    private func favoriteRow(for number: String) -> some View {
+        let contact = contacts.contact(for: number)
+        return HStack {
+            Button {
+                if let dialNumber = RecentCallDialPolicy.numberToDial(number) {
+                    onCall(dialNumber)
+                }
+            } label: {
+                HStack {
+                    Image(systemName: "star.fill")
+                        .foregroundStyle(.yellow)
+                    VStack(alignment: .leading) {
+                        Text(contact?.name ?? contacts.displayName(for: number))
+                            .font(.headline)
+                        Text(number)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
+            .buttonStyle(.plain)
+            Spacer()
+            Button {
+                onMessage(number)
+            } label: {
+                Image(systemName: "message.fill")
+                    .foregroundStyle(.blue)
+            }
+            .buttonStyle(.plain)
+            Button {
+                toggleFavorite(number)
+            } label: {
+                Image(systemName: "star.slash")
+                    .foregroundStyle(.secondary)
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
+    private var historyList: some View {
+        List(visibleCallHistory) { call in
+            historyRow(for: call)
+        }
+        .listStyle(.plain)
+        .scrollContentBackground(.hidden)
+        .environment(\.defaultMinListRowHeight, PhoneListMetrics.rowHeight)
+        .phoneReportsTabBarCompactState()
+    }
+
+    private func historyRow(for call: CallRecord) -> some View {
+        let contact = call.number.flatMap { contacts.contact(for: $0) }
+        return Button {
+            if suppressNextCallTap {
+                suppressNextCallTap = false
+                return
+            }
+            if let number = RecentCallDialPolicy.numberToDial(call.number) {
+                onCall(number)
+            }
+        } label: {
+            CallHistoryRow(
+                call: call,
+                contact: contact,
+                displayName: contact?.name ?? contacts.displayName(for: call.number)
+            )
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .disabled(RecentCallDialPolicy.numberToDial(call.number) == nil)
+        .simultaneousGesture(
+            LongPressGesture(minimumDuration: 0.38).onEnded { _ in
+                guard let number = call.number, !number.isEmpty else { return }
+                suppressNextCallTap = true
+                UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                longPressNumber = number
+                showLongPressMenu = true
+            }
+        )
+        .accessibilityHint("轻点回拨，按住查看详情")
+        .listRowBackground(Color.clear)
+        .listRowInsets(.init(
+            top: 0,
+            leading: PhoneListMetrics.horizontalInset,
+            bottom: 0,
+            trailing: PhoneListMetrics.horizontalInset
+        ))
+        .alignmentGuide(.listRowSeparatorLeading) { _ in
+            PhoneListMetrics.separatorLeading
+        }
+        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+            trailingSwipeActions(for: call)
+        }
+        .swipeActions(edge: .leading, allowsFullSwipe: true) {
+            leadingSwipeActions(for: call)
+        }
+    }
+
+    @ViewBuilder
+    private func trailingSwipeActions(for call: CallRecord) -> some View {
+        if let number = call.number {
+            Button { onMessage(number) } label: {
+                Label(L10n.t("短信"), systemImage: "message.fill")
+            }
+            .tint(.blue)
+            Button(role: .destructive) {
+                var ids = deletedCallIDs
+                ids.insert(call.id)
+                deletedCallIDs = ids
+            } label: {
+                Label(L10n.t("删除"), systemImage: "trash.fill")
+            }
+            .tint(.red)
+            Button {
+                if CallPolicyStore.shared.addToBlacklist(number) {
+                    toastText = L10n.t("已加入黑名单")
+                } else {
+                    toastText = L10n.t("已在黑名单中")
+                }
+            } label: {
+                Label(L10n.t("拉黑"), systemImage: "nosign")
+            }
+            .tint(.red)
+            Button {
+                toggleFavorite(number)
+            } label: {
+                Label(
+                    isFavorite(number) ? L10n.t("取消收藏") : L10n.t("收藏"),
+                    systemImage: isFavorite(number) ? "star.slash" : "star.fill"
+                )
+            }
+            .tint(.yellow)
+        }
+    }
+
+    @ViewBuilder
+    private func leadingSwipeActions(for call: CallRecord) -> some View {
+        if let number = call.number,
+           RecentCallDialPolicy.numberToDial(number) != nil {
+            Button {
+                dialBackNumber = number
+                showDialBackMenu = true
+            } label: {
+                Label(L10n.t("选择回拨"), systemImage: "phone.fill")
+            }
+            .tint(.green)
+        }
+    }
+
+    @ViewBuilder
+    private var callDetailsOverlay: some View {
+        if let call = selectedCall,
+           let number = RecentCallDialPolicy.numberToDial(call.number) {
+            Color.black.opacity(0.18)
+                .ignoresSafeArea()
+                .onTapGesture(perform: dismissCallDetails)
+                .transition(.opacity)
+
+            callDetailsCard(call: call, number: number)
+                .padding(.horizontal, 28)
+                .transition(.scale(scale: 0.88).combined(with: .opacity))
+        }
+    }
+
+    @ViewBuilder
+    private var toastOverlay: some View {
+        if let toastText {
+            VStack {
+                Text(toastText)
+                    .font(.subheadline.weight(.medium))
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+                    .background(.ultraThinMaterial, in: Capsule())
+                    .shadow(radius: 4)
+                Spacer()
+            }
+            .padding(.top, 8)
+            .transition(.move(edge: .top).combined(with: .opacity))
+            .onAppear {
+                Task {
+                    try? await Task.sleep(for: .seconds(1.8))
+                    self.toastText = nil
+                }
+            }
+        }
     }
 
     private func callDetailsCard(call: CallRecord, number: String) -> some View {
@@ -1067,7 +1115,7 @@ struct CallRecordingFile: Identifiable {
 
 /// 录音播放器：同一时间只播一个；来电打断时自动停止。
 @MainActor
-private final class RecordingPlayer: NSObject, ObservableObject, AVAudioPlayerDelegate {
+private final class RecordingPlayer: NSObject, ObservableObject, @MainActor AVAudioPlayerDelegate {
     @Published var playingID: String?
     private var player: AVAudioPlayer?
 
