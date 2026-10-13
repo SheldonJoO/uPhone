@@ -17,6 +17,8 @@ protocol CallKitActionHandling: AnyObject {
     func callKitDidFail(_ message: String)
     func callKitDidReceiveIncoming(_ call: IncomingVoIPCall)
     func callKitCallDidEnd()
+    /// 策略拦截来电时的可选短信通知；默认空实现。
+    func callKitSendBlockNotificationSMS(to number: String, text: String) async
 }
 
 enum CallAnswerOrigin: Equatable, Sendable {
@@ -47,6 +49,7 @@ extension CallKitActionHandling {
     func callKitPrepareAudioSession() throws {}
     func callKitDidReceiveIncoming(_ call: IncomingVoIPCall) {}
     func callKitCallDidEnd() {}
+    func callKitSendBlockNotificationSMS(to number: String, text: String) async {}
 }
 
 /// 挂断后 PushKit、USB 长轮询与系统回调可能乱序到达。短期保留已经结束的
@@ -92,6 +95,8 @@ final class CallKitController: NSObject {
     weak var handler: (any CallKitActionHandling)?
 
     private var currentUUID: UUID?
+    /// 策略拦截后待自动挂断的系统通话 UUID（上报成功后立即请求结束）。
+    private var pendingAutoDecline = Set<UUID>()
     private var currentBackendID: String?
     private var currentState: String?
     private var currentNumber: String?
@@ -194,6 +199,21 @@ final class CallKitController: NSObject {
             debugLog("忽略已结束通话的晚到 PushKit 事件")
             completion(nil)
             return
+        }
+        // 来电策略：黑白名单 / 静默时段命中则自动拒接（仍需上报系统以满足 PushKit 要求，上报成功后立即挂断）。
+        let policyDecision = CallPolicyStore.shared.decision(for: call.number, deviceID: call.deviceID)
+        if policyDecision.shouldBlock, !pendingAutoDecline.contains(call.uuid) {
+            CallPolicyStore.shared.logBlocked(
+                number: call.number, deviceID: call.deviceID, reason: policyDecision.reason)
+            debugLog("来电被策略拦截；原因=\(policyDecision.reason)")
+            pendingAutoDecline.insert(call.uuid)
+            if CallPolicyStore.shared.policy.blockSMSEnabled,
+               let target = call.number, !target.isEmpty {
+                let text = CallPolicyStore.shared.policy.blockSMSText
+                Task { @MainActor [weak self] in
+                    await self?.handler?.callKitSendBlockNotificationSMS(to: target, text: text)
+                }
+            }
         }
         if currentUUID != nil {
             guard call.matches(backendID: currentBackendID, uuid: currentUUID) else {
@@ -385,6 +405,14 @@ final class CallKitController: NSObject {
                     self.debugLog("系统来电上报成功")
                     self.systemCallReported = true
                     self.finishIncomingReport(nil)
+                    // 策略拦截的来电：上报成功后立即挂断，走系统标准结束链路。
+                    if self.pendingAutoDecline.remove(uuid) != nil {
+                        do {
+                            try await self.requestSystemAction(CXEndCallAction(call: uuid))
+                        } catch {
+                            self.debugLog("策略自动挂断失败：\(error.localizedDescription)")
+                        }
+                    }
                 }
             }
         }

@@ -1186,3 +1186,153 @@ struct VoicePCMStatistics: Codable, Sendable {
         case downlinkDroppedFrames = "downlink_dropped_frames"
     }
 }
+
+/// 来电策略：黑白名单 + 分时段静默。iOS 侧执行（relay 侧执行是 clean-room 重写版的规划）。
+struct CallPolicy: Codable {
+    enum Mode: String, Codable, CaseIterable {
+        case off, blacklist, whitelist
+        var title: String {
+            switch self {
+            case .off: return "关闭"
+            case .blacklist: return "黑名单"
+            case .whitelist: return "白名单"
+            }
+        }
+    }
+    var mode: Mode = .off
+    /// 归一化后的号码（纯数字，已去 +86/0086 前缀）。
+    var blacklist: [String] = []
+    var whitelist: [String] = []
+    var quietRules: [QuietRule] = []
+    var blockSMSEnabled: Bool = false
+    var blockSMSText: String = "您拨打的号码暂时无法接听，请稍后再拨。"
+}
+
+/// 分时段静默规则。deviceID 为空表示全部设备（单卡场景等同按 SIM 卡）。
+struct QuietRule: Codable, Identifiable {
+    var id: UUID = UUID()
+    var deviceID: String = ""
+    /// 当天分钟数 0..<1440；start > end 表示跨天（如 23:00–07:00）。
+    var startMinutes: Int = 1380
+    var endMinutes: Int = 420
+    var enabled: Bool = true
+
+    func isActive(at date: Date, deviceID: String?) -> Bool {
+        guard enabled else { return false }
+        if !self.deviceID.isEmpty, self.deviceID != deviceID { return false }
+        let cal = Calendar.current
+        let mins = cal.component(.hour, from: date) * 60 + cal.component(.minute, from: date)
+        if startMinutes <= endMinutes {
+            return mins >= startMinutes && mins < endMinutes
+        }
+        return mins >= startMinutes || mins < endMinutes
+    }
+
+    var timeRangeText: String {
+        "\(Self.text(for: startMinutes))–\(Self.text(for: endMinutes))"
+    }
+
+    static func text(for minutes: Int) -> String {
+        String(format: "%02d:%02d", minutes / 60, minutes % 60)
+    }
+}
+
+/// 被策略拦截的来电记录。
+struct BlockedCallEvent: Codable, Identifiable {
+    var id: UUID = UUID()
+    var number: String?
+    var deviceID: String?
+    var reason: String
+    var date: Date = Date()
+}
+
+struct CallPolicyDecision {
+    let shouldBlock: Bool
+    let reason: String
+    static let allow = CallPolicyDecision(shouldBlock: false, reason: "")
+}
+
+/// 来电策略存储：UserDefaults 持久化，主线程访问。
+@MainActor
+final class CallPolicyStore: ObservableObject {
+    static let shared = CallPolicyStore()
+
+    @Published var policy: CallPolicy {
+        didSet { savePolicy() }
+    }
+    @Published private(set) var blockedLog: [BlockedCallEvent] = []
+
+    private static let policyKey = "uphone.callPolicy"
+    private static let logKey = "uphone.blockedCallLog"
+    private static let maxLogCount = 100
+
+    private init() {
+        if let data = UserDefaults.standard.data(forKey: Self.policyKey),
+           let decoded = try? JSONDecoder().decode(CallPolicy.self, from: data) {
+            policy = decoded
+        } else {
+            policy = CallPolicy()
+        }
+        if let data = UserDefaults.standard.data(forKey: Self.logKey),
+           let decoded = try? JSONDecoder().decode([BlockedCallEvent].self, from: data) {
+            blockedLog = decoded
+        }
+    }
+
+    private func savePolicy() {
+        if let data = try? JSONEncoder().encode(policy) {
+            UserDefaults.standard.set(data, forKey: Self.policyKey)
+        }
+    }
+
+    /// 号码归一化：只留数字，去 +86/0086 前缀。
+    static func normalizedNumber(_ raw: String) -> String {
+        var digits = raw.filter(\.isWholeNumber)
+        if digits.hasPrefix("0086"), digits.count > 12 {
+            digits = String(digits.dropFirst(4))
+        } else if digits.hasPrefix("86"), digits.count == 13, digits.dropFirst(2).first == "1" {
+            digits = String(digits.dropFirst(2))
+        }
+        return digits
+    }
+
+    func decision(for number: String?, deviceID: String?, at date: Date = Date()) -> CallPolicyDecision {
+        if policy.quietRules.contains(where: { $0.isActive(at: date, deviceID: deviceID) }) {
+            return CallPolicyDecision(shouldBlock: true, reason: "静默时段")
+        }
+        let normalized = Self.normalizedNumber(number ?? "")
+        switch policy.mode {
+        case .off:
+            return .allow
+        case .blacklist:
+            return policy.blacklist.contains(normalized)
+                ? CallPolicyDecision(shouldBlock: true, reason: "黑名单")
+                : .allow
+        case .whitelist:
+            // 未知号码也视为非白名单，一律拒接。
+            return policy.whitelist.contains(normalized) && !normalized.isEmpty
+                ? .allow
+                : CallPolicyDecision(shouldBlock: true, reason: "非白名单号码")
+        }
+    }
+
+    func logBlocked(number: String?, deviceID: String?, reason: String, at date: Date = Date()) {
+        var log = blockedLog
+        log.insert(BlockedCallEvent(number: number, deviceID: deviceID, reason: reason, date: date), at: 0)
+        if log.count > Self.maxLogCount { log = Array(log.prefix(Self.maxLogCount)) }
+        blockedLog = log
+        if let data = try? JSONEncoder().encode(log) {
+            UserDefaults.standard.set(data, forKey: Self.logKey)
+        }
+    }
+
+    func clearBlockedLog() {
+        blockedLog = []
+        UserDefaults.standard.removeObject(forKey: Self.logKey)
+    }
+
+    func deviceName(for deviceID: String?) -> String? {
+        guard let deviceID, !deviceID.isEmpty else { return nil }
+        return DeviceRegistry.allDevices().first { $0.deviceID == deviceID }?.displayName
+    }
+}

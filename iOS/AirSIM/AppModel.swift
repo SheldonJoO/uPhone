@@ -2128,6 +2128,11 @@ extension AppModel: CallKitActionHandling {
         VirtualCallTTSController.shared.stop()
         backgroundStandby.resumeAfterCall()
     }
+
+    /// 策略拦截来电后的可选短信通知（走当前值守机发送）。
+    func callKitSendBlockNotificationSMS(to number: String, text: String) async {
+        _ = await sendSMS(to: number, content: text)
+    }
 }
 
 private enum ModuleSetupError: LocalizedError {

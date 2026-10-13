@@ -253,6 +253,17 @@ struct AirSIMSettingsView: View {
                         : "依次验证本机 Push 凭据、uPhone Relay 身份、设备注册和 Agent 最近 90 秒心跳；不会拨号或发送短信。免费侧载无 PushKit 能力时可打开上方跳过开关。")
                 }
 
+                Section("来电策略") {
+                    NavigationLink {
+                        CallPolicyView()
+                    } label: {
+                        Label("黑白名单与静默时段", systemImage: "phone.badge.waveform")
+                    }
+                    Text("黑名单自动拒接；白名单模式下非名单号码一律拒接；静默时段内来电不响铃直接挂断，事件照常记录。")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
                 Section("关于") {
                     LabeledContent("项目", value: "uPhone · 安卓")
                     Picker("外观", selection: $settings.appearance) {
@@ -400,5 +411,225 @@ struct PairedDevicesSection: View {
     private func remove(_ device: PairedDevice) {
         DeviceRegistry.remove(deviceID: device.deviceID)
         refresh()
+    }
+}
+
+/// 来电策略管理：黑白名单、静默时段、拒接短信通知、拦截记录。
+struct CallPolicyView: View {
+    @ObservedObject private var store = CallPolicyStore.shared
+    @State private var newBlockNumber = ""
+    @State private var newWhiteNumber = ""
+    @State private var showingRuleEditor = false
+
+    var body: some View {
+        Form {
+            Section {
+                Picker("模式", selection: $store.policy.mode) {
+                    ForEach(CallPolicy.Mode.allCases, id: \.self) { mode in
+                        Text(mode.title).tag(mode)
+                    }
+                }
+                .pickerStyle(.segmented)
+                Text(modeHint)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            } header: {
+                Text("黑白名单")
+            }
+
+            Section {
+                ForEach(store.policy.blacklist, id: \.self) { number in
+                    Text(number).monospacedDigit()
+                }
+                .onDelete { store.policy.blacklist.remove(atOffsets: $0) }
+                HStack {
+                    TextField("输入号码后添加", text: $newBlockNumber)
+                        .keyboardType(.phonePad)
+                        .monospacedDigit()
+                    Button("添加") { addNumber($newBlockNumber, to: \.blacklist) }
+                        .disabled(CallPolicyStore.normalizedNumber(newBlockNumber).isEmpty)
+                }
+            } header: {
+                Text("黑名单（\(store.policy.blacklist.count)）")
+            } footer: {
+                Text("名单内号码来电将自动拒接。")
+                    .font(.caption)
+            }
+
+            Section {
+                ForEach(store.policy.whitelist, id: \.self) { number in
+                    Text(number).monospacedDigit()
+                }
+                .onDelete { store.policy.whitelist.remove(atOffsets: $0) }
+                HStack {
+                    TextField("输入号码后添加", text: $newWhiteNumber)
+                        .keyboardType(.phonePad)
+                        .monospacedDigit()
+                    Button("添加") { addNumber($newWhiteNumber, to: \.whitelist) }
+                        .disabled(CallPolicyStore.normalizedNumber(newWhiteNumber).isEmpty)
+                }
+            } header: {
+                Text("白名单（\(store.policy.whitelist.count)）")
+            } footer: {
+                Text("白名单模式下，非名单号码（含未知号码）一律自动拒接。")
+                    .font(.caption)
+            }
+
+            Section {
+                if store.policy.quietRules.isEmpty {
+                    Text("暂无静默时段")
+                        .foregroundStyle(.secondary)
+                } else {
+                    ForEach($store.policy.quietRules) { $rule in
+                        HStack {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(rule.timeRangeText)
+                                    .font(.headline.monospacedDigit())
+                                Text(ruleDeviceName(for: rule))
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            Toggle("", isOn: $rule.enabled)
+                                .labelsHidden()
+                        }
+                    }
+                    .onDelete { store.policy.quietRules.remove(atOffsets: $0) }
+                }
+                Button {
+                    showingRuleEditor = true
+                } label: {
+                    Label("添加静默时段", systemImage: "plus.circle")
+                }
+            } header: {
+                Text("分时段静默")
+            } footer: {
+                Text("静默时段内来电不响铃、自动挂断，事件照常记录。按设备设置；单卡设备等同按 SIM 卡。")
+                    .font(.caption)
+            }
+
+            Section {
+                Toggle("拒接时发送短信通知", isOn: $store.policy.blockSMSEnabled)
+                if store.policy.blockSMSEnabled {
+                    TextField("短信内容", text: $store.policy.blockSMSText, axis: .vertical)
+                        .lineLimit(2...4)
+                }
+            } header: {
+                Text("拒接通知")
+            } footer: {
+                Text("拦截来电后自动给对方发一条短信说明（走当前值守机发送）。")
+                    .font(.caption)
+            }
+
+            Section {
+                if store.blockedLog.isEmpty {
+                    Text("暂无拦截记录")
+                        .foregroundStyle(.secondary)
+                } else {
+                    ForEach(store.blockedLog) { event in
+                        VStack(alignment: .leading, spacing: 2) {
+                            HStack {
+                                Text(event.number ?? "未知号码")
+                                    .font(.headline.monospacedDigit())
+                                Spacer()
+                                Text(event.reason)
+                                    .font(.caption)
+                                    .foregroundStyle(.orange)
+                            }
+                            HStack {
+                                if let device = store.deviceName(for: event.deviceID) {
+                                    Text(device)
+                                }
+                                Text(event.date, style: .relative)
+                            }
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        }
+                    }
+                    Button("清空记录", role: .destructive) {
+                        store.clearBlockedLog()
+                    }
+                }
+            } header: {
+                Text("拦截记录")
+            }
+        }
+        .navigationTitle("来电策略")
+        .navigationBarTitleDisplayMode(.inline)
+        .sheet(isPresented: $showingRuleEditor) {
+            QuietRuleEditor { rule in
+                store.policy.quietRules.append(rule)
+            }
+            .presentationDetents([.medium])
+        }
+    }
+
+    private var modeHint: String {
+        switch store.policy.mode {
+        case .off: return "策略关闭，所有来电正常响铃。"
+        case .blacklist: return "黑名单号码来电自动拒接。"
+        case .whitelist: return "仅白名单号码能打进来，其余自动拒接。"
+        }
+    }
+
+    private func addNumber(_ input: Binding<String>, to keyPath: WritableKeyPath<CallPolicy, [String]>) {
+        let normalized = CallPolicyStore.normalizedNumber(input.wrappedValue)
+        guard !normalized.isEmpty else { return }
+        if !store.policy[keyPath: keyPath].contains(normalized) {
+            store.policy[keyPath: keyPath].append(normalized)
+        }
+        input.wrappedValue = ""
+    }
+
+    private func ruleDeviceName(for rule: QuietRule) -> String {
+        if rule.deviceID.isEmpty { return "全部设备" }
+        return store.deviceName(for: rule.deviceID) ?? "未知设备"
+    }
+}
+
+/// 新增静默时段：选设备 + 起止时间。
+private struct QuietRuleEditor: View {
+    @Environment(\.dismiss) private var dismiss
+    var onSave: (QuietRule) -> Void
+
+    @State private var deviceID = ""
+    @State private var start = Calendar.current.date(bySettingHour: 23, minute: 0, second: 0, of: Date()) ?? Date()
+    @State private var end = Calendar.current.date(bySettingHour: 7, minute: 0, second: 0, of: Date()) ?? Date()
+    private var devices: [PairedDevice] { DeviceRegistry.allDevices() }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Picker("设备", selection: $deviceID) {
+                    Text("全部设备").tag("")
+                    ForEach(devices) { device in
+                        Text(device.displayName).tag(device.deviceID)
+                    }
+                }
+                DatePicker("开始", selection: $start, displayedComponents: .hourAndMinute)
+                DatePicker("结束", selection: $end, displayedComponents: .hourAndMinute)
+                Text("开始晚于结束表示跨天，如 23:00–07:00。")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            .navigationTitle("添加静默时段")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("取消") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("保存") {
+                        let cal = Calendar.current
+                        onSave(QuietRule(
+                            deviceID: deviceID,
+                            startMinutes: cal.component(.hour, from: start) * 60 + cal.component(.minute, from: start),
+                            endMinutes: cal.component(.hour, from: end) * 60 + cal.component(.minute, from: end)
+                        ))
+                        dismiss()
+                    }
+                }
+            }
+        }
     }
 }
