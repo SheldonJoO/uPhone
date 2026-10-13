@@ -2175,6 +2175,8 @@ extension AppModel: CallKitActionHandling {
         guard store.shouldReplyToMissedCall(id: call.id) else { return }
         guard let number = call.number, !number.isEmpty else { return }
         let normalized = CallPolicyStore.normalizedNumber(number)
+        // 10 分钟内同一号码只回复一次。
+        if store.recentlyReplied(to: normalized) { return }
         // 刚被策略拦截过的号码不重复发送（拒接短信已覆盖）。
         let recentlyBlocked = store.blockedLog.contains { event in
             guard let eventNumber = event.number else { return false }
@@ -2188,6 +2190,7 @@ extension AppModel: CallKitActionHandling {
             return
         }
         store.markMissedCallReplied(id: call.id)
+        store.markReplied(to: normalized)
         _ = await sendSMS(to: number, content: store.policy.missedReplyText)
     }
 }

@@ -1387,6 +1387,20 @@ final class CallPolicyStore: ObservableObject {
         UserDefaults.standard.set(Array(repliedMissedCallIDs), forKey: Self.repliedMissedKey)
     }
 
+    /// 该号码最近是否已回复过（10 分钟内只回复一次，避免连续漏接时刷屏）。
+    func recentlyReplied(to normalizedNumber: String) -> Bool {
+        // 用 blockedLog 的时间戳做近似：查找最近的回复记录
+        // （实际实现：在 UserDefaults 存号码->时间的映射）
+        let key = Self.repliedMissedKey + ".time." + normalizedNumber
+        let last = UserDefaults.standard.double(forKey: key)
+        return last > 0 && Date().timeIntervalSince1970 - last < 600
+    }
+
+    func markReplied(to normalizedNumber: String) {
+        let key = Self.repliedMissedKey + ".time." + normalizedNumber
+        UserDefaults.standard.set(Date().timeIntervalSince1970, forKey: key)
+    }
+
     /// 加入黑名单；号码为空或已在名单中时返回 false。
     @discardableResult
     func addToBlacklist(_ raw: String) -> Bool {
