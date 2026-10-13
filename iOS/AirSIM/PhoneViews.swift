@@ -588,6 +588,8 @@ struct RecentsView: View {
     @AppStorage("favoriteNumbers") private var favoriteNumbersData: String = ""
     @State private var deletedCallIDs: Set<String> = []
     @State private var newContactNumber: String?
+    @State private var longPressNumber: String?
+    @State private var showLongPressMenu = false
 
     private struct NewContactItem: Identifiable {
         let id = UUID()
@@ -709,7 +711,8 @@ struct RecentsView: View {
                                     guard let number = call.number, !number.isEmpty else { return }
                                     suppressNextCallTap = true
                                     UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-                                    newContactNumber = number
+                                    longPressNumber = number
+                                    showLongPressMenu = true
                                 }
                             )
                             .accessibilityHint("轻点回拨，按住查看详情")
@@ -729,13 +732,6 @@ struct RecentsView: View {
                                         Label(L10n.t("短信"), systemImage: "message.fill")
                                     }
                                     .tint(.blue)
-                                    Button {
-                                        UIPasteboard.general.string = number
-                                        toastText = L10n.t("已复制号码")
-                                    } label: {
-                                        Label(L10n.t("复制"), systemImage: "doc.on.doc")
-                                    }
-                                    .tint(.gray)
                                     Button(role: .destructive) {
                                         deletedCallIDs.insert(call.id)
                                     } label: {
@@ -761,6 +757,17 @@ struct RecentsView: View {
                                         )
                                     }
                                     .tint(.yellow)
+                                }
+                            }
+                            .swipeActions(edge: .leading, allowsFullSwipe: true) {
+                                if let number = call.number,
+                                   let dialNumber = RecentCallDialPolicy.numberToDial(number) {
+                                    Button {
+                                        onCall(dialNumber)
+                                    } label: {
+                                        Label(L10n.t("回拨"), systemImage: "phone.fill")
+                                    }
+                                    .tint(.green)
                                 }
                             }
                         }
@@ -794,6 +801,18 @@ struct RecentsView: View {
             }
             .sheet(item: $newContactNumberItem) { item in
                 NewContactView(phoneNumber: item.number)
+            }
+            .confirmationDialog("", isPresented: $showLongPressMenu, titleVisibility: .hidden) {
+                if let number = longPressNumber {
+                    Button(L10n.t("新建联系人")) {
+                        newContactNumber = number
+                    }
+                    Button(L10n.t("复制号码")) {
+                        UIPasteboard.general.string = number
+                        toastText = L10n.t("已复制号码")
+                    }
+                    Button(L10n.t("取消"), role: .cancel) {}
+                }
             }
             .allowsHitTesting(selectedCall == nil)
 
