@@ -1214,6 +1214,16 @@ struct MessagesView: View {
                         Text(displayName)
                             .font(.body.weight(.semibold))
                             .lineLimit(1)
+                        // 非联系人显示归属地
+                        if contact == nil,
+                           let place = PhoneAttribution.shared.lookup(sender)?.shortPlace {
+                            Text(place)
+                                .font(.caption2.weight(.medium))
+                                .foregroundStyle(.secondary)
+                                .padding(.horizontal, 5)
+                                .padding(.vertical, 1)
+                                .background(Color(uiColor: .secondarySystemBackground), in: Capsule())
+                        }
                         if let simLabel = messages.last?.simLabel {
                             Text(simLabel)
                                 .font(.caption2.weight(.bold))
