@@ -1353,6 +1353,9 @@ private struct PickupCodeCard: View {
                 HStack(spacing: 6) {
                     Text(model.contacts.displayName(for: message.sender))
                         .lineLimit(1)
+                    if let place = PhoneAttribution.shared.lookup(message.sender)?.shortPlace {
+                        Text("· \(place)")
+                    }
                     Text(message.timestamp, style: .relative)
                         .foregroundStyle(.secondary)
                 }
