@@ -401,6 +401,8 @@ final class CallKitController: NSObject {
                     self.incomingReportFailed = true
                     self.handler?.callKitDidFail("系统来电界面启动失败：\(error.localizedDescription)")
                     self.finishIncomingReport(error)
+                    // 上报失败：撤销待自动挂断，避免集合泄漏。
+                    _ = self.pendingAutoDecline.remove(uuid)
                 } else {
                     self.debugLog("系统来电上报成功")
                     self.systemCallReported = true
@@ -514,6 +516,9 @@ final class CallKitController: NSObject {
     private func resetCurrentCall() {
         if !incomingReportCompletions.isEmpty {
             finishIncomingReport(CallKitBridgeError.staleSystemCall)
+        }
+        if let uuid = currentUUID {
+            pendingAutoDecline.remove(uuid)
         }
         currentUUID = nil
         currentBackendID = nil
