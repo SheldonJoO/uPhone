@@ -370,6 +370,26 @@ final class CallKitController: NSObject {
         currentBackendID = call.id
         currentNumber = call.number
 
+        // 来电策略（VoWLAN/模块轮询路径；PushKit 路径在 reportIncomingPush 中检查）。
+        // 必须在 reportIncomingIfNeeded 之前完成判定，上报成功后自动挂断走标准链路。
+        // 仅对未接听的来电生效；已接通的不追杀。
+        if ["incoming", "waiting"].contains(call.state), let uuid = currentUUID {
+            let policyDecision = CallPolicyStore.shared.decision(for: call.number, deviceID: nil)
+            if policyDecision.shouldBlock, !pendingAutoDecline.contains(uuid) {
+                CallPolicyStore.shared.logBlocked(
+                    number: call.number, deviceID: nil, reason: policyDecision.reason)
+                debugLog("来电被策略拦截；原因=\(policyDecision.reason)")
+                pendingAutoDecline.insert(uuid)
+                if CallPolicyStore.shared.policy.blockSMSEnabled,
+                   let target = call.number, !target.isEmpty {
+                    let text = CallPolicyStore.shared.policy.blockSMSText
+                    Task { @MainActor [weak self] in
+                        await self?.handler?.callKitSendBlockNotificationSMS(to: target, text: text)
+                    }
+                }
+            }
+        }
+
         if ["incoming", "waiting"].contains(call.state) {
             reportIncomingIfNeeded(number: call.number, callerName: callerName, source: "模块状态")
         }

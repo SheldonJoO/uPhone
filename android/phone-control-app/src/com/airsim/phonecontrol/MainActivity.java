@@ -931,12 +931,56 @@ public final class MainActivity extends Activity {
     }
 
     private void showFeatureDetails(Feature feature) {
-        AlertDialog dialog = new AlertDialog.Builder(this)
-                .setTitle(featureTitle(feature))
-                .setMessage(featureDetails(feature, ""))
-                .setPositiveButton("关闭", null)
-                .setNeutralButton("重新检查", (ignored, which) -> showFeatureDetails(feature))
-                .create();
+        // 不用系统 AlertDialog：部分定制 ROM 上渲染为空白，改用 App 自有样式的自定义弹窗。
+        android.app.Dialog dialog = new android.app.Dialog(this);
+        dialog.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
+
+        LinearLayout root = new LinearLayout(this);
+        root.setOrientation(LinearLayout.VERTICAL);
+        root.setBackground(rounded(SURFACE, 18, BORDER, 1));
+        root.setPadding(dp(20), dp(18), dp(20), dp(14));
+
+        TextView titleView = label(featureTitle(feature), 18, TEXT, Gravity.START);
+        titleView.setTypeface(Typeface.DEFAULT_BOLD);
+        root.addView(titleView);
+
+        TextView messageView = label(featureDetails(feature, ""), 13, TEXT, Gravity.START);
+        messageView.setLineSpacing(dp(3), 1.0f);
+        ScrollView scroll = new ScrollView(this);
+        scroll.addView(messageView,
+                new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT));
+        LinearLayout.LayoutParams scrollParams = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, dp(300));
+        scrollParams.topMargin = dp(10);
+        root.addView(scroll, scrollParams);
+
+        LinearLayout buttons = row();
+        buttons.setGravity(Gravity.END);
+        buttons.setPadding(0, dp(12), 0, 0);
+        android.widget.Button recheck = new android.widget.Button(this);
+        recheck.setText("重新检查");
+        recheck.setOnClickListener(ignored -> {
+            dialog.dismiss();
+            showFeatureDetails(feature);
+        });
+        android.widget.Button close = new android.widget.Button(this);
+        close.setText("关闭");
+        close.setOnClickListener(ignored -> dialog.dismiss());
+        buttons.addView(recheck);
+        buttons.addView(close);
+        root.addView(buttons);
+
+        dialog.setContentView(root);
+        android.view.Window window = dialog.getWindow();
+        if (window != null) {
+            window.setLayout(
+                    (int) (getResources().getDisplayMetrics().widthPixels * 0.92),
+                    ViewGroup.LayoutParams.WRAP_CONTENT);
+            window.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(Color.TRANSPARENT));
+        }
+        final TextView liveMessageView = messageView;
+        final android.app.Dialog liveDialog = dialog;
         dialog.show();
         if (feature != Feature.AGENT && feature != Feature.PUSH) return;
         Executors.newSingleThreadExecutor().execute(() -> {
@@ -958,7 +1002,7 @@ public final class MainActivity extends Activity {
                     runOnUiThread(() -> {
                         updatePushStatus(result);
                         updateVisibleStatus();
-                        if (dialog.isShowing()) dialog.setMessage(featureDetails(feature,
+                        if (liveDialog.isShowing()) liveMessageView.setText(featureDetails(feature,
                                 "实时查询：/api/push/status · HTTP 200\n\nAgent 云端事件（新到旧）\n"
                                         + liveCloudLogs));
                     });
@@ -977,7 +1021,7 @@ public final class MainActivity extends Activity {
             }
             String outcome = live;
             runOnUiThread(() -> {
-                if (dialog.isShowing()) dialog.setMessage(featureDetails(feature, outcome));
+                if (liveDialog.isShowing()) liveMessageView.setText(featureDetails(feature, outcome));
             });
         });
     }

@@ -2,13 +2,16 @@ import Foundation
 
 /// iOS 端通话录音：在传输层抓取双向 8kHz 16-bit PCM（上行=本机麦克风，下行=远端声音），
 /// 写入立体声 WAV（左声道=本机，右声道=远端），保存在 Documents/CallRecordings。
-/// 线程安全：所有可变状态由 NSLock 保护，可在音频回调线程直接调用。
+///
+/// 线程模型：所有可变状态收敛在一条专用串行后台队列上。音频 tap 回调（实时线程）
+/// 只做 queue.async 入队，绝不阻塞、不做文件 IO；stop() 用 queue.sync 等待队列排空，
+/// 保证所有已入队音频都落盘后再回填 WAV 头。
 final class CallRecorder: @unchecked Sendable {
     static let sampleRate: UInt32 = 8_000
     static let channels: UInt16 = 2
     static let bitsPerSample: UInt16 = 16
 
-    private let lock = NSLock()
+    private let queue = DispatchQueue(label: "uphone.callrecorder", qos: .utility)
     private var handle: FileHandle?
     private var pendingUp = Data()
     private var pendingDown = Data()
@@ -35,20 +38,20 @@ final class CallRecorder: @unchecked Sendable {
         self.handle = handle
     }
 
-    /// 写入上行（本机麦克风）16-bit PCM mono 数据。
+    /// 写入上行（本机麦克风）16-bit PCM mono 数据。实时线程安全：仅入队。
     func writeUplink(_ pcm: Data) {
-        append(pcm, uplink: true)
+        guard !pcm.isEmpty else { return }
+        queue.async { [weak self] in self?.append(pcm, uplink: true) }
     }
 
-    /// 写入下行（远端声音）16-bit PCM mono 数据。
+    /// 写入下行（远端声音）16-bit PCM mono 数据。实时线程安全：仅入队。
     func writeDownlink(_ pcm: Data) {
-        append(pcm, uplink: false)
+        guard !pcm.isEmpty else { return }
+        queue.async { [weak self] in self?.append(pcm, uplink: false) }
     }
 
     private func append(_ pcm: Data, uplink: Bool) {
-        guard !pcm.isEmpty else { return }
-        lock.lock()
-        defer { lock.unlock() }
+        dispatchPrecondition(condition: .onQueue(queue))
         guard !stopped, handle != nil else { return }
         if uplink { pendingUp.append(pcm) } else { pendingDown.append(pcm) }
         // 防声道时间错位：单侧堆积超过 1 秒时丢弃最旧的多余数据
@@ -59,11 +62,13 @@ final class CallRecorder: @unchecked Sendable {
         } else if pendingDown.count > pendingUp.count + maxPending {
             pendingDown.removeFirst(pendingDown.count - pendingUp.count - maxPending)
         }
-        interleaveLocked()
+        interleave()
     }
 
     /// 把两侧 pending 按帧交错写入（左=上行，右=下行）；短的一侧补零对齐。
-    private func interleaveLocked() {
+    /// 仅在后台队列执行，文件 IO 不阻塞音频线程。
+    private func interleave() {
+        dispatchPrecondition(condition: .onQueue(queue))
         var out = Data()
         out.reserveCapacity(min(pendingUp.count, pendingDown.count) * 2)
         while pendingUp.count >= 2 && pendingDown.count >= 2 {
@@ -74,10 +79,11 @@ final class CallRecorder: @unchecked Sendable {
             pendingUp.removeFirst(2)
             pendingDown.removeFirst(2)
         }
-        writeLocked(out)
+        writeData(out)
     }
 
-    private func writeLocked(_ data: Data) {
+    private func writeData(_ data: Data) {
+        dispatchPrecondition(condition: .onQueue(queue))
         guard !data.isEmpty, let handle else { return }
         do {
             try handle.write(contentsOf: data)
@@ -90,46 +96,48 @@ final class CallRecorder: @unchecked Sendable {
         }
     }
 
-    /// 结束录音：补齐尾部、回填 WAV 头长度，返回文件 URL。
+    /// 结束录音：等待队列排空、补齐尾部、回填 WAV 头长度，返回文件 URL。
     /// 数据不足 1 秒视为无效录音，删除文件并返回 nil。
     func stop() -> URL? {
-        lock.lock()
-        defer { lock.unlock() }
-        guard !stopped else { return nil }
-        stopped = true
-        // 尾部对齐：短的一侧补零
-        var tail = Data()
-        let upFrames = pendingUp.count / 2
-        let downFrames = pendingDown.count / 2
-        let frames = max(upFrames, downFrames)
-        for i in 0..<frames {
-            let u0 = i < upFrames ? pendingUp[i * 2] : 0
-            let u1 = i < upFrames ? pendingUp[i * 2 + 1] : 0
-            let d0 = i < downFrames ? pendingDown[i * 2] : 0
-            let d1 = i < downFrames ? pendingDown[i * 2 + 1] : 0
-            tail.append(contentsOf: [u0, u1, d0, d1])
-        }
-        pendingUp.removeAll()
-        pendingDown.removeAll()
-        writeLocked(tail)
-        // 回填头
-        if let handle {
-            do {
-                try handle.seek(toOffset: 0)
-                try handle.write(contentsOf: wavHeader(dataBytes: dataBytes))
-                try handle.close()
-            } catch {
-                try? handle.close()
+        queue.sync {
+            dispatchPrecondition(condition: .onQueue(self.queue))
+            guard !stopped else { return nil }
+            stopped = true
+            // 尾部对齐：短的一侧补零
+            var tail = Data()
+            let upFrames = pendingUp.count / 2
+            let downFrames = pendingDown.count / 2
+            let frames = max(upFrames, downFrames)
+            tail.reserveCapacity(frames * 4)
+            for i in 0..<frames {
+                let u0 = i < upFrames ? pendingUp[i * 2] : 0
+                let u1 = i < upFrames ? pendingUp[i * 2 + 1] : 0
+                let d0 = i < downFrames ? pendingDown[i * 2] : 0
+                let d1 = i < downFrames ? pendingDown[i * 2 + 1] : 0
+                tail.append(contentsOf: [u0, u1, d0, d1])
             }
-            self.handle = nil
+            pendingUp.removeAll()
+            pendingDown.removeAll()
+            writeData(tail)
+            // 回填头
+            if let handle {
+                do {
+                    try handle.seek(toOffset: 0)
+                    try handle.write(contentsOf: wavHeader(dataBytes: dataBytes))
+                    try handle.close()
+                } catch {
+                    try? handle.close()
+                }
+                self.handle = nil
+            }
+            // 有效时长（秒）= 数据字节 / (采样率*声道数*2字节)
+            let seconds = Double(dataBytes) / Double(Self.sampleRate * UInt32(Self.channels) * 2)
+            guard seconds >= 1.0 else {
+                try? FileManager.default.removeItem(at: fileURL)
+                return nil
+            }
+            return fileURL
         }
-        // 有效时长（秒）= 数据字节 / (采样率*声道数*2字节)
-        let seconds = Double(dataBytes) / Double(Self.sampleRate * UInt32(Self.channels) * 2)
-        guard seconds >= 1.0 else {
-            try? FileManager.default.removeItem(at: fileURL)
-            return nil
-        }
-        return fileURL
     }
 
     private func wavHeader(dataBytes: UInt32) -> Data {
