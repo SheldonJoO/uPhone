@@ -914,6 +914,8 @@ public final class MainActivity extends Activity {
                 + "\nRelay：" + (relay.isEmpty() ? "未配置" : relay)
                 + "\nAPNs 环境：" + result.optString("environment", "未知")
                 + " · WAN：" + result.optString("wan_interface", "未检测到")
+                + "\n" + MainScreenPresentation.heartbeatLine(
+                        result.optLong("last_heartbeat", 0), result.optInt("heartbeat_failures", 0))
                 + (lastError.isEmpty() ? "" : "\n最近错误：" + DebugRedactor.sanitize(lastError))
                 + "\n注意：已配置不等于公网 Relay 已验证可达。";
     }

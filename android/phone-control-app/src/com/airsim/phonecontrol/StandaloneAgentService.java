@@ -115,7 +115,12 @@ public final class StandaloneAgentService extends Service {
                 .put("at_ok", true).put("cellular_state", "registered")
                 .put("cellular_registration", "Android Telecom")
                 .put("cellular_recovery", "not_required").put("ecm_carrier", "android-default");
-        relay.postJSON(registration, "/v1/events/heartbeat", heartbeat, 12_000);
+        try {
+            relay.postJSON(registration, "/v1/events/heartbeat", heartbeat, 12_000);
+        } catch (Exception error) {
+            store.recordHeartbeatFailure(error.getClass().getSimpleName() + ": " + error.getMessage());
+            throw error;
+        }
         lastHeartbeat = System.currentTimeMillis();
         store.recordHeartbeat();
     }
@@ -227,6 +232,12 @@ public final class StandaloneAgentService extends Service {
             }
             if (source.has("slot_index")) {
                 event.put("slot_index", source.optInt("slot_index"));
+            }
+            if (source.has("code")) {
+                event.put("code", source.optString("code"));
+            }
+            if (source.has("category")) {
+                event.put("category", source.optString("category"));
             }
             relay.postJSON(registration, "/v1/events/sms", event, 12_000);
             smsStore.markCloudSent(source.getString("delivery_id"));

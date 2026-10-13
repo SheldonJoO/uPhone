@@ -31,6 +31,22 @@ public final class MainScreenPresentation {
         return "请连接同一 Wi-Fi / 三星热点，或开启并配置云端 Relay";
     }
 
+    /**
+     * Heartbeat status line for the connection card.
+     * lastHeartbeatMillis: 0 when never succeeded. failures: consecutive failures.
+     */
+    public static String heartbeatLine(long lastHeartbeatMillis, int failures) {
+        if (lastHeartbeatMillis <= 0) {
+            return failures > 0 ? "心跳：从未成功 · 失败 " + failures + " 次" : "心跳：尚未发送";
+        }
+        long ageSeconds = Math.max(0, (System.currentTimeMillis() - lastHeartbeatMillis) / 1000);
+        String age = ageSeconds < 60 ? ageSeconds + " 秒前"
+                : ageSeconds < 3600 ? (ageSeconds / 60) + " 分钟前"
+                : (ageSeconds / 3600) + " 小时前";
+        if (failures > 0) return "心跳：失败 " + failures + " 次 · 上次成功 " + age;
+        return "心跳：正常 · " + age;
+    }
+
     public static String formatPairingCode(String code) {
         if (code == null) return "--- ---";
         String digits = code.replaceAll("[^0-9]", "");

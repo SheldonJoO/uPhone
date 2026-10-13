@@ -16,6 +16,7 @@ final class StandaloneAgentStore {
     private static final String LAST_ERROR = "last_error";
     private static final String LAST_HEARTBEAT = "last_heartbeat";
     private static final String LAST_SEEN = "last_seen";
+    private static final String HEARTBEAT_FAILURES = "heartbeat_failures";
 
     private final SharedPreferences preferences;
 
@@ -78,8 +79,17 @@ final class StandaloneAgentStore {
 
     void recordHeartbeat() {
         preferences.edit().putLong(LAST_HEARTBEAT, System.currentTimeMillis())
-                .putLong(LAST_SEEN, System.currentTimeMillis()).remove(LAST_ERROR).apply();
+                .putLong(LAST_SEEN, System.currentTimeMillis())
+                .putInt(HEARTBEAT_FAILURES, 0).remove(LAST_ERROR).apply();
     }
+
+    void recordHeartbeatFailure(String error) {
+        int failures = preferences.getInt(HEARTBEAT_FAILURES, 0) + 1;
+        preferences.edit().putInt(HEARTBEAT_FAILURES, failures)
+                .putString(LAST_ERROR, DebugRedactor.sanitize(error)).apply();
+    }
+
+    int heartbeatFailures() { return preferences.getInt(HEARTBEAT_FAILURES, 0); }
 
     void recordError(String error) {
         preferences.edit().putString(LAST_ERROR, DebugRedactor.sanitize(error)).apply();
@@ -102,6 +112,8 @@ final class StandaloneAgentStore {
                         || !registration.optString("watch_voip_token", "").isEmpty()))
                 .put("message_push_ready", configured && !registration.optString("alert_token", "").isEmpty())
                 .put("last_error", lastError())
+                .put("last_heartbeat", lastHeartbeat())
+                .put("heartbeat_failures", heartbeatFailures())
                 .put("wan_interface", "android-default");
         if (configured) {
             result.put("device_id", registration.optString("device_id", ""));
