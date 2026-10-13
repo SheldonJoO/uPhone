@@ -1211,6 +1211,11 @@ struct CallPolicy: Codable {
     var quietRules: [QuietRule] = []
     var blockSMSEnabled: Bool = false
     var blockSMSText: String = "您拨打的号码暂时无法接听，请稍后再拨。"
+    /// 未接来电自动回复短信。
+    var missedReplyEnabled: Bool = false
+    var missedReplyText: String = "刚才没能接听您的电话，稍后会回复您。"
+    /// 仅回复通讯录联系人（避免向陌生/骚扰号码确认本机活跃）。
+    var missedReplyContactsOnly: Bool = true
 }
 
 /// 分时段静默规则。deviceID 为空表示全部设备（单卡场景等同按 SIM 卡）。
@@ -1269,10 +1274,15 @@ final class CallPolicyStore: ObservableObject {
 
     private static let policyKey = "uphone.callPolicy"
     private static let logKey = "uphone.blockedCallLog"
+    private static let repliedMissedKey = "uphone.repliedMissedCalls"
     private static let maxLogCount = 100
+    private static let maxRepliedCount = 50
 
     /// 由 AppModel 注入：返回归一化后的全部联系人号码（白名单包含联系人时用）。
     var contactNumberProvider: (() -> Set<String>)?
+
+    /// 已发送未接回复的通话 ID（防重复）。
+    private var repliedMissedCallIDs: Set<String> = []
 
     private init() {
         if let data = UserDefaults.standard.data(forKey: Self.policyKey),
@@ -1284,6 +1294,9 @@ final class CallPolicyStore: ObservableObject {
         if let data = UserDefaults.standard.data(forKey: Self.logKey),
            let decoded = try? JSONDecoder().decode([BlockedCallEvent].self, from: data) {
             blockedLog = decoded
+        }
+        if let ids = UserDefaults.standard.stringArray(forKey: Self.repliedMissedKey) {
+            repliedMissedCallIDs = Set(ids)
         }
     }
 
@@ -1349,6 +1362,20 @@ final class CallPolicyStore: ObservableObject {
     func clearBlockedLog() {
         blockedLog = []
         UserDefaults.standard.removeObject(forKey: Self.logKey)
+    }
+
+    /// 是否需要对该未接来电发送自动回复（未发送过才返回 true）。
+    func shouldReplyToMissedCall(id: String) -> Bool {
+        !repliedMissedCallIDs.contains(id)
+    }
+
+    /// 标记已发送未接回复（持久化，防重复）。
+    func markMissedCallReplied(id: String) {
+        repliedMissedCallIDs.insert(id)
+        if repliedMissedCallIDs.count > Self.maxRepliedCount {
+            repliedMissedCallIDs = Set(repliedMissedCallIDs.suffix(Self.maxRepliedCount))
+        }
+        UserDefaults.standard.set(Array(repliedMissedCallIDs), forKey: Self.repliedMissedKey)
     }
 
     /// 加入黑名单；号码为空或已在名单中时返回 false。

@@ -677,6 +677,11 @@ final class AppModel: ObservableObject {
                 isMuted = false
                 isRecording = false
                 recordingStartDate = nil
+                // 未接来电自动回复（仅 agent 标记为 missed 的呼入）。
+                if let ended = confirmedEndedCall,
+                   ended.direction == "incoming", ended.missed {
+                    Task { [weak self] in await self?.maybeSendMissedCallReply(for: ended) }
+                }
             }
             if appIsActive, status.active?.state == "active",
                Date() >= nextAudioDiagnosticRefresh,
@@ -2143,6 +2148,29 @@ extension AppModel: CallKitActionHandling {
     /// 策略拦截来电后的可选短信通知（走当前值守机发送）。
     func callKitSendBlockNotificationSMS(to number: String, text: String) async {
         _ = await sendSMS(to: number, content: text)
+    }
+
+    /// 未接来电自动回复：agent 标记为 missed 的呼入，且未被策略拦截过。
+    private func maybeSendMissedCallReply(for call: CallRecord) async {
+        let store = CallPolicyStore.shared
+        guard store.policy.missedReplyEnabled else { return }
+        guard store.shouldReplyToMissedCall(id: call.id) else { return }
+        guard let number = call.number, !number.isEmpty else { return }
+        let normalized = CallPolicyStore.normalizedNumber(number)
+        // 刚被策略拦截过的号码不重复发送（拒接短信已覆盖）。
+        let recentlyBlocked = store.blockedLog.contains { event in
+            guard let eventNumber = event.number else { return false }
+            return CallPolicyStore.normalizedNumber(eventNumber) == normalized
+                && Date().timeIntervalSince(event.date) < 120
+        }
+        if recentlyBlocked { return }
+        // 仅联系人模式：陌生号码不回复，避免向骚扰号码确认本机活跃。
+        if store.policy.missedReplyContactsOnly,
+           contacts.contact(for: number) == nil {
+            return
+        }
+        store.markMissedCallReplied(id: call.id)
+        _ = await sendSMS(to: number, content: store.policy.missedReplyText)
     }
 }
 

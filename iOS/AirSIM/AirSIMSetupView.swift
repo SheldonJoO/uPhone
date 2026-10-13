@@ -523,6 +523,20 @@ struct CallPolicyView: View {
             }
 
             Section {
+                Toggle("未接来电自动回复短信", isOn: $store.policy.missedReplyEnabled)
+                if store.policy.missedReplyEnabled {
+                    TextField("回复内容", text: $store.policy.missedReplyText, axis: .vertical)
+                        .lineLimit(2...4)
+                    Toggle("仅回复通讯录联系人", isOn: $store.policy.missedReplyContactsOnly)
+                }
+            } header: {
+                Text("未接回复")
+            } footer: {
+                Text("漏接电话后自动回复一条短信。被策略拦截的来电不重复发送；建议仅回复联系人，避免向骚扰号码确认本机活跃。")
+                    .font(.caption)
+            }
+
+            Section {
                 if store.blockedLog.isEmpty {
                     Text("暂无拦截记录")
                         .foregroundStyle(.secondary)
