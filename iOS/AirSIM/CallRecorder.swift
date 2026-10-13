@@ -25,7 +25,7 @@ final class CallRecorder: @unchecked Sendable {
             return nil
         }
         let formatter = DateFormatter()
-        formatter.dateFormat = "yyyyMMdd_HHmmss"
+        formatter.dateFormat = "yyyyMMdd_HHmmss_SSS"
         let stamp = formatter.string(from: Date())
         fileURL = dir.appendingPathComponent("uPhone_\(stamp).wav")
         guard FileManager.default.createFile(atPath: fileURL.path, contents: wavHeader(dataBytes: 0), attributes: nil),

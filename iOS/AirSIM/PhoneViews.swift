@@ -852,18 +852,24 @@ struct CallRecordingFile: Identifiable {
                 else { return nil }
                 let date = Self.date(from: url) ?? values.contentModificationDate ?? .distantPast
                 let duration = size > 44 ? Double(size - 44) / bytesPerSecond : 0
+                // 过滤崩溃残留的空文件（只有 WAV 头）。
+                guard duration > 0 else { return nil }
                 return CallRecordingFile(url: url, date: date, duration: duration, size: size)
             }
             .sorted { $0.date > $1.date }
     }
 
-    /// 从文件名 uPhone_yyyyMMdd_HHmmss.wav 解析时间。
+    /// 从文件名 uPhone_yyyyMMdd_HHmmss_SSS.wav 解析时间（兼容旧版无毫秒格式）。
     private static func date(from url: URL) -> Date? {
         let name = url.deletingPathExtension().lastPathComponent
         guard name.hasPrefix("uPhone_") else { return nil }
+        let stamp = String(name.dropFirst("uPhone_".count))
         let formatter = DateFormatter()
-        formatter.dateFormat = "yyyyMMdd_HHmmss"
-        return formatter.date(from: String(name.dropFirst("uPhone_".count)))
+        for format in ["yyyyMMdd_HHmmss_SSS", "yyyyMMdd_HHmmss"] {
+            formatter.dateFormat = format
+            if let date = formatter.date(from: stamp) { return date }
+        }
+        return nil
     }
 }
 

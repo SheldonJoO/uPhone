@@ -50,9 +50,9 @@ final class PhoneAttribution {
         return nil
     }
 
-    /// 脱敏显示，如 13800101234 -> "138****1234"。
+    /// 脱敏显示，如 13800101234 -> "138****1234"（支持 +86/0086/86 前缀）。
     static func masked(_ number: String?) -> String? {
-        guard let digits = Self.digitsOnly(number), digits.count == 11 else { return nil }
+        guard let digits = Self.mainlandDigits(from: number) else { return nil }
         return String(digits.prefix(3)) + "****" + String(digits.suffix(4))
     }
 
@@ -93,12 +93,18 @@ final class PhoneAttribution {
         return digits
     }
 
-    /// 提取 7 位号段：仅支持中国大陆手机号（11 位以 1 开头，允许 +86/0086/86 前缀）。
-    private static func sevenDigitPrefix(from number: String?) -> Int? {
+    /// 归一化为 11 位大陆手机号（去 +86/0086/86 前缀）；非大陆手机号返回 nil。
+    private static func mainlandDigits(from number: String?) -> String? {
         guard var digits = digitsOnly(number) else { return nil }
         if digits.hasPrefix("0086") { digits = String(digits.dropFirst(4)) }
         else if digits.hasPrefix("86"), digits.count == 13 { digits = String(digits.dropFirst(2)) }
         guard digits.count == 11, digits.hasPrefix("1") else { return nil }
+        return digits
+    }
+
+    /// 提取 7 位号段：仅支持中国大陆手机号（11 位以 1 开头，允许 +86/0086/86 前缀）。
+    private static func sevenDigitPrefix(from number: String?) -> Int? {
+        guard let digits = mainlandDigits(from: number) else { return nil }
         return Int(digits.prefix(7))
     }
 
