@@ -1243,10 +1243,16 @@ async function resolveSmsToTail(env, deviceID, message) {
       .sort((a, b) => b.received_at_ms - a.received_at_ms)[0];
     const slots = latest && Array.isArray(latest.sim_cards) ? latest.sim_cards : [];
     if (!slots.length) return "";
-    const subID = Number.isInteger(message.subscription_id) ? message.subscription_id : null;
-    const slotIdx = Number.isInteger(message.slot_index) ? message.slot_index : null;
-    let match = subID !== null ? slots.find((s) => s && s.subscription_id === subID) : null;
-    if (!match && slotIdx !== null) match = slots.find((s) => s && s.slot_index === slotIdx);
+    // subscription_id 可能是数字或字符串，做宽容比较；优先按 subscription_id，再按 slot_index。
+    const subID = message.subscription_id !== undefined && message.subscription_id !== null
+      ? Number(message.subscription_id) : NaN;
+    const slotIdx = message.slot_index !== undefined && message.slot_index !== null
+      ? Number(message.slot_index) : NaN;
+    let match = Number.isInteger(subID)
+      ? slots.find((s) => s && Number(s.subscription_id) === subID) : null;
+    if (!match && Number.isInteger(slotIdx)) {
+      match = slots.find((s) => s && Number(s.slot_index) === slotIdx);
+    }
     const digits = match && typeof match.number === "string" ? match.number.replace(/\D/g, "") : "";
     return digits.length >= 4 ? digits.slice(-4) : "";
   } catch {
