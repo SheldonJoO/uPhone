@@ -118,6 +118,7 @@ final class AppModel: ObservableObject {
     @Published var isBusy = false
     @Published var isMuted = false
     @Published var isRecording = false
+    @Published var recordingStartDate: Date?
     @Published var showRecordingComplianceAlert = false
     @Published var showRecordingShare = false
     @Published var recordingShareURL: URL?
@@ -675,6 +676,7 @@ final class AppModel: ObservableObject {
                 backgroundStandby.resumeAfterCall()
                 isMuted = false
                 isRecording = false
+                recordingStartDate = nil
             }
             if appIsActive, status.active?.state == "active",
                Date() >= nextAudioDiagnosticRefresh,
@@ -1180,6 +1182,7 @@ final class AppModel: ObservableObject {
         if CallRecordingCenter.shared.isRecording {
             let url = CallRecordingCenter.shared.stop()
             isRecording = false
+            recordingStartDate = nil
             if let url {
                 recordingShareURL = url
                 showRecordingShare = true
@@ -1208,6 +1211,7 @@ final class AppModel: ObservableObject {
     private func startLocalRecording() {
         if CallRecordingCenter.shared.start() {
             isRecording = true
+            recordingStartDate = Date()
             errorMessage = nil
         } else {
             errorMessage = "录音启动失败"

@@ -2309,6 +2309,11 @@ struct ActiveCallView: View {
             Text(title)
             Spacer()
             if showsRecording {
+                if model.isRecording, let start = model.recordingStartDate {
+                    Text(start, style: .timer)
+                        .font(.caption.monospacedDigit())
+                        .foregroundStyle(.red)
+                }
                 Button {
                     Task { await model.toggleRecording() }
                 } label: {

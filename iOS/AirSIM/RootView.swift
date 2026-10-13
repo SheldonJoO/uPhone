@@ -129,6 +129,7 @@ struct RootView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: .uPhoneCallRecordingFinished)) { notification in
             model.isRecording = false
+            model.recordingStartDate = nil
             if let url = notification.userInfo?["url"] as? URL {
                 model.recordingShareURL = url
                 model.showRecordingShare = true
