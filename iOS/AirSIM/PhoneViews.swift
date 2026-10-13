@@ -1,6 +1,8 @@
 import SwiftUI
 import UIKit
 import AVFoundation
+import Contacts
+import ContactsUI
 
 enum RecentCallTimeFormatter {
     static func string(
@@ -585,6 +587,19 @@ struct RecentsView: View {
     @State private var recentsTab = 0
     @AppStorage("favoriteNumbers") private var favoriteNumbersData: String = ""
     @State private var deletedCallIDs: Set<String> = []
+    @State private var newContactNumber: String?
+
+    private struct NewContactItem: Identifiable {
+        let id = UUID()
+        let number: String
+    }
+
+    private var newContactNumberItem: Binding<NewContactItem?> {
+        Binding(
+            get: { newContactNumber.map { NewContactItem(number: $0) } },
+            set: { newContactNumber = $0?.number }
+        )
+    }
 
     /// 过滤掉已删除的通话记录
     private var visibleCallHistory: [CallRecord] {
@@ -691,12 +706,10 @@ struct RecentsView: View {
                             .disabled(RecentCallDialPolicy.numberToDial(call.number) == nil)
                             .simultaneousGesture(
                                 LongPressGesture(minimumDuration: 0.38).onEnded { _ in
-                                    guard call.number?.isEmpty == false else { return }
+                                    guard let number = call.number, !number.isEmpty else { return }
                                     suppressNextCallTap = true
                                     UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.84)) {
-                                        selectedCall = call
-                                    }
+                                    newContactNumber = number
                                 }
                             )
                             .accessibilityHint("轻点回拨，按住查看详情")
@@ -716,6 +729,13 @@ struct RecentsView: View {
                                         Label(L10n.t("短信"), systemImage: "message.fill")
                                     }
                                     .tint(.blue)
+                                    Button {
+                                        UIPasteboard.general.string = number
+                                        toastText = L10n.t("已复制号码")
+                                    } label: {
+                                        Label(L10n.t("复制"), systemImage: "doc.on.doc")
+                                    }
+                                    .tint(.gray)
                                     Button(role: .destructive) {
                                         deletedCallIDs.insert(call.id)
                                     } label: {
@@ -771,6 +791,9 @@ struct RecentsView: View {
                         .accessibilityLabel(L10n.t("通话录音"))
                     }
                 }
+            }
+            .sheet(item: $newContactNumberItem) { item in
+                NewContactView(phoneNumber: item.number)
             }
             .allowsHitTesting(selectedCall == nil)
 
@@ -2813,5 +2836,33 @@ private struct DTMFGlassButtonStyle: ButtonStyle {
         .foregroundStyle(configuration.isPressed ? Color.cyan : Color.primary)
         .scaleEffect(configuration.isPressed ? 0.91 : 1)
         .animation(.spring(response: 0.2, dampingFraction: 0.7), value: configuration.isPressed)
+    }
+}
+
+/// 新建系统联系人（预填电话号码）。
+private struct NewContactView: UIViewControllerRepresentable {
+    let phoneNumber: String
+    @Environment(\.dismiss) private var dismiss
+
+    func makeUIViewController(context: Context) -> UINavigationController {
+        let contact = CNMutableContact()
+        contact.phoneNumbers = [CNLabeledValue(label: CNLabelPhoneNumberMobile, value: CNPhoneNumber(stringValue: phoneNumber))]
+        let vc = CNContactViewController(forNewContact: contact)
+        vc.delegate = context.coordinator
+        return UINavigationController(rootViewController: vc)
+    }
+
+    func updateUIViewController(_ uiViewController: UINavigationController, context: Context) {}
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(dismiss: dismiss)
+    }
+
+    class Coordinator: NSObject, CNContactViewControllerDelegate {
+        let dismiss: DismissAction
+        init(dismiss: DismissAction) { self.dismiss = dismiss }
+        func contactViewController(_ viewController: CNContactViewController, didCompleteWith contact: CNContact?) {
+            dismiss()
+        }
     }
 }
