@@ -77,7 +77,8 @@ final class AndroidAgentIdentity {
         return value == null ? "" : value.trim();
     }
 
-    /** Lists active SIM subscriptions for dual-SIM dialing and SMS routing. */
+    /** Lists active SIM subscriptions for dual-SIM dialing and SMS routing.
+     * 自动检测失败时，用手动配置的号码补齐（TCL 功能机 SubscriptionManager 可能不可靠）。 */
     static JSONArray simCards(Context context) {
         JSONArray cards = new JSONArray();
         if (context.checkSelfPermission(Manifest.permission.READ_PHONE_STATE)
@@ -112,6 +113,38 @@ final class AndroidAgentIdentity {
                 } catch (JSONException ignored) {}
             }
         } catch (SecurityException ignored) {}
+        // 手动配置兜底：如果自动检测不到两张卡，用用户手动填的号码补齐。
+        // slot_index 0 = SIM 1, 1 = SIM 2；subscription_id 用 slot 占位，iOS 仅做展示。
+        try {
+            String sim1 = AppConfig.sim1Number(context);
+            String sim2 = AppConfig.sim2Number(context);
+            boolean hasSlot0 = false, hasSlot1 = false;
+            for (int i = 0; i < cards.length(); i++) {
+                int slot = cards.getJSONObject(i).optInt("slot_index", -1);
+                if (slot == 0) hasSlot0 = true;
+                if (slot == 1) hasSlot1 = true;
+            }
+            if (!sim1.isEmpty() && !hasSlot0) {
+                cards.put(new JSONObject()
+                        .put("subscription_id", 0)
+                        .put("slot_index", 0)
+                        .put("carrier_name", "")
+                        .put("display_name", "SIM 1")
+                        .put("number", sim1)
+                        .put("icc_id", "")
+                        .put("manual", true));
+            }
+            if (!sim2.isEmpty() && !hasSlot1) {
+                cards.put(new JSONObject()
+                        .put("subscription_id", 1)
+                        .put("slot_index", 1)
+                        .put("carrier_name", "")
+                        .put("display_name", "SIM 2")
+                        .put("number", sim2)
+                        .put("icc_id", "")
+                        .put("manual", true));
+            }
+        } catch (JSONException ignored) {}
         return cards;
     }
 }

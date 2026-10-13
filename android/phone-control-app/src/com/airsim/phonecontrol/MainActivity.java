@@ -340,7 +340,7 @@ public final class MainActivity extends Activity {
     private View callsPage() {
         LinearLayout root = pageRoot();
         root.addView(pageTitle("通话控制", null));
-        root.addView(description("三星 Telecom 本机控制；iPhone 通话优先使用 VoWLAN，局域网不可用时由云端中继。"), matchWithTop(8));
+        root.addView(description("本机 Telecom 本机控制；iPhone 通话优先使用 VoWLAN，局域网不可用时由云端中继。"), matchWithTop(8));
 
         LinearLayout dialCard = card(SURFACE, 24);
         dialCard.setOrientation(LinearLayout.VERTICAL);
@@ -356,7 +356,7 @@ public final class MainActivity extends Activity {
 
         root.addView(sectionTitle("当前通话"), matchWithTop(22));
         LinearLayout actions = row();
-        TextView answer = secondaryButton("三星接听");
+        TextView answer = secondaryButton("本机接听");
         answer.setOnClickListener(ignored -> localCall("answer"));
         TextView hangup = secondaryButton("挂断通话");
         hangup.setTextColor(DANGER);
@@ -456,6 +456,30 @@ public final class MainActivity extends Activity {
         save.setOnClickListener(ignored -> saveConfiguration());
         agentCard.addView(save, matchWithTop(12));
         root.addView(agentCard, matchWithTop(10));
+
+        // 双卡设置：手动配置 SIM 1 / SIM 2 号码（自动检测失败时的兜底）
+        root.addView(sectionTitle("双卡设置"), matchWithTop(22));
+        LinearLayout simCard = card(SURFACE, 22);
+        simCard.setOrientation(LinearLayout.VERTICAL);
+        simCard.setPadding(dp(16), dp(16), dp(16), dp(16));
+        simCard.addView(label("自动检测不到双卡时，手动填写号码，iPhone 端会显示两张卡。",
+                13, MUTED, Gravity.START));
+        EditText sim1Input = input("SIM 1 号码", InputType.TYPE_CLASS_PHONE);
+        sim1Input.setText(AppConfig.sim1Number(this));
+        simCard.addView(sim1Input, matchWithTop(10));
+        EditText sim2Input = input("SIM 2 号码", InputType.TYPE_CLASS_PHONE);
+        sim2Input.setText(AppConfig.sim2Number(this));
+        simCard.addView(sim2Input, matchWithTop(10));
+        TextView simSave = primaryButton("保存号码", BLUE);
+        simSave.setOnClickListener(ignored -> {
+            AppConfig.setSim1Number(this, sim1Input.getText().toString());
+            AppConfig.setSim2Number(this, sim2Input.getText().toString());
+            BridgeLog.info("sim_numbers_saved");
+            // 触发心跳上报，让 iPhone 尽快拿到新号码
+            AgentWatchdogService.start(this);
+        });
+        simCard.addView(simSave, matchWithTop(12));
+        root.addView(simCard, matchWithTop(10));
 
 		if (!standaloneRuntime) {
 		root.addView(sectionTitle("AVF Linux 首次安装"), matchWithTop(22));
@@ -575,7 +599,7 @@ public final class MainActivity extends Activity {
         TextView title = label("一次性配对", 30, TEXT, Gravity.START);
         title.setTypeface(Typeface.DEFAULT_BOLD);
         root.addView(title, matchWithTop(8));
-        root.addView(description("让 iPhone 与三星连接同一 Wi‑Fi 或三星热点"), matchWithTop(6));
+        root.addView(description("让 iPhone 与本机连接同一 Wi‑Fi 或手机热点"), matchWithTop(6));
 
         LinearLayout pairingCard = card(SURFACE, 28);
         pairingCard.setOrientation(LinearLayout.VERTICAL);
@@ -1071,7 +1095,7 @@ public final class MainActivity extends Activity {
                 String address = localVoWLANAddress();
                 String pcmBackend = RuntimeMode.isStandalone(this) ? "本机 PCM 端口 7580" : "AVF PCM 端口 7580";
                 String reason = !paired ? "尚未与 iPhone 配对"
-                        : address.isEmpty() ? "没有可用的同网 Wi-Fi 或三星热点地址"
+                        : address.isEmpty() ? "没有可用的同网 Wi-Fi 或手机热点地址"
                         : currentVoWLAN.contains("avf=missing") ? "AVF 虚拟网卡未出现"
                         : currentVoWLAN.contains("agent_ready=false") ? "Agent 未通过 VoWLAN 就绪检查"
                         : currentVoWLAN.contains("pcm_ready=false") ? pcmBackend + "未就绪"
@@ -1447,7 +1471,7 @@ public final class MainActivity extends Activity {
 
     private String vowlanNetworkLine() {
         String host = localVoWLANAddress();
-        return host.isEmpty() ? "同一 Wi‑Fi / 三星热点" : "同一 Wi‑Fi · " + host;
+        return host.isEmpty() ? "同一 Wi‑Fi / 手机热点" : "同一 Wi‑Fi · " + host;
     }
 
     private boolean vowlanReady() {

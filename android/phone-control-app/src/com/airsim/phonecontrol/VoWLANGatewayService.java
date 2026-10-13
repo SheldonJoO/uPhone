@@ -99,7 +99,7 @@ public final class VoWLANGatewayService extends Service {
                     stopGateways();
                     update(!dialerRoleHeld ? "请将 AirSIM 设为默认电话应用"
                             : !paired ? "VoWLAN 未配对"
-                            : hotspot == null ? "正在等待同网 Wi-Fi 或三星热点"
+                            : hotspot == null ? "正在等待同网 Wi-Fi 或手机热点"
                             : !agentReady ? RuntimeMode.agentLabel(this) + " 尚未就绪" : "PCM 音频桥尚未就绪");
                 }
                 Thread.sleep(5_000);

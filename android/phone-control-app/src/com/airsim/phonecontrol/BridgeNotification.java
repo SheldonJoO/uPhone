@@ -52,7 +52,7 @@ public final class BridgeNotification {
     public static void showCallFallback(Context context, String callId, String direction, String mode) {
         if (!"incoming".equals(direction)) return;
 		createChannel(context);
-        String text = AppConfig.MODE_REMOTE_SILENT.equals(mode) ? "来电已转送 iOS；点按可在三星处理" : "来电已同步到 iOS";
+        String text = AppConfig.MODE_REMOTE_SILENT.equals(mode) ? "来电已转送 iOS；点按可在本机处理" : "来电已同步到 iOS";
         Notification notification = new Notification.Builder(context, CHANNEL)
                 .setSmallIcon(android.R.drawable.stat_sys_phone_call)
                 .setContentTitle("AirSIM 来电")

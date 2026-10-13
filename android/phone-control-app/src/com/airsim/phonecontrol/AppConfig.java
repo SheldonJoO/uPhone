@@ -84,6 +84,24 @@ public final class AppConfig {
         return context.getSharedPreferences(FILE, Context.MODE_PRIVATE);
     }
 
+    /** 手动配置的 SIM 1 号码（自动检测失败时的兜底）。 */
+    public static String sim1Number(Context context) {
+        return preferences(context).getString("sim1_number", "");
+    }
+
+    public static void setSim1Number(Context context, String number) {
+        preferences(context).edit().putString("sim1_number", number == null ? "" : number.trim()).apply();
+    }
+
+    /** 手动配置的 SIM 2 号码（自动检测失败时的兜底）。 */
+    public static String sim2Number(Context context) {
+        return preferences(context).getString("sim2_number", "");
+    }
+
+    public static void setSim2Number(Context context, String number) {
+        preferences(context).edit().putString("sim2_number", number == null ? "" : number.trim()).apply();
+    }
+
 	static String discoverAVFEndpoint() {
 		try {
 			NetworkInterface avf = NetworkInterface.getByName("avf_tap_fixed");
