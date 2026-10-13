@@ -219,7 +219,7 @@ enum SamsungPairingClientError: LocalizedError {
     }
 }
 
-private extension Data {
+extension Data {
     init?(base64URL: String) {
         var value = base64URL.replacingOccurrences(of: "-", with: "+").replacingOccurrences(of: "_", with: "/")
         value += String(repeating: "=", count: (4 - value.count % 4) % 4)
