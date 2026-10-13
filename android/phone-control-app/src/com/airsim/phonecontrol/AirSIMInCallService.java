@@ -32,7 +32,8 @@ public final class AirSIMInCallService extends InCallService {
                 BridgeLog.info("blocklist_reject_local number=" + DebugRedactor.safeIdentifier(
                         CallBlocklistStore.normalize(incomingNumber)));
                 try {
-                    call.reject(false, null);
+                    if (call.getState() == Call.STATE_RINGING) call.reject(false, null);
+                    else call.disconnect();
                 } catch (Exception error) {
                     BridgeLog.error("blocklist_reject_failed", error);
                 }
