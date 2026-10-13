@@ -1492,7 +1492,7 @@ final class VoIPPushController: NSObject {
             localMode: false,
             deviceID: deviceID,
             deviceSecret: secret,
-            token: token,
+            token: resolvedToken,
             alertToken: defaults.string(forKey: Keys.alertToken) ?? "",
             watchVoIPToken: defaults.string(forKey: Keys.watchVoIPToken) ?? "",
             watchBundleID: defaults.string(forKey: Keys.watchBundleID) ?? "com.sheldonjoo.uphone.watchkitapp",
