@@ -457,6 +457,7 @@ struct CallPolicyView: View {
             }
 
             Section {
+                Toggle("包含通讯录全部号码", isOn: $store.policy.whitelistIncludesContacts)
                 ForEach(store.policy.whitelist, id: \.self) { number in
                     Text(number).monospacedDigit()
                 }
@@ -471,7 +472,7 @@ struct CallPolicyView: View {
             } header: {
                 Text("白名单（\(store.policy.whitelist.count)）")
             } footer: {
-                Text("白名单模式下，非名单号码（含未知号码）一律自动拒接。")
+                Text("白名单模式下，非名单号码（含未知号码）一律自动拒接。打开包含通讯录开关后，通讯录里的号码自动放行。")
                     .font(.caption)
             }
 
@@ -504,7 +505,7 @@ struct CallPolicyView: View {
             } header: {
                 Text("分时段静默")
             } footer: {
-                Text("静默时段内来电不响铃、自动挂断，事件照常记录。按设备设置；单卡设备等同按 SIM 卡。")
+                Text("静默时段内来电不响铃、自动挂断，事件照常记录。白名单号码不受静默限制。按设备设置；单卡设备等同按 SIM 卡。")
                     .font(.caption)
             }
 

@@ -1206,6 +1206,8 @@ struct CallPolicy: Codable {
     /// 归一化后的号码（纯数字，已去 +86/0086 前缀）。
     var blacklist: [String] = []
     var whitelist: [String] = []
+    /// 白名单模式/静默例外是否包含通讯录全部号码。
+    var whitelistIncludesContacts: Bool = false
     var quietRules: [QuietRule] = []
     var blockSMSEnabled: Bool = false
     var blockSMSText: String = "您拨打的号码暂时无法接听，请稍后再拨。"
@@ -1269,6 +1271,9 @@ final class CallPolicyStore: ObservableObject {
     private static let logKey = "uphone.blockedCallLog"
     private static let maxLogCount = 100
 
+    /// 由 AppModel 注入：返回归一化后的全部联系人号码（白名单包含联系人时用）。
+    var contactNumberProvider: (() -> Set<String>)?
+
     private init() {
         if let data = UserDefaults.standard.data(forKey: Self.policyKey),
            let decoded = try? JSONDecoder().decode(CallPolicy.self, from: data) {
@@ -1300,10 +1305,13 @@ final class CallPolicyStore: ObservableObject {
     }
 
     func decision(for number: String?, deviceID: String?, at date: Date = Date()) -> CallPolicyDecision {
-        if policy.quietRules.contains(where: { $0.isActive(at: date, deviceID: deviceID) }) {
-            return CallPolicyDecision(shouldBlock: true, reason: "静默时段")
-        }
         let normalized = Self.normalizedNumber(number ?? "")
+        // 静默时段：白名单（含联系人）不受限，其余一律拦截。
+        if policy.quietRules.contains(where: { $0.isActive(at: date, deviceID: deviceID) }) {
+            return !normalized.isEmpty && isWhitelisted(normalized)
+                ? .allow
+                : CallPolicyDecision(shouldBlock: true, reason: "静默时段")
+        }
         switch policy.mode {
         case .off:
             return .allow
@@ -1313,10 +1321,19 @@ final class CallPolicyStore: ObservableObject {
                 : .allow
         case .whitelist:
             // 未知号码也视为非白名单，一律拒接。
-            return policy.whitelist.contains(normalized) && !normalized.isEmpty
+            return !normalized.isEmpty && isWhitelisted(normalized)
                 ? .allow
                 : CallPolicyDecision(shouldBlock: true, reason: "非白名单号码")
         }
+    }
+
+    /// 是否在白名单中（含"包含通讯录"选项）。
+    private func isWhitelisted(_ normalized: String) -> Bool {
+        if policy.whitelist.contains(normalized) { return true }
+        if policy.whitelistIncludesContacts, let provider = contactNumberProvider {
+            return provider().contains(normalized)
+        }
+        return false
     }
 
     func logBlocked(number: String?, deviceID: String?, reason: String, at date: Date = Date()) {

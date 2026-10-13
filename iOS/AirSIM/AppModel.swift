@@ -352,6 +352,13 @@ final class AppModel: ObservableObject {
         }
         callKit.handler = self
         callKit.setEnabled(!LocalModePreference.isEnabled())
+        // 来电策略：白名单"包含通讯录"选项的号码来源。
+        CallPolicyStore.shared.contactNumberProvider = { [weak self] in
+            guard let self else { return [] }
+            return Set(self.contacts.contacts.flatMap { contact in
+                contact.phones.map(CallPolicyStore.normalizedNumber)
+            }.filter { !$0.isEmpty })
+        }
         WatchCallCoordinator.shared.configure(model: self)
         WatchCallCoordinator.shared.start()
         IPhoneCloudCallSession.shared.onAudioStateChange = { [weak self] state in
