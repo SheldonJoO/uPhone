@@ -584,6 +584,12 @@ struct RecentsView: View {
     @State private var toastText: String?
     @State private var recentsTab = 0
     @AppStorage("favoriteNumbers") private var favoriteNumbersData: String = ""
+    @State private var deletedCallIDs: Set<String> = []
+
+    /// 过滤掉已删除的通话记录
+    private var visibleCallHistory: [CallRecord] {
+        model.callHistory.filter { !deletedCallIDs.contains($0.id) }
+    }
 
     /// 收藏的号码列表
     private var favoriteNumbers: [String] {
@@ -657,13 +663,13 @@ struct RecentsView: View {
                                 }
                             }
                         }
-                    } else if model.callHistory.isEmpty {
+                    } else if visibleCallHistory.isEmpty {
                         EmptyStateView(
                             title: L10n.t("暂无通话记录"),
                             systemImage: "phone.arrow.up.right"
                         )
                     } else {
-                        List(model.callHistory) { call in
+                        List(visibleCallHistory) { call in
                             let contact = call.number.flatMap { contacts.contact(for: $0) }
                             Button {
                                 if suppressNextCallTap {
@@ -710,10 +716,12 @@ struct RecentsView: View {
                                         Label(L10n.t("短信"), systemImage: "message.fill")
                                     }
                                     .tint(.blue)
-                                    Button { onCall(number) } label: {
-                                        Label(L10n.t("拨号"), systemImage: "phone.fill")
+                                    Button(role: .destructive) {
+                                        deletedCallIDs.insert(call.id)
+                                    } label: {
+                                        Label(L10n.t("删除"), systemImage: "trash.fill")
                                     }
-                                    .tint(.green)
+                                    .tint(.red)
                                     Button {
                                         if CallPolicyStore.shared.addToBlacklist(number) {
                                             toastText = L10n.t("已加入黑名单")
@@ -868,6 +876,21 @@ struct RecentsView: View {
         let contact: ContactStore.Contact?
         let displayName: String
 
+        /// 通话时长格式化：endedAt - startedAt，精确到秒
+        private func callDuration(_ call: CallRecord) -> String? {
+            guard let ended = call.endedAt else { return nil }
+            let seconds = Int(ended.timeIntervalSince(call.startedAt))
+            guard seconds > 0 else { return nil }
+            let h = seconds / 3600
+            let m = (seconds % 3600) / 60
+            let s = seconds % 60
+            if h > 0 {
+                return String(format: "%d:%02d:%02d", h, m, s)
+            } else {
+                return String(format: "%d:%02d", m, s)
+            }
+        }
+
         var body: some View {
             HStack(spacing: PhoneListMetrics.avatarSpacing) {
                 InitialAvatar(
@@ -900,6 +923,13 @@ struct RecentsView: View {
                     .lineLimit(1)
                     .minimumScaleFactor(0.78)
                     .frame(width: PhoneListMetrics.timeColumnWidth, alignment: .trailing)
+                if let duration = callDuration(call) {
+                    Text(duration)
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                        .frame(width: PhoneListMetrics.timeColumnWidth, alignment: .trailing)
+                }
 
                 Image(systemName: "phone.fill")
                     .font(.system(size: 17, weight: .semibold))
