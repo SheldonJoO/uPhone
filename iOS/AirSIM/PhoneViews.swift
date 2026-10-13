@@ -511,9 +511,18 @@ private struct PairedAndroidAgentsView: View {
                         VStack(alignment: .leading, spacing: 2) {
                             Text(agent.deviceName)
                                 .font(.headline)
-                            Text(agent.phoneNumber ?? "号码未提供")
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
+                            // 多号码展示：双卡时列出每张卡
+                            if agent.simCards.count > 1 {
+                                ForEach(agent.simCards) { sim in
+                                    Text(sim.fullLabel)
+                                        .font(.subheadline)
+                                        .foregroundStyle(.secondary)
+                                }
+                            } else {
+                                Text(agent.phoneNumber ?? "号码未提供")
+                                    .font(.subheadline)
+                                    .foregroundStyle(.secondary)
+                            }
                         }
                         Spacer()
                         if agent.isCurrent {
