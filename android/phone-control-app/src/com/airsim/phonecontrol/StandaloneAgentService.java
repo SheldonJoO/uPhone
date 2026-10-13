@@ -168,7 +168,10 @@ public final class StandaloneAgentService extends Service {
                     Thread.sleep(2_000);
                     continue;
                 }
-                URI relayURI = URI.create(registration.getString("relay_url"));
+                // 自定义 Relay 地址优先
+                String customRelay = AppConfig.customRelayUrl(this);
+                String relayUrlStr = customRelay.isEmpty() ? registration.getString("relay_url") : customRelay;
+                URI relayURI = URI.create(relayUrlStr);
                 String deviceID = URLEncoder.encode(registration.getString("device_id"), StandardCharsets.UTF_8)
                         .replace("+", "%20");
                 URI endpoint = URI.create("wss://" + relayURI.getRawAuthority()

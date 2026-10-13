@@ -102,6 +102,15 @@ public final class AppConfig {
         preferences(context).edit().putString("sim2_number", number == null ? "" : number.trim()).apply();
     }
 
+    /** 自定义 Relay 地址（为空则使用配对时的地址）。 */
+    public static String customRelayUrl(Context context) {
+        return preferences(context).getString("custom_relay_url", "");
+    }
+
+    public static void setCustomRelayUrl(Context context, String url) {
+        preferences(context).edit().putString("custom_relay_url", url == null ? "" : url.trim()).apply();
+    }
+
 	static String discoverAVFEndpoint() {
 		try {
 			NetworkInterface avf = NetworkInterface.getByName("avf_tap_fixed");

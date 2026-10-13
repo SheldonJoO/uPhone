@@ -481,6 +481,25 @@ public final class MainActivity extends Activity {
         simCard.addView(simSave, matchWithTop(12));
         root.addView(simCard, matchWithTop(10));
 
+        // 云端 Relay 自定义地址
+        root.addView(sectionTitle("云端 Relay"), matchWithTop(22));
+        LinearLayout relayCard = card(SURFACE, 22);
+        relayCard.setOrientation(LinearLayout.VERTICAL);
+        relayCard.setPadding(dp(16), dp(16), dp(16), dp(16));
+        relayCard.addView(label("自定义 Relay 服务器地址（为空则使用配对时的地址）。修改后需重启 Agent 生效。",
+                13, MUTED, Gravity.START));
+        EditText relayInput = input("Relay 地址 (https://...)", InputType.TYPE_CLASS_TEXT);
+        relayInput.setText(AppConfig.customRelayUrl(this));
+        relayCard.addView(relayInput, matchWithTop(10));
+        TextView relaySave = primaryButton("保存 Relay 地址", BLUE);
+        relaySave.setOnClickListener(ignored -> {
+            AppConfig.setCustomRelayUrl(this, relayInput.getText().toString());
+            BridgeLog.info("custom_relay_url_saved");
+            AgentWatchdogService.start(this);
+        });
+        relayCard.addView(relaySave, matchWithTop(12));
+        root.addView(relayCard, matchWithTop(10));
+
 		if (!standaloneRuntime) {
 		root.addView(sectionTitle("AVF Linux 首次安装"), matchWithTop(22));
 		LinearLayout bootstrapCard = card(SURFACE, 22);
