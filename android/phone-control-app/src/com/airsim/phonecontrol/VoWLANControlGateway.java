@@ -101,6 +101,7 @@ public final class VoWLANControlGateway implements Closeable {
                         .put("manufacturer", android.os.Build.MANUFACTURER)
                         .put("model", android.os.Build.MODEL)
                         .put("phone_number", AndroidAgentIdentity.phoneNumber(context))
+                        .put("sim_cards", AndroidAgentIdentity.simCards(context))
                         .toString();
             } else {
                 String body = request.body.length == 0 ? null : new String(request.body, StandardCharsets.UTF_8);

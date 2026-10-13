@@ -227,7 +227,7 @@ final class AppModel: ObservableObject {
                 cloudOnline: previous?.cloudOnline ?? false,
                 vowlanOnline: true,
                 isCurrent: false,
-                simCards: previous?.simCards ?? []
+                simCards: local.simCards.isEmpty ? (previous?.simCards ?? []) : local.simCards
             )
         }
 

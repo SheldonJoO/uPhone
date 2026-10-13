@@ -33,6 +33,7 @@ struct VoWLANDiscoveredAgent: Equatable, Identifiable, Sendable {
     let model: String?
     let phoneNumber: String?
     let agentKind: String?
+    let simCards: [SimCard]
 }
 
 private struct VoWLANHealthIdentity: Decodable {
@@ -43,6 +44,7 @@ private struct VoWLANHealthIdentity: Decodable {
     let manufacturer: String?
     let model: String?
     let phoneNumber: String?
+    let simCards: [SimCard]
 
     enum CodingKeys: String, CodingKey {
         case ok
@@ -51,6 +53,19 @@ private struct VoWLANHealthIdentity: Decodable {
         case deviceName = "device_name"
         case manufacturer, model
         case phoneNumber = "phone_number"
+        case simCards = "sim_cards"
+    }
+
+    init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        ok = try values.decodeIfPresent(Bool.self, forKey: .ok) ?? false
+        agentID = try values.decodeIfPresent(String.self, forKey: .agentID)
+        agentKind = try values.decodeIfPresent(String.self, forKey: .agentKind)
+        deviceName = try values.decodeIfPresent(String.self, forKey: .deviceName)
+        manufacturer = try values.decodeIfPresent(String.self, forKey: .manufacturer)
+        model = try values.decodeIfPresent(String.self, forKey: .model)
+        phoneNumber = try values.decodeIfPresent(String.self, forKey: .phoneNumber)
+        simCards = try values.decodeIfPresent([SimCard].self, forKey: .simCards) ?? []
     }
 }
 
@@ -419,7 +434,8 @@ final class VoWLANController: ObservableObject {
                     manufacturer: identity.manufacturer ?? previous.manufacturer,
                     model: identity.model ?? previous.model,
                     phoneNumber: identity.phoneNumber?.isEmpty == false ? identity.phoneNumber : previous.phoneNumber,
-                    agentKind: identity.agentKind ?? previous.agentKind
+                    agentKind: identity.agentKind ?? previous.agentKind,
+                    simCards: identity.simCards.isEmpty ? previous.simCards : identity.simCards
                 )
             }
             availability = .verified(endpoint, at: Date())
@@ -462,7 +478,8 @@ final class VoWLANController: ObservableObject {
             manufacturer: record["manufacturer"],
             model: record["model"],
             phoneNumber: nil,
-            agentKind: record["agent_kind"]
+            agentKind: record["agent_kind"],
+            simCards: []
         )
     }
 }
