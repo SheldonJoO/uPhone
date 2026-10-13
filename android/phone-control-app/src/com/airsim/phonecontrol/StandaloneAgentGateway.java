@@ -140,6 +140,11 @@ final class StandaloneAgentGateway {
                 yield ok("{\"accepted\":true}");
             }
             case "/api/sms/refresh" -> ok("{\"accepted\":true}");
+            case "/api/policy/blocklist" -> {
+                boolean accepted = CallBlocklistStore.replaceFromJson(context, body);
+                yield ok(new JSONObject().put("accepted", accepted)
+                        .put("count", CallBlocklistStore.count(context)).toString());
+            }
             default -> error(404, "not_found");
         };
     }

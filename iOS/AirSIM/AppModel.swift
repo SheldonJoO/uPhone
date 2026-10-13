@@ -360,6 +360,10 @@ final class AppModel: ObservableObject {
                 contact.phones.map(CallPolicyStore.normalizedNumber)
             }.filter { !$0.isEmpty })
         }
+        // 黑名单变化时同步到 Android 本地（iPhone 离线时的兜底拦截）。
+        CallPolicyStore.shared.onBlacklistChanged = { [weak self] in
+            Task { [weak self] in await self?.syncBlocklistToAndroid() }
+        }
         WatchCallCoordinator.shared.configure(model: self)
         WatchCallCoordinator.shared.start()
         IPhoneCloudCallSession.shared.onAudioStateChange = { [weak self] state in
@@ -426,6 +430,8 @@ final class AppModel: ObservableObject {
         requestMicrophoneOnForegroundIfNeeded()
         vowlan.restartBrowsing()
         Task { await vowlan.probeNow() }
+        // 回到前台时同步黑名单到 Android（兜底拦截保持最新）。
+        Task { await syncBlocklistToAndroid() }
         eventStreamSupported = nil
         consecutivePollFailures = 0
         isReconnecting = false
@@ -2148,6 +2154,18 @@ extension AppModel: CallKitActionHandling {
     /// 策略拦截来电后的可选短信通知（走当前值守机发送）。
     func callKitSendBlockNotificationSMS(to number: String, text: String) async {
         _ = await sendSMS(to: number, content: text)
+    }
+
+    /// 同步黑名单到 Android 本地（VoWLAN 直连；iPhone 离线时的兜底拦截）。
+    /// 失败时静默跳过，下次连接或黑名单变化时再试。
+    func syncBlocklistToAndroid() async {
+        guard let api = verifiedVoWLANAPI() else { return }
+        let numbers = CallPolicyStore.shared.policy.blacklist
+        do {
+            try await api.syncBlocklist(numbers: numbers)
+        } catch {
+            // 同步失败不打扰用户；黑名单变化或重连时会重试。
+        }
     }
 
     /// 未接来电自动回复：agent 标记为 missed 的呼入，且未被策略拦截过。

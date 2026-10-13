@@ -213,6 +213,16 @@ struct AirSIMAPI: Sendable {
     }
     func clearModuleDebug() async throws { try await post("api/debug/clear", EmptyBody()) }
 
+    /// 同步黑名单到 Android 本地（iPhone 离线时的兜底拦截）。
+    func syncBlocklist(numbers: [String]) async throws {
+        struct BlocklistBody: Encodable {
+            let numbers: [String]
+            let updated_at: Int
+        }
+        try await post("api/policy/blocklist",
+                       BlocklistBody(numbers: numbers, updated_at: Int(Date().timeIntervalSince1970)))
+    }
+
     // MARK: HTTP 公共实现
 
     private func endpoint(_ path: String) -> URL { baseURL.appendingPathComponent(path) }

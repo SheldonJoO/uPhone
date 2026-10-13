@@ -1268,9 +1268,18 @@ final class CallPolicyStore: ObservableObject {
     static let shared = CallPolicyStore()
 
     @Published var policy: CallPolicy {
-        didSet { savePolicy() }
+        didSet {
+            savePolicy()
+            // 黑名单变化时通知（AppModel 会同步到 Android 本地）。
+            if policy.blacklist != oldValue.blacklist {
+                onBlacklistChanged?()
+            }
+        }
     }
     @Published private(set) var blockedLog: [BlockedCallEvent] = []
+
+    /// 黑名单变化时的回调（由 AppModel 设置，用于同步到 Android）。
+    var onBlacklistChanged: (() -> Void)?
 
     private static let policyKey = "uphone.callPolicy"
     private static let logKey = "uphone.blockedCallLog"
