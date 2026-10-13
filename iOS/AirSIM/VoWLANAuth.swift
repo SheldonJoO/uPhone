@@ -113,12 +113,3 @@ enum VoWLANCredentialStore {
         ]
     }
 }
-
-private extension Data {
-    var base64URL: String {
-        base64EncodedString()
-            .replacingOccurrences(of: "+", with: "-")
-            .replacingOccurrences(of: "/", with: "_")
-            .replacingOccurrences(of: "=", with: "")
-    }
-}
