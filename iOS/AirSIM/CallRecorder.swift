@@ -51,6 +51,14 @@ final class CallRecorder: @unchecked Sendable {
         defer { lock.unlock() }
         guard !stopped, handle != nil else { return }
         if uplink { pendingUp.append(pcm) } else { pendingDown.append(pcm) }
+        // 防声道时间错位：单侧堆积超过 1 秒时丢弃最旧的多余数据
+        //（如下行长时间静音），保持双声道时间对齐。
+        let maxPending = Int(Self.sampleRate) * 2 // 1 秒 mono 16-bit
+        if pendingUp.count > pendingDown.count + maxPending {
+            pendingUp.removeFirst(pendingUp.count - pendingDown.count - maxPending)
+        } else if pendingDown.count > pendingUp.count + maxPending {
+            pendingDown.removeFirst(pendingDown.count - pendingUp.count - maxPending)
+        }
         interleaveLocked()
     }
 
@@ -75,8 +83,10 @@ final class CallRecorder: @unchecked Sendable {
             try handle.write(contentsOf: data)
             dataBytes &+= UInt32(data.count)
         } catch {
-            // 磁盘写入失败：停止录音，保留已写部分
+            // 磁盘写入失败：停止录音，关闭句柄，保留已写部分
             stopped = true
+            try? handle.close()
+            self.handle = nil
         }
     }
 
