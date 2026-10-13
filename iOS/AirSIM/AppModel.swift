@@ -118,7 +118,12 @@ final class AppModel: ObservableObject {
     @Published var isBusy = false
     @Published var isMuted = false
     @Published var isRecording = false
+    @Published var showRecordingComplianceAlert = false
+    @Published var showRecordingShare = false
+    @Published var recordingShareURL: URL?
     @Published var errorMessage: String?
+
+    private static let recordingComplianceKey = "uPhone.recordingComplianceAccepted"
     @Published private(set) var modemStatus: ModemStatus?
     @Published private(set) var agentVersion: String?
     @Published private(set) var connectionSummary: ModuleConnectionSummary = .offline
@@ -1162,18 +1167,43 @@ final class AppModel: ObservableObject {
         errorMessage = nil
     }
 
+    /// 通话录音：iOS 端本地录制双向混音（左声道=本机，右声道=远端），WAV 存本机，可分享。
+    /// 首次录音前弹合规提示；通话结束时若正在录音会自动收尾并弹出分享。
     func toggleRecording() async {
-        let target = !isRecording
-        do {
-            guard let samsungAPI = verifiedVoWLANAPI() else {
-                throw CallKitBridgeError.noReachableTransport
+        if CallRecordingCenter.shared.isRecording {
+            let url = CallRecordingCenter.shared.stop()
+            isRecording = false
+            if let url {
+                recordingShareURL = url
+                showRecordingShare = true
             }
-            let response = try await samsungAPI.setCallRecording(target)
-            isRecording = response.recording
+            return
+        }
+        // 云端 / 本地（VoWLAN）两种音频路径任一在通话中即可录音
+        guard IPhoneCloudCallSession.shared.hasActiveCall || audio.active else {
+            errorMessage = "没有进行中的通话"
+            return
+        }
+        if !UserDefaults.standard.bool(forKey: Self.recordingComplianceKey) {
+            showRecordingComplianceAlert = true
+            return
+        }
+        startLocalRecording()
+    }
+
+    /// 合规提示中点“开始录音”。
+    func confirmRecordingAndStart() {
+        UserDefaults.standard.set(true, forKey: Self.recordingComplianceKey)
+        showRecordingComplianceAlert = false
+        startLocalRecording()
+    }
+
+    private func startLocalRecording() {
+        if CallRecordingCenter.shared.start() {
+            isRecording = true
             errorMessage = nil
-        } catch {
-            debugDialLog("操作失败：\(error.localizedDescription)")
-            errorMessage = error.localizedDescription
+        } else {
+            errorMessage = "录音启动失败"
         }
     }
 

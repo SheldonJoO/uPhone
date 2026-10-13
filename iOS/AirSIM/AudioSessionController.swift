@@ -208,7 +208,10 @@ final class AudioSessionController: ObservableObject {
             input.installTap(onBus: 0, bufferSize: 960, format: inputFormat) {
                 buffer, _ in
                 let pcm = encoder.encode(buffer)
-                if !pcm.isEmpty { transport.sendPCM(pcm) }
+                if !pcm.isEmpty {
+                    CallRecordingCenter.shared.writeUplink(pcm)
+                    transport.sendPCM(pcm)
+                }
             }
 
             engine.prepare()
@@ -386,6 +389,8 @@ final class AudioSessionController: ObservableObject {
     }
 
     func deactivate() {
+        // 通话音频 teardown：若正在录音则收尾并通知 UI（分享/保存）。
+        CallRecordingCenter.shared.finishIfRecording()
         let callKitManagedSession = sessionActivationManagedByCallKit
         sessionActivationManagedByCallKit = false
         muted = false
@@ -517,6 +522,7 @@ final class AudioSessionController: ObservableObject {
 
     private func schedulePlayback(_ pcm: Data) {
         guard active, let player, !pcm.isEmpty else { return }
+        CallRecordingCenter.shared.writeDownlink(pcm)
         let frames = pcm.count / MemoryLayout<Int16>.size
         guard frames > 0, playbackQueue.reserve(frames: frames) else { return }
         guard let format = AVAudioFormat(

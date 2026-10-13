@@ -14,6 +14,7 @@ extension Notification.Name {
     static let airsimRemoteSMSReceived = Notification.Name("AirSIMRemoteSMSReceived")
     static let airsimOpenSMSConversation = Notification.Name("AirSIMOpenSMSConversation")
     static let airsimOpenIncomingCall = Notification.Name("AirSIMOpenIncomingCall")
+    static let uPhoneCallRecordingFinished = Notification.Name("uPhoneCallRecordingFinished")
 }
 
 /// 锁屏来电通知使用的稳定标识；动作不要求设备解锁，也不会强制打开 App 界面。

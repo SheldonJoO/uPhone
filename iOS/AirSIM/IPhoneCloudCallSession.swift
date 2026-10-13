@@ -1428,7 +1428,10 @@ private final class IPhoneCloudCallMediaBridge: @unchecked Sendable {
         input.installTap(onBus: 0, bufferSize: 960, format: inputFormat) { [weak self] buffer, _ in
             guard let self else { return }
             let pcm = encoder.encode(buffer)
-            if !pcm.isEmpty { enqueueUplink(pcm, generation: generation) }
+            if !pcm.isEmpty {
+                CallRecordingCenter.shared.writeUplink(pcm)
+                enqueueUplink(pcm, generation: generation)
+            }
         }
         do {
             engine.prepare()
@@ -1481,6 +1484,9 @@ private final class IPhoneCloudCallMediaBridge: @unchecked Sendable {
             uplinkBuffer.removeAll(keepingCapacity: false)
             controlOperations.removeAll(keepingCapacity: false)
             stopAudioLocked()
+            // 会话彻底结束：若正在录音则收尾并通知 UI（分享/保存）。
+            // 注意 stopAudioLocked 也会在重连时调用，那里不收尾，保证一次通话只产生一个录音文件。
+            CallRecordingCenter.shared.finishIfRecording()
         }
     }
 
@@ -1582,6 +1588,7 @@ private final class IPhoneCloudCallMediaBridge: @unchecked Sendable {
     }
 
     private func schedulePacket(_ pcm: Data, player: AVAudioPlayerNode) {
+        CallRecordingCenter.shared.writeDownlink(pcm)
         let frames = pcm.count / 2
         guard
               let format = AVAudioFormat(

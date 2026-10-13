@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 enum SystemCommunicationDestination: Equatable {
     case call(String)
@@ -125,6 +126,24 @@ struct RootView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: .airsimOpenIncomingCall)) { _ in
             model.presentCurrentCallInApp()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .uPhoneCallRecordingFinished)) { notification in
+            model.isRecording = false
+            if let url = notification.userInfo?["url"] as? URL {
+                model.recordingShareURL = url
+                model.showRecordingShare = true
+            }
+        }
+        .alert(L10n.t("通话录音"), isPresented: $model.showRecordingComplianceAlert) {
+            Button(L10n.t("开始录音")) { model.confirmRecordingAndStart() }
+            Button(L10n.t("取消"), role: .cancel) {}
+        } message: {
+            Text(L10n.t("录音将保存在本机（左声道是你，右声道是对方），可分享。请遵守当地法律法规，必要时告知对方正在录音。"))
+        }
+        .sheet(isPresented: $model.showRecordingShare) {
+            if let url = model.recordingShareURL {
+                RecordingShareSheet(url: url)
+            }
         }
         .alert(L10n.t("错误"), isPresented: errorBinding) {
             Button("OK") { model.errorMessage = nil }
@@ -381,4 +400,15 @@ extension View {
     func phoneReportsTabBarCompactState() -> some View {
         modifier(PhoneTabBarCompactScrollReporter())
     }
+}
+
+/// 录音完成后的系统分享面板（保存到文件 / 微信 / 隔空投送等）。
+struct RecordingShareSheet: UIViewControllerRepresentable {
+    let url: URL
+
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        UIActivityViewController(activityItems: [url], applicationActivities: nil)
+    }
+
+    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
 }
