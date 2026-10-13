@@ -56,6 +56,10 @@ public final class IncomingSMSReceiver extends BroadcastReceiver {
                 event.put("subscription_id", subscriptionId);
                 event.put("slot_index", SimCardManager.slotIndexFor(application, subscriptionId));
             }
+            String body = content.toString();
+            String code = SmsCodeExtractor.extract(body);
+            if (!code.isEmpty()) event.put("code", code);
+            event.put("category", SmsCodeExtractor.classify(sender, body));
             if (RuntimeMode.isStandalone(application)) {
                 StandaloneAgentGateway.get(application).sendSMSEvent(event.toString());
             } else {
