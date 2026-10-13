@@ -1334,6 +1334,24 @@ final class CallPolicyStore: ObservableObject {
         UserDefaults.standard.removeObject(forKey: Self.logKey)
     }
 
+    /// 加入黑名单；号码为空或已在名单中时返回 false。
+    @discardableResult
+    func addToBlacklist(_ raw: String) -> Bool {
+        let normalized = Self.normalizedNumber(raw)
+        guard !normalized.isEmpty, !policy.blacklist.contains(normalized) else { return false }
+        policy.blacklist.append(normalized)
+        return true
+    }
+
+    /// 加入白名单；号码为空或已在名单中时返回 false。
+    @discardableResult
+    func addToWhitelist(_ raw: String) -> Bool {
+        let normalized = Self.normalizedNumber(raw)
+        guard !normalized.isEmpty, !policy.whitelist.contains(normalized) else { return false }
+        policy.whitelist.append(normalized)
+        return true
+    }
+
     func deviceName(for deviceID: String?) -> String? {
         guard let deviceID, !deviceID.isEmpty else { return nil }
         return DeviceRegistry.allDevices().first { $0.deviceID == deviceID }?.displayName

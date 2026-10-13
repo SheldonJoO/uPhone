@@ -572,6 +572,7 @@ struct RecentsView: View {
     let onMessage: (String) -> Void
     @State private var selectedCall: CallRecord?
     @State private var suppressNextCallTap = false
+    @State private var toastText: String?
 
     var body: some View {
         ZStack {
@@ -634,6 +635,16 @@ struct RecentsView: View {
                                         Label(L10n.t("拨号"), systemImage: "phone.fill")
                                     }
                                     .tint(.green)
+                                    Button {
+                                        if CallPolicyStore.shared.addToBlacklist(number) {
+                                            toastText = L10n.t("已加入黑名单")
+                                        } else {
+                                            toastText = L10n.t("已在黑名单中")
+                                        }
+                                    } label: {
+                                        Label(L10n.t("拉黑"), systemImage: "nosign")
+                                    }
+                                    .tint(.red)
                                 }
                             }
                         }
@@ -669,8 +680,29 @@ struct RecentsView: View {
                     .padding(.horizontal, 28)
                     .transition(.scale(scale: 0.88).combined(with: .opacity))
             }
+
+            if let toastText {
+                VStack {
+                    Text(toastText)
+                        .font(.subheadline.weight(.medium))
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 10)
+                        .background(.ultraThinMaterial, in: Capsule())
+                        .shadow(radius: 4)
+                    Spacer()
+                }
+                .padding(.top, 8)
+                .transition(.move(edge: .top).combined(with: .opacity))
+                .onAppear {
+                    Task {
+                        try? await Task.sleep(for: .seconds(1.8))
+                        self.toastText = nil
+                    }
+                }
+            }
         }
         .animation(.easeInOut(duration: 0.2), value: selectedCall?.id)
+        .animation(.easeInOut(duration: 0.25), value: toastText)
     }
 
     private func callDetailsCard(call: CallRecord, number: String) -> some View {
@@ -755,6 +787,9 @@ struct RecentsView: View {
                         Image(systemName: call.direction == "incoming" ? "arrow.down.left" : "arrow.up.right")
                             .font(.caption2.weight(.semibold))
                         Text(call.missed ? L10n.t("未接") : "uPhone 音频")
+                        if let place = PhoneAttribution.shared.lookup(call.number)?.shortPlace {
+                            Text("· \(place)")
+                        }
                     }
                     .font(.subheadline)
                     .foregroundStyle(call.missed ? .red : .secondary)
