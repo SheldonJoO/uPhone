@@ -288,6 +288,8 @@ struct SMSMessage: Codable, Equatable, Sendable, Identifiable {
     /// 收到短信的 SIM（双卡场景）；发送时为 nil。
     var subscriptionID: Int? = nil
     var slotIndex: Int? = nil
+    /// 服务端短信分类：pickup（取件码）/ code（验证码）/ other；旧数据为 nil。
+    var category: String? = nil
 
     var isOutgoing: Bool { direction == .outgoing }
 
@@ -320,6 +322,33 @@ struct SMSMessage: Codable, Equatable, Sendable, Identifiable {
         return nil
     }
 
+    /// 是否为快递取件码短信：优先用服务端分类，旧数据用本地规则兜底。
+    var isPickup: Bool {
+        guard !isOutgoing else { return false }
+        if category == "pickup" { return true }
+        if category != nil { return false }
+        let senderHit = ["丰巢", "菜鸟", "京东", "顺丰", "邮政"].contains { sender.contains($0) }
+        return senderHit || content.contains("取件码") || content.contains("提货码")
+    }
+
+    /// 取件码：先按"取件码/提货码"句式提取，否则用服务端 code 或验证码兜底。
+    var pickupCode: String? {
+        let patterns = [
+            "取件码[^0-9A-Za-z]{0,8}([0-9A-Za-z][0-9A-Za-z\\-]{3,15})",
+            "提货码[^0-9A-Za-z]{0,8}([0-9A-Za-z][0-9A-Za-z\\-]{3,15})",
+        ]
+        for pattern in patterns {
+            if let range = content.range(of: pattern, options: .regularExpression) {
+                let matched = String(content[range])
+                if let token = matched.range(of: "[0-9A-Za-z\\-]+$", options: .regularExpression) {
+                    return String(matched[token])
+                }
+            }
+        }
+        if let code, !code.isEmpty { return code }
+        return verificationCode
+    }
+
     /// 新版 Agent 用 delivery_id 对齐 APNs 与本地同步；旧版仍回退到内容指纹。
     var id: String {
         if let deliveryID, !deliveryID.isEmpty { return "delivery:\(deliveryID)" }
@@ -329,6 +358,9 @@ struct SMSMessage: Codable, Equatable, Sendable, Identifiable {
     enum CodingKeys: String, CodingKey {
         case sender, content, code, timestamp, direction
         case deliveryID = "delivery_id"
+        case category
+        case subscriptionID = "subscription_id"
+        case slotIndex = "slot_index"
     }
 }
 

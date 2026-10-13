@@ -779,6 +779,10 @@ struct MessagesView: View {
     @State private var showingComposer = false
     @State private var showingClearConfirmation = false
     @State private var messageTab = 0
+    @State private var pickedUpIDs: Set<String> = Set(
+        UserDefaults.standard.stringArray(forKey: "uphone.pickedUpPickupIDs") ?? []
+    )
+    private static let pickedUpKey = "uphone.pickedUpPickupIDs"
 
     private var conversations: [(sender: String, messages: [SMSMessage])] {
         Dictionary(grouping: model.messages, by: \.sender)
@@ -791,6 +795,19 @@ struct MessagesView: View {
         model.messages
             .filter { !$0.isOutgoing && $0.verificationCode != nil }
             .sorted { $0.timestamp > $1.timestamp }
+    }
+
+    /// 未取件的取件码短信（最新一条），用于顶部置顶卡片。
+    private var unpickedPickup: SMSMessage? {
+        model.messages
+            .filter { $0.isPickup && !pickedUpIDs.contains($0.id) }
+            .sorted { $0.timestamp > $1.timestamp }
+            .first
+    }
+
+    private func markPickedUp(_ message: SMSMessage) {
+        pickedUpIDs.insert(message.id)
+        UserDefaults.standard.set(Array(pickedUpIDs), forKey: Self.pickedUpKey)
     }
 
     var body: some View {
@@ -840,13 +857,20 @@ struct MessagesView: View {
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
             .safeAreaInset(edge: .top) {
-                Picker("", selection: $messageTab) {
-                    Text(L10n.t("短信")).tag(0)
-                    Text(L10n.t("验证码")).tag(1)
+                VStack(spacing: 0) {
+                    Picker("", selection: $messageTab) {
+                        Text(L10n.t("短信")).tag(0)
+                        Text(L10n.t("验证码")).tag(1)
+                    }
+                    .pickerStyle(.segmented)
+                    .padding(.horizontal, PhoneListMetrics.horizontalInset)
+                    .padding(.vertical, 6)
+                    if messageTab == 0, let pickup = unpickedPickup {
+                        PickupCodeCard(message: pickup) {
+                            markPickedUp(pickup)
+                        }
+                    }
                 }
-                .pickerStyle(.segmented)
-                .padding(.horizontal, PhoneListMetrics.horizontalInset)
-                .padding(.vertical, 6)
             }
             .environment(\.defaultMinListRowHeight, PhoneListMetrics.rowHeight)
             .phoneReportsTabBarCompactState()
@@ -1023,6 +1047,58 @@ private struct CodeCenterRow: View {
             .opacity(isExpired ? 0.55 : 1)
         }
         .buttonStyle(.plain)
+    }
+}
+
+/// 取件码置顶卡片：最新一条未取件的取件码短信；点"已取"后卡片消失，记录保留在会话里。
+private struct PickupCodeCard: View {
+    @EnvironmentObject private var model: AppModel
+    let message: SMSMessage
+    var onPickedUp: () -> Void
+    @State private var copied = false
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: "shippingbox.fill")
+                .font(.title2)
+                .foregroundStyle(.orange)
+            VStack(alignment: .leading, spacing: 3) {
+                HStack(spacing: 8) {
+                    Text(message.pickupCode ?? "")
+                        .font(.title2.weight(.bold).monospacedDigit())
+                    Button {
+                        if let code = message.pickupCode {
+                            UIPasteboard.general.string = code
+                            copied = true
+                            Task {
+                                try? await Task.sleep(for: .seconds(1.5))
+                                copied = false
+                            }
+                        }
+                    } label: {
+                        Image(systemName: copied ? "checkmark.circle.fill" : "doc.on.doc")
+                            .foregroundStyle(copied ? .green : .secondary)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(L10n.t("复制取件码"))
+                }
+                HStack(spacing: 6) {
+                    Text(model.contacts.displayName(for: message.sender))
+                        .lineLimit(1)
+                    Text(message.timestamp, style: .relative)
+                        .foregroundStyle(.secondary)
+                }
+                .font(.caption)
+            }
+            Spacer()
+            Button(L10n.t("已取")) { onPickedUp() }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
+        }
+        .padding(12)
+        .background(Color.orange.opacity(0.12), in: RoundedRectangle(cornerRadius: 14))
+        .padding(.horizontal, PhoneListMetrics.horizontalInset)
+        .padding(.bottom, 6)
     }
 }
 
