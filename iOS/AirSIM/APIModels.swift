@@ -290,6 +290,8 @@ struct SMSMessage: Codable, Equatable, Sendable, Identifiable {
     var slotIndex: Int? = nil
     /// 服务端短信分类：pickup（取件码）/ code（验证码）/ other；旧数据为 nil。
     var category: String? = nil
+    /// relay 解析的接收号码后四位（多卡场景标注用）；无则为 nil。
+    var toTail: String? = nil
 
     var isOutgoing: Bool { direction == .outgoing }
 
@@ -361,6 +363,7 @@ struct SMSMessage: Codable, Equatable, Sendable, Identifiable {
         case category
         case subscriptionID = "subscription_id"
         case slotIndex = "slot_index"
+        case toTail = "to_tail"
     }
 }
 

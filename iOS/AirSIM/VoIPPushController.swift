@@ -652,6 +652,8 @@ struct IncomingRemoteSMS: Equatable, Sendable {
     let contentTruncated: Bool
     let subscriptionID: Int?
     let slotIndex: Int?
+    /// relay 根据 sim_cards 解析的接收号码后四位（可能无）。
+    let toTail: String?
 
     init(userInfo: [AnyHashable: Any]) throws {
         guard userInfo["event"] as? String == "incoming_sms" else {
@@ -674,6 +676,7 @@ struct IncomingRemoteSMS: Equatable, Sendable {
         contentTruncated = userInfo["content_truncated"] as? Bool ?? false
         subscriptionID = userInfo["subscription_id"] as? Int
         slotIndex = userInfo["slot_index"] as? Int
+        toTail = Self.nonEmpty(userInfo["to_tail"] as? String)
     }
 
     private static func parseTimestamp(_ value: String) -> Date? {
@@ -695,7 +698,8 @@ struct IncomingRemoteSMS: Equatable, Sendable {
             deliveryID: deliveryID,
             direction: .incoming,
             subscriptionID: subscriptionID,
-            slotIndex: slotIndex
+            slotIndex: slotIndex,
+            toTail: toTail
         )
     }
 

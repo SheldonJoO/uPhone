@@ -1022,7 +1022,13 @@ private struct CodeCenterRow: View {
                         Text(displayName)
                             .font(.subheadline)
                             .lineLimit(1)
-                        if let sim = message.simLabel {
+                        if let tail = message.toTail {
+                            Text("尾号\(tail)")
+                                .font(.caption2.weight(.semibold))
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
+                                .background(Color.blue.opacity(0.12), in: Capsule())
+                        } else if let sim = message.simLabel {
                             Text(sim)
                                 .font(.caption2.weight(.semibold))
                                 .padding(.horizontal, 6)

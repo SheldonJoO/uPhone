@@ -1233,8 +1233,28 @@ async function receiveCall(request, env) {
   }
 }
 
-async function receiveSMS(request, env) {
-  const message = await readJSON(request);
+/// 根据心跳里的 sim_cards 解析短信接收号码后四位（to_tail），用于验证码集合页标注。
+/// 取不到时返回空字符串，调用方不下发该字段。
+async function resolveSmsToTail(env, deviceID, message) {
+  try {
+    const heartbeats = await readAgentHeartbeats(env, deviceID);
+    const latest = (heartbeats || [])
+      .filter((h) => h && Number.isFinite(h.received_at_ms))
+      .sort((a, b) => b.received_at_ms - a.received_at_ms)[0];
+    const slots = latest && Array.isArray(latest.sim_cards) ? latest.sim_cards : [];
+    if (!slots.length) return "";
+    const subID = Number.isInteger(message.subscription_id) ? message.subscription_id : null;
+    const slotIdx = Number.isInteger(message.slot_index) ? message.slot_index : null;
+    let match = subID !== null ? slots.find((s) => s && s.subscription_id === subID) : null;
+    if (!match && slotIdx !== null) match = slots.find((s) => s && s.slot_index === slotIdx);
+    const digits = match && typeof match.number === "string" ? match.number.replace(/\D/g, "") : "";
+    return digits.length >= 4 ? digits.slice(-4) : "";
+  } catch {
+    return "";
+  }
+}
+
+async function receiveSMS(request, env) {  const message = await readJSON(request);
   const authenticated = await authenticate(message, env);
   if (authenticated.response) return authenticated.response;
   if (!authenticated.device.alert_token) {
@@ -1256,6 +1276,7 @@ async function receiveSMS(request, env) {
   await writeRelayState(env, dedupeKey, "1", 7 * 24 * 60 * 60);
 
   const [content, truncated] = truncateCodePoints(message.content, 700);
+  const toTail = await resolveSmsToTail(env, authenticated.device.device_id, message);
   const payload = {
     aps: {
       alert: { title: message.sender, body: content },
@@ -1272,6 +1293,7 @@ async function receiveSMS(request, env) {
     content_truncated: truncated,
     code: stringValue(message.code),
     category: stringValue(message.category),
+    ...(toTail ? { to_tail: toTail } : {}),
     timestamp: message.timestamp,
     subscription_id: Number.isInteger(message.subscription_id) ? message.subscription_id : null,
     slot_index: Number.isInteger(message.slot_index) ? message.slot_index : null,
