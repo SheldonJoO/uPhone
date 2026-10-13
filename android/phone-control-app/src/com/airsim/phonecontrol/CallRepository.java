@@ -155,7 +155,15 @@ public final class CallRepository {
             return error.isEmpty() ? ActionResult.success() : ActionResult.failure(error);
         }
         Call call = CALLS.get(command.callId);
-        if (call == null) return ActionResult.failure("active call id mismatch");
+        if (call == null) {
+            // 挂断/拒接是幂等的：通话已不在 Telecom 栈里（对方已挂断或本地已释放）
+            // 说明期望的结束状态已达成，直接成功，避免 iPhone 侧弹“active call id mismatch”。
+            if ("end".equals(command.action) || "reject".equals(command.action)) {
+                BridgeLog.info("call_action_idempotent_noop action=" + command.action);
+                return ActionResult.success();
+            }
+            return ActionResult.failure("active call id mismatch");
+        }
         CountDownLatch invoked = new CountDownLatch(1);
 		AtomicReference<Throwable> invocationError = new AtomicReference<>();
         new Handler(Looper.getMainLooper()).post(() -> {

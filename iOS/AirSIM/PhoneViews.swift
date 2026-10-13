@@ -1760,7 +1760,7 @@ struct ActiveCallView: View {
 
     private var connectedSurface: some View {
         VStack(spacing: 0) {
-            callHeader(title: "uPhone 通话", showsRecording: true)
+            callHeader(title: "uPhone 通话", showsRecording: false) // 录音待实现：Android 端 api/calls/audio/record 尚无实现，先隐藏按钮避免 not_found 报错
 
             Spacer(minLength: isCompact ? 24 : 42)
 
