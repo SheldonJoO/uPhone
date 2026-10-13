@@ -491,7 +491,7 @@ struct CallPolicyView: View {
                     TextField("输入号码后添加", text: $newBlockNumber)
                         .keyboardType(.phonePad)
                         .monospacedDigit()
-                    Button("添加") { addNumber($newBlockNumber, to: \.blacklist) }
+                    Button("添加") { addNumber($newBlockNumber, to: \.blacklist, mode: .blacklist) }
                         .disabled(CallPolicyStore.normalizedNumber(newBlockNumber).isEmpty)
                 }
             } header: {
@@ -511,7 +511,7 @@ struct CallPolicyView: View {
                     TextField("输入号码后添加", text: $newWhiteNumber)
                         .keyboardType(.phonePad)
                         .monospacedDigit()
-                    Button("添加") { addNumber($newWhiteNumber, to: \.whitelist) }
+                    Button("添加") { addNumber($newWhiteNumber, to: \.whitelist, mode: .whitelist) }
                         .disabled(CallPolicyStore.normalizedNumber(newWhiteNumber).isEmpty)
                 }
             } header: {
@@ -632,11 +632,15 @@ struct CallPolicyView: View {
         }
     }
 
-    private func addNumber(_ input: Binding<String>, to keyPath: WritableKeyPath<CallPolicy, [String]>) {
+    private func addNumber(_ input: Binding<String>, to keyPath: WritableKeyPath<CallPolicy, [String]>, mode: CallPolicy.Mode) {
         let normalized = CallPolicyStore.normalizedNumber(input.wrappedValue)
         guard !normalized.isEmpty else { return }
         if !store.policy[keyPath: keyPath].contains(normalized) {
             store.policy[keyPath: keyPath].append(normalized)
+        }
+        // 加号码即启用对应模式：mode 默认为 .off，不切的话名单加了也拦不住。
+        if store.policy.mode == .off {
+            store.policy.mode = mode
         }
         input.wrappedValue = ""
     }
