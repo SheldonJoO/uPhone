@@ -1284,6 +1284,11 @@ private struct CodeCenterRow: View {
                         Text(displayName)
                             .font(.subheadline)
                             .lineLimit(1)
+                        if let place = PhoneAttribution.shared.lookup(message.sender)?.shortPlace {
+                            Text(place)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
                         if let tail = message.toTail {
                             Text("尾号\(tail)")
                                 .font(.caption2.weight(.semibold))
