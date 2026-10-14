@@ -10,8 +10,6 @@ import android.telephony.SubscriptionManager;
 
 import org.json.JSONObject;
 
-import java.security.MessageDigest;
-import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -32,7 +30,6 @@ public final class IncomingSMSReceiver extends BroadcastReceiver {
             SmsMessage[] parts = Telephony.Sms.Intents.getMessagesFromIntent(intent);
             if (parts == null || parts.length == 0) return;
             StringBuilder content = new StringBuilder();
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
             String sender = parts[0].getOriginatingAddress();
             long timestamp = parts[0].getTimestampMillis();
             int subscriptionId = intent.getIntExtra("subscription",
@@ -40,18 +37,15 @@ public final class IncomingSMSReceiver extends BroadcastReceiver {
             for (SmsMessage part : parts) {
                 if (part == null) continue;
                 content.append(part.getMessageBody() == null ? "" : part.getMessageBody());
-                byte[] pdu = part.getPdu();
-                if (pdu != null) digest.update(pdu);
             }
             if (content.length() == 0) return;
-            digest.update((sender == null ? "" : sender).getBytes(StandardCharsets.UTF_8));
-            digest.update(Long.toString(timestamp).getBytes(StandardCharsets.US_ASCII));
-            digest.update(content.toString().getBytes(StandardCharsets.UTF_8));
-            StringBuilder id = new StringBuilder("android-sms-");
-            for (byte value : digest.digest()) id.append(String.format("%02x", value & 0xff));
+            long eventTimestamp = timestamp > 0 ? timestamp : System.currentTimeMillis();
+            // 与 SMSInboxScanner 共用同一套 delivery key：广播漏收时由扫描器补回的同一条短信，
+            // delivery_id 一致，StandaloneSMSStore.add 的去重会直接挡掉，不会重复推给 iPhone。
+            String id = SMSDeliveryIdentity.id(sender, content.toString(), eventTimestamp);
             JSONObject event = new JSONObject(WireJson.smsEvent(UUID.randomUUID().toString(),
-                    id.toString(), sender == null ? "" : sender, content.toString(),
-                    Instant.ofEpochMilli(timestamp > 0 ? timestamp : System.currentTimeMillis()).toString()));
+                    id, sender == null ? "" : sender, content.toString(),
+                    Instant.ofEpochMilli(eventTimestamp).toString()));
             if (subscriptionId != SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
                 event.put("subscription_id", subscriptionId);
                 event.put("slot_index", SimCardManager.slotIndexFor(application, subscriptionId));

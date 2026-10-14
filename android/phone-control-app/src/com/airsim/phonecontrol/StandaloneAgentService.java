@@ -101,6 +101,9 @@ public final class StandaloneAgentService extends Service {
                 long now = System.currentTimeMillis();
                 if (now - lastHeartbeat >= 30_000) sendHeartbeat(registration);
                 flushEvents(registration);
+                // 短信兜底：广播漏收（后台限制 / 进程被杀）时每 30s 扫一次收件箱补回，
+                // 与广播共用 delivery key，不会重复推送。
+                SMSInboxScanner.scanIfDue(this);
                 if (!commandChannelConnected) pollCommands(registration);
                 failures = 0;
                 update("内置 Agent 在线 · Relay 已连接");
