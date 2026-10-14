@@ -12,6 +12,7 @@ import android.telecom.TelecomManager;
 import android.telecom.VideoProfile;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
+import android.telephony.TelephonyManager;
 import android.content.Context;
 
 import java.util.List;
@@ -115,18 +116,21 @@ public final class CallRepository {
         }
         if (handles == null) return null;
         // Pass 0（双卡正确选路的关键）：PhoneAccount 本身不暴露 subscription id，
-        // 需经 TelecomManager.getSubscriptionIdForPhoneAccount 反查（API 30+）。
+        // 需经 TelephonyManager.getSubscriptionId(PhoneAccountHandle) 反查（API 30+）。
         // TCL / 多数 OEM ROM 既不把 ICC ID 嵌进 handle id，也不暴露号码，
         // 因此这一 pass 是让指定 SIM 真正生效的唯一可靠路径。
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            for (PhoneAccountHandle handle : handles) {
-                try {
-                    if (telecomManager.getSubscriptionIdForPhoneAccount(handle) == subId) {
-                        BridgeLog.info("dial_sim_matched subscription_id=" + subId
-                                + " match=subscription_id");
-                        return handle;
-                    }
-                } catch (SecurityException ignored) {}
+            TelephonyManager tel = context.getSystemService(TelephonyManager.class);
+            if (tel != null) {
+                for (PhoneAccountHandle handle : handles) {
+                    try {
+                        if (tel.getSubscriptionId(handle) == subId) {
+                            BridgeLog.info("dial_sim_matched subscription_id=" + subId
+                                    + " match=subscription_id");
+                            return handle;
+                        }
+                    } catch (SecurityException ignored) {}
+                }
             }
         }
         // First pass: match by ICC ID embedded in the handle ID.
