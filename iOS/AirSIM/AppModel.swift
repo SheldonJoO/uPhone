@@ -1428,6 +1428,17 @@ final class AppModel: ObservableObject {
         errorMessage = nil
     }
 
+    /// 删除单个短信会话（按发件人），本机持久化同步更新。
+    func deleteConversation(sender: String) {
+        let remaining = messages.filter { $0.sender != sender }
+        guard historyStore.saveMessages(remaining) else {
+            errorMessage = "无法删除短信，请稍后重试"
+            return
+        }
+        messages = remaining
+        errorMessage = nil
+    }
+
     func reloadMessagesFromLocalStore() {
         restoreLocalHistory()
     }

@@ -1331,6 +1331,13 @@ struct MessagesView: View {
                             MessageConversationRow(sender: conversation.sender, messages: conversation.messages)
                                 .contentShape(Rectangle())
                         }
+                        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                            Button(role: .destructive) {
+                                model.deleteConversation(sender: conversation.sender)
+                            } label: {
+                                Label(L10n.t("删除"), systemImage: "trash")
+                            }
+                        }
                         .listRowBackground(Color.clear)
                         .listRowInsets(.init(
                             top: 0,

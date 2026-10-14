@@ -389,17 +389,18 @@ struct SMSMessage: Codable, Equatable, Sendable, Identifiable {
         return "SIM \(slotIndex + 1)"
     }
 
-    /// 短信验证码：优先用服务端提取的 code 字段，否则从正文正则提取 4-8 位数字。
+    /// 短信验证码：正文必须含"验证码"明文或同义英文关键词，才视为验证码短信；
+    /// 满足时优先用服务端 code 字段，否则从关键词附近提取 4-8 位数字。
+    /// 避免"是个数字就上榜"（如 10001 账单短信里的 100011）。
     var verificationCode: String? {
+        guard !isOutgoing, Self.hasVerificationKeyword(content) else { return nil }
         if let code, code.range(of: "^[0-9]{4,8}$", options: .regularExpression) != nil {
             return code
         }
-        // 常见验证码句式：验证码 123456、code is 123456、【xxx】123456
+        // 关键词附近的 4-8 位数字：验证码 123456、your code is 123456
         let patterns = [
-            "验证码[^0-9]{0,6}([0-9]{4,8})",
-            "verification code[^0-9]{0,6}([0-9]{4,8})",
-            "code[^0-9]{0,6}([0-9]{4,8})",
-            "【[^】]{1,12}】([0-9]{4,8})",
+            "(?:验证码|校验码|动态密码|动态口令|确认码|安全码|验证字符|短信密码)[^0-9]{0,8}([0-9]{4,8})",
+            "(?:verification\\s*code|auth(?:entication)?\\s*code|security\\s*code|one[\\s\\-]*time(?:\\s*pass)?\\s*code|\\botp\\b|\\bcode\\b)[^0-9]{0,8}([0-9]{4,8})",
         ]
         for pattern in patterns {
             if let range = content.range(of: pattern, options: [.regularExpression, .caseInsensitive]) {
@@ -410,6 +411,21 @@ struct SMSMessage: Codable, Equatable, Sendable, Identifiable {
             }
         }
         return nil
+    }
+
+    /// 验证码关键词门槛：中文明文（验证码/校验码/动态密码…）或英文同义
+    ///（verification code / auth code / OTP / 独立单词 code）。
+    private static func hasVerificationKeyword(_ text: String) -> Bool {
+        let lower = text.lowercased()
+        let keywords = [
+            "验证码", "校验码", "动态密码", "动态口令", "确认码", "安全码",
+            "验证字符", "短信密码",
+            "verification code", "authentication code", "auth code", "security code",
+            "one time code", "one-time code", "otp",
+        ]
+        if keywords.contains(where: { lower.contains($0) }) { return true }
+        // 独立英文单词 code（如 "your code is 123456"）；不用 contains 防误伤 encode 等
+        return text.range(of: "\\bcode\\b", options: [.regularExpression, .caseInsensitive]) != nil
     }
 
     /// 是否为快递取件码短信：优先用服务端分类，旧数据用本地规则兜底。
