@@ -65,6 +65,35 @@ final class StandaloneAgentGateway {
                 .put("log_available_in_app", true).toString();
     }
 
+    /**
+     * 现场诊断快照：值守开关、双卡及反查结果、最近一次 SIM 推断、短信积压、配对与云端状态。
+     * 值守机在用户手里、不在我面前，远程就靠这一份还原现场，不必让人到机器上抄日志。
+     */
+    String diagnostics() throws Exception {
+        JSONObject value = new JSONObject();
+        value.put("duty_on", DutyStore.isDutyOn(context));
+        value.put("duty_slot", DutyStore.getDutySlot(context));
+        value.put("duty_subscription_id", DutyStore.getDutySubscriptionId(context));
+        value.put("sim_cards", SimCards.snapshotJson(context));
+        value.put("sim_cards_text", SimCards.describe(context));
+        value.put("last_sim_inference", AirSIMInCallService.lastSimInference);
+        value.put("configured", store.configured());
+        value.put("cloud_enabled", store.cloudEnabled());
+        JSONObject registration = store.registration();
+        value.put("local_mode", registration != null && registration.optBoolean("local_mode", false));
+        value.put("device_id", registration == null ? "" : registration.optString("device_id", ""));
+        value.put("relay_url", registration == null ? "" : registration.optString("relay_url", ""));
+        value.put("last_error", store.lastError());
+        value.put("last_heartbeat", store.lastHeartbeat() == 0 ? ""
+                : Instant.ofEpochMilli(store.lastHeartbeat()).toString());
+        JSONArray pending = smsStore.cloudPending();
+        value.put("sms_pending", pending == null ? 0 : pending.length());
+        synchronized (callsLock) {
+            value.put("active_call", activeCall == null ? JSONObject.NULL : activeCall);
+        }
+        return value.toString();
+    }
+
     String registerPairing(String registrationJSON) throws Exception {
         JSONObject registration = store.saveRegistration(registrationJSON);
         StandaloneAgentService.start(context);
@@ -103,6 +132,7 @@ final class StandaloneAgentGateway {
                 case "/api/android/status" -> ok(status());
                 case "/api/push/status" -> ok(pushStatus());
                 case "/api/debug" -> ok(debugSnapshot());
+                case "/api/diagnostics" -> ok(diagnostics());
                 case "/api/calls/status" -> ok(callSnapshot().toString());
                 case "/api/calls/events" -> waitForCallEvent(pathAndQuery);
                 case "/api/events" -> waitForAgentEvent(pathAndQuery);

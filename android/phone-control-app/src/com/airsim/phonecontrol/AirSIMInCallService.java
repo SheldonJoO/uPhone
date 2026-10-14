@@ -12,6 +12,7 @@ import android.telecom.PhoneAccountHandle;
 import android.telecom.TelecomManager;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
+import android.telephony.TelephonyManager;
 
 import java.util.List;
 import java.util.Map;
@@ -168,10 +169,23 @@ public final class AirSIMInCallService extends InCallService {
      * 去电优先用 onCallAdded 时暂存的拨号订阅；其余走 Telecom 账号句柄多策略匹配。
      * 权限缺失时全部吞掉异常，绝不抛。
      */
+    /** 最近一次 SIM 归属推断的现场记录，供 /api/diagnostics 回传，便于远程核对双卡判得对不对。 */
+    public static volatile String lastSimInference = "尚未发生通话";
+
     private int[] inferSim(Call call, String direction) {
         int[] cached = callSimCache.get(call);
-        if (cached != null) return cached;
-        return inferSimFromAccountHandle(call);
+        int[] result = cached != null ? cached : inferSimFromAccountHandle(call);
+        String handle = "";
+        try {
+            Call.Details details = call.getDetails();
+            if (details != null && details.getAccountHandle() != null) {
+                handle = String.valueOf(details.getAccountHandle().getId());
+            }
+        } catch (Exception ignored) {}
+        lastSimInference = (direction == null ? "call" : direction)
+                + " subId=" + result[0] + " slot=" + result[1] + " handle=" + handle;
+        BridgeLog.info("call_sim_inferred " + lastSimInference);
+        return result;
     }
 
     /** 来电（及无暂存订阅的去电）：从 Call 的账号句柄映射订阅。 */
@@ -189,6 +203,24 @@ public final class AirSIMInCallService extends InCallService {
                 return new int[]{-1, -1};
             }
             if (subscriptions == null) return new int[]{-1, -1};
+            // 策略0（双卡选路关键，API 30+）：由框架直接反查 handle 对应的 subscription id，
+            // 与活动订阅比对。TCL / 多数 OEM ROM 不把 ICC ID 嵌进 handle id、也不暴露号码，
+            // 这条是让来电归属到正确 SIM 的唯一可靠路径。
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                try {
+                    TelephonyManager tel = getSystemService(TelephonyManager.class);
+                    if (tel != null) {
+                        int sub = tel.getSubscriptionId(handle);
+                        if (sub != SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
+                            for (SubscriptionInfo info : subscriptions) {
+                                if (info.getSubscriptionId() == sub) {
+                                    return new int[]{info.getSubscriptionId(), info.getSimSlotIndex()};
+                                }
+                            }
+                        }
+                    }
+                } catch (Exception ignored) {}
+            }
             // 策略①：句柄 ID 对 ICC ID
             String handleId = handle.getId();
             if (handleId != null) {

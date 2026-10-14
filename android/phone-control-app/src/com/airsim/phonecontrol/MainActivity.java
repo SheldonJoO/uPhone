@@ -69,13 +69,19 @@ public final class MainActivity extends Activity {
     private static final int WARNING = Color.rgb(178, 106, 0);
     private static final int DANGER = Color.rgb(214, 69, 69);
 
-    private enum Page { STATUS, CALLS, DEBUG, SETTINGS }
+    // 一键值守：主路径只剩「值守」一页；通话 / 设置 / 诊断收进「更多」里的次级分段，
+    // 不再占用底部导航，避免值守机每次打开都要在四个页签里找开关。
+    private enum Page { DUTY, MORE }
+    private enum MoreSection { CALLS, SETTINGS, DEBUG }
     private enum Feature { VOWLAN, AGENT, PCM, PUSH, SHIZUKU }
 
     private FrameLayout contentHost;
+    private FrameLayout moreHost;
     private LinearLayout bottomBar;
     private final List<TextView> navigationItems = new ArrayList<>();
-    private Page currentPage = Page.STATUS;
+    private final List<TextView> moreSectionItems = new ArrayList<>();
+    private Page currentPage = Page.DUTY;
+    private MoreSection currentMore = MoreSection.CALLS;
 
     private EditText endpoint;
     private EditText token;
@@ -114,7 +120,7 @@ public final class MainActivity extends Activity {
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final Runnable debugRefresh = new Runnable() {
         @Override public void run() {
-            if (currentPage == Page.DEBUG && realtimeLogging) {
+            if (currentPage == Page.MORE && currentMore == MoreSection.DEBUG && realtimeLogging) {
                 refreshDebugLog();
                 handler.postDelayed(this, 2_000);
             }
@@ -125,10 +131,10 @@ public final class MainActivity extends Activity {
         super.onCreate(state);
         configureWindow();
         setContentView(buildShell());
-        showPage(Page.STATUS);
+        showPage(Page.DUTY);
         Uri data = getIntent().getData();
         if (Intent.ACTION_DIAL.equals(getIntent().getAction()) && data != null) {
-            showPage(Page.CALLS);
+            openMore(MoreSection.CALLS);
             if (number != null) number.setText(data.getSchemeSpecificPart());
         }
         refreshStatus();
@@ -196,10 +202,8 @@ public final class MainActivity extends Activity {
         bar.setPadding(dp(10), dp(6), dp(10), dp(8));
         bar.setBackground(neuDrawable("neu_bar_bg"));
         navigationItems.clear();
-        bar.addView(navigationItem("状态", android.R.drawable.presence_online, Page.STATUS), weighted());
-        bar.addView(navigationItem("通话", android.R.drawable.sym_action_call, Page.CALLS), weighted());
-        bar.addView(navigationItem("调试", android.R.drawable.ic_menu_info_details, Page.DEBUG), weighted());
-        bar.addView(navigationItem("设置", android.R.drawable.ic_menu_preferences, Page.SETTINGS), weighted());
+        bar.addView(navigationItem("值守", android.R.drawable.presence_online, Page.DUTY), weighted());
+        bar.addView(navigationItem("更多", android.R.drawable.ic_menu_preferences, Page.MORE), weighted());
         return bar;
     }
 
@@ -219,19 +223,41 @@ public final class MainActivity extends Activity {
         currentPage = page;
         handler.removeCallbacks(debugRefresh);
         bottomBar.setVisibility(View.VISIBLE);
+        moreSectionItems.clear();
         contentHost.removeAllViews();
-        View content;
-        switch (page) {
-        case CALLS: content = callsPage(); break;
-        case DEBUG: content = debugPage(); break;
-        case SETTINGS: content = settingsPage(); break;
-        case STATUS:
-        default: content = statusPage(); break;
-        }
+        View content = page == Page.MORE ? morePage() : dutyPage();
         contentHost.addView(content, new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         updateNavigation();
-        if (page == Page.DEBUG && realtimeLogging) handler.post(debugRefresh);
+        if (page == Page.MORE) showMoreSection(currentMore);
+    }
+
+    /** 「更多」页内的次级分段：通话 / 设置 / 诊断，共用同一个容器，不新增底部页签。 */
+    private void showMoreSection(MoreSection section) {
+        currentMore = section;
+        if (moreHost == null) return;
+        handler.removeCallbacks(debugRefresh);
+        moreHost.removeAllViews();
+        View content;
+        switch (section) {
+        case SETTINGS: content = settingsPage(); break;
+        case DEBUG: content = debugPage(); break;
+        case CALLS:
+        default: content = callsPage(); break;
+        }
+        moreHost.addView(content, new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        for (TextView item : moreSectionItems) {
+            boolean selected = item.getTag() == section;
+            item.setTextColor(selected ? PRIMARY : MUTED);
+            item.setTypeface(Typeface.DEFAULT, selected ? Typeface.BOLD : Typeface.NORMAL);
+        }
+        if (section == MoreSection.DEBUG && realtimeLogging) handler.post(debugRefresh);
+    }
+
+    private void openMore(MoreSection section) {
+        currentMore = section;
+        showPage(Page.MORE);
     }
 
     private void updateNavigation() {
@@ -242,6 +268,228 @@ public final class MainActivity extends Activity {
             item.setTypeface(Typeface.DEFAULT, selected ? Typeface.BOLD : Typeface.NORMAL);
             item.setCompoundDrawableTintList(ColorStateList.valueOf(color));
         }
+    }
+
+    /** 一键值守台：值守机上日常要操作的，只有最上面那个开关。 */
+    private View dutyPage() {
+        LinearLayout root = pageRoot();
+        boolean dutyOn = DutyStore.isDutyOn(this);
+        boolean paired = VoWLANPairingStore.configured(this);
+
+        root.addView(pageTitle("余奉电话助理", dutyOn ? "值守中" : "待命"));
+
+        LinearLayout hero = card(SURFACE_HIGH, 26);
+        hero.setOrientation(LinearLayout.VERTICAL);
+        hero.setPadding(dp(20), dp(22), dp(20), dp(22));
+
+        LinearLayout headRow = row();
+        headRow.setGravity(Gravity.CENTER_VERTICAL);
+        ImageView mark = icon(android.R.drawable.presence_online, dutyOn ? PRIMARY : MUTED, 44);
+        mark.setBackground(neuInsetDrawable(24));
+        mark.setPadding(dp(11), dp(11), dp(11), dp(11));
+        headRow.addView(mark, new LinearLayout.LayoutParams(dp(50), dp(50)));
+        LinearLayout headCopy = column(dp(12));
+        TextView headTitle = label(dutyOn ? "值守中" : "尚未开始值守", 22,
+                dutyOn ? PRIMARY : TEXT, Gravity.START);
+        headTitle.setTypeface(Typeface.DEFAULT_BOLD);
+        headCopy.addView(headTitle);
+        headCopy.addView(label(dutySummary(dutyOn, paired), 13, MUTED, Gravity.START));
+        headRow.addView(headCopy, weighted());
+        hero.addView(headRow);
+
+        TextView toggle = dutyOn ? dangerButton("停止值守") : primaryButton("一键开始值守", PRIMARY);
+        toggle.setTypeface(Typeface.DEFAULT_BOLD);
+        toggle.setTextSize(17);
+        toggle.setOnClickListener(ignored -> toggleDuty());
+        hero.addView(toggle, matchWithTop(18));
+        root.addView(hero, matchWithTop(16));
+
+        root.addView(buildDutySimCard(), matchWithTop(14));
+
+        String connectionMode = MainScreenPresentation.connectionModeTitle(
+                vowlanReady(), cloudEnabled, cloudRelayConfigured, cloudLastError);
+        int connectionColor = vowlanReady() ? CYAN
+                : cloudEnabled && cloudRelayConfigured && cloudLastError.isEmpty() ? BLUE : WARNING;
+        LinearLayout connectionCard = card(SURFACE, 18);
+        connectionCard.setOrientation(LinearLayout.VERTICAL);
+        connectionCard.setPadding(dp(16), dp(14), dp(16), dp(14));
+        connectionCard.addView(overline("当前连接模式"));
+        TextView connectionTitle = label(connectionMode, 17, connectionColor, Gravity.START);
+        connectionTitle.setTypeface(Typeface.DEFAULT_BOLD);
+        connectionCard.addView(connectionTitle, matchWithTop(5));
+        root.addView(connectionCard, matchWithTop(12));
+
+        TextView pairing = primaryButton(paired ? "重新配对 iPhone" : "配对 iPhone", BLUE);
+        pairing.setCompoundDrawablesWithIntrinsicBounds(android.R.drawable.ic_input_add, 0, 0, 0);
+        pairing.setCompoundDrawableTintList(ColorStateList.valueOf(Color.WHITE));
+        pairing.setCompoundDrawablePadding(dp(8));
+        pairing.setOnClickListener(ignored -> openPairingPage());
+        root.addView(pairing, matchWithTop(14));
+
+        root.addView(sectionTitle("最近活动"), matchWithTop(22));
+        LinearLayout recent = card(SURFACE, 18);
+        recent.setPadding(dp(16), dp(14), dp(16), dp(14));
+        recent.setOrientation(LinearLayout.HORIZONTAL);
+        recent.setGravity(Gravity.CENTER_VERTICAL);
+        View dot = new View(this);
+        dot.setBackground(solidPill(PRIMARY, 7));
+        recent.addView(dot, new LinearLayout.LayoutParams(dp(10), dp(10)));
+        TextView activity = label(latestActivity(), 14, TEXT, Gravity.CENTER_VERTICAL);
+        LinearLayout.LayoutParams activityParams = weighted();
+        activityParams.leftMargin = dp(12);
+        recent.addView(activity, activityParams);
+        recent.setOnClickListener(ignored -> openMore(MoreSection.DEBUG));
+        root.addView(recent, matchWithTop(10));
+
+        status = label("", 12, MUTED, Gravity.START);
+        status.setVisibility(View.GONE);
+        root.addView(status);
+        return scroll(root);
+    }
+
+    private String dutySummary(boolean dutyOn, boolean paired) {
+        if (!dutyOn) {
+            return paired ? "已配对 iPhone，点下方按钮开始值守" : "点下方按钮开始值守，再配对 iPhone";
+        }
+        if (!paired) return "值守已开启，等待配对 iPhone";
+        return MainScreenPresentation.connectionModeDetail(
+                vowlanReady(), cloudEnabled, cloudRelayConfigured, cloudLastError);
+    }
+
+    /**
+     * 值守卡选择。双卡是这个应用的命门：这里既让用户选卡，也把每张卡能否被系统
+     * 准确反查摊开显示——反查失败就意味着选卡在这台机器上会退化。
+     */
+    private View buildDutySimCard() {
+        LinearLayout cardView = card(SURFACE, 20);
+        cardView.setOrientation(LinearLayout.VERTICAL);
+        cardView.setPadding(dp(16), dp(15), dp(16), dp(15));
+        cardView.addView(overline("值守卡（拨出与接听默认使用）"));
+
+        List<SimCards.Card> cards = SimCards.activeCards(this);
+        int selected = DutyStore.getDutySlot(this);
+        if (cards.isEmpty()) {
+            cardView.addView(description("未检测到 SIM 卡：请确认已授予电话权限且卡槽已插卡。"), matchWithTop(8));
+        } else {
+            for (SimCards.Card sim : cards) {
+                cardView.addView(simOptionRow(sim, selected), matchWithTop(8));
+            }
+        }
+        cardView.addView(simOptionRow(null, selected), matchWithTop(8));
+
+        TextView health = description(SimCards.describe(this));
+        health.setTextIsSelectable(true);
+        cardView.addView(health, matchWithTop(10));
+        return cardView;
+    }
+
+    private View simOptionRow(SimCards.Card sim, int selectedSlot) {
+        boolean follow = sim == null;
+        int slot = follow ? DutyStore.SLOT_FOLLOW_SYSTEM : sim.slot;
+        boolean selected = selectedSlot == slot;
+
+        LinearLayout item = new LinearLayout(this);
+        item.setOrientation(LinearLayout.HORIZONTAL);
+        item.setGravity(Gravity.CENTER_VERTICAL);
+        item.setPadding(dp(12), dp(11), dp(12), dp(11));
+        item.setBackground(selected ? neuInsetDrawable(14) : neuRaisedDrawable(14));
+
+        LinearLayout copy = column(0);
+        TextView title = label(follow ? "跟随系统默认卡" : sim.title(), 15,
+                selected ? PRIMARY : TEXT, Gravity.START);
+        if (selected) title.setTypeface(Typeface.DEFAULT_BOLD);
+        copy.addView(title);
+        String detail = follow ? "由系统决定用哪张卡拨出"
+                : (sim.reverseLookupOk ? "可被系统准确识别" : "识别受限：无法反查该卡");
+        copy.addView(description(detail), matchWithTop(2));
+        item.addView(copy, weighted());
+        if (selected) item.addView(label("当前", 12, PRIMARY, Gravity.CENTER));
+
+        item.setClickable(true);
+        item.setOnClickListener(ignored -> {
+            DutyStore.setDutySlot(this, slot);
+            BridgeLog.info("duty_sim_selected slot=" + slot);
+            showPage(Page.DUTY);
+            toast(slot == DutyStore.SLOT_FOLLOW_SYSTEM ? "已跟随系统默认卡" : "值守卡已设为卡" + (slot + 1));
+        });
+        return item;
+    }
+
+    private TextView dangerButton(String title) {
+        TextView button = label(title, 16, Color.WHITE, Gravity.CENTER);
+        button.setTypeface(Typeface.DEFAULT_BOLD);
+        button.setMinHeight(dp(54));
+        button.setPadding(dp(16), dp(13), dp(16), dp(13));
+        button.setBackground(solidPill(DANGER, 27));
+        button.setClickable(true);
+        button.setFocusable(true);
+        return button;
+    }
+
+    /** 值守总开关：开即常驻转发，关即真正停服。 */
+    private void toggleDuty() {
+        boolean next = !DutyStore.isDutyOn(this);
+        if (!next) {
+            DutyStore.setDutyOn(this, false);
+            StandaloneAgentService.stop(this);
+            BridgeLog.info("duty_stopped");
+            toast("已停止值守");
+            showPage(Page.DUTY);
+            return;
+        }
+        String[] missing = RuntimePermissionPolicy.missingPermissions(
+                Build.VERSION.SDK_INT,
+                checkSelfPermission(Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED,
+                checkSelfPermission(Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED,
+                checkSelfPermission(Manifest.permission.RECEIVE_SMS) == PackageManager.PERMISSION_GRANTED,
+                checkSelfPermission(Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED,
+                checkSelfPermission(Manifest.permission.READ_PHONE_NUMBERS) == PackageManager.PERMISSION_GRANTED,
+                Build.VERSION.SDK_INT < 33 || checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)
+                        == PackageManager.PERMISSION_GRANTED);
+        DutyStore.setDutyOn(this, true);
+        if (missing.length > 0) {
+            requestPermissions(missing, 101);
+            toast("已开启值守，请先授予剩余权限");
+            showPage(Page.DUTY);
+            return;
+        }
+        StandaloneAgentService.start(this);
+        refreshStatus();
+        if (!dialerRoleHeld()) requestDialerRole();
+        BridgeLog.info("duty_started");
+        toast("已开始值守");
+        showPage(Page.DUTY);
+    }
+
+    /** 「更多」：通话测试 / 设置 / 诊断收进次级分段，不再占用底部导航。 */
+    private View morePage() {
+        LinearLayout root = pageRoot();
+        root.addView(pageTitle("更多", null));
+
+        LinearLayout segments = row();
+        segments.setGravity(Gravity.CENTER);
+        segments.setPadding(dp(4), dp(4), dp(4), dp(4));
+        segments.setBackground(neuDrawable("neu_bar_bg"));
+        moreSectionItems.clear();
+        segments.addView(moreSegmentItem("通话", MoreSection.CALLS), weighted());
+        segments.addView(moreSegmentItem("设置", MoreSection.SETTINGS), weighted());
+        segments.addView(moreSegmentItem("诊断", MoreSection.DEBUG), weighted());
+        root.addView(segments, matchWithTop(12));
+
+        moreHost = new FrameLayout(this);
+        root.addView(moreHost, new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, 0, 1));
+        return root;
+    }
+
+    private TextView moreSegmentItem(String title, MoreSection section) {
+        TextView item = label(title, 14, MUTED, Gravity.CENTER);
+        item.setPadding(dp(10), dp(9), dp(10), dp(9));
+        item.setClickable(true);
+        item.setTag(section);
+        item.setOnClickListener(ignored -> showMoreSection(section));
+        moreSectionItems.add(item);
+        return item;
     }
 
     private View statusPage() {
@@ -332,7 +580,7 @@ public final class MainActivity extends Activity {
         LinearLayout.LayoutParams activityParams = weighted();
         activityParams.leftMargin = dp(12);
         recent.addView(activity, activityParams);
-        recent.setOnClickListener(ignored -> showPage(Page.DEBUG));
+        recent.setOnClickListener(ignored -> openMore(MoreSection.DEBUG));
         root.addView(recent, matchWithTop(10));
 
         status = label("", 12, MUTED, Gravity.START);
@@ -643,7 +891,7 @@ public final class MainActivity extends Activity {
         back.setContentDescription("返回");
         back.setOnClickListener(ignored -> {
             stopPairingServer();
-            showPage(Page.STATUS);
+            showPage(Page.DUTY);
         });
         root.addView(back, new LinearLayout.LayoutParams(dp(56), dp(52)));
 
@@ -690,7 +938,7 @@ public final class MainActivity extends Activity {
         cancel.setTextColor(DANGER);
         cancel.setOnClickListener(ignored -> {
             stopPairingServer();
-            showPage(Page.STATUS);
+            showPage(Page.DUTY);
         });
         root.addView(cancel, matchWithTop(18));
 
@@ -721,7 +969,7 @@ public final class MainActivity extends Activity {
             filterRow.addView(chip, chipParams);
             chip.setOnClickListener(ignored -> {
                 activeDebugFilter = filter;
-                showPage(Page.DEBUG);
+                openMore(MoreSection.DEBUG);
             });
         }
         scroll.addView(filterRow);
@@ -749,7 +997,10 @@ public final class MainActivity extends Activity {
         item.setBackground(selected ? neuRaisedDrawable(20) : solidPill(Color.TRANSPARENT, 20));
         item.setOnClickListener(ignored -> {
             selectedMode = mode;
-            if (currentPage == Page.STATUS || currentPage == Page.SETTINGS) showPage(currentPage);
+            if (currentPage == Page.DUTY
+                    || (currentPage == Page.MORE && currentMore == MoreSection.SETTINGS)) {
+                showPage(currentPage);
+            }
         });
         return item;
     }
@@ -1325,8 +1576,8 @@ public final class MainActivity extends Activity {
 
     private void updateVisibleStatus() {
         if (status != null) status.setText(roleText() + "\nAgent：" + agentDetail);
-        if (currentPage == Page.STATUS && contentHost != null
-                && bottomBar.getVisibility() == View.VISIBLE) showPage(Page.STATUS);
+        if (currentPage == Page.DUTY && contentHost != null
+                && bottomBar.getVisibility() == View.VISIBLE) showPage(Page.DUTY);
     }
 
     private void startPairing() {
@@ -1783,17 +2034,20 @@ public final class MainActivity extends Activity {
     @Override protected void onResume() {
         super.onResume();
         refreshShizukuStatus();
-        if (RuntimeMode.isStandalone(this)) StandaloneAgentService.start(this);
+        // 一键值守：开关决定 Agent 是否常驻。关闭值守即真正停止，不再被前台唤醒偷偷拉起。
+        if (RuntimeMode.isStandalone(this) && DutyStore.isDutyOn(this)) {
+            StandaloneAgentService.start(this);
+        }
     }
 
     @Override public void onBackPressed() {
         if (bottomBar != null && bottomBar.getVisibility() == View.GONE) {
             stopPairingServer();
-            showPage(Page.STATUS);
+            showPage(Page.DUTY);
             return;
         }
-        if (currentPage != Page.STATUS) {
-            showPage(Page.STATUS);
+        if (currentPage != Page.DUTY) {
+            showPage(Page.DUTY);
             return;
         }
         super.onBackPressed();
