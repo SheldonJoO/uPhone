@@ -233,18 +233,26 @@ struct PhoneBackdrop: View {
                     endPoint: .bottom
                 )
             } else {
-                Color.white
+                // Neumorphism 浅灰底，与安卓端统一
+                NeuColors.background
             }
         }
         .ignoresSafeArea()
     }
 }
 
-/// 关键内容表面使用系统原生 Liquid Glass，旧系统回退为系统材质。
+/// 关键内容表面：浅色模式用 Neumorphism 凸起卡片，深色模式用 Liquid Glass/系统材质。
 struct PhoneCard: ViewModifier {
+    @Environment(\.colorScheme) private var colorScheme
+
     @ViewBuilder
     func body(content: Content) -> some View {
-        if #available(iOS 26.0, *) {
+        if colorScheme == .light {
+            content
+                .padding(16)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .neuCard()
+        } else if #available(iOS 26.0, *) {
             content
                 .padding(16)
                 .frame(maxWidth: .infinity, alignment: .leading)

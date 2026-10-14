@@ -29,6 +29,7 @@
 		A10000000000000000000017 /* LocalHistoryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000018 /* LocalHistoryStore.swift */; };
 		A10000000000000000000018 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000019 /* AppIcon.icon */; };
 		A1000000000000000000001A /* VoIPPushController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000001B /* VoIPPushController.swift */; };
+		A2000000000000000000002A /* Neumorphism.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000000000000000000002B /* Neumorphism.swift */; };
 		A1000000000000000000001B /* WatchCallCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000001D /* WatchCallCoordinator.swift */; };
 		A1000000000000000000001C /* WatchCallPayload.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000001E /* WatchCallPayload.swift */; };
 		A1000000000000000000001D /* WatchCallPayload.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000001E /* WatchCallPayload.swift */; };
@@ -131,6 +132,7 @@
 		B10000000000000000000018 /* LocalHistoryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalHistoryStore.swift; sourceTree = "<group>"; };
 		B10000000000000000000019 /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIcon.icon; sourceTree = "<group>"; };
 		B1000000000000000000001B /* VoIPPushController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoIPPushController.swift; sourceTree = "<group>"; };
+		B2000000000000000000002B /* Neumorphism.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Neumorphism.swift; sourceTree = "<group>"; };
 		B1000000000000000000001C /* AirSIM.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = AirSIM.entitlements; sourceTree = "<group>"; };
 		B1000000000000000000001D /* WatchCallCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchCallCoordinator.swift; sourceTree = "<group>"; };
 		B1000000000000000000001E /* WatchCallPayload.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchCallPayload.swift; sourceTree = "<group>"; };
@@ -218,6 +220,7 @@
 				B10000000000000000000007 /* AppModel.swift */,
 				B10000000000000000000010 /* CallKitController.swift */,
 				B1000000000000000000001B /* VoIPPushController.swift */,
+				B2000000000000000000002B /* Neumorphism.swift */,
 				B10000000000000000000024 /* IPhoneCloudCallSession.swift */,
 				B1000000000000000000002B /* CallLifecycleStore.swift */,
 				B10000000000000000000025 /* VirtualCallTTSController.swift */,
@@ -466,6 +469,7 @@
 				A1000000000000000000000A /* AirSIMSetupView.swift in Sources */,
 				A1000000000000000000000E /* CallKitController.swift in Sources */,
 				A1000000000000000000001A /* VoIPPushController.swift in Sources */,
+				A2000000000000000000002A /* Neumorphism.swift in Sources */,
 				A10000000000000000000024 /* IPhoneCloudCallSession.swift in Sources */,
 				A1000000000000000000002B /* CallLifecycleStore.swift in Sources */,
 				A10000000000000000000025 /* VirtualCallTTSController.swift in Sources */,
@@ -570,7 +574,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = "$(AIRSIM_PUSH_ENTITLEMENTS)";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 87;
+				CURRENT_PROJECT_VERSION = 88;
 				DEVELOPMENT_TEAM = "";
 				AIRSIM_APNS_ENVIRONMENT = sandbox;
 				AIRSIM_PUSH_ENTITLEMENTS = "AirSIM/AirSIM.entitlements";
@@ -596,7 +600,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = "$(AIRSIM_PUSH_ENTITLEMENTS)";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 87;
+				CURRENT_PROJECT_VERSION = 88;
 				DEVELOPMENT_TEAM = "";
 				AIRSIM_APNS_ENVIRONMENT = production;
 				AIRSIM_PUSH_ENTITLEMENTS = "AirSIM/AirSIM.entitlements";
@@ -620,7 +624,7 @@
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 87;
+				CURRENT_PROJECT_VERSION = 88;
 				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = AirSIMLiveActivityExtension/Info.plist;
@@ -646,7 +650,7 @@
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 87;
+				CURRENT_PROJECT_VERSION = 88;
 				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = AirSIMLiveActivityExtension/Info.plist;
@@ -706,7 +710,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = "AirSIMWatchApp/AirSIMWatchApp.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 87;
+				CURRENT_PROJECT_VERSION = 88;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
@@ -735,7 +739,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = "AirSIMWatchApp/AirSIMWatchApp.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 87;
+				CURRENT_PROJECT_VERSION = 88;
 				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = "AirSIMWatchApp/Info.plist";

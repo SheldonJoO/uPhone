@@ -134,6 +134,7 @@ private struct DialPadLayoutMetrics {
 struct DialPadView: View {
     @EnvironmentObject private var model: AppModel
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @Environment(\.colorScheme) private var colorScheme
     @State private var deleteRepeatTask: Task<Void, Never>?
     @State private var zeroWasLongPressed = false
     @State private var dialKeyFeedback = DialKeyFeedback()
@@ -339,7 +340,7 @@ struct DialPadView: View {
             }
             .foregroundStyle(.primary)
             .frame(width: metrics.keySize, height: metrics.keySize)
-            .dialKeySurface()
+            .neuDialKeySurface(colorScheme: colorScheme)
             .contentShape(Circle())
         }
         .buttonStyle(.plain)
@@ -2143,6 +2144,16 @@ private extension View {
             glassEffect(.regular.interactive(), in: Circle())
         } else {
             background(Color(uiColor: .tertiarySystemFill), in: Circle())
+        }
+    }
+
+    /// Neumorphism 拨号键：浅色模式下凸起黏土圆，深色模式保持原样。
+    @ViewBuilder
+    func neuDialKeySurface(colorScheme: ColorScheme) -> some View {
+        if colorScheme == .light {
+            self.neuCircleButton()
+        } else {
+            dialKeySurface()
         }
     }
 }
