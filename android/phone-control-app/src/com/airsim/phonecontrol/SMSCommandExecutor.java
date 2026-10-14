@@ -37,12 +37,12 @@ final class SMSCommandExecutor {
         try {
             int subscriptionID;
             if (!command.subscriptionId.isEmpty()) {
-                try {
-                    subscriptionID = Integer.parseInt(command.subscriptionId);
-                    BridgeLog.info("sms_send_with_sim subscription_id=" + command.subscriptionId);
-                } catch (NumberFormatException ignored) {
+                subscriptionID = SimCardManager.resolveSubscriptionId(context, command.subscriptionId);
+                if (subscriptionID == SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
                     return AgentCommandDispatcher.Result.failure("指定的 SIM 卡无效");
                 }
+                BridgeLog.info("sms_send_with_sim subscription_id=" + command.subscriptionId
+                        + " resolved=" + subscriptionID);
             } else {
                 subscriptionID = SmsManager.getDefaultSmsSubscriptionId();
             }

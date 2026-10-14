@@ -738,7 +738,7 @@ struct RecentsView: View {
                 let sims = model.currentAndroidAgent?.simCards ?? []
                 if sims.count > 1 {
                     ForEach(sims) { sim in
-                        Button(sim.displayName) {
+                        Button(sim.fullLabel) {
                             SimSelectionStore.select(subscriptionID: sim.subscriptionID)
                             onCall(dialNumber)
                         }

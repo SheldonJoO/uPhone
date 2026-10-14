@@ -222,7 +222,8 @@ enum SimSelectionStore {
     static func selectedSubscriptionID() -> Int? {
         let value = UserDefaults.standard.integer(forKey: key)
         // integer(forKey:) 在缺省时返回 0；用 object(forKey:) 区分"未设置"。
-        guard UserDefaults.standard.object(forKey: key) != nil, value > 0 else { return nil }
+        // subscription_id 允许为 0（手动补卡时 SIM 1 用槽位 0 做占位）。
+        guard UserDefaults.standard.object(forKey: key) != nil, value >= 0 else { return nil }
         return value
     }
 

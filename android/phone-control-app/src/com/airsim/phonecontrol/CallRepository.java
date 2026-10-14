@@ -83,12 +83,8 @@ public final class CallRepository {
     static PhoneAccountHandle findPhoneAccountForSubscription(
             Context context, TelecomManager telecomManager, String subscriptionId) {
         if (subscriptionId == null || subscriptionId.isEmpty()) return null;
-        int subId;
-        try {
-            subId = Integer.parseInt(subscriptionId);
-        } catch (NumberFormatException ignored) {
-            return null;
-        }
+        int subId = SimCardManager.resolveSubscriptionId(context, subscriptionId);
+        if (subId == SubscriptionManager.INVALID_SUBSCRIPTION_ID) return null;
         String iccId = null;
         String number = null;
         try {

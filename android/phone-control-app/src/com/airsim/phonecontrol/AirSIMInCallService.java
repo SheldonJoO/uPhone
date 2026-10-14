@@ -56,6 +56,11 @@ public final class AirSIMInCallService extends InCallService {
             CallRepository.pendingDialSubscriptionId = "";
             int subscriptionId = parseSubscriptionId(pending);
             if (subscriptionId >= 0) {
+                // 手动补卡的 0/1 占位先解析为真实订阅，保证事件上报的是真实 subId 和正确卡槽。
+                int resolved = SimCardManager.resolveSubscriptionId(this, pending);
+                if (resolved != SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
+                    subscriptionId = resolved;
+                }
                 callSimCache.put(call, new int[]{subscriptionId, slotIndexForSubscriptionId(subscriptionId)});
             }
         }

@@ -517,7 +517,7 @@ struct CallPolicyView: View {
                         ForEach(numbers, id: \.self) { number in
                             Text(number).monospacedDigit()
                         }
-                        .onDelete { deleteSlotNumbers($0, slot: slot, blacklist: true) }
+                        .onDelete { deleteSlotNumbers(at: $0, slot: slot, blacklist: true) }
                     }
                 }
                 HStack {
@@ -552,7 +552,7 @@ struct CallPolicyView: View {
                         ForEach(numbers, id: \.self) { number in
                             Text(number).monospacedDigit()
                         }
-                        .onDelete { deleteSlotNumbers($0, slot: slot, blacklist: false) }
+                        .onDelete { deleteSlotNumbers(at: $0, slot: slot, blacklist: false) }
                     }
                 }
                 HStack {
