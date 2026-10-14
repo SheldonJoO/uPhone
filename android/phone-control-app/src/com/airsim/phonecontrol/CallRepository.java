@@ -3,6 +3,7 @@ package com.airsim.phonecontrol;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Build;
 import android.os.Looper;
 import android.telecom.Call;
 import android.telecom.PhoneAccount;
@@ -113,18 +114,20 @@ public final class CallRepository {
             return null;
         }
         if (handles == null) return null;
-        // Pass 0 (most reliable on Android 6+): match by the account's own subscription id.
-        // TCL / many OEM ROMs do not embed the ICC ID in the handle id and hide the phone
-        // number, so the two legacy passes below silently fall through to the default SIM.
-        for (PhoneAccountHandle handle : handles) {
-            try {
-                PhoneAccount account = telecomManager.getPhoneAccount(handle);
-                if (account != null && account.getSubscriptionId() == subId) {
-                    BridgeLog.info("dial_sim_matched subscription_id=" + subId
-                            + " match=subscription_id");
-                    return handle;
-                }
-            } catch (SecurityException ignored) {}
+        // Pass 0（双卡正确选路的关键）：PhoneAccount 本身不暴露 subscription id，
+        // 需经 TelecomManager.getSubscriptionIdForPhoneAccount 反查（API 30+）。
+        // TCL / 多数 OEM ROM 既不把 ICC ID 嵌进 handle id，也不暴露号码，
+        // 因此这一 pass 是让指定 SIM 真正生效的唯一可靠路径。
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            for (PhoneAccountHandle handle : handles) {
+                try {
+                    if (telecomManager.getSubscriptionIdForPhoneAccount(handle) == subId) {
+                        BridgeLog.info("dial_sim_matched subscription_id=" + subId
+                                + " match=subscription_id");
+                        return handle;
+                    }
+                } catch (SecurityException ignored) {}
+            }
         }
         // First pass: match by ICC ID embedded in the handle ID.
         if (iccId != null && !iccId.isEmpty()) {

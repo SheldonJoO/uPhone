@@ -360,9 +360,10 @@ final class AppModel: ObservableObject {
         }
         syncSimDeviceScope()
         await VoIPPushController.shared.sendCloudUnpair()
-        if let creds {
+        let localAPI = verifiedVoWLANAPI()
+        if let creds, let localAPI {
             Task.detached {
-                try? await AirSIMAPI.shared.unpairLocally(
+                try? await localAPI.unpairLocally(
                     deviceID: creds.deviceID, deviceSecret: creds.deviceSecret)
             }
         }

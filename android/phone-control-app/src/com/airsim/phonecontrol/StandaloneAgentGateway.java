@@ -186,7 +186,8 @@ final class StandaloneAgentGateway {
         String type = command.optString("type", "");
         if ("unpair".equals(type)) {
             // 云端命令由 Relay 已鉴权（仅配对 iPhone 能路由到本机），直接解绑。
-            return rememberCommand(commandKey, doUnpair());
+            AgentClient.ForwardResponse unpairResp = doUnpair();
+            return rememberCommand(commandKey, new JSONObject(unpairResp.payload()));
         }
         String action = switch (type) {
             case "dial" -> "dial";
@@ -251,7 +252,7 @@ final class StandaloneAgentGateway {
     }
 
     /** 真正解绑：清除云端 + VoWLAN 配对，停止广播与 Agent 服务。调用前由调用方完成鉴权。 */
-    private JSONObject doUnpair() {
+    private AgentClient.ForwardResponse doUnpair() throws Exception {
         try {
             VoWLANPairingStore.clear(context);
             store.clearRegistration();
