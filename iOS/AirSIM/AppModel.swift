@@ -286,7 +286,11 @@ final class AppModel: ObservableObject {
                 ?? cloudStatus?.agents.first(where: \.cloudOnline)?.id
         }()
 
-        let ignored = ignoredAgentIDs
+        // 忽略名单只对"未入库"的设备生效（VoWLAN 广播发现的设备）。
+        // 已在 DeviceRegistry 里的都是用户明确配对过的：即使之前点过"解散配对"，
+        // 只要重新配对成功（重新入库），就必须重新显示，否则删了重配也永远是空列表。
+        let registryIDs = Set(DeviceRegistry.allDevices().map(\.deviceID))
+        let ignored = ignoredAgentIDs.subtracting(registryIDs)
         return values.values.filter { !ignored.contains($0.id) }.map { item in
             AndroidAgentPresentation(
                 id: item.id,
@@ -329,6 +333,12 @@ final class AppModel: ObservableObject {
         if preferredAgentID == id {
             preferredAgentID = nil
         }
+    }
+
+    /// 配对成功后调用：把该设备从忽略名单里放出来。
+    /// 不清的话，"解散配对"后再重新配对会永远显示"暂无已配对"（重配多为同一 deviceID）。
+    func clearIgnoredAgent(id: String) {
+        ignoredAgentIDs.remove(id)
     }
 
     /// 设为当前设备：点选切换。云端设备走 DeviceRegistry 切换并重同步注册；

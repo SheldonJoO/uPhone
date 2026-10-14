@@ -134,15 +134,22 @@ struct SamsungPairingView: View {
                 }
             )
             if isAdditionalDevice {
-                if DeviceRegistry.activateStagedDevice(deviceName: service.displayName,
-                                                       relayURL: registration.relayURL) != nil {
+                if let device = DeviceRegistry.activateStagedDevice(deviceName: service.displayName,
+                                                                    relayURL: registration.relayURL) {
                     await VoIPPushController.shared.forceRegistrationSync()
                     message = "配对成功，已切换到新设备（\(service.displayName)）"
+                    model.clearIgnoredAgent(id: device.deviceID)
                 }
             } else {
                 // 首台设备：登记进设备列表（幂等）
                 DeviceRegistry.archiveActiveDeviceIfNeeded()
+                // 删了重配的场景：同一 deviceID 之前可能在忽略名单里，放出来。
+                if !registration.deviceID.isEmpty {
+                    model.clearIgnoredAgent(id: registration.deviceID)
+                }
             }
+            // 配对后立即刷新设备列表，sheet 里马上能看到。
+            await model.refreshPairedAndroidAgents()
 #if DEBUG
             print("[AirSIM Pair] claim_completed session=\(service.sessionID)")
 #endif
