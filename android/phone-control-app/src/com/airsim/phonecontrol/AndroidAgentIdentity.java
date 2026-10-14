@@ -113,36 +113,37 @@ final class AndroidAgentIdentity {
                 } catch (JSONException ignored) {}
             }
         } catch (SecurityException ignored) {}
-        // 手动配置兜底：如果自动检测不到两张卡，用用户手动填的号码补齐。
+        // 手动配置兜底：如果自动检测不到该槽位，或检测到的号码为空，
+        // 用用户手动填的号码补齐/填补（TCL 功能机 SubscriptionManager 经常返回空号码）。
         // slot_index 0 = SIM 1, 1 = SIM 2；subscription_id 用 slot 占位，iOS 仅做展示。
         try {
-            String sim1 = AppConfig.sim1Number(context);
-            String sim2 = AppConfig.sim2Number(context);
-            boolean hasSlot0 = false, hasSlot1 = false;
-            for (int i = 0; i < cards.length(); i++) {
-                int slot = cards.getJSONObject(i).optInt("slot_index", -1);
-                if (slot == 0) hasSlot0 = true;
-                if (slot == 1) hasSlot1 = true;
-            }
-            if (!sim1.isEmpty() && !hasSlot0) {
-                cards.put(new JSONObject()
-                        .put("subscription_id", 0)
-                        .put("slot_index", 0)
-                        .put("carrier_name", "")
-                        .put("display_name", "SIM 1")
-                        .put("number", sim1)
-                        .put("icc_id", "")
-                        .put("manual", true));
-            }
-            if (!sim2.isEmpty() && !hasSlot1) {
-                cards.put(new JSONObject()
-                        .put("subscription_id", 1)
-                        .put("slot_index", 1)
-                        .put("carrier_name", "")
-                        .put("display_name", "SIM 2")
-                        .put("number", sim2)
-                        .put("icc_id", "")
-                        .put("manual", true));
+            String[] manualNumbers = { AppConfig.sim1Number(context), AppConfig.sim2Number(context) };
+            for (int slot = 0; slot < 2; slot++) {
+                String manualNumber = manualNumbers[slot];
+                if (manualNumber.isEmpty()) continue;
+                boolean filled = false;
+                for (int i = 0; i < cards.length(); i++) {
+                    JSONObject card = cards.getJSONObject(i);
+                    if (card.optInt("slot_index", -1) == slot) {
+                        // 槽位已检测到但号码为空：用手动号码填补
+                        if (card.optString("number", "").isEmpty()) {
+                            card.put("number", manualNumber);
+                            card.put("manual", true);
+                        }
+                        filled = true;
+                        break;
+                    }
+                }
+                if (!filled) {
+                    cards.put(new JSONObject()
+                            .put("subscription_id", slot)
+                            .put("slot_index", slot)
+                            .put("carrier_name", "")
+                            .put("display_name", "SIM " + (slot + 1))
+                            .put("number", manualNumber)
+                            .put("icc_id", "")
+                            .put("manual", true));
+                }
             }
         } catch (JSONException ignored) {}
         return cards;

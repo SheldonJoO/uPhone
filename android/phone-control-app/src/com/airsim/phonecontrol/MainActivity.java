@@ -475,6 +475,7 @@ public final class MainActivity extends Activity {
             AppConfig.setSim1Number(this, sim1Input.getText().toString());
             AppConfig.setSim2Number(this, sim2Input.getText().toString());
             BridgeLog.info("sim_numbers_saved");
+            android.widget.Toast.makeText(this, "已保存双卡号码，iPhone 端稍后刷新显示", android.widget.Toast.LENGTH_SHORT).show();
             // 触发心跳上报，让 iPhone 尽快拿到新号码
             AgentWatchdogService.start(this);
         });
