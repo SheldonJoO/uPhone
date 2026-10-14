@@ -194,7 +194,7 @@ public final class MainActivity extends Activity {
         bar.setOrientation(LinearLayout.HORIZONTAL);
         bar.setGravity(Gravity.CENTER);
         bar.setPadding(dp(10), dp(6), dp(10), dp(8));
-        bar.setBackground(getDrawable(R.drawable.neu_bar_bg));
+        bar.setBackground(neuDrawable("neu_bar_bg"));
         navigationItems.clear();
         bar.addView(navigationItem("状态", android.R.drawable.presence_online, Page.STATUS), weighted());
         bar.addView(navigationItem("通话", android.R.drawable.sym_action_call, Page.CALLS), weighted());
@@ -686,7 +686,7 @@ public final class MainActivity extends Activity {
             chip.setTypeface(Typeface.DEFAULT, selected ? Typeface.BOLD : Typeface.NORMAL);
             chip.setPadding(dp(16), dp(9), dp(16), dp(9));
             chip.setBackground(selected
-                    ? getDrawable(R.drawable.neu_accent_green)
+                    ? neuDrawable("neu_accent_green")
                     : neuRaisedDrawable(18));
             LinearLayout.LayoutParams chipParams = new LinearLayout.LayoutParams(
                     ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -1560,7 +1560,7 @@ public final class MainActivity extends Activity {
 
     private LinearLayout card(int color, int radius) {
         LinearLayout card = new LinearLayout(this);
-        card.setBackground(getDrawable(R.drawable.neu_card_bg));
+        card.setBackground(neuDrawable("neu_card_bg"));
         return card;
     }
 
@@ -1614,7 +1614,7 @@ public final class MainActivity extends Activity {
         view.setInputType(type);
         view.setSingleLine(true);
         view.setPadding(dp(14), dp(11), dp(14), dp(11));
-        view.setBackground(getDrawable(R.drawable.neu_input_bg));
+        view.setBackground(neuDrawable("neu_input_bg"));
         return view;
     }
 
@@ -1624,7 +1624,7 @@ public final class MainActivity extends Activity {
         button.setMinHeight(dp(54));
         button.setPadding(dp(16), dp(13), dp(16), dp(13));
         button.setBackground(getDrawable(color == BLUE
-                ? R.drawable.neu_accent_blue : R.drawable.neu_accent_green));
+                ? neuDrawable("neu_accent_blue") : neuDrawable("neu_accent_green"));
         button.setClickable(true);
         button.setFocusable(true);
         return button;
@@ -1635,7 +1635,7 @@ public final class MainActivity extends Activity {
         button.setTypeface(Typeface.DEFAULT_BOLD);
         button.setMinHeight(dp(50));
         button.setPadding(dp(12), dp(12), dp(12), dp(12));
-        button.setBackground(getDrawable(R.drawable.neu_btn_bg));
+        button.setBackground(neuDrawable("neu_btn_bg"));
         button.setClickable(true);
         button.setFocusable(true);
         return button;
@@ -1686,6 +1686,21 @@ public final class MainActivity extends Activity {
 
     private Drawable neuInsetDrawable(int radiusDp) {
         return neuLayer(true, radiusDp, BG);
+    }
+
+
+    /** 取 app 自带 drawable（本工程不生成 R 类，用 getIdentifier 动态解析）。 */
+    private Drawable neuDrawable(String name) {
+        int id = getResources().getIdentifier(name, "drawable", getPackageName());
+        if (id != 0) {
+            Drawable d = getDrawable(id);
+            if (d != null) return d;
+        }
+        // 兜底：纯色圆角
+        GradientDrawable fallback = new GradientDrawable();
+        fallback.setColor(BG);
+        fallback.setCornerRadius(dp(14));
+        return fallback;
     }
 
     /** 纯色小圆点/小胶囊（不带阴影），用于状态点。 */
