@@ -139,6 +139,8 @@ struct SamsungPairingView: View {
                     await VoIPPushController.shared.forceRegistrationSync()
                     message = "配对成功，已切换到新设备（\(service.displayName)）"
                     model.clearIgnoredAgent(id: device.deviceID)
+                } else {
+                    message = "配对已完成，但保存新设备凭证失败，请重试"
                 }
             } else {
                 // 首台设备：登记进设备列表（幂等）

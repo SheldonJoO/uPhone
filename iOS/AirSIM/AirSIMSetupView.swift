@@ -185,6 +185,11 @@ struct AirSIMSettingsView: View {
                     }
                     .disabled(localModeEnabled)
                     if let message { Text(message).foregroundStyle(.secondary) }
+                    if let connectionMessage = model.connectionMessage, !connectionMessage.isEmpty {
+                        Text(connectionMessage)
+                            .font(.footnote)
+                            .foregroundStyle(.orange)
+                    }
                 } header: {
                     Text("连接方式")
                 } footer: {
@@ -373,8 +378,22 @@ struct GuardDeviceRows: View {
 
     var body: some View {
         Group {
-            ForEach(agents) { agent in
-                VStack(alignment: .leading, spacing: 8) {
+            if agents.isEmpty {
+                // 空状态做成一行（而不是 overlay）：ForEach 为空时没有尺寸，overlay 显示不出来。
+                VStack(spacing: 10) {
+                    Image(systemName: "smartphone.slash")
+                        .font(.system(size: 34))
+                        .foregroundStyle(.secondary)
+                    Text("暂无值守机").font(.headline)
+                    Text("添加一台放在国内的值守手机")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 24)
+            } else {
+                ForEach(agents) { agent in
+                    VStack(alignment: .leading, spacing: 8) {
                     HStack(alignment: .firstTextBaseline, spacing: 8) {
                         VStack(alignment: .leading, spacing: 2) {
                             Text(agent.deviceName).font(.headline)
@@ -426,20 +445,6 @@ struct GuardDeviceRows: View {
                     }
                 }
             }
-            .overlay {
-                if agents.isEmpty {
-                    VStack(spacing: 10) {
-                        Image(systemName: "smartphone.slash")
-                            .font(.system(size: 34))
-                            .foregroundStyle(.secondary)
-                        Text("暂无值守机").font(.headline)
-                        Text("添加一台放在国内的值守手机")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 24)
-                }
             }
             NavigationLink {
                 SamsungPairingView()

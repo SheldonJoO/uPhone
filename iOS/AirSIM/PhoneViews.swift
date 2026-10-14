@@ -188,8 +188,7 @@ struct DialPadView: View {
                     // 状态条收到底部：紧凑显示传输状态 + 双卡选择，不再挤占拨号区。
                     DialPadBottomStrip(
                         currentAgent: model.currentAndroidAgent,
-                        agentCount: model.pairedAndroidAgents.count,
-                        cloudModeEnabled: CloudModePreference.isEnabled()
+                        agentCount: model.pairedAndroidAgents.count
                     ) {
                         pairedAgentListPresentation = PairedAgentListPresentation()
                     }
@@ -203,9 +202,7 @@ struct DialPadView: View {
             .background(PhoneBackdrop())
             .toolbar(.hidden, for: .navigationBar)
             .sheet(item: $pairedAgentListPresentation) { _ in
-                PairedAndroidAgentsView(
-                    cloudModeEnabled: CloudModePreference.isEnabled()
-                )
+                PairedAndroidAgentsView()
                 .environmentObject(model)
             }
             .task {
@@ -368,7 +365,6 @@ private struct PairedAgentListPresentation: Identifiable {
 private struct DialPadBottomStrip: View {
     let currentAgent: AndroidAgentPresentation?
     let agentCount: Int
-    let cloudModeEnabled: Bool
     let showAll: () -> Void
 
     @State private var selectedSimID: Int? = SimSelectionStore.selectedSubscriptionID()
@@ -482,7 +478,6 @@ extension Notification.Name {
 private struct PairedAndroidAgentsView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var model: AppModel
-    let cloudModeEnabled: Bool
 
     var body: some View {
         NavigationStack {
