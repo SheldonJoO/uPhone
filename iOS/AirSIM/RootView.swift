@@ -143,7 +143,7 @@ struct RootView: View {
         }
         // 录音结束自动分享：不再走 SwiftUI sheet 托管 UIActivityViewController
         //（该写法会白屏），改为 UIKit 直接 present；后台挂断时等回到前台再弹。
-        .onChange(of: model.showRecordingShare) { _, _ in
+        .onChange(of: model.showRecordingShare) { _ in
             DispatchQueue.main.async { presentPendingRecordingShare() }
         }
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
