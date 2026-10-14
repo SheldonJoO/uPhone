@@ -330,6 +330,7 @@ final class AppModel: ObservableObject {
     }
 
     func refreshPairedAndroidAgents() async {
+        syncSimDeviceScope()
         do {
             cloudAgentDirectory = try await VoIPPushController.shared.fetchCloudAgentStatusForDiagnostics()
         } catch {
@@ -340,6 +341,11 @@ final class AppModel: ObservableObject {
 
     // MARK: - 多设备：解绑 / 设为当前
 
+    /// 把当前值守机同步给出号卡存储，让拨号/短信的选卡自动按设备解析。
+    private func syncSimDeviceScope() {
+        SimSelectionStore.currentDeviceID = currentAndroidAgent?.id
+    }
+
     /// 解绑设备：记入忽略名单（配对 sheet 不再显示）；云端设备同时从 DeviceRegistry 删除。
     /// VoWLAN 是局域网广播发现，无法真正"解绑"，忽略即不再显示、不再自动选中。
     func unpairAndroidAgent(id: String) {
@@ -348,6 +354,7 @@ final class AppModel: ObservableObject {
         if preferredAgentID == id {
             preferredAgentID = nil
         }
+        syncSimDeviceScope()
     }
 
     /// 配对成功后调用：把该设备从忽略名单里放出来。
@@ -363,6 +370,7 @@ final class AppModel: ObservableObject {
     func selectAndroidAgent(id: String) {
         guard pairedAndroidAgents.contains(where: { $0.id == id }) else { return }
         preferredAgentID = id
+        syncSimDeviceScope()
         Task {
             // 云端路径：切换活跃设备凭据，后续拨号/短信/推送注册全部跟随。
             if DeviceRegistry.switchTo(deviceID: id) {
@@ -456,6 +464,7 @@ final class AppModel: ObservableObject {
         }
         WatchCallCoordinator.shared.configure(model: self)
         WatchCallCoordinator.shared.start()
+        syncSimDeviceScope()
         IPhoneCloudCallSession.shared.onAudioStateChange = { [weak self] state in
             self?.cloudCallAudioState = state
             if state.isConnected { self?.audio.retryRequestedSpeakerRoute() }

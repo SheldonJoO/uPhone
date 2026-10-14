@@ -215,25 +215,58 @@ struct SimCard: Equatable, Identifiable, Sendable, Codable {
     }
 }
 
-/// 双卡选择的持久化：记住用户上次选的 SIM。
+/// 双卡选择的持久化：按"设备"记住用户上次选的 SIM（多设备多卡）。
+/// 调用方一般不用传 deviceID：AppModel 会把当前值守机同步到 currentDeviceID，
+/// 无参版本自动按当前设备解析。老版本的全局键做一次性迁移。
 enum SimSelectionStore {
-    private static let key = "uphone.selected-sim-subscription-id"
+    private static let globalKey = "uphone.selected-sim-subscription-id"
 
-    static func selectedSubscriptionID() -> Int? {
-        let value = UserDefaults.standard.integer(forKey: key)
+    private static func key(for deviceID: String?) -> String {
+        guard let deviceID, !deviceID.isEmpty else { return globalKey }
+        return "uphone.selected-sim.\(deviceID)"
+    }
+
+    /// 当前值守机 ID，由 AppModel 在切换/刷新时同步。
+    static var currentDeviceID: String?
+
+    static func selectedSubscriptionID(for deviceID: String? = currentDeviceID) -> Int? {
+        let k = key(for: deviceID)
+        if UserDefaults.standard.object(forKey: k) == nil {
+            // 一次性迁移：老版本全局选择搬到当前设备名下。
+            if deviceID != nil,
+               let migrated = readRaw(key: globalKey) {
+                select(subscriptionID: migrated, for: deviceID)
+                UserDefaults.standard.removeObject(forKey: globalKey)
+                return migrated
+            }
+            return nil
+        }
+        return readRaw(key: k)
+    }
+
+    private static func readRaw(key: String) -> Int? {
         // integer(forKey:) 在缺省时返回 0；用 object(forKey:) 区分"未设置"。
         // subscription_id 允许为 0（手动补卡时 SIM 1 用槽位 0 做占位）。
-        guard UserDefaults.standard.object(forKey: key) != nil, value >= 0 else { return nil }
+        guard UserDefaults.standard.object(forKey: key) != nil else { return nil }
+        let value = UserDefaults.standard.integer(forKey: key)
+        guard value >= 0 else { return nil }
         return value
     }
 
-    static func select(subscriptionID: Int?) {
+    static func select(subscriptionID: Int?, for deviceID: String? = currentDeviceID) {
+        let k = key(for: deviceID)
         if let subscriptionID {
-            UserDefaults.standard.set(subscriptionID, forKey: key)
+            UserDefaults.standard.set(subscriptionID, forKey: k)
         } else {
-            UserDefaults.standard.removeObject(forKey: key)
+            UserDefaults.standard.removeObject(forKey: k)
         }
+        NotificationCenter.default.post(name: .simSelectionChanged, object: nil)
     }
+}
+
+extension Notification.Name {
+    /// 出号卡选择变化（任一设备）。UI 刷新各自的选中态。
+    static let simSelectionChanged = Notification.Name("uphone.simSelectionChanged")
 }
 
 /// 值守机的统一连接方式：本地和云端不再是两种"设备"，而是一台设备的两种"线路"。

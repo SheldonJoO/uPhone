@@ -20,7 +20,7 @@ struct AirSIMFirstConnectionView: View {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("连接安卓手机")
                         .font(.largeTitle.bold())
-                    Text("uPhone 通过同一 Wi-Fi 或安卓热点建立 VoWLAN；离开局域网时可使用独立云端 Relay。")
+                    Text("üMobile Kit 通过同一 Wi-Fi 或安卓热点建立直连；离开局域网时可使用独立云中继。")
                         .foregroundStyle(.secondary)
                 }
 
@@ -61,7 +61,7 @@ struct AirSIMFirstConnectionView: View {
                     .frame(maxWidth: .infinity)
             }
             .padding(24)
-            .navigationTitle("uPhone")
+            .navigationTitle("üMobile Kit")
             .navigationBarTitleDisplayMode(.inline)
             .sheet(isPresented: $showingPairing, onDismiss: {
                 if model.vowlan.availability.isOnlineForDisplay { completed = true }
@@ -282,12 +282,28 @@ struct AirSIMSettingsView: View {
                 }
 
                 Section("关于") {
-                    LabeledContent("项目", value: "uPhone · 安卓")
+                    LabeledContent("项目", value: "üMobile Kit · 安卓")
                     Picker("外观", selection: $settings.appearance) {
                         ForEach(AppAppearance.allCases) { appearance in
                             Text(appearance.title).tag(appearance)
                         }
                     }
+                }
+
+                Section {
+                    NavigationLink {
+                        AIAssistantSettingsView()
+                    } label: {
+                        Label {
+                            Text("AI 电话助理")
+                        } icon: {
+                            Image(systemName: "sparkles")
+                        }
+                    }
+                } header: {
+                    Text("智能扩展")
+                } footer: {
+                    Text("预留接口：未来可接入 Muse、豆包、Grok 等 AI 助手，用自然语言管理电话与短信。")
                 }
             }
             .navigationTitle("设置")
@@ -373,8 +389,15 @@ struct GuardDeviceRows: View {
     @State private var renamingDevice: AndroidAgentPresentation?
     @State private var renameText = ""
     @State private var switching = false
+    /// 出号卡变化时刷新各行的选中态。
+    @State private var selectionTick = 0
 
     private var agents: [AndroidAgentPresentation] { model.pairedAndroidAgents }
+
+    private func selectedSimID(for agent: AndroidAgentPresentation) -> Int? {
+        _ = selectionTick
+        return SimSelectionStore.selectedSubscriptionID(for: agent.id)
+    }
 
     var body: some View {
         Group {
@@ -397,8 +420,30 @@ struct GuardDeviceRows: View {
                     HStack(alignment: .firstTextBaseline, spacing: 8) {
                         VStack(alignment: .leading, spacing: 2) {
                             Text(agent.deviceName).font(.headline)
-                            ForEach(agent.simSummaryLines, id: \.self) { line in
-                                Text(line).font(.subheadline).foregroundStyle(.secondary)
+                            // 每张卡都可点：点选即设为该设备的出号卡（拨号/短信默认走它）。
+                            ForEach(agent.simCards) { sim in
+                                let isSelected = selectedSimID(for: agent) == sim.subscriptionID
+                                Button {
+                                    let newID = isSelected ? nil : sim.subscriptionID
+                                    SimSelectionStore.select(subscriptionID: newID, for: agent.id)
+                                } label: {
+                                    HStack(spacing: 6) {
+                                        Text(sim.fullLabel)
+                                            .font(.subheadline)
+                                            .foregroundStyle(.secondary)
+                                        if isSelected {
+                                            Image(systemName: "checkmark.circle.fill")
+                                                .font(.caption)
+                                                .foregroundStyle(.green)
+                                        }
+                                    }
+                                }
+                                .buttonStyle(.plain)
+                            }
+                            if agent.simCards.isEmpty {
+                                Text(agent.phoneNumber ?? "号码未提供")
+                                    .font(.subheadline)
+                                    .foregroundStyle(.secondary)
                             }
                         }
                         Spacer()
@@ -455,6 +500,9 @@ struct GuardDeviceRows: View {
         .onAppear {
             // 老版本单设备配对只写旧槽位，第一次打开时迁移进注册表，保证列表完整。
             DeviceRegistry.archiveActiveDeviceIfNeeded()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .simSelectionChanged)) { _ in
+            selectionTick += 1
         }
         .alert("重命名设备", isPresented: renamePresented) {
             TextField("设备名称，如 TCL-深圳", text: $renameText)

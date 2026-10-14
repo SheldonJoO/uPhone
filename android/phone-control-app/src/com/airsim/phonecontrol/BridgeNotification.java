@@ -15,7 +15,7 @@ public final class BridgeNotification {
     private BridgeNotification() {}
 
     public static void createChannel(Context context) {
-        NotificationChannel channel = new NotificationChannel(CHANNEL, "AirSIM 通话桥", NotificationManager.IMPORTANCE_LOW);
+        NotificationChannel channel = new NotificationChannel(CHANNEL, "余奉电话助理", NotificationManager.IMPORTANCE_LOW);
         channel.setSound(null, null);
         channel.enableVibration(false);
         context.getSystemService(NotificationManager.class).createNotificationChannel(channel);
@@ -27,7 +27,7 @@ public final class BridgeNotification {
                 PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
         return new Notification.Builder(context, CHANNEL)
                 .setSmallIcon(android.R.drawable.stat_sys_phone_call)
-                .setContentTitle("AirSIM 通话桥")
+                .setContentTitle("余奉电话助理")
                 .setContentText(detail)
                 .setContentIntent(open)
                 .setOngoing(true)
@@ -41,7 +41,7 @@ public final class BridgeNotification {
                 PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
         return new Notification.Builder(context, CHANNEL)
                 .setSmallIcon(android.R.drawable.stat_sys_phone_call)
-                .setContentTitle("AirSIM VoWLAN")
+                .setContentTitle("余奉电话助理")
                 .setContentText(detail)
                 .setContentIntent(open)
                 .setOngoing(true)
@@ -55,7 +55,7 @@ public final class BridgeNotification {
         String text = AppConfig.MODE_REMOTE_SILENT.equals(mode) ? "来电已转送 iOS；点按可在本机处理" : "来电已同步到 iOS";
         Notification notification = new Notification.Builder(context, CHANNEL)
                 .setSmallIcon(android.R.drawable.stat_sys_phone_call)
-                .setContentTitle("AirSIM 来电")
+                .setContentTitle("余奉电话助理来电")
                 .setContentText(text)
                 .setContentIntent(PendingIntent.getActivity(context, 1, new Intent(context, MainActivity.class),
                         PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT))

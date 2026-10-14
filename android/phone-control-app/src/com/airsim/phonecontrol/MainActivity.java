@@ -242,7 +242,7 @@ public final class MainActivity extends Activity {
 
     private View statusPage() {
         LinearLayout root = pageRoot();
-        root.addView(pageTitle("AirSIM Bridge", "运行中"));
+        root.addView(pageTitle("余奉电话助理", "运行中"));
 
         boolean paired = VoWLANPairingStore.configured(this);
         LinearLayout hero = card(SURFACE_HIGH, 24);
@@ -554,7 +554,7 @@ public final class MainActivity extends Activity {
         shizukuCard.setPadding(dp(16), dp(16), dp(16), dp(16));
         shizukuStatus = label("", 14, TEXT, Gravity.START);
         shizukuCard.addView(shizukuStatus);
-        shizukuCard.addView(description("首次通过无线调试启动并授权；之后 AirSIM 会自动恢复 PCM 桥。"), matchWithTop(6));
+        shizukuCard.addView(description("首次通过无线调试启动并授权；之后 余奉电话助理 会自动恢复 PCM 桥。"), matchWithTop(6));
         LinearLayout shizukuActions = row();
         TextView authorize = secondaryButton("授权并启动");
         authorize.setOnClickListener(ignored -> {
@@ -768,7 +768,7 @@ public final class MainActivity extends Activity {
         String value = number == null ? "" : number.getText().toString().trim();
         if (value.isEmpty()) { toast("请输入号码"); return; }
         if (!dialerRoleHeld()) {
-            toast("请先将 AirSIM 设为默认电话应用");
+            toast("请先将 余奉电话助理 设为默认电话应用");
             requestDialerRole();
             return;
         }
@@ -822,7 +822,7 @@ public final class MainActivity extends Activity {
                 toast("默认电话角色已由系统启用");
                 checkAVFEnvironmentAtStartup();
             } else {
-                toast(detail + "，请在默认应用中选择 AirSIM");
+                toast(detail + "，请在默认应用中选择 余奉电话助理");
                 openDefaultAppsSettings();
             }
         });
@@ -842,7 +842,7 @@ public final class MainActivity extends Activity {
 
     private void localCall(String action) {
         if (!dialerRoleHeld()) {
-            toast("当前通话属于其他默认电话应用；请先选择 AirSIM");
+            toast("当前通话属于其他默认电话应用；请先选择 余奉电话助理");
             requestDialerRole();
             return;
         }
@@ -1163,7 +1163,7 @@ public final class MainActivity extends Activity {
                 String shizuku = ShizukuBridgeManager.get(this).status();
                 details = "状态：" + shizuku + "\n原因：" + (shizukuReady()
                         ? "Binder 已连接；是否有声音仍需检查 PCM 路由"
-                        : "检查 Shizuku 是否运行、AirSIM 授权及 PCM 用户服务是否成功绑定");
+                        : "检查 Shizuku 是否运行、余奉电话助理 授权及 PCM 用户服务是否成功绑定");
                 keywords = new String[]{"shizuku", "local_output"};
             }
             default -> throw new IllegalStateException("未知功能");
@@ -1186,12 +1186,12 @@ public final class MainActivity extends Activity {
 		boolean needsInstall = snapshot.state() == AVFStartupPolicy.State.RUNNING && !agentConfigured;
 		boolean canLaunch = snapshot.state() == AVFStartupPolicy.State.READY_TO_START;
 		AlertDialog dialog = new AlertDialog.Builder(this)
-				.setTitle(needsInstall ? "配置 AirSIM AVF Agent" : "需要启动 AVF Linux 环境")
+				.setTitle(needsInstall ? "配置 余奉电话助理 AVF Agent" : "需要启动 AVF Linux 环境")
 				.setMessage(avfEnvironmentSummary(snapshot)
 						+ (needsInstall
 						? "\n\n若尚未安装，复制首次安装命令到 Linux Terminal；" +
 								"若 Agent 已运行，先执行 sudo airsim-avf-pair 配对并检查 installerd。"
-						: "\n\n启动 Linux 后，在 Terminal 中粘贴 AirSIM 一键安装命令。"))
+						: "\n\n启动 Linux 后，在 Terminal 中粘贴 余奉电话助理 一键安装命令。"))
 				.setPositiveButton(needsInstall ? "复制首次安装命令"
 						: canLaunch ? "启动 Linux Terminal" : "打开开发者选项",
 						(ignored, which) -> {
@@ -1215,10 +1215,10 @@ public final class MainActivity extends Activity {
 			case READY_TO_START -> "系统已提供 AVF 和 Linux Terminal，但虚拟 Linux 尚未启动。";
 			case TERMINAL_DISABLED -> "系统包含 Linux Terminal，但当前被开发者选项停用。";
 			case TERMINAL_MISSING -> snapshot.restrictedChinaOEM()
-					? "当前国产 ROM 未提供 AOSP Linux Terminal 组件；AirSIM 无法用普通应用权限强制补装或开启。"
+					? "当前国产 ROM 未提供 AOSP Linux Terminal 组件；余奉电话助理 无法用普通应用权限强制补装或开启。"
 					: "系统声明支持 AVF，但未安装 AOSP Linux Terminal 组件。";
 			case AVF_UNSUPPORTED -> snapshot.restrictedChinaOEM()
-					? "当前国产 ROM 没有向第三方应用公开 AVF Linux 能力，无法由 AirSIM 强制开启。"
+					? "当前国产 ROM 没有向第三方应用公开 AVF Linux 能力，无法由余奉电话助理强制开启。"
 					: "当前系统没有公开 AVF 能力，请检查系统版本和厂商支持。";
 		};
 	}
@@ -1232,7 +1232,7 @@ public final class MainActivity extends Activity {
 
 	private void copyAVFInstallCommand() {
 		getSystemService(ClipboardManager.class).setPrimaryClip(
-				ClipData.newPlainText("AirSIM AVF 一键安装", AVFStartupPolicy.installCommand()));
+				ClipData.newPlainText("余奉电话助理 AVF 一键安装", AVFStartupPolicy.installCommand()));
 		toast("AVF 一键安装命令已复制");
 	}
 
@@ -1451,14 +1451,14 @@ public final class MainActivity extends Activity {
     private void copyDebugLog() {
         String value = BridgeLog.read();
         getSystemService(ClipboardManager.class).setPrimaryClip(
-                ClipData.newPlainText("AirSIM Debug Log", value));
+                ClipData.newPlainText("余奉电话助理 Debug Log", value));
         toast("日志已复制");
     }
 
     private void exportDebugLog() {
         Intent share = new Intent(Intent.ACTION_SEND);
         share.setType("text/plain");
-        share.putExtra(Intent.EXTRA_SUBJECT, "AirSIM Android 诊断");
+        share.putExtra(Intent.EXTRA_SUBJECT, "余奉电话助理 Android 诊断");
         share.putExtra(Intent.EXTRA_TEXT, BridgeLog.read());
         startActivity(Intent.createChooser(share, "导出诊断"));
     }
@@ -1695,7 +1695,7 @@ public final class MainActivity extends Activity {
             continueAfterSystemRoleRequest();
         } else if (request == DEFAULT_APPS_REQUEST) {
             if (dialerRoleHeld()) checkAVFEnvironmentAtStartup();
-            else toast("AirSIM 仍未获得默认电话角色");
+            else toast("余奉电话助理仍未获得默认电话角色");
         }
     }
 

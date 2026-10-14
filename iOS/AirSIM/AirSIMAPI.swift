@@ -360,7 +360,7 @@ enum APIError: LocalizedError {
         case .invalidResponse: return "模块代理返回了无效响应"
         case let .http(status, message): return message?.isEmpty == false ? message : "请求失败（HTTP \(status)）"
         case let .unreadablePayload(message): return message
-        case .disabledLegacyRoute: return "uPhone 不支持旧模块控制路线"
+        case .disabledLegacyRoute: return "üMobile Kit 不支持旧模块控制路线"
         }
     }
 }

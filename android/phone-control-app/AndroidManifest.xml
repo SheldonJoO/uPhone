@@ -29,7 +29,7 @@
         android:allowBackup="false"
         android:debuggable="true"
         android:icon="@mipmap/ic_launcher"
-        android:label="508Kit"
+        android:label="余奉电话助理"
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
         android:theme="@android:style/Theme.Material.NoActionBar"

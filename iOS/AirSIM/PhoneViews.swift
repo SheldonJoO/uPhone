@@ -367,8 +367,9 @@ private struct DialPadBottomStrip: View {
     let agentCount: Int
     let showAll: () -> Void
 
-    @State private var selectedSimID: Int? = SimSelectionStore.selectedSubscriptionID()
+    @State private var selectedSimID: Int? = nil
 
+    private var deviceID: String? { currentAgent?.id }
     private var simCards: [SimCard] { currentAgent?.simCards ?? [] }
 
     private var transportText: String {
@@ -414,7 +415,7 @@ private struct DialPadBottomStrip: View {
                         Button {
                             let newID = (selectedSimID == sim.subscriptionID) ? nil : sim.subscriptionID
                             selectedSimID = newID
-                            SimSelectionStore.select(subscriptionID: newID)
+                            SimSelectionStore.select(subscriptionID: newID, for: deviceID)
                         } label: {
                             HStack(spacing: 4) {
                                 Text(sim.shortLabel)
@@ -455,13 +456,20 @@ private struct DialPadBottomStrip: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.horizontal, 4)
+        .onAppear {
+            selectedSimID = SimSelectionStore.selectedSubscriptionID(for: deviceID)
+        }
         .onReceive(NotificationCenter.default.publisher(for: .simCardsUpdated)) { _ in
-            selectedSimID = SimSelectionStore.selectedSubscriptionID()
+            selectedSimID = SimSelectionStore.selectedSubscriptionID(for: deviceID)
             // 已选的 SIM 不在当前列表里时，回到默认（不指定）
             if let selectedSimID, !simCards.contains(where: { $0.subscriptionID == selectedSimID }) {
                 self.selectedSimID = nil
-                SimSelectionStore.select(subscriptionID: nil)
+                SimSelectionStore.select(subscriptionID: nil, for: deviceID)
             }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .simSelectionChanged)) { _ in
+            // 值守机列表里点的选卡，同步到这里的胶囊状态。
+            selectedSimID = SimSelectionStore.selectedSubscriptionID(for: deviceID)
         }
     }
 
@@ -638,7 +646,8 @@ struct RecentsView: View {
                 if sims.count > 1 {
                     ForEach(sims) { sim in
                         Button(sim.fullLabel) {
-                            SimSelectionStore.select(subscriptionID: sim.subscriptionID)
+                            SimSelectionStore.select(subscriptionID: sim.subscriptionID,
+                                                     for: model.currentAndroidAgent?.id)
                             onCall(dialNumber)
                         }
                     }
@@ -981,7 +990,7 @@ struct RecentsView: View {
                     HStack(spacing: 4) {
                         Image(systemName: call.direction == "incoming" ? "arrow.down.left" : "arrow.up.right")
                             .font(.caption2.weight(.semibold))
-                        Text(call.missed ? L10n.t("未接") : "uPhone 音频")
+                        Text(call.missed ? L10n.t("未接") : "üMobile Kit 音频")
                         if let place = PhoneAttribution.shared.lookup(call.number)?.shortPlace {
                             Text("· \(place)")
                         }
@@ -2838,8 +2847,10 @@ private struct DTMFKeypadView: View {
                     .lineLimit(1)
                     .contentTransition(.numericText())
                     .accessibilityLabel(enteredDigits.isEmpty ? "尚未输入按键" : enteredDigits)
+                // GlassEffectContainer 的融合距离必须明显小于按键真实间距（横向 24pt / 纵向 16pt），
+                // 否则 Liquid Glass 会把相邻圆键吸成一体，按"1"时按压高亮会漫到旁边的键上。
                 if #available(iOS 26.0, *) {
-                    GlassEffectContainer(spacing: 16) { keypad }
+                    GlassEffectContainer(spacing: 4) { keypad }
                 } else {
                     keypad
                 }
