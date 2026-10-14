@@ -45,7 +45,12 @@ final class StandaloneCloudMediaManager implements Closeable {
 
     void startOutgoing(JSONObject call) {
         if (call == null) return;
-        try { start(Descriptor.from(call)); }
+        try {
+            // 媒体走生效 Relay：自定义地址优先，否则用呼叫自带的 relay_url。
+            String custom = AppConfig.customRelayUrl(context);
+            String relayUrl = custom.isEmpty() ? call.optString("relay_url") : custom;
+            start(Descriptor.from(call, relayUrl));
+        }
         catch (Exception error) { BridgeLog.error("standalone_outgoing_media_invalid", error); }
     }
 
@@ -58,7 +63,8 @@ final class StandaloneCloudMediaManager implements Closeable {
             descriptor = active == null ? null : active.descriptor;
         }
         if ("incoming".equals(direction) && "incoming".equals(state) && descriptor == null) {
-            descriptor = Descriptor.incoming(registration, androidID);
+            descriptor = Descriptor.incoming(registration, androidID,
+                    AppConfig.effectiveRelayUrl(context, registration));
             JSONObject payload = identity(registration).put("event", "incoming_call")
                     .put("call_id", descriptor.callID).put("call_uuid", descriptor.callUUID)
                     .put("generation", descriptor.generation).put("call_secret", descriptor.secret)
@@ -277,21 +283,21 @@ final class StandaloneCloudMediaManager implements Closeable {
             this.androidID = androidID;
         }
 
-        static Descriptor from(JSONObject call) {
+        static Descriptor from(JSONObject call, String relayUrl) {
             Descriptor result = new Descriptor(call.optString("call_id"), call.optString("call_uuid"),
                     call.optLong("generation", 1), call.optString("call_secret"),
-                    call.optString("relay_url"), call.optString("direction", "outgoing"), "");
+                    relayUrl, call.optString("direction", "outgoing"), "");
             result.validate();
             return result;
         }
 
-        static Descriptor incoming(JSONObject registration, String androidID) {
+        static Descriptor incoming(JSONObject registration, String androidID, String relayUrl) {
             byte[] secret = new byte[32];
             new SecureRandom().nextBytes(secret);
             StringBuilder encoded = new StringBuilder(64);
             for (byte value : secret) encoded.append(String.format("%02x", value & 0xff));
             Descriptor result = new Descriptor("android-" + System.currentTimeMillis(), UUID.randomUUID().toString(), 1,
-                    encoded.toString(), registration.optString("relay_url"), "incoming", androidID);
+                    encoded.toString(), relayUrl, "incoming", androidID);
             result.validate();
             return result;
         }

@@ -111,6 +111,13 @@ public final class AppConfig {
         preferences(context).edit().putString("custom_relay_url", url == null ? "" : url.trim()).apply();
     }
 
+    /** 生效中的 Relay 地址：自定义地址优先，否则用配对时注册的地址。 */
+    public static String effectiveRelayUrl(Context context, org.json.JSONObject registration) {
+        String custom = customRelayUrl(context);
+        if (!custom.isEmpty()) return custom;
+        return registration == null ? "" : registration.optString("relay_url", "");
+    }
+
 	static String discoverAVFEndpoint() {
 		try {
 			NetworkInterface avf = NetworkInterface.getByName("avf_tap_fixed");

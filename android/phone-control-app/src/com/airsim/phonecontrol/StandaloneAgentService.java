@@ -46,7 +46,7 @@ public final class StandaloneAgentService extends Service {
     @Override public void onCreate() {
         super.onCreate();
         store = new StandaloneAgentStore(this);
-        relay = new StandaloneRelayClient();
+        relay = new StandaloneRelayClient(this);
         startForeground(BridgeNotification.WATCHDOG_ID,
                 BridgeNotification.status(this, "内置 Agent 正在启动"),
                 ServiceInfo.FOREGROUND_SERVICE_TYPE_REMOTE_MESSAGING);

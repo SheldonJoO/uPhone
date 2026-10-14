@@ -143,6 +143,33 @@ final class AppModel: ObservableObject {
     let backgroundStandby = BackgroundStandbyController()
     let vowlan = VoWLANController()
     let incomingNotifier = IncomingCallNotifier()
+
+    // MARK: - 多设备管理（配对 sheet 用）
+
+    private static let ignoredAgentIDsKey = "uphone.ignored-agent-ids"
+    private static let preferredAgentIDKey = "uphone.preferred-agent-id"
+
+    /// 用户在配对 sheet 里"解散配对"/忽略的设备（VoWLAN 广播无法真正解绑，仅不再显示、不再自动选中）。
+    @Published var ignoredAgentIDs: Set<String> = Set(
+        UserDefaults.standard.stringArray(forKey: AppModel.ignoredAgentIDsKey) ?? []
+    ) {
+        didSet {
+            UserDefaults.standard.set(Array(ignoredAgentIDs), forKey: Self.ignoredAgentIDsKey)
+        }
+    }
+
+    /// 用户在配对 sheet 里点选的当前设备（持久化；云端走 DeviceRegistry 切换，VoWLAN 尽力重连）。
+    @Published var preferredAgentID: String? =
+        UserDefaults.standard.string(forKey: AppModel.preferredAgentIDKey)
+    {
+        didSet {
+            if let preferredAgentID {
+                UserDefaults.standard.set(preferredAgentID, forKey: Self.preferredAgentIDKey)
+            } else {
+                UserDefaults.standard.removeObject(forKey: Self.preferredAgentIDKey)
+            }
+        }
+    }
     let incomingSMSNotifier = IncomingSMSNotifier()
     let liveActivity = LiveActivityController()
 
@@ -245,6 +272,12 @@ final class AppModel: ObservableObject {
         }
 
         let currentID: String? = {
+            // 用户点选的设备优先（需仍在列表且在线）。
+            if let preferred = preferredAgentID,
+               let item = values[preferred],
+               item.vowlanOnline || item.cloudOnline {
+                return preferred
+            }
             if vowlan.availability.isOnlineForDisplay, let endpoint = vowlan.availability.endpoint {
                 return vowlan.discoveredAgents.first(where: { $0.endpoint == endpoint })?.id
             }
@@ -253,7 +286,8 @@ final class AppModel: ObservableObject {
                 ?? cloudStatus?.agents.first(where: \.cloudOnline)?.id
         }()
 
-        return values.values.map { item in
+        let ignored = ignoredAgentIDs
+        return values.values.filter { !ignored.contains($0.id) }.map { item in
             AndroidAgentPresentation(
                 id: item.id,
                 deviceName: item.deviceName,
@@ -283,6 +317,37 @@ final class AppModel: ObservableObject {
             cloudAgentDirectory = nil
         }
         NotificationCenter.default.post(name: .simCardsUpdated, object: nil)
+    }
+
+    // MARK: - 多设备：解绑 / 设为当前
+
+    /// 解绑设备：记入忽略名单（配对 sheet 不再显示）；云端设备同时从 DeviceRegistry 删除。
+    /// VoWLAN 是局域网广播发现，无法真正"解绑"，忽略即不再显示、不再自动选中。
+    func unpairAndroidAgent(id: String) {
+        ignoredAgentIDs.insert(id)
+        DeviceRegistry.remove(deviceID: id)
+        if preferredAgentID == id {
+            preferredAgentID = nil
+        }
+    }
+
+    /// 设为当前设备：点选切换。云端设备走 DeviceRegistry 切换并重同步注册；
+    /// VoWLAN 设备记下偏好并重建浏览器触发重连（注意：VoWLAN 传输层实际连接的端点由
+    /// VoWLANController 内部的 discoveredEndpoint 决定，精确的端点级切换需要给它加
+    /// selectEndpoint 方法；当前为尽力而为）。
+    func selectAndroidAgent(id: String) {
+        guard pairedAndroidAgents.contains(where: { $0.id == id }) else { return }
+        preferredAgentID = id
+        Task {
+            // 云端路径：切换活跃设备凭据，后续拨号/短信/推送注册全部跟随。
+            if DeviceRegistry.switchTo(deviceID: id) {
+                await VoIPPushController.shared.forceRegistrationSync()
+                await refreshCloudStatusForDiagnostics()
+            } else {
+                // VoWLAN 路径：重建浏览器，让连接尽快切到偏好设备。
+                await MainActor.run { vowlan.restartBrowsing() }
+            }
+        }
     }
 
     @discardableResult

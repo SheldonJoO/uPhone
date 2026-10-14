@@ -266,7 +266,13 @@ final class StandaloneAgentGateway {
                 }
                 activeCall.put("direction", event.optString("direction"))
                         .put("state", state).put("number", event.optString("number"))
+                        .put("subscription_id", event.optInt("subscription_id", -1))
+                        .put("slot_index", event.optInt("slot_index", -1))
                         .put("updated_at", Instant.now().toString());
+                // 首次进入 active 时记录接通时间；从未接通则没有该字段。
+                if ("active".equals(state) && activeCall.isNull("connected_at")) {
+                    activeCall.put("connected_at", Instant.now().toString());
+                }
             }
         }
         callEvents.advance();

@@ -14,8 +14,15 @@ import java.nio.charset.StandardCharsets;
 final class StandaloneRelayClient {
     record Response(int status, String body) {}
 
+    private final android.content.Context context;
+
+    StandaloneRelayClient(android.content.Context context) {
+        this.context = context.getApplicationContext();
+    }
+
     Response post(JSONObject registration, String path, JSONObject payload, int timeoutMillis) throws Exception {
-        String base = registration.getString("relay_url");
+        // 自定义 Relay 优先：注册/心跳/命令/短信事件全部走生效地址，不能只让 Service 走自定义。
+        String base = AppConfig.effectiveRelayUrl(context, registration);
         URI target = URI.create(base + path);
         if (!"https".equalsIgnoreCase(target.getScheme()) || target.getHost() == null
                 || target.getRawUserInfo() != null) {

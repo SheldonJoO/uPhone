@@ -13,12 +13,36 @@ struct CallRecord: Codable, Equatable, Sendable, Identifiable {
     let updatedAt: Date
     let endedAt: Date?
     let missed: Bool
+    /// Android 上报的订阅 ID（-1=未知），双卡拨号路由用。
+    let subscriptionID: Int? = nil
+    /// Android 上报的卡槽（0/1，-1=未知），双卡展示与策略隔离用。
+    let slotIndex: Int? = nil
+    /// Android 上报的接通时间（ISO8601，可缺省）；缺省时回退到 startedAt。
+    let connectedAt: Date? = nil
 
     enum CodingKeys: String, CodingKey {
         case id, index, direction, state, number, missed
         case startedAt = "started_at"
         case updatedAt = "updated_at"
         case endedAt = "ended_at"
+        case subscriptionID = "subscription_id"
+        case slotIndex = "slot_index"
+        case connectedAt = "connected_at"
+    }
+
+    /// 双卡短标签，如 "SIM 1"；无卡槽信息时返回 nil。
+    var simLabel: String? {
+        guard let slotIndex, slotIndex >= 0 else { return nil }
+        return "SIM \(slotIndex + 1)"
+    }
+
+    /// 真实通话时长：以接通时间为准（connectedAt ?? startedAt → endedAt ?? 现在）。
+    /// 从未接通的未接来电返回 nil。
+    var callDuration: TimeInterval? {
+        if connectedAt == nil, missed { return nil }
+        let start = connectedAt ?? startedAt
+        let end = endedAt ?? Date()
+        return max(0, end.timeIntervalSince(start))
     }
 }
 
@@ -1206,6 +1230,10 @@ struct CallPolicy: Codable {
     /// 归一化后的号码（纯数字，已去 +86/0086 前缀）。
     var blacklist: [String] = []
     var whitelist: [String] = []
+    /// 按卡槽隔离的黑名单（key 为 slotIndex 0/1），号码格式与 blacklist 一致。
+    var blacklistBySlot: [Int: [String]] = [:]
+    /// 按卡槽隔离的白名单（key 为 slotIndex 0/1），号码格式与 whitelist 一致。
+    var whitelistBySlot: [Int: [String]] = [:]
     /// 白名单模式/静默例外是否包含通讯录全部号码。
     var whitelistIncludesContacts: Bool = false
     var quietRules: [QuietRule] = []
@@ -1219,17 +1247,20 @@ struct CallPolicy: Codable {
 }
 
 /// 分时段静默规则。deviceID 为空表示全部设备（单卡场景等同按 SIM 卡）。
+/// slotIndex 为 nil 表示适用于所有 SIM，否则只对指定卡槽生效。
 struct QuietRule: Codable, Identifiable {
     var id: UUID = UUID()
     var deviceID: String = ""
+    var slotIndex: Int? = nil
     /// 当天分钟数 0..<1440；start > end 表示跨天（如 23:00–07:00）。
     var startMinutes: Int = 1380
     var endMinutes: Int = 420
     var enabled: Bool = true
 
-    func isActive(at date: Date, deviceID: String?) -> Bool {
+    func isActive(at date: Date, deviceID: String?, slotIndex: Int? = nil) -> Bool {
         guard enabled else { return false }
         if !self.deviceID.isEmpty, self.deviceID != deviceID { return false }
+        if let ruleSlot = self.slotIndex, ruleSlot != slotIndex { return false }
         let cal = Calendar.current
         let mins = cal.component(.hour, from: date) * 60 + cal.component(.minute, from: date)
         if startMinutes <= endMinutes {
@@ -1326,10 +1357,10 @@ final class CallPolicyStore: ObservableObject {
         return digits
     }
 
-    func decision(for number: String?, deviceID: String?, at date: Date = Date()) -> CallPolicyDecision {
+    func decision(for number: String?, deviceID: String?, at date: Date = Date(), slotIndex: Int? = nil) -> CallPolicyDecision {
         let normalized = Self.normalizedNumber(number ?? "")
-        // 静默时段：白名单（含联系人）不受限，其余一律拦截。
-        if policy.quietRules.contains(where: { $0.isActive(at: date, deviceID: deviceID) }) {
+        // 静默时段：白名单（含联系人）不受限，其余一律拦截；规则可按 SIM 卡隔离。
+        if policy.quietRules.contains(where: { $0.isActive(at: date, deviceID: deviceID, slotIndex: slotIndex) }) {
             return !normalized.isEmpty && isWhitelisted(normalized)
                 ? .allow
                 : CallPolicyDecision(shouldBlock: true, reason: "静默时段")
@@ -1338,12 +1369,15 @@ final class CallPolicyStore: ObservableObject {
         case .off:
             return .allow
         case .blacklist:
-            return policy.blacklist.contains(normalized)
+            // 全局黑名单或该卡槽的黑名单命中其一即拦截。
+            let inSlotBlacklist = slotIndex.flatMap { policy.blacklistBySlot[$0] }?.contains(normalized) ?? false
+            return (policy.blacklist.contains(normalized) || inSlotBlacklist)
                 ? CallPolicyDecision(shouldBlock: true, reason: "黑名单")
                 : .allow
         case .whitelist:
-            // 未知号码也视为非白名单，一律拒接。
-            return !normalized.isEmpty && isWhitelisted(normalized)
+            // 未知号码也视为非白名单，一律拒接；该卡槽的白名单同样放行。
+            let inSlotWhitelist = slotIndex.flatMap { policy.whitelistBySlot[$0] }?.contains(normalized) ?? false
+            return !normalized.isEmpty && (isWhitelisted(normalized) || inSlotWhitelist)
                 ? .allow
                 : CallPolicyDecision(shouldBlock: true, reason: "非白名单号码")
         }

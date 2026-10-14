@@ -81,15 +81,17 @@ final class AndroidAgentIdentity {
      * 自动检测失败时，用手动配置的号码补齐（TCL 功能机 SubscriptionManager 可能不可靠）。 */
     static JSONArray simCards(Context context) {
         JSONArray cards = new JSONArray();
-        if (context.checkSelfPermission(Manifest.permission.READ_PHONE_STATE)
-                != PackageManager.PERMISSION_GRANTED) return cards;
+        // 权限只门控自动检测：手动填的号码是用户输入，不需要任何权限，必须始终生效。
+        boolean canReadState = context.checkSelfPermission(Manifest.permission.READ_PHONE_STATE)
+                == PackageManager.PERMISSION_GRANTED;
+        if (canReadState) {
         try {
             SubscriptionManager manager = context.getSystemService(SubscriptionManager.class);
-            if (manager == null) return cards;
-            List<SubscriptionInfo> subscriptions = manager.getActiveSubscriptionInfoList();
-            if (subscriptions == null) return cards;
+            List<SubscriptionInfo> subscriptions =
+                    manager == null ? null : manager.getActiveSubscriptionInfoList();
             boolean canReadNumbers = context.checkSelfPermission(Manifest.permission.READ_PHONE_NUMBERS)
                     == PackageManager.PERMISSION_GRANTED;
+            if (subscriptions != null) {
             for (SubscriptionInfo subscription : subscriptions) {
                 int subscriptionId = subscription.getSubscriptionId();
                 String number = "";
@@ -112,6 +114,7 @@ final class AndroidAgentIdentity {
                             .put("icc_id", clean(subscription.getIccId())));
                 } catch (JSONException ignored) {}
             }
+            } // subscriptions != null
         } catch (SecurityException ignored) {}
         // 手动配置兜底：如果自动检测不到该槽位，或检测到的号码为空，
         // 用用户手动填的号码补齐/填补（TCL 功能机 SubscriptionManager 经常返回空号码）。

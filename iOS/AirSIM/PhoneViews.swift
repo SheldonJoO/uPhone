@@ -204,9 +204,9 @@ struct DialPadView: View {
             .toolbar(.hidden, for: .navigationBar)
             .sheet(item: $pairedAgentListPresentation) { _ in
                 PairedAndroidAgentsView(
-                    agents: model.pairedAndroidAgents,
                     cloudModeEnabled: CloudModePreference.isEnabled()
                 )
+                .environmentObject(model)
             }
             .task {
                 while !Task.isCancelled {
@@ -502,8 +502,10 @@ private struct AgentTransportPill: View {
 
 private struct PairedAndroidAgentsView: View {
     @Environment(\.dismiss) private var dismiss
-    let agents: [AndroidAgentPresentation]
+    @EnvironmentObject private var model: AppModel
     let cloudModeEnabled: Bool
+
+    private var agents: [AndroidAgentPresentation] { model.pairedAndroidAgents }
 
     var body: some View {
         NavigationStack {
@@ -543,6 +545,34 @@ private struct PairedAndroidAgentsView: View {
                     }
                 }
                 .padding(.vertical, 5)
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    // 点选设为当前设备（已是当前则无操作）
+                    if !agent.isCurrent {
+                        model.selectAndroidAgent(id: agent.id)
+                    }
+                }
+                .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                    Button(role: .destructive) {
+                        model.unpairAndroidAgent(id: agent.id)
+                    } label: {
+                        Label("解散配对", systemImage: "trash.fill")
+                    }
+                }
+                .contextMenu {
+                    if !agent.isCurrent {
+                        Button {
+                            model.selectAndroidAgent(id: agent.id)
+                        } label: {
+                            Label("设为当前设备", systemImage: "checkmark.circle")
+                        }
+                    }
+                    Button(role: .destructive) {
+                        model.unpairAndroidAgent(id: agent.id)
+                    } label: {
+                        Label("解散配对", systemImage: "trash")
+                    }
+                }
             }
             .overlay {
                 if agents.isEmpty {
@@ -1023,11 +1053,10 @@ struct RecentsView: View {
         let contact: ContactStore.Contact?
         let displayName: String
 
-        /// 通话时长格式化：endedAt - startedAt，精确到秒
-        private func callDuration(_ call: CallRecord) -> String? {
-            guard let ended = call.endedAt else { return nil }
-            let seconds = Int(ended.timeIntervalSince(call.startedAt))
-            guard seconds > 0 else { return nil }
+        /// 通话时长格式化：用 CallRecord.callDuration（接通时长）；nil 表示未接通，不显示。
+        private func callDurationText(_ duration: TimeInterval) -> String {
+            let seconds = Int(duration)
+            guard seconds > 0 else { return "0:00" }
             let h = seconds / 3600
             let m = (seconds % 3600) / 60
             let s = seconds % 60
@@ -1057,6 +1086,10 @@ struct RecentsView: View {
                         if let place = PhoneAttribution.shared.lookup(call.number)?.shortPlace {
                             Text("· \(place)")
                         }
+                        // 双卡标注：哪张卡打出/接到的
+                        if let simLabel = call.simLabel {
+                            Text("· \(simLabel)")
+                        }
                     }
                     .font(.subheadline)
                     .foregroundStyle(call.missed ? .red : .secondary)
@@ -1070,8 +1103,8 @@ struct RecentsView: View {
                     .lineLimit(1)
                     .minimumScaleFactor(0.78)
                     .frame(width: PhoneListMetrics.timeColumnWidth, alignment: .trailing)
-                if let duration = callDuration(call) {
-                    Text(duration)
+                if let duration = call.callDuration {
+                    Text(callDurationText(duration))
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                         .lineLimit(1)

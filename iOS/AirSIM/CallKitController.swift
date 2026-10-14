@@ -201,7 +201,8 @@ final class CallKitController: NSObject {
             return
         }
         // 来电策略：黑白名单 / 静默时段命中则自动拒接（仍需上报系统以满足 PushKit 要求，上报成功后立即挂断）。
-        let policyDecision = CallPolicyStore.shared.decision(for: call.number, deviceID: call.deviceID)
+        // PushKit 载荷暂不带卡槽信息，按 SIM 隔离的策略在此路径按"未知卡槽"处理。
+        let policyDecision = CallPolicyStore.shared.decision(for: call.number, deviceID: call.deviceID, slotIndex: nil)
         if policyDecision.shouldBlock, !pendingAutoDecline.contains(call.uuid) {
             CallPolicyStore.shared.logBlocked(
                 number: call.number, deviceID: call.deviceID, reason: policyDecision.reason)
@@ -374,7 +375,7 @@ final class CallKitController: NSObject {
         // 必须在 reportIncomingIfNeeded 之前完成判定，上报成功后自动挂断走标准链路。
         // 仅对未接听的来电生效；已接通的不追杀。
         if ["incoming", "waiting"].contains(call.state), let uuid = currentUUID {
-            let policyDecision = CallPolicyStore.shared.decision(for: call.number, deviceID: nil)
+            let policyDecision = CallPolicyStore.shared.decision(for: call.number, deviceID: nil, slotIndex: call.slotIndex)
             if policyDecision.shouldBlock, !pendingAutoDecline.contains(uuid) {
                 CallPolicyStore.shared.logBlocked(
                     number: call.number, deviceID: nil, reason: policyDecision.reason)

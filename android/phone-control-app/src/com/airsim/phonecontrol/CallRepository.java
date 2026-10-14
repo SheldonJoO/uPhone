@@ -25,6 +25,12 @@ public final class CallRepository {
     private static final Map<String, Call> CALLS = new ConcurrentHashMap<>();
     private static final Map<Call, String> IDS = new ConcurrentHashMap<>();
 
+    /**
+     * 最近一次拨号命令指定的 subscription_id（字符串，可能为空）。
+     * execute() 发起 placeCall 时写入；AirSIMInCallService 在去电的 onCallAdded 里消费一次后清空。
+     */
+    public static volatile String pendingDialSubscriptionId = "";
+
     private CallRepository() {}
 
     public static String add(Call call) {
@@ -148,6 +154,8 @@ public final class CallRepository {
                 BridgeLog.info("dial_sim_not_found subscription_id=" + command.subscriptionId
                         + " fallback=default");
             }
+            // 暂存本次拨号指定的订阅，供 InCallService 推断通话所用 SIM 卡（去电消费一次后清空）。
+            pendingDialSubscriptionId = command.subscriptionId == null ? "" : command.subscriptionId;
             String error = TelecomInvocation.run(
                     task -> new Handler(Looper.getMainLooper()).post(task),
                     () -> telecomManager.placeCall(Uri.parse("tel:" + command.number), extras),

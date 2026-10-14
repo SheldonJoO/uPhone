@@ -462,9 +462,30 @@ struct PairedDevicesSection: View {
 /// 来电策略管理：黑白名单、静默时段、拒接短信通知、拦截记录。
 struct CallPolicyView: View {
     @ObservedObject private var store = CallPolicyStore.shared
+    @EnvironmentObject private var model: AppModel
     @State private var newBlockNumber = ""
     @State private var newWhiteNumber = ""
     @State private var showingRuleEditor = false
+    /// 添加黑名单号码时的适用 SIM（nil = 全部）
+    @State private var blockSimSlot: Int? = nil
+    /// 添加白名单号码时的适用 SIM（nil = 全部）
+    @State private var whiteSimSlot: Int? = nil
+
+    /// 当前值守设备的 SIM 卡；双卡时才显示按 SIM 选择。
+    private var simCards: [SimCard] { model.currentAndroidAgent?.simCards ?? [] }
+    private var showSimPicker: Bool { simCards.count > 1 }
+
+    /// SIM 选择器（全部 / SIM 1 / SIM 2）
+    @ViewBuilder
+    private func simSlotPicker(selection: Binding<Int?>) -> some View {
+        Picker("适用 SIM 卡", selection: selection) {
+            Text("全部").tag(nil as Int?)
+            ForEach(simCards) { sim in
+                Text(sim.shortLabel).tag(sim.slotIndex as Int?)
+            }
+        }
+        .pickerStyle(.segmented)
+    }
 
     var body: some View {
         Form {
@@ -487,17 +508,32 @@ struct CallPolicyView: View {
                     Text(number).monospacedDigit()
                 }
                 .onDelete { store.policy.blacklist.remove(atOffsets: $0) }
+                // 按 SIM 卡隔离的黑名单
+                ForEach(store.policy.blacklistBySlot.keys.sorted(), id: \.self) { slot in
+                    if let numbers = store.policy.blacklistBySlot[slot], !numbers.isEmpty {
+                        Text("仅 SIM \(slot + 1)")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        ForEach(numbers, id: \.self) { number in
+                            Text(number).monospacedDigit()
+                        }
+                        .onDelete { deleteSlotNumbers($0, slot: slot, blacklist: true) }
+                    }
+                }
                 HStack {
                     TextField("输入号码后添加", text: $newBlockNumber)
                         .keyboardType(.phonePad)
                         .monospacedDigit()
-                    Button("添加") { addNumber($newBlockNumber, to: \.blacklist, mode: .blacklist) }
+                    Button("添加") { addNumber($newBlockNumber, slot: blockSimSlot, blacklist: true) }
                         .disabled(CallPolicyStore.normalizedNumber(newBlockNumber).isEmpty)
                 }
+                if showSimPicker {
+                    simSlotPicker(selection: $blockSimSlot)
+                }
             } header: {
-                Text("黑名单（\(store.policy.blacklist.count)）")
+                Text("黑名单（\(blacklistTotalCount)）")
             } footer: {
-                Text("名单内号码来电将自动拒接。")
+                Text("名单内号码来电将自动拒接。选择 SIM 卡可只对该卡生效。")
                     .font(.caption)
             }
 
@@ -507,17 +543,32 @@ struct CallPolicyView: View {
                     Text(number).monospacedDigit()
                 }
                 .onDelete { store.policy.whitelist.remove(atOffsets: $0) }
+                // 按 SIM 卡隔离的白名单
+                ForEach(store.policy.whitelistBySlot.keys.sorted(), id: \.self) { slot in
+                    if let numbers = store.policy.whitelistBySlot[slot], !numbers.isEmpty {
+                        Text("仅 SIM \(slot + 1)")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        ForEach(numbers, id: \.self) { number in
+                            Text(number).monospacedDigit()
+                        }
+                        .onDelete { deleteSlotNumbers($0, slot: slot, blacklist: false) }
+                    }
+                }
                 HStack {
                     TextField("输入号码后添加", text: $newWhiteNumber)
                         .keyboardType(.phonePad)
                         .monospacedDigit()
-                    Button("添加") { addNumber($newWhiteNumber, to: \.whitelist, mode: .whitelist) }
+                    Button("添加") { addNumber($newWhiteNumber, slot: whiteSimSlot, blacklist: false) }
                         .disabled(CallPolicyStore.normalizedNumber(newWhiteNumber).isEmpty)
                 }
+                if showSimPicker {
+                    simSlotPicker(selection: $whiteSimSlot)
+                }
             } header: {
-                Text("白名单（\(store.policy.whitelist.count)）")
+                Text("白名单（\(whitelistTotalCount)）")
             } footer: {
-                Text("白名单模式下，非名单号码（含未知号码）一律自动拒接。打开包含通讯录开关后，通讯录里的号码自动放行。")
+                Text("白名单模式下，非名单号码（含未知号码）一律自动拒接。打开包含通讯录开关后，通讯录里的号码自动放行。选择 SIM 卡可只对该卡生效。")
                     .font(.caption)
             }
 
@@ -531,7 +582,7 @@ struct CallPolicyView: View {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(rule.timeRangeText)
                                     .font(.headline.monospacedDigit())
-                                Text(ruleDeviceName(for: rule))
+                                Text(ruleScopeName(for: rule))
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
                             }
@@ -617,9 +668,12 @@ struct CallPolicyView: View {
         .navigationTitle("来电策略")
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $showingRuleEditor) {
-            QuietRuleEditor { rule in
-                store.policy.quietRules.append(rule)
-            }
+            QuietRuleEditor(
+                onSave: { rule in
+                    store.policy.quietRules.append(rule)
+                },
+                simCards: simCards
+            )
             .presentationDetents([.medium])
         }
     }
@@ -632,31 +686,89 @@ struct CallPolicyView: View {
         }
     }
 
-    private func addNumber(_ input: Binding<String>, to keyPath: WritableKeyPath<CallPolicy, [String]>, mode: CallPolicy.Mode) {
+    private func addNumber(_ input: Binding<String>, slot: Int?, blacklist: Bool) {
         let normalized = CallPolicyStore.normalizedNumber(input.wrappedValue)
         guard !normalized.isEmpty else { return }
-        if !store.policy[keyPath: keyPath].contains(normalized) {
-            store.policy[keyPath: keyPath].append(normalized)
+        if blacklist {
+            if let slot {
+                var list = store.policy.blacklistBySlot[slot] ?? []
+                if !list.contains(normalized) { list.append(normalized) }
+                store.policy.blacklistBySlot[slot] = list
+            } else {
+                if !store.policy.blacklist.contains(normalized) {
+                    store.policy.blacklist.append(normalized)
+                }
+            }
+        } else {
+            if let slot {
+                var list = store.policy.whitelistBySlot[slot] ?? []
+                if !list.contains(normalized) { list.append(normalized) }
+                store.policy.whitelistBySlot[slot] = list
+            } else {
+                if !store.policy.whitelist.contains(normalized) {
+                    store.policy.whitelist.append(normalized)
+                }
+            }
         }
         // 加号码即启用对应模式：mode 默认为 .off，不切的话名单加了也拦不住。
         if store.policy.mode == .off {
-            store.policy.mode = mode
+            store.policy.mode = blacklist ? .blacklist : .whitelist
         }
         input.wrappedValue = ""
     }
 
-    private func ruleDeviceName(for rule: QuietRule) -> String {
-        if rule.deviceID.isEmpty { return "全部设备" }
-        return store.deviceName(for: rule.deviceID) ?? "未知设备"
+    /// 删除按 SIM 隔离名单中的号码。
+    private func deleteSlotNumbers(at offsets: IndexSet, slot: Int, blacklist: Bool) {
+        if blacklist {
+            var list = store.policy.blacklistBySlot[slot] ?? []
+            list.remove(atOffsets: offsets)
+            if list.isEmpty {
+                store.policy.blacklistBySlot.removeValue(forKey: slot)
+            } else {
+                store.policy.blacklistBySlot[slot] = list
+            }
+        } else {
+            var list = store.policy.whitelistBySlot[slot] ?? []
+            list.remove(atOffsets: offsets)
+            if list.isEmpty {
+                store.policy.whitelistBySlot.removeValue(forKey: slot)
+            } else {
+                store.policy.whitelistBySlot[slot] = list
+            }
+        }
+    }
+
+    private var blacklistTotalCount: Int {
+        store.policy.blacklist.count + store.policy.blacklistBySlot.values.reduce(0) { $0 + $1.count }
+    }
+
+    private var whitelistTotalCount: Int {
+        store.policy.whitelist.count + store.policy.whitelistBySlot.values.reduce(0) { $0 + $1.count }
+    }
+
+    /// 静默规则的作用范围：设备 + SIM 卡。
+    private func ruleScopeName(for rule: QuietRule) -> String {
+        var parts: [String] = []
+        if rule.deviceID.isEmpty {
+            parts.append("全部设备")
+        } else {
+            parts.append(store.deviceName(for: rule.deviceID) ?? "未知设备")
+        }
+        if let slot = rule.slotIndex {
+            parts.append("SIM \(slot + 1)")
+        }
+        return parts.joined(separator: " · ")
     }
 }
 
-/// 新增静默时段：选设备 + 起止时间。
+/// 新增静默时段：选设备 + SIM 卡 + 起止时间。
 private struct QuietRuleEditor: View {
     @Environment(\.dismiss) private var dismiss
     var onSave: (QuietRule) -> Void
+    var simCards: [SimCard] = []
 
     @State private var deviceID = ""
+    @State private var slotIndex: Int? = nil
     @State private var start = Calendar.current.date(bySettingHour: 23, minute: 0, second: 0, of: Date()) ?? Date()
     @State private var end = Calendar.current.date(bySettingHour: 7, minute: 0, second: 0, of: Date()) ?? Date()
     private var devices: [PairedDevice] { DeviceRegistry.allDevices() }
@@ -669,6 +781,15 @@ private struct QuietRuleEditor: View {
                     ForEach(devices) { device in
                         Text(device.displayName).tag(device.deviceID)
                     }
+                }
+                if simCards.count > 1 {
+                    Picker("适用 SIM 卡", selection: $slotIndex) {
+                        Text("全部").tag(nil as Int?)
+                        ForEach(simCards) { sim in
+                            Text(sim.shortLabel).tag(sim.slotIndex as Int?)
+                        }
+                    }
+                    .pickerStyle(.segmented)
                 }
                 DatePicker("开始", selection: $start, displayedComponents: .hourAndMinute)
                 DatePicker("结束", selection: $end, displayedComponents: .hourAndMinute)
@@ -687,6 +808,7 @@ private struct QuietRuleEditor: View {
                         let cal = Calendar.current
                         onSave(QuietRule(
                             deviceID: deviceID,
+                            slotIndex: slotIndex,
                             startMinutes: cal.component(.hour, from: start) * 60 + cal.component(.minute, from: start),
                             endMinutes: cal.component(.hour, from: end) * 60 + cal.component(.minute, from: end)
                         ))
