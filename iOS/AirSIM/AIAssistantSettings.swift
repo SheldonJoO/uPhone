@@ -64,7 +64,11 @@ struct AIAssistantSettingsView: View {
 
             Section("规划中的能力") {
                 ForEach(AIAssistantScope.allCases, id: \.self) { scope in
-                    LabeledContent(scope.rawValue, value: "未接入")
+                    LabeledContent {
+                        Text("未接入")
+                    } label: {
+                        Text(scope.rawValue)
+                    }
                 }
             } footer: {
                 Text("安全原则：AI 只能提议、不能直接外呼或发短信；敏感操作每次都需要你点确认；号码与短信内容不出本机。")
