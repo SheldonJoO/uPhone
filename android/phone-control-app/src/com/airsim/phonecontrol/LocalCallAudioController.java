@@ -19,7 +19,7 @@ final class LocalCallAudioController {
         BridgeLog.info("local_call_output_requested target_silent=" + shouldSilence);
         AudioManager am = (AudioManager) appContext.getSystemService(Context.AUDIO_SERVICE);
         if (am == null) {
-            BridgeLog.error("local_call_output_no_audio_manager");
+            BridgeLog.info("local_call_output_no_audio_manager");
             return;
         }
         // 1) Shizuku 特权桥：在特权身份下真正静音本机语音通话输出流，最可靠。

@@ -252,24 +252,32 @@ public final class StandaloneAgentService extends Service {
         JSONArray smsPending = smsStore.cloudPending();
         for (int index = 0; index < smsPending.length(); index++) {
             JSONObject source = smsPending.getJSONObject(index);
-            JSONObject event = identity(registration).put("event", "incoming_sms")
-                    .put("delivery_id", source.optString("delivery_id"))
-                    .put("sender", source.optString("sender")).put("content", source.optString("content"))
-                    .put("timestamp", source.optString("timestamp", Instant.now().toString()));
-            if (source.has("subscription_id")) {
-                event.put("subscription_id", source.optInt("subscription_id"));
+            try {
+                JSONObject event = identity(registration).put("event", "incoming_sms")
+                        .put("delivery_id", source.optString("delivery_id"))
+                        .put("sender", source.optString("sender")).put("content", source.optString("content"))
+                        .put("timestamp", source.optString("timestamp", Instant.now().toString()));
+                if (source.has("subscription_id")) {
+                    event.put("subscription_id", source.optInt("subscription_id"));
+                }
+                if (source.has("slot_index")) {
+                    event.put("slot_index", source.optInt("slot_index"));
+                }
+                if (source.has("code")) {
+                    event.put("code", source.optString("code"));
+                }
+                if (source.has("category")) {
+                    event.put("category", source.optString("category"));
+                }
+                relay.postJSON(registration, "/v1/events/sms", event, 12_000);
+                smsStore.markCloudSent(source.getString("delivery_id"));
+            } catch (Exception error) {
+                // 单条失败不能拖垮整个周期：保留 pending 等下轮重试，
+                // 否则一次网络抖动会让通话事件和后续短信全部卡住。
+                // 短信按时间顺序投递，因此遇到失败就停下，下轮从这一条继续。
+                BridgeLog.error("standalone_sms_upload_failed", error);
+                break;
             }
-            if (source.has("slot_index")) {
-                event.put("slot_index", source.optInt("slot_index"));
-            }
-            if (source.has("code")) {
-                event.put("code", source.optString("code"));
-            }
-            if (source.has("category")) {
-                event.put("category", source.optString("category"));
-            }
-            relay.postJSON(registration, "/v1/events/sms", event, 12_000);
-            smsStore.markCloudSent(source.getString("delivery_id"));
         }
     }
 

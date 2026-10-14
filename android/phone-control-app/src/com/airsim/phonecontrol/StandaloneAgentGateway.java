@@ -117,9 +117,16 @@ final class StandaloneAgentGateway {
 
     void sendSMSEvent(String json) throws Exception {
         JSONObject event = new JSONObject(json);
-        if (smsStore.add(event, store.configured() && store.cloudEnabled())) {
+        // 短信是值守的核心产出：只要已配对就入队，不再被 cloudEnabled 开关牵连。
+        // 老逻辑里这个开关一旦为 false，短信会永久只存本地、再也不同步到 iPhone，
+        // 而且事后打开开关也不补发——这就是「短信不同步」的回归点。
+        boolean queued = smsStore.add(event, store.configured());
+        if (queued) {
             agentEvents.advance();
-            if (store.configured() && store.cloudEnabled()) StandaloneAgentService.start(context);
+            // 是否拉起上传交给值守开关：停止值守时短信本地留存，重新开启后自动补发。
+            if (store.configured() && DutyStore.isDutyOn(context)) {
+                StandaloneAgentService.start(context);
+            }
         }
     }
 
