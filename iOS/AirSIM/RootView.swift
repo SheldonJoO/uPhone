@@ -95,6 +95,7 @@ struct RootView: View {
                 ActiveCallView(call: call)
                     .transition(.opacity.combined(with: .scale(scale: 0.98)))
             }
+            recordingSavedToast
         }
         .background(PhoneBackdrop())
         .animation(.easeInOut(duration: 0.2), value: model.inAppPresentedCall?.id)
@@ -132,7 +133,7 @@ struct RootView: View {
             model.recordingStartDate = nil
             if let url = notification.userInfo?["url"] as? URL {
                 model.recordingShareURL = url
-                model.showRecordingShare = true
+                model.recordingSavedNotice = L10n.t("通话录音已保存到本机 · 在录音列表可转发")
             }
         }
         .alert(L10n.t("通话录音"), isPresented: $model.showRecordingComplianceAlert) {
@@ -141,13 +142,14 @@ struct RootView: View {
         } message: {
             Text(L10n.t("录音将保存在本机（左声道是你，右声道是对方），可分享。请遵守当地法律法规，必要时告知对方正在录音。"))
         }
-        // 录音结束自动分享：不再走 SwiftUI sheet 托管 UIActivityViewController
-        //（该写法会白屏），改为 UIKit 直接 present；后台挂断时等回到前台再弹。
-        .onChange(of: model.showRecordingShare) { _ in
-            DispatchQueue.main.async { presentPendingRecordingShare() }
-        }
-        .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
-            presentPendingRecordingShare()
+        // 录音结束/停止只静默落盘，用轻提示告知，不再自动弹系统分享框
+        //（真正转发入口在录音列表）。提示 2.5s 后自动消失。
+        .onChange(of: model.recordingSavedNotice) { notice in
+            if notice != nil {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
+                    if model.recordingSavedNotice == notice { model.recordingSavedNotice = nil }
+                }
+            }
         }
         .alert(L10n.t("错误"), isPresented: errorBinding) {
             Button("OK") { model.errorMessage = nil }
@@ -156,12 +158,19 @@ struct RootView: View {
         }
     }
 
-    /// 尝试弹出待分享的录音；成功后消费掉标记，失败（后台）则留待回到前台重试。
-    private func presentPendingRecordingShare() {
-        guard model.showRecordingShare, let url = model.recordingShareURL else { return }
-        guard SystemSharePresenter.present(url: url) else { return }
-        model.showRecordingShare = false
-        model.recordingShareURL = nil
+    /// 录音已保存的轻提示气泡（顶部）。
+    private var recordingSavedToast: some View {
+        Group {
+            if let notice = model.recordingSavedNotice {
+                Text(notice)
+                    .font(.caption.weight(.medium))
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 9)
+                    .background(.thinMaterial, in: Capsule())
+                    .foregroundStyle(.primary)
+                    .padding(.top, 10)
+            }
+        }
     }
 
     private var errorBinding: Binding<Bool> {

@@ -57,6 +57,13 @@ final class StandaloneAgentStore {
                 && !value.optString("relay_url", "").isBlank();
     }
 
+    /** 真正解绑：清除云端配对，让 Agent 停止接受命令、停止心跳（VoWLAN 由调用方一并停止）。 */
+    synchronized void clearRegistration() {
+        preferences.edit().remove(REGISTRATION).remove(LAST_ERROR)
+                .putLong(LAST_SEEN, 0).apply();
+        BridgeLog.info("standalone_registration_cleared");
+    }
+
     boolean cloudEnabled() {
         JSONObject value = registration();
         return value != null && !value.optBoolean("local_mode", false)

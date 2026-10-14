@@ -1211,7 +1211,8 @@ final class VoIPPushController: NSObject {
         }
         let outcome = try await waitForCloudCommand(commandID: commandID, timeout: timeout)
         guard outcome.status == "completed", outcome.result?.dialing == true else {
-            throw CloudCommandError.failed(outcome.error ?? "模块未能开始拨号")
+            throw CloudCommandError.failed(outcome.error
+                ?? "模块未能开始拨号（云端命令未执行；若刚重装/重置 Android，请重新配对以刷新 device_id）")
         }
         return try IncomingVoIPCall(
             outgoingCallID: call.callID,
@@ -1236,7 +1237,8 @@ final class VoIPPushController: NSObject {
         guard enqueue.accepted else { throw CloudCommandError.invalidResponse }
         let outcome = try await waitForCloudCommand(commandID: commandID, timeout: 5 * 60)
         guard outcome.status == "completed", outcome.result?.sent == true else {
-            throw CloudCommandError.failed(outcome.error ?? "模块发送短信失败")
+            throw CloudCommandError.failed(outcome.error
+                ?? "模块发送短信失败（云端命令未执行；若刚重装/重置 Android，请重新配对以刷新 device_id）")
         }
         return SMSSendResult(sent: true, segments: outcome.result?.segments)
     }
@@ -1254,6 +1256,17 @@ final class VoIPPushController: NSObject {
         guard outcome.status == "completed", outcome.result?.sent == true else {
             throw CloudCommandError.failed(outcome.error ?? "模块发送 DTMF 失败")
         }
+    }
+
+    /// 云端下发解绑：经 Relay 透传到 Android（异网主路径），由 Android 真正清除配对。
+    func sendCloudUnpair() async {
+        let commandID = UUID()
+        _ = try? await enqueueCloudCommand(
+            commandID: commandID,
+            type: "unpair",
+            number: "",
+            message: nil
+        )
     }
 
     private func enqueueCloudCommand(

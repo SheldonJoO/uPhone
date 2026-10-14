@@ -470,7 +470,7 @@ struct GuardDeviceRows: View {
                         renameText = agent.deviceName
                     }.tint(.blue)
                     Button(role: .destructive) {
-                        model.unpairAndroidAgent(id: agent.id)
+                        Task { await model.unpairAndroidAgent(id: agent.id) }
                     } label: {
                         Label("解散配对", systemImage: "trash.fill")
                     }
@@ -484,7 +484,7 @@ struct GuardDeviceRows: View {
                         }
                     }
                     Button(role: .destructive) {
-                        model.unpairAndroidAgent(id: agent.id)
+                        Task { await model.unpairAndroidAgent(id: agent.id) }
                     } label: {
                         Label("解散配对", systemImage: "trash")
                     }

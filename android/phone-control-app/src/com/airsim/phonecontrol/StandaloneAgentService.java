@@ -32,6 +32,8 @@ public final class StandaloneAgentService extends Service {
     private long lastHeartbeat;
     private volatile StandaloneWebSocket commandSocket;
     private volatile boolean commandChannelConnected;
+    /** 配对过期自动解绑兜底：超过此时长无任何来自配对 iPhone 的心跳/命令，视为已解除配对。 */
+    private static final long UNPAIR_TIMEOUT_MS = 7L * 24L * 3600L * 1000L;
 
     public static void start(Context context) {
         try { context.startForegroundService(new Intent(context, StandaloneAgentService.class)); }
@@ -61,11 +63,35 @@ public final class StandaloneAgentService extends Service {
     @Override public int onStartCommand(Intent intent, int flags, int startId) { return START_STICKY; }
     @Override public IBinder onBind(Intent intent) { return null; }
 
+    static void stop(Context context) {
+        try { context.stopService(new Intent(context, StandaloneAgentService.class)); }
+        catch (RuntimeException error) { BridgeLog.error("standalone_agent_stop_failed", error); }
+    }
+
+    /** 真正解绑：清除云端 + VoWLAN 配对并停止广播/服务。iPhone 删除配对时由 unpair 指令调用。 */
+    static void unpair(Context context) {
+        try {
+            VoWLANPairingStore.clear(context);
+            new StandaloneAgentStore(context).clearRegistration();
+            VoWLANGatewayService.stop(context);
+            BridgeLog.info("agent_unpaired");
+        } catch (Exception error) {
+            BridgeLog.error("agent_unpair_failed", error);
+        }
+    }
+
     private void loop() {
         int failures = 0;
         while (running) {
             try {
                 JSONObject registration = store.registration();
+                // 配对过期兜底：最后一次来自配对 iPhone 的活动超过阈值即自动解绑，
+                // 覆盖 iPhone 端删除配对但 unpair 指令未送达（如两端异网）的情况。
+                long sincePaired = System.currentTimeMillis() - store.lastSeen();
+                if (store.configured() && sincePaired > UNPAIR_TIMEOUT_MS) {
+                    BridgeLog.info("agent_auto_unpaired_after_timeout days=" + (sincePaired / 86_400_000L));
+                    unpair(this);
+                }
                 if (registration == null || !store.cloudEnabled()) {
                     update(registration == null ? "内置 Agent 在线 · 等待 iPhone 配对" : "内置 Agent 在线 · 云端已关闭");
                     Thread.sleep(2_000);

@@ -120,7 +120,9 @@ final class AppModel: ObservableObject {
     @Published var isRecording = false
     @Published var recordingStartDate: Date?
     @Published var showRecordingComplianceAlert = false
-    @Published var showRecordingShare = false
+    /// 录音结束/手动停止后只静默落盘（左=本机、右=远端），不弹系统分享框；
+    /// 用此轻提示告知用户已保存，真正的转发入口在录音列表里。
+    @Published var recordingSavedNotice: String?
     @Published var recordingShareURL: URL?
     @Published var errorMessage: String?
 
@@ -346,15 +348,24 @@ final class AppModel: ObservableObject {
         SimSelectionStore.currentDeviceID = currentAndroidAgent?.id
     }
 
-    /// 解绑设备：记入忽略名单（配对 sheet 不再显示）；云端设备同时从 DeviceRegistry 删除。
-    /// VoWLAN 是局域网广播发现，无法真正"解绑"，忽略即不再显示、不再自动选中。
-    func unpairAndroidAgent(id: String) {
+    /// 解绑设备：本地移除记录后，向 Android 下发真正的解绑指令
+    /// （云端 Relay 透传覆盖异网场景，局域网直连作为同网兜底）。
+    /// Android 收到后会清除云端 + VoWLAN 配对并停止广播，此后不再接受任何命令。
+    func unpairAndroidAgent(id: String) async {
+        let creds = DeviceRegistry.credentials(for: id)
         ignoredAgentIDs.insert(id)
         DeviceRegistry.remove(deviceID: id)
         if preferredAgentID == id {
             preferredAgentID = nil
         }
         syncSimDeviceScope()
+        await VoIPPushController.shared.sendCloudUnpair()
+        if let creds {
+            Task.detached {
+                try? await AirSIMAPI.shared.unpairLocally(
+                    deviceID: creds.deviceID, deviceSecret: creds.deviceSecret)
+            }
+        }
     }
 
     /// 配对成功后调用：把该设备从忽略名单里放出来。
@@ -1295,7 +1306,7 @@ final class AppModel: ObservableObject {
             recordingStartDate = nil
             if let url {
                 recordingShareURL = url
-                showRecordingShare = true
+                recordingSavedNotice = L10n.t("通话录音已保存到本机 · 在录音列表可转发")
             }
             return
         }

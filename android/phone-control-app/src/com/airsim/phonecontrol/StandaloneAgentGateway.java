@@ -120,6 +120,15 @@ final class StandaloneAgentGateway {
         JSONObject input = body == null || body.isBlank() ? new JSONObject() : new JSONObject(body);
         return switch (path) {
             case "/api/push/register" -> ok(registerPairing(input.toString()));
+            case "/api/pairing/unpair" -> {
+                JSONObject registration = store.registration();
+                if (registration == null) yield ok("{\"unpaired\":true}");
+                if (!registration.optString("device_id", "").equals(input.optString("device_id", ""))
+                        || !registration.optString("device_secret", "").equals(input.optString("device_secret", ""))) {
+                    yield error(403, "配对凭证不匹配");
+                }
+                yield doUnpair();
+            }
             case "/api/push/mode" -> ok(store.setCloudEnabled(
                     input.optBoolean("enabled", false)).toString());
             case "/api/calls/dial" -> command("dial", "", input.optString("number", ""), "",
@@ -175,6 +184,10 @@ final class StandaloneAgentGateway {
             }
         }
         String type = command.optString("type", "");
+        if ("unpair".equals(type)) {
+            // 云端命令由 Relay 已鉴权（仅配对 iPhone 能路由到本机），直接解绑。
+            return rememberCommand(commandKey, doUnpair());
+        }
         String action = switch (type) {
             case "dial" -> "dial";
             case "send_sms" -> "send_sms";
@@ -235,6 +248,21 @@ final class StandaloneAgentGateway {
             case "send_sms" -> value.put("sent", true).put("segments", result.segments());
         }
         return ok(value.toString());
+    }
+
+    /** 真正解绑：清除云端 + VoWLAN 配对，停止广播与 Agent 服务。调用前由调用方完成鉴权。 */
+    private JSONObject doUnpair() {
+        try {
+            VoWLANPairingStore.clear(context);
+            store.clearRegistration();
+            VoWLANGatewayService.stop(context);
+            StandaloneAgentService.stop(context);
+            BridgeLog.info("agent_unpaired");
+        } catch (Exception error) {
+            BridgeLog.error("agent_unpair_failed", error);
+            return error(500, "解绑失败：" + error.getClass().getSimpleName());
+        }
+        return ok("{\"unpaired\":true}");
     }
 
     private AgentCommandDispatcher.Result execute(AgentCommand command) {

@@ -23,7 +23,7 @@ const TOKEN_PATTERN = /^[0-9a-f]{16,512}$/i;
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const encoder = new TextEncoder();
 const MEDIA_CLIENT_ROLES = new Set(["watch", "iphone"]);
-const COMMAND_TYPES = new Set(["dial", "send_sms", "dtmf"]);
+const COMMAND_TYPES = new Set(["dial", "send_sms", "dtmf", "unpair"]);
 const MEDIA_TRANSPORTS = new Set(["legacy_pcm", "webrtc"]);
 
 let cachedProviderToken = "";
@@ -371,6 +371,7 @@ function validateDeviceCommand(value) {
       (value.type !== "dial" || value.media_transport !== "legacy_pcm")) {
     return "invalid media transport";
   }
+  if (value.type === "unpair") return ""; // 解绑指令不需要号码/内容
   const number = normalizePhoneNumber(value.number);
   if (!number || number.length > 82) return "invalid phone number";
   if (value.type === "dtmf" && (number.length !== 1 || !/^[0-9*#]$/.test(number))) {

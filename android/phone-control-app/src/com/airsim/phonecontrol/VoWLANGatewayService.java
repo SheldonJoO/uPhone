@@ -55,6 +55,11 @@ public final class VoWLANGatewayService extends Service {
     @Override public int onStartCommand(Intent intent, int flags, int startId) { return START_STICKY; }
     @Override public IBinder onBind(Intent intent) { return null; }
 
+    static void stop(Context context) {
+        try { context.stopService(new Intent(context, VoWLANGatewayService.class)); }
+        catch (RuntimeException error) { BridgeLog.error("vowlan_service_stop_failed", error); }
+    }
+
     private void lifecycleLoop() {
         while (running) {
             try {

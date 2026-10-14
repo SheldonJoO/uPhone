@@ -113,6 +113,19 @@ public final class CallRepository {
             return null;
         }
         if (handles == null) return null;
+        // Pass 0 (most reliable on Android 6+): match by the account's own subscription id.
+        // TCL / many OEM ROMs do not embed the ICC ID in the handle id and hide the phone
+        // number, so the two legacy passes below silently fall through to the default SIM.
+        for (PhoneAccountHandle handle : handles) {
+            try {
+                PhoneAccount account = telecomManager.getPhoneAccount(handle);
+                if (account != null && account.getSubscriptionId() == subId) {
+                    BridgeLog.info("dial_sim_matched subscription_id=" + subId
+                            + " match=subscription_id");
+                    return handle;
+                }
+            } catch (SecurityException ignored) {}
+        }
         // First pass: match by ICC ID embedded in the handle ID.
         if (iccId != null && !iccId.isEmpty()) {
             for (PhoneAccountHandle handle : handles) {

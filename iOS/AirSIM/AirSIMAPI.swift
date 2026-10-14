@@ -192,6 +192,12 @@ struct AirSIMAPI: Sendable {
         return try await postDecoded("api/sms/send", body, timeout: 80)
     }
     func refreshSMS() async throws { try await post("api/sms/refresh", EmptyBody()) }
+
+    /// 局域网下发解绑（同网兜底）：Android 校验 device_id + device_secret 后清除配对。
+    func unpairLocally(deviceID: String, deviceSecret: String) async throws {
+        try await post("api/pairing/unpair",
+                       ["device_id": deviceID, "device_secret": deviceSecret], timeout: 8)
+    }
     func clearModuleSMS() async throws { try await post("api/sms/clear-module", EmptyBody()) }
     func setSMSAutoCleanup(_ enabled: Bool) async throws {
         try await send("PATCH", "api/sms/settings", ["auto_cleanup_me": enabled])
