@@ -377,14 +377,12 @@ private struct DialPadBottomStrip: View {
 
     private var transportText: String {
         guard let agent = currentAgent else { return "未连接" }
-        if agent.vowlanOnline { return "VoWLAN 在线" }
-        if agent.cloudOnline { return "云端在线" }
-        return "离线"
+        return agent.linkTitle
     }
 
     private var transportOnline: Bool {
         guard let agent = currentAgent else { return false }
-        return agent.vowlanOnline || agent.cloudOnline
+        return agent.linkKind != .offline
     }
 
     var body: some View {
@@ -480,112 +478,18 @@ extension Notification.Name {
     static let simCardsUpdated = Notification.Name("uphone.simCardsUpdated")
 }
 
-private struct AgentTransportPill: View {
-    let title: String
-    let online: Bool
-    let enabled: Bool
-
-    private var color: Color { !enabled ? .secondary : (online ? .green : .secondary) }
-
-    var body: some View {
-        HStack(spacing: 4) {
-            Circle().fill(color).frame(width: 6, height: 6)
-            Text("\(title) \(!enabled ? "关闭" : (online ? "在线" : "离线"))")
-                .font(.caption2.weight(.medium))
-        }
-        .foregroundStyle(color)
-        .padding(.horizontal, 8)
-        .padding(.vertical, 5)
-        .background(color.opacity(0.1), in: Capsule())
-    }
-}
-
+/// 拨号页状态弹窗：与"设置-值守机"共用同一套统一列表。
 private struct PairedAndroidAgentsView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var model: AppModel
     let cloudModeEnabled: Bool
 
-    private var agents: [AndroidAgentPresentation] { model.pairedAndroidAgents }
-
     var body: some View {
         NavigationStack {
-            List(agents) { agent in
-                VStack(alignment: .leading, spacing: 9) {
-                    HStack(alignment: .firstTextBaseline, spacing: 8) {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(agent.deviceName)
-                                .font(.headline)
-                            // 多号码展示：双卡时列出每张卡
-                            if agent.simCards.count > 1 {
-                                ForEach(agent.simCards) { sim in
-                                    Text(sim.fullLabel)
-                                        .font(.subheadline)
-                                        .foregroundStyle(.secondary)
-                                }
-                            } else {
-                                Text(agent.phoneNumber ?? "号码未提供")
-                                    .font(.subheadline)
-                                    .foregroundStyle(.secondary)
-                            }
-                        }
-                        Spacer()
-                        if agent.isCurrent {
-                            Label("当前", systemImage: "checkmark.circle.fill")
-                                .font(.caption.weight(.semibold))
-                                .foregroundStyle(.green)
-                        }
-                    }
-                    HStack(spacing: 8) {
-                        AgentTransportPill(title: "VoWLAN", online: agent.vowlanOnline, enabled: true)
-                        AgentTransportPill(title: "云端", online: agent.cloudOnline, enabled: cloudModeEnabled)
-                        Spacer()
-                        Text(agent.agentKindTitle)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-                .padding(.vertical, 5)
-                .contentShape(Rectangle())
-                .onTapGesture {
-                    // 点选设为当前设备（已是当前则无操作）
-                    if !agent.isCurrent {
-                        model.selectAndroidAgent(id: agent.id)
-                    }
-                }
-                .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                    Button(role: .destructive) {
-                        model.unpairAndroidAgent(id: agent.id)
-                    } label: {
-                        Label("解散配对", systemImage: "trash.fill")
-                    }
-                }
-                .contextMenu {
-                    if !agent.isCurrent {
-                        Button {
-                            model.selectAndroidAgent(id: agent.id)
-                        } label: {
-                            Label("设为当前设备", systemImage: "checkmark.circle")
-                        }
-                    }
-                    Button(role: .destructive) {
-                        model.unpairAndroidAgent(id: agent.id)
-                    } label: {
-                        Label("解散配对", systemImage: "trash")
-                    }
-                }
+            List {
+                GuardDeviceRows()
             }
-            .overlay {
-                if agents.isEmpty {
-                    VStack(spacing: 10) {
-                        Image(systemName: "smartphone.slash")
-                            .font(.system(size: 34))
-                            .foregroundStyle(.secondary)
-                        Text("暂无已配对 Android Agent")
-                            .font(.headline)
-                    }
-                }
-            }
-            .navigationTitle("已配对 Android Agent")
+            .navigationTitle("值守机")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {

@@ -236,6 +236,14 @@ enum SimSelectionStore {
     }
 }
 
+/// 值守机的统一连接方式：本地和云端不再是两种"设备"，而是一台设备的两种"线路"。
+/// 同一 Wi-Fi 下优先 Wi-Fi 直连，不在身边时经云中继兜底。
+enum DeviceLinkKind {
+    case wifiDirect
+    case cloud
+    case offline
+}
+
 struct AndroidAgentPresentation: Equatable, Identifiable, Sendable {
     let id: String
     let deviceName: String
@@ -272,6 +280,28 @@ struct AndroidAgentPresentation: Equatable, Identifiable, Sendable {
         case "avf": return "AVF Agent"
         default: return "Android Agent"
         }
+    }
+
+    /// 当前生效的线路：Wi-Fi 直连优先，云中继兜底，都不通即离线。
+    var linkKind: DeviceLinkKind {
+        if vowlanOnline { return .wifiDirect }
+        if cloudOnline { return .cloud }
+        return .offline
+    }
+
+    var linkTitle: String {
+        switch linkKind {
+        case .wifiDirect: return "Wi-Fi 直连"
+        case .cloud: return "云中继"
+        case .offline: return "离线"
+        }
+    }
+
+    /// SIM 卡小结："SIM 1 · 中国移动 138****0000" / 单卡显示号码 / 无卡显示占位。
+    var simSummaryLines: [String] {
+        if simCards.count > 1 { return simCards.map(\.fullLabel) }
+        if let first = simCards.first { return [first.fullLabel] }
+        return [phoneNumber ?? "号码未提供"]
     }
 }
 

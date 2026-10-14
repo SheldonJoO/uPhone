@@ -271,6 +271,21 @@ final class AppModel: ObservableObject {
             )
         }
 
+        // 注册表里配对过、但云端目录和局域网都暂时看不到的设备：显示为离线。
+        // 这样"值守机"列表永远完整，不会因为设备关机就消失。
+        let knownIDs = Set(values.keys)
+        for device in DeviceRegistry.allDevices() where !knownIDs.contains(device.deviceID) {
+            values[device.deviceID] = AndroidAgentPresentation(
+                id: device.deviceID,
+                deviceName: device.displayName,
+                phoneNumber: nil,
+                agentKind: nil,
+                cloudOnline: false,
+                vowlanOnline: false,
+                isCurrent: false
+            )
+        }
+
         let currentID: String? = {
             // 用户点选的设备优先（需仍在列表且在线）。
             if let preferred = preferredAgentID,

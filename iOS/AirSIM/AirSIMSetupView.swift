@@ -124,62 +124,19 @@ struct AirSIMSettingsView: View {
         NavigationStack {
             Form {
                 Section {
-                    Toggle(isOn: $localModeEnabled) {
-                        Label("仅本地模式", systemImage: "wifi")
-                    }
-                    .onChange(of: localModeEnabled) { enabled in
-                        selfTestTask?.cancel()
-                        selfTestPhase = .idle
-                        selfTestReport = nil
-                        if enabled { cloudModeEnabled = false }
-                        model.setLocalModeEnabled(enabled)
-                    }
+                    GuardDeviceRows()
                 } header: {
-                    Text("运行模式")
+                    Text("值守机")
                 } footer: {
-                    Text(localModeEnabled
-                        ? "仅使用同一 Wi-Fi 或手机热点下的 VoWLAN。不会注册 Relay、APNs、PushKit 或 CallKit。"
-                        : "关闭后可按需启用云端 Relay、PushKit 和 CallKit。")
+                    Text("本地和云端不再是两种设备，而是一台设备的两条线路：同一 Wi-Fi 下优先 Wi-Fi 直连，在外地时经云中继。点选切换当前值守机。")
                 }
 
-                Section("当前连接") {
-                    LabeledContent("当前模式", value: model.connectionModePresentation.title)
-                    LabeledContent("连接状态", value: model.connectionModePresentation.status)
-                    LabeledContent("VoWLAN", value: VoWLANStatusCopy.text(for: model.vowlan.availability))
-                    LabeledContent(
-                        "云端 Relay",
-                        value: localModeEnabled
-                            ? "本地模式已关闭"
-                            : (!cloudModeEnabled
-                            ? "已关闭"
-                            : (model.cloudAgentStatus?.cloudOnline == true ? "Agent 在线" : "不可达"))
-                    )
-                    Text(model.connectionModePresentation.detail)
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
-                    if let connectionMessage = model.connectionMessage, !connectionMessage.isEmpty {
-                        Text(connectionMessage)
-                            .font(.footnote)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-
-                Section("安卓连接") {
-                    LabeledContent("VoWLAN", value: VoWLANStatusCopy.text(for: model.vowlan.availability))
-                    NavigationLink {
-                        SamsungPairingView()
-                    } label: {
-                        Label("值守配对", systemImage: "personalhotspot")
-                    }
+                Section {
+                    LabeledContent("Wi-Fi 直连", value: VoWLANStatusCopy.text(for: model.vowlan.availability))
                     Button("重新发现", systemImage: "arrow.clockwise") {
                         model.vowlan.restartBrowsing()
                         Task { await model.vowlan.probeNow() }
                     }
-                }
-
-                PairedDevicesSection()
-
-                Section {
                     Toggle(isOn: $cloudModeEnabled) {
                         Label("远程通话与短信", systemImage: "cloud")
                     }
@@ -197,13 +154,23 @@ struct AirSIMSettingsView: View {
                             await model.refreshCloudStatusForDiagnostics()
                         }
                     }
+                    Toggle(isOn: $localModeEnabled) {
+                        Label("仅 Wi-Fi 直连模式", systemImage: "wifi")
+                    }
+                    .onChange(of: localModeEnabled) { enabled in
+                        selfTestTask?.cancel()
+                        selfTestPhase = .idle
+                        selfTestReport = nil
+                        if enabled { cloudModeEnabled = false }
+                        model.setLocalModeEnabled(enabled)
+                    }
 
                     TextField("https://relay.example.com", text: $relayURL)
                         .keyboardType(.URL)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
                         .disabled(localModeEnabled)
-                    Button("保存 Relay 地址") {
+                    Button("保存中继地址") {
                         VoIPPushController.shared.updateRelayURL(relayURL)
                         selfTestTask?.cancel()
                         selfTestPhase = .idle
@@ -219,9 +186,9 @@ struct AirSIMSettingsView: View {
                     .disabled(localModeEnabled)
                     if let message { Text(message).foregroundStyle(.secondary) }
                 } header: {
-                    Text("云端 Relay")
+                    Text("连接方式")
                 } footer: {
-                    Text("云端关闭后，局域网内的安卓 VoWLAN 仍可使用；公网拨打、接听和短信需要云端 Relay 与有效设备注册。")
+                    Text("云中继关闭后，只有同一 Wi-Fi 下的值守机可用；人在外地时请保持云中继开启。")
                 }
 
                 Section {
@@ -369,56 +336,128 @@ struct AirSIMSettingsView: View {
 }
 
 /// 多设备管理：配对过的安卓值守机列表，点选切换当前设备。
-struct PairedDevicesSection: View {
+/// 单条线路徽章：Wi-Fi 直连 / 云中继 / 离线。
+private struct DeviceLinkBadge: View {
+    let kind: DeviceLinkKind
+    let title: String
+
+    private var color: Color {
+        switch kind {
+        case .wifiDirect: return .blue
+        case .cloud: return .green
+        case .offline: return .secondary
+        }
+    }
+
+    var body: some View {
+        HStack(spacing: 4) {
+            Circle().fill(color).frame(width: 6, height: 6)
+            Text(title).font(.caption2.weight(.medium))
+        }
+        .foregroundStyle(color)
+        .padding(.horizontal, 8)
+        .padding(.vertical, 5)
+        .background(color.opacity(0.1), in: Capsule())
+    }
+}
+
+/// 统一的值守机列表：拨号页状态弹窗和"设置-值守机"共用同一套。
+/// 本地 / 云端不再是两种设备，而是一台设备的两条线路。
+struct GuardDeviceRows: View {
     @EnvironmentObject private var model: AppModel
-    @State private var devices: [PairedDevice] = []
-    @State private var activeID: String?
-    @State private var renamingDevice: PairedDevice?
+    @State private var renamingDevice: AndroidAgentPresentation?
     @State private var renameText = ""
     @State private var switching = false
 
+    private var agents: [AndroidAgentPresentation] { model.pairedAndroidAgents }
+
     var body: some View {
-        Section {
-            ForEach(devices) { device in
-                HStack {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(device.displayName).font(.headline)
-                        Text("…\(device.deviceID.suffix(8))")
-                            .font(.caption).foregroundStyle(.secondary)
+        Group {
+            ForEach(agents) { agent in
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack(alignment: .firstTextBaseline, spacing: 8) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(agent.deviceName).font(.headline)
+                            ForEach(agent.simSummaryLines, id: \.self) { line in
+                                Text(line).font(.subheadline).foregroundStyle(.secondary)
+                            }
+                        }
+                        Spacer()
+                        if agent.isCurrent {
+                            Label("当前", systemImage: "checkmark.circle.fill")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(.green)
+                        }
                     }
-                    Spacer()
-                    if device.deviceID == activeID {
-                        Image(systemName: "checkmark.circle.fill").foregroundStyle(.green)
+                    HStack(spacing: 8) {
+                        DeviceLinkBadge(kind: agent.linkKind, title: agent.linkTitle)
+                        Spacer()
+                        Text(agent.agentKindTitle)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
                     }
                 }
+                .padding(.vertical, 5)
                 .contentShape(Rectangle())
-                .onTapGesture { switchTo(device) }
+                .onTapGesture { switchTo(agent) }
                 .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                     Button("改名") {
-                        renamingDevice = device
-                        renameText = device.deviceName
+                        renamingDevice = agent
+                        renameText = agent.deviceName
                     }.tint(.blue)
-                    Button("删除", role: .destructive) { remove(device) }
+                    Button(role: .destructive) {
+                        model.unpairAndroidAgent(id: agent.id)
+                    } label: {
+                        Label("解散配对", systemImage: "trash.fill")
+                    }
+                }
+                .contextMenu {
+                    if !agent.isCurrent {
+                        Button {
+                            switchTo(agent)
+                        } label: {
+                            Label("设为当前设备", systemImage: "checkmark.circle")
+                        }
+                    }
+                    Button(role: .destructive) {
+                        model.unpairAndroidAgent(id: agent.id)
+                    } label: {
+                        Label("解散配对", systemImage: "trash")
+                    }
+                }
+            }
+            .overlay {
+                if agents.isEmpty {
+                    VStack(spacing: 10) {
+                        Image(systemName: "smartphone.slash")
+                            .font(.system(size: 34))
+                            .foregroundStyle(.secondary)
+                        Text("暂无值守机").font(.headline)
+                        Text("添加一台放在国内的值守手机")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 24)
                 }
             }
             NavigationLink {
                 SamsungPairingView()
             } label: {
-                Label("配对新设备", systemImage: "plus.circle")
+                Label("添加值守机", systemImage: "plus.circle")
             }
-        } header: {
-            Text("值守设备")
-        } footer: {
-            Text("点选切换当前使用的值守机；多台设备的来电会标注来源。")
         }
-        .onAppear(perform: refresh)
+        .onAppear {
+            // 老版本单设备配对只写旧槽位，第一次打开时迁移进注册表，保证列表完整。
+            DeviceRegistry.archiveActiveDeviceIfNeeded()
+        }
         .alert("重命名设备", isPresented: renamePresented) {
             TextField("设备名称，如 TCL-深圳", text: $renameText)
             Button("取消", role: .cancel) {}
             Button("保存") {
                 if let device = renamingDevice {
-                    DeviceRegistry.rename(deviceID: device.deviceID, to: renameText)
-                    refresh()
+                    DeviceRegistry.rename(deviceID: device.id, to: renameText)
+                    Task { await model.refreshPairedAndroidAgents() }
                 }
             }
         }
@@ -431,31 +470,13 @@ struct PairedDevicesSection: View {
         )
     }
 
-    private func refresh() {
-        DeviceRegistry.archiveActiveDeviceIfNeeded()
-        devices = DeviceRegistry.allDevices()
-        activeID = DeviceRegistry.activeDeviceID()
-    }
-
-    private func switchTo(_ device: PairedDevice) {
-        guard device.deviceID != activeID, !switching else { return }
+    private func switchTo(_ agent: AndroidAgentPresentation) {
+        guard !agent.isCurrent, !switching else { return }
         switching = true
         Task {
-            let ok = DeviceRegistry.switchTo(deviceID: device.deviceID)
-            if ok {
-                await VoIPPushController.shared.forceRegistrationSync()
-                await model.refreshCloudStatusForDiagnostics()
-            }
-            await MainActor.run {
-                refresh()
-                switching = false
-            }
+            model.selectAndroidAgent(id: agent.id)
+            await MainActor.run { switching = false }
         }
-    }
-
-    private func remove(_ device: PairedDevice) {
-        DeviceRegistry.remove(deviceID: device.deviceID)
-        refresh()
     }
 }
 
