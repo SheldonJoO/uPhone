@@ -62,14 +62,16 @@ struct AIAssistantSettingsView: View {
                 Text("余奉电话助理 · AI 扩展")
             }
 
-            Section("规划中的能力") {
-                ForEach(AIAssistantScope.allCases, id: \.self) { scope in
+            Section {
+                ForEach(AIAssistantScope.allCases, id: \.rawValue) { scope in
                     HStack {
-                        Text(scope.rawValue)
+                        Text(verbatim: scope.rawValue)
                         Spacer()
                         Text("未接入").foregroundStyle(.secondary)
                     }
                 }
+            } header: {
+                Text("规划中的能力")
             } footer: {
                 Text("安全原则：AI 只能提议、不能直接外呼或发短信；敏感操作每次都需要你点确认；号码与短信内容不出本机。")
             }
