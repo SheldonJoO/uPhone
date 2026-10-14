@@ -475,15 +475,42 @@ public final class MainActivity extends Activity {
         sim2Input.setText(AppConfig.sim2Number(this));
         simCard.addView(sim2Input, matchWithTop(10));
         TextView simSave = primaryButton("保存号码", BLUE);
+        TextView simStatus = label("", 13, MUTED, Gravity.START);
+        Runnable refreshSimStatus = () -> {
+            String s1 = AppConfig.sim1Number(this);
+            String s2 = AppConfig.sim2Number(this);
+            String json;
+            try {
+                json = AndroidAgentIdentity.simCards(this).toString();
+            } catch (Exception e) {
+                json = "[]";
+            }
+            StringBuilder sb = new StringBuilder();
+            sb.append("当前已保存：");
+            sb.append("SIM 1=").append(s1.isEmpty() ? "（未填）" : s1);
+            sb.append("  SIM 2=").append(s2.isEmpty() ? "（未填）" : s2);
+            sb.append("\n上报 JSON：").append(json);
+            try {
+                org.json.JSONObject r = new StandaloneAgentStore(this).registration();
+                String did = r.optString("device_id", "");
+                sb.append("\n设备ID：").append(did.isEmpty() ? "（未配对）" : did);
+            } catch (Exception e) {
+                sb.append("\n设备ID：（读取失败）");
+            }
+            simStatus.setText(sb.toString());
+        };
         simSave.setOnClickListener(ignored -> {
             AppConfig.setSim1Number(this, sim1Input.getText().toString());
             AppConfig.setSim2Number(this, sim2Input.getText().toString());
             BridgeLog.info("sim_numbers_saved");
-            android.widget.Toast.makeText(this, "已保存双卡号码，iPhone 端稍后刷新显示", android.widget.Toast.LENGTH_SHORT).show();
+            refreshSimStatus.run();
+            android.widget.Toast.makeText(this, "已保存，iPhone 端 30 秒内刷新", android.widget.Toast.LENGTH_SHORT).show();
             // 触发心跳上报，让 iPhone 尽快拿到新号码
             AgentWatchdogService.start(this);
         });
         simCard.addView(simSave, matchWithTop(12));
+        simCard.addView(simStatus, matchWithTop(8));
+        refreshSimStatus.run();
         root.addView(simCard, matchWithTop(10));
 
         // 云端 Relay 自定义地址

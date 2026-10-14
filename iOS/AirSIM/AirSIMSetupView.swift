@@ -441,7 +441,7 @@ struct GuardDeviceRows: View {
                                 .buttonStyle(.plain)
                             }
                             if agent.simCards.isEmpty {
-                                Text(agent.phoneNumber ?? "号码未提供")
+                                Text("双卡未设置 · 在值守机「双卡设置」里填写号码")
                                     .font(.subheadline)
                                     .foregroundStyle(.secondary)
                             }
