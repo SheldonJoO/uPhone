@@ -12,7 +12,9 @@ import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.Insets;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.LayerDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -54,17 +56,18 @@ public final class MainActivity extends Activity {
     private static final int ROLE_REQUEST = 100;
     private static final int DEFAULT_APPS_REQUEST = 102;
 
-    private static final int BG = Color.rgb(8, 14, 20);
-    private static final int SURFACE = Color.rgb(17, 28, 39);
-    private static final int SURFACE_HIGH = Color.rgb(23, 36, 49);
-    private static final int BORDER = Color.rgb(42, 58, 73);
-    private static final int PRIMARY = Color.rgb(52, 229, 170);
-    private static final int CYAN = Color.rgb(73, 231, 224);
+    // Neumorphism 浅色主题（试改）：底 #E0E5EC，双阴影塑造凸起/凹陷
+    private static final int BG = Color.rgb(224, 229, 236);
+    private static final int SURFACE = Color.rgb(224, 229, 236);
+    private static final int SURFACE_HIGH = Color.rgb(224, 229, 236);
+    private static final int BORDER = Color.rgb(163, 177, 198);
+    private static final int PRIMARY = Color.rgb(24, 154, 118);
+    private static final int CYAN = Color.rgb(14, 124, 134);
     private static final int BLUE = Color.rgb(47, 128, 237);
-    private static final int TEXT = Color.rgb(244, 247, 250);
-    private static final int MUTED = Color.rgb(166, 179, 193);
-    private static final int WARNING = Color.rgb(255, 184, 77);
-    private static final int DANGER = Color.rgb(255, 99, 99);
+    private static final int TEXT = Color.rgb(46, 58, 77);
+    private static final int MUTED = Color.rgb(107, 120, 137);
+    private static final int WARNING = Color.rgb(178, 106, 0);
+    private static final int DANGER = Color.rgb(214, 69, 69);
 
     private enum Page { STATUS, CALLS, DEBUG, SETTINGS }
     private enum Feature { VOWLAN, AGENT, PCM, PUSH, SHIZUKU }
@@ -155,7 +158,8 @@ public final class MainActivity extends Activity {
     private void configureWindow() {
         getWindow().setStatusBarColor(BG);
         getWindow().setNavigationBarColor(BG);
-        getWindow().getDecorView().setSystemUiVisibility(0);
+        // 浅色主题：状态栏图标切深色
+        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
     }
 
     private View buildShell() {
@@ -190,7 +194,7 @@ public final class MainActivity extends Activity {
         bar.setOrientation(LinearLayout.HORIZONTAL);
         bar.setGravity(Gravity.CENTER);
         bar.setPadding(dp(10), dp(6), dp(10), dp(8));
-        bar.setBackground(rounded(SURFACE, 28, BORDER, 1));
+        bar.setBackground(getDrawable(R.drawable.neu_bar_bg));
         navigationItems.clear();
         bar.addView(navigationItem("状态", android.R.drawable.presence_online, Page.STATUS), weighted());
         bar.addView(navigationItem("通话", android.R.drawable.sym_action_call, Page.CALLS), weighted());
@@ -250,7 +254,7 @@ public final class MainActivity extends Activity {
         hero.setGravity(Gravity.CENTER_VERTICAL);
         hero.setPadding(dp(18), dp(20), dp(18), dp(20));
         ImageView wifi = icon(android.R.drawable.ic_menu_share, CYAN, 54);
-        wifi.setBackground(rounded(Color.rgb(20, 80, 73), 28, Color.TRANSPARENT, 0));
+        wifi.setBackground(neuInsetDrawable(28));
         wifi.setPadding(dp(14), dp(14), dp(14), dp(14));
         hero.addView(wifi, new LinearLayout.LayoutParams(dp(58), dp(58)));
         LinearLayout heroCopy = column(dp(14));
@@ -322,7 +326,7 @@ public final class MainActivity extends Activity {
         recent.setOrientation(LinearLayout.HORIZONTAL);
         recent.setGravity(Gravity.CENTER_VERTICAL);
         View dot = new View(this);
-        dot.setBackground(rounded(PRIMARY, 7, Color.TRANSPARENT, 0));
+        dot.setBackground(solidPill(PRIMARY, 7));
         recent.addView(dot, new LinearLayout.LayoutParams(dp(10), dp(10)));
         TextView activity = label(latestActivity(), 14, TEXT, Gravity.CENTER_VERTICAL);
         LinearLayout.LayoutParams activityParams = weighted();
@@ -580,7 +584,7 @@ public final class MainActivity extends Activity {
         root.addView(agent, matchWithTop(10));
         agentRefreshResult = label(agentRefreshMessage, 12, agentRefreshColor, Gravity.START);
         agentRefreshResult.setPadding(dp(12), dp(8), dp(12), dp(8));
-        agentRefreshResult.setBackground(rounded(SURFACE, 12, BORDER, 1));
+        agentRefreshResult.setBackground(neuInsetDrawable(12));
         root.addView(agentRefreshResult, matchWithTop(6));
 
         CheckBox debugEnabled = new CheckBox(this);
@@ -630,7 +634,7 @@ public final class MainActivity extends Activity {
                 MainScreenPresentation.formatPairingCode(pairingCode), 42, TEXT, Gravity.CENTER);
         pairingCodeView.setTypeface(Typeface.create(Typeface.MONOSPACE, Typeface.BOLD));
         pairingCodeView.setLetterSpacing(0.05f);
-        pairingCodeView.setBackground(rounded(Color.rgb(20, 32, 45), 18, BORDER, 1));
+        pairingCodeView.setBackground(neuInsetDrawable(18));
         pairingCodeView.setPadding(dp(18), dp(18), dp(18), dp(18));
         pairingCard.addView(pairingCodeView, matchWithTop(18));
 
@@ -643,7 +647,7 @@ public final class MainActivity extends Activity {
         pairingCard.addView(label("iPhone 用 uPhone 扫码配对（或手动输入上方配对码）", 13, MUTED, Gravity.CENTER),
                 matchWithTop(8));
 
-        pairingCountdownView = label("正在生成安全密钥…", 14, Color.rgb(135, 183, 238), Gravity.CENTER);
+        pairingCountdownView = label("正在生成安全密钥…", 14, BLUE, Gravity.CENTER);
         pairingCard.addView(pairingCountdownView, matchWithTop(16));
 
         ImageView link = icon(android.R.drawable.ic_menu_share, CYAN, 92);
@@ -678,10 +682,12 @@ public final class MainActivity extends Activity {
         String[] filters = {"全部", "Agent", "VoWLAN", "PCM", "Telecom"};
         for (String filter : filters) {
             boolean selected = filter.equals(activeDebugFilter);
-            TextView chip = label(filter, 13, selected ? BG : TEXT, Gravity.CENTER);
+            TextView chip = label(filter, 13, selected ? Color.WHITE : TEXT, Gravity.CENTER);
             chip.setTypeface(Typeface.DEFAULT, selected ? Typeface.BOLD : Typeface.NORMAL);
             chip.setPadding(dp(16), dp(9), dp(16), dp(9));
-            chip.setBackground(rounded(selected ? PRIMARY : SURFACE_HIGH, 18, selected ? PRIMARY : BORDER, 1));
+            chip.setBackground(selected
+                    ? getDrawable(R.drawable.neu_accent_green)
+                    : neuRaisedDrawable(18));
             LinearLayout.LayoutParams chipParams = new LinearLayout.LayoutParams(
                     ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             chipParams.rightMargin = dp(8);
@@ -702,7 +708,7 @@ public final class MainActivity extends Activity {
         selectedMode = selectedMode == null ? AppConfig.mode(this) : selectedMode;
         LinearLayout segment = row();
         segment.setPadding(dp(3), dp(3), dp(3), dp(3));
-        segment.setBackground(rounded(SURFACE_HIGH, 24, BORDER, 1));
+        segment.setBackground(neuInsetDrawable(24));
         segment.addView(segmentItem("远端静默", AppConfig.MODE_REMOTE_SILENT), weighted());
         segment.addView(segmentItem("本机显示", AppConfig.MODE_LOCAL_AND_PUSH), weighted());
         return segment;
@@ -713,8 +719,7 @@ public final class MainActivity extends Activity {
         TextView item = label(title, 14, selected ? PRIMARY : MUTED, Gravity.CENTER);
         item.setTypeface(Typeface.DEFAULT, selected ? Typeface.BOLD : Typeface.NORMAL);
         item.setPadding(dp(8), dp(12), dp(8), dp(12));
-        item.setBackground(rounded(selected ? Color.rgb(19, 70, 61) : Color.TRANSPARENT,
-                20, selected ? PRIMARY : Color.TRANSPARENT, 1));
+        item.setBackground(selected ? neuRaisedDrawable(20) : solidPill(Color.TRANSPARENT, 20));
         item.setOnClickListener(ignored -> {
             selectedMode = mode;
             if (currentPage == Page.STATUS || currentPage == Page.SETTINGS) showPage(currentPage);
@@ -728,8 +733,7 @@ public final class MainActivity extends Activity {
         tile.setGravity(Gravity.CENTER_VERTICAL);
         tile.setPadding(dp(12), dp(15), dp(12), dp(15));
         ImageView icon = icon(iconResource, healthy ? PRIMARY : WARNING, 42);
-        icon.setBackground(rounded(healthy ? Color.rgb(17, 66, 57) : Color.rgb(76, 58, 25), 21,
-                Color.TRANSPARENT, 0));
+        icon.setBackground(neuInsetDrawable(21));
         icon.setPadding(dp(10), dp(10), dp(10), dp(10));
         tile.addView(icon, new LinearLayout.LayoutParams(dp(44), dp(44)));
         LinearLayout copy = column(dp(10));
@@ -755,7 +759,7 @@ public final class MainActivity extends Activity {
             TextView chip = label(badge, 13, PRIMARY, Gravity.CENTER);
             chip.setTypeface(Typeface.DEFAULT_BOLD);
             chip.setPadding(dp(12), dp(5), dp(12), dp(5));
-            chip.setBackground(rounded(Color.rgb(15, 66, 56), 16, Color.TRANSPARENT, 0));
+            chip.setBackground(neuRaisedDrawable(16));
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                     ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             params.topMargin = dp(6);
@@ -981,7 +985,7 @@ public final class MainActivity extends Activity {
 
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
-        root.setBackground(rounded(SURFACE, 18, BORDER, 1));
+        root.setBackground(neuRaisedDrawable(18));
         root.setPadding(dp(20), dp(18), dp(20), dp(14));
 
         TextView titleView = label(featureTitle(feature), 18, TEXT, Gravity.START);
@@ -1416,8 +1420,7 @@ public final class MainActivity extends Activity {
             row.setPadding(dp(2), dp(6), dp(2), dp(6));
 
             View dot = new View(this);
-            dot.setBackground(rounded(MainScreenPresentation.isErrorLog(lines[index]) ? DANGER : PRIMARY,
-                    4, Color.TRANSPARENT, 0));
+            dot.setBackground(solidPill(MainScreenPresentation.isErrorLog(lines[index]) ? DANGER : PRIMARY, 4));
             LinearLayout.LayoutParams dotParams = new LinearLayout.LayoutParams(dp(7), dp(7));
             dotParams.topMargin = dp(5);
             row.addView(dot, dotParams);
@@ -1557,7 +1560,7 @@ public final class MainActivity extends Activity {
 
     private LinearLayout card(int color, int radius) {
         LinearLayout card = new LinearLayout(this);
-        card.setBackground(rounded(color, radius, BORDER, 1));
+        card.setBackground(getDrawable(R.drawable.neu_card_bg));
         return card;
     }
 
@@ -1611,7 +1614,7 @@ public final class MainActivity extends Activity {
         view.setInputType(type);
         view.setSingleLine(true);
         view.setPadding(dp(14), dp(11), dp(14), dp(11));
-        view.setBackground(rounded(SURFACE_HIGH, 15, BORDER, 1));
+        view.setBackground(getDrawable(R.drawable.neu_input_bg));
         return view;
     }
 
@@ -1620,7 +1623,8 @@ public final class MainActivity extends Activity {
         button.setTypeface(Typeface.DEFAULT_BOLD);
         button.setMinHeight(dp(54));
         button.setPadding(dp(16), dp(13), dp(16), dp(13));
-        button.setBackground(rounded(color, 20, color, 1));
+        button.setBackground(getDrawable(color == BLUE
+                ? R.drawable.neu_accent_blue : R.drawable.neu_accent_green));
         button.setClickable(true);
         button.setFocusable(true);
         return button;
@@ -1631,7 +1635,7 @@ public final class MainActivity extends Activity {
         button.setTypeface(Typeface.DEFAULT_BOLD);
         button.setMinHeight(dp(50));
         button.setPadding(dp(12), dp(12), dp(12), dp(12));
-        button.setBackground(rounded(SURFACE_HIGH, 18, BORDER, 1));
+        button.setBackground(getDrawable(R.drawable.neu_btn_bg));
         button.setClickable(true);
         button.setFocusable(true);
         return button;
@@ -1647,13 +1651,48 @@ public final class MainActivity extends Activity {
         return view;
     }
 
-    private GradientDrawable rounded(int color, int radius, int strokeColor, int strokeWidth) {
+    /**
+     * Neumorphism 双阴影 layer：inset=false 为凸起（左上浅阴影、右下深阴影），
+     * inset=true 则阴影反转呈现凹陷。底色统一用 BG（#E0E5EC）。
+     */
+    private Drawable neuLayer(boolean inset, int radiusDp, int baseColor) {
+        int r = dp(radiusDp);
+        int shadow = dp(6);
+        int pad = dp(3);
+        GradientDrawable dark = new GradientDrawable();
+        dark.setColor(Color.rgb(163, 177, 198));
+        dark.setCornerRadius(r);
+        GradientDrawable light = new GradientDrawable();
+        light.setColor(Color.WHITE);
+        light.setCornerRadius(r);
+        GradientDrawable base = new GradientDrawable();
+        base.setColor(baseColor);
+        base.setCornerRadius(Math.max(dp(1), r - pad));
+        LayerDrawable layers = new LayerDrawable(new Drawable[]{dark, light, base});
+        if (inset) {
+            layers.setLayerInset(0, 0, 0, shadow, shadow);
+            layers.setLayerInset(1, shadow, shadow, 0, 0);
+        } else {
+            layers.setLayerInset(0, shadow, shadow, 0, 0);
+            layers.setLayerInset(1, 0, 0, shadow, shadow);
+        }
+        layers.setLayerInset(2, pad, pad, pad, pad);
+        return layers;
+    }
+
+    private Drawable neuRaisedDrawable(int radiusDp) {
+        return neuLayer(false, radiusDp, BG);
+    }
+
+    private Drawable neuInsetDrawable(int radiusDp) {
+        return neuLayer(true, radiusDp, BG);
+    }
+
+    /** 纯色小圆点/小胶囊（不带阴影），用于状态点。 */
+    private Drawable solidPill(int color, int radiusDp) {
         GradientDrawable drawable = new GradientDrawable();
         drawable.setColor(color);
-        drawable.setCornerRadius(dp(radius));
-        if (strokeWidth > 0 && strokeColor != Color.TRANSPARENT) {
-            drawable.setStroke(dp(strokeWidth), strokeColor);
-        }
+        drawable.setCornerRadius(dp(radiusDp));
         return drawable;
     }
 

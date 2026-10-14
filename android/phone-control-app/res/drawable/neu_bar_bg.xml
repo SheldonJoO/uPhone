@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Neumorphism 底部导航栏：大圆角凸起条 -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:left="8dp" android:top="8dp">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/neu_shadow_dark" />
+            <corners android:radius="28dp" />
+        </shape>
+    </item>
+    <item android:right="8dp" android:bottom="8dp">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/neu_shadow_light" />
+            <corners android:radius="28dp" />
+        </shape>
+    </item>
+    <item android:left="4dp" android:top="4dp" android:right="4dp" android:bottom="4dp">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/neu_bg" />
+            <corners android:radius="24dp" />
+        </shape>
+    </item>
+</layer-list>

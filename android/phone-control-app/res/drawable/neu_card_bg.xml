@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Neumorphism 凸起卡片：左上浅阴影 + 右下深阴影 + 同底色主体 -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:left="6dp" android:top="6dp">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/neu_shadow_dark" />
+            <corners android:radius="20dp" />
+        </shape>
+    </item>
+    <item android:right="6dp" android:bottom="6dp">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/neu_shadow_light" />
+            <corners android:radius="20dp" />
+        </shape>
+    </item>
+    <item android:left="3dp" android:top="3dp" android:right="3dp" android:bottom="3dp">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/neu_bg" />
+            <corners android:radius="17dp" />
+        </shape>
+    </item>
+</layer-list>
