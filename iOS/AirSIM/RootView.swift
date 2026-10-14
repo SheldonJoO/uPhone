@@ -141,16 +141,27 @@ struct RootView: View {
         } message: {
             Text(L10n.t("录音将保存在本机（左声道是你，右声道是对方），可分享。请遵守当地法律法规，必要时告知对方正在录音。"))
         }
-        .sheet(isPresented: $model.showRecordingShare) {
-            if let url = model.recordingShareURL {
-                RecordingShareSheet(url: url)
-            }
+        // 录音结束自动分享：不再走 SwiftUI sheet 托管 UIActivityViewController
+        //（该写法会白屏），改为 UIKit 直接 present；后台挂断时等回到前台再弹。
+        .onChange(of: model.showRecordingShare) { _, _ in
+            DispatchQueue.main.async { presentPendingRecordingShare() }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
+            presentPendingRecordingShare()
         }
         .alert(L10n.t("错误"), isPresented: errorBinding) {
             Button("OK") { model.errorMessage = nil }
         } message: {
             Text(model.errorMessage ?? "")
         }
+    }
+
+    /// 尝试弹出待分享的录音；成功后消费掉标记，失败（后台）则留待回到前台重试。
+    private func presentPendingRecordingShare() {
+        guard model.showRecordingShare, let url = model.recordingShareURL else { return }
+        guard SystemSharePresenter.present(url: url) else { return }
+        model.showRecordingShare = false
+        model.recordingShareURL = nil
     }
 
     private var errorBinding: Binding<Bool> {
@@ -403,13 +414,26 @@ extension View {
     }
 }
 
-/// 录音完成后的系统分享面板（保存到文件 / 微信 / 隔空投送等）。
-struct RecordingShareSheet: UIViewControllerRepresentable {
-    let url: URL
-
-    func makeUIViewController(context: Context) -> UIActivityViewController {
-        UIActivityViewController(activityItems: [url], applicationActivities: nil)
+/// 系统分享面板：直接走 UIKit present，不经过 SwiftUI sheet 托管
+/// UIActivityViewController（后者会导致白屏）。返回是否成功弹出。
+enum SystemSharePresenter {
+    @discardableResult
+    static func present(url: URL) -> Bool {
+        let activity = UIActivityViewController(activityItems: [url], applicationActivities: nil)
+        let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+        guard let scene = scenes.first(where: { $0.activationState == .foregroundActive }) ?? scenes.first,
+              let window = scene.keyWindow ?? scene.windows.first,
+              var top = window.rootViewController
+        else { return false }
+        while let presented = top.presentedViewController { top = presented }
+        if top.presentedViewController is UIActivityViewController { return true }
+        if let pop = activity.popoverPresentationController {
+            pop.sourceView = top.view
+            pop.sourceRect = CGRect(
+                x: top.view.bounds.midX, y: top.view.bounds.midY, width: 1, height: 1)
+            pop.permittedArrowDirections = []
+        }
+        top.present(activity, animated: true)
+        return true
     }
-
-    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
 }

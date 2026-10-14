@@ -1128,8 +1128,6 @@ private final class RecordingPlayer: NSObject, ObservableObject, @MainActor AVAu
 struct RecordingsView: View {
     @State private var files: [CallRecordingFile] = []
     @StateObject private var player = RecordingPlayer()
-    @State private var shareURL: URL?
-    @State private var showShare = false
 
     var body: some View {
         Group {
@@ -1150,10 +1148,9 @@ struct RecordingsView: View {
                         trailing: PhoneListMetrics.horizontalInset
                     ))
                     .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                        Button {
-                            shareURL = file.url
-                            showShare = true
-                        } label: {
+                        // 原生 ShareLink：系统直接弹分享面板，不走 SwiftUI sheet 托管
+                        // UIActivityViewController，避免白屏。
+                        ShareLink(item: file.url) {
                             Label(L10n.t("分享"), systemImage: "square.and.arrow.up")
                         }
                         .tint(.blue)
@@ -1172,11 +1169,6 @@ struct RecordingsView: View {
         .navigationTitle(L10n.t("通话录音"))
         .navigationBarTitleDisplayMode(.inline)
         .onAppear(perform: reload)
-        .sheet(isPresented: $showShare) {
-            if let url = shareURL {
-                RecordingShareSheet(url: url)
-            }
-        }
     }
 
     private func reload() {
