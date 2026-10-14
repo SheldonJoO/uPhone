@@ -64,10 +64,10 @@ struct AIAssistantSettingsView: View {
 
             Section("规划中的能力") {
                 ForEach(AIAssistantScope.allCases, id: \.self) { scope in
-                    LabeledContent {
-                        Text("未接入")
-                    } label: {
+                    HStack {
                         Text(scope.rawValue)
+                        Spacer()
+                        Text("未接入").foregroundStyle(.secondary)
                     }
                 }
             } footer: {
