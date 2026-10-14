@@ -1152,7 +1152,7 @@ final class VoIPPushController: NSObject {
     func fetchCloudAgentStatusForDiagnostics(
         using registration: AgentPushRegistration? = nil
     ) async throws -> CloudAgentStatus {
-        guard let registration = registration ?? currentRegistration() else {
+        guard let registration = registration ?? cloudOperationRegistration() else {
             throw CloudAgentStatusError.unavailable
         }
         guard let url = RelayEndpoint.url(
@@ -1265,7 +1265,7 @@ final class VoIPPushController: NSObject {
         subscriptionID: Int? = nil
     ) async throws -> CloudCommandEnqueueResponse {
         guard CloudModePreference.isEnabled() else { throw CloudCommandError.cloudModeDisabled }
-        guard let registration = currentRegistration(),
+        guard let registration = cloudOperationRegistration(),
               let url = RelayEndpoint.url(base: registration.relayURL, path: "v1/commands/enqueue") else {
             throw CloudCommandError.unavailable
         }
@@ -1283,7 +1283,7 @@ final class VoIPPushController: NSObject {
     }
 
     private func waitForCloudCommand(commandID: UUID, timeout: TimeInterval) async throws -> CloudCommandResultResponse {
-        guard let registration = currentRegistration(),
+        guard let registration = cloudOperationRegistration(),
               let url = RelayEndpoint.url(base: registration.relayURL, path: "v1/commands/result") else {
             throw CloudCommandError.unavailable
         }
@@ -1332,7 +1332,7 @@ final class VoIPPushController: NSObject {
 
     /// 验证当前 iPhone 到 Relay 的 HTTPS 控制面，不携带设备密钥。
     func relayHealthReachable() async -> Bool {
-        guard let registration = currentRegistration(),
+        guard let registration = cloudOperationRegistration(),
               (try? await fetchRelayHealthVersion(registration: registration)) != nil else { return false }
         return true
     }
@@ -1467,6 +1467,15 @@ final class VoIPPushController: NSObject {
             return nil
         }
         return buildRegistration(deviceSecret: secret, token: token, defaults: defaults)
+    }
+
+    /// 云操作（设备状态查询、指令下发/结果轮询、Relay 健康检查）用的凭证。
+    /// 侧载无 VoIP token 时回退到最小注册体，保证云模式在侧载下可用；
+    /// 来电推送唤醒在此模式下依然不可用。
+    private func cloudOperationRegistration() -> AgentPushRegistration? {
+        if let registration = currentRegistration() { return registration }
+        guard UserDefaults.standard.bool(forKey: "sideloadSkipPushCredentials") else { return nil }
+        return sideloadTestRegistration()
     }
 
     private func buildRegistration(deviceSecret secret: String, token: String? = nil,
