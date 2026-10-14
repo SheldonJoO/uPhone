@@ -116,6 +116,7 @@ final class AndroidAgentIdentity {
             }
             } // subscriptions != null
         } catch (SecurityException ignored) {}
+        } // if (canReadState)：权限只门控自动检测，手动兜底在下面始终执行
         // 手动配置兜底：如果自动检测不到该槽位，或检测到的号码为空，
         // 用用户手动填的号码补齐/填补（TCL 功能机 SubscriptionManager 经常返回空号码）。
         // slot_index 0 = SIM 1, 1 = SIM 2；subscription_id 用 slot 占位，iOS 仅做展示。
