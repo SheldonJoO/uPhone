@@ -1623,7 +1623,7 @@ public final class MainActivity extends Activity {
         button.setTypeface(Typeface.DEFAULT_BOLD);
         button.setMinHeight(dp(54));
         button.setPadding(dp(16), dp(13), dp(16), dp(13));
-        button.setBackground(getDrawable(color == BLUE
+        button.setBackground(color == BLUE
                 ? neuDrawable("neu_accent_blue") : neuDrawable("neu_accent_green"));
         button.setClickable(true);
         button.setFocusable(true);
