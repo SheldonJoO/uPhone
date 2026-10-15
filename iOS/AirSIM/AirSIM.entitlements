@@ -4,9 +4,5 @@
 <dict>
 	<key>aps-environment</key>
 	<string>$(APS_ENVIRONMENT)</string>
-	<key>com.apple.developer.calling-app</key>
-	<true/>
-	<key>com.apple.developer.messaging-app</key>
-	<true/>
 </dict>
 </plist>
