@@ -98,6 +98,7 @@ public final class MainActivity extends Activity {
     private String lastRenderedDebugLog;
     private String lastRenderedDebugFilter;
     private TextView agentRefreshResult;
+    private TextView redirStatus;
     private String agentRefreshMessage = "点击刷新以查看 Agent 的实际返回结果";
     private int agentRefreshColor = MUTED;
     private int agentRefreshGeneration;
@@ -874,9 +875,10 @@ public final class MainActivity extends Activity {
                     : "无法发起授权：该角色在当前设备可能不可用，请到 系统设置 → 应用 → 默认应用 → 通话重定向 中手动授予 余奉电话助理");
         });
         root.addView(redir, matchWithTop(10));
-        root.addView(description(CallRedirectionPolicy.isRoleHeld(this)
+        redirStatus = description(CallRedirectionPolicy.isRoleHeld(this)
                 ? "双卡通话重定向：已授予"
-                : "双卡通话重定向：未授予（双卡选路可能走默认卡，建议授予）"), matchWithTop(6));
+                : "双卡通话重定向：未授予（双卡选路可能走默认卡，建议授予）");
+        root.addView(redirStatus, matchWithTop(6));
 
         CheckBox debugEnabled = new CheckBox(this);
         debugEnabled.setText("启用 Debug 模式");
@@ -2044,12 +2046,26 @@ public final class MainActivity extends Activity {
         } else if (request == DEFAULT_APPS_REQUEST) {
             if (dialerRoleHeld()) checkAVFEnvironmentAtStartup();
             else toast("余奉电话助理仍未获得默认电话角色");
+        } else if (request == CallRedirectionPolicy.REQUEST_CODE) {
+            refreshRedirectionStatus();
+            toast(CallRedirectionPolicy.isRoleHeld(this)
+                    ? "已获得双卡通话重定向权限，双卡选路已启用"
+                    : "未获得双卡通话重定向权限，双卡仍可能走默认卡");
         }
+    }
+
+    private void refreshRedirectionStatus() {
+        if (redirStatus == null) return;
+        boolean held = CallRedirectionPolicy.isRoleHeld(this);
+        redirStatus.setText(held
+                ? "双卡通话重定向：已授予"
+                : "双卡通话重定向：未授予（双卡选路可能走默认卡，建议授予）");
     }
 
     @Override protected void onResume() {
         super.onResume();
         refreshShizukuStatus();
+        refreshRedirectionStatus();
         // 一键值守：开关决定 Agent 是否常驻。关闭值守即真正停止，不再被前台唤醒偷偷拉起。
         if (RuntimeMode.isStandalone(this) && DutyStore.isDutyOn(this)) {
             StandaloneAgentService.start(this);

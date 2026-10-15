@@ -3,11 +3,7 @@ package com.airsim.phonecontrol;
 import android.app.Activity;
 import android.app.role.RoleManager;
 import android.content.Context;
-import android.os.Build;
-import android.os.Process;
-
-import java.util.concurrent.Executor;
-import java.util.function.Consumer;
+import android.content.Intent;
 
 /**
  * 双卡选路依赖的 {@code ROLE_CALL_REDIRECTION} 角色。
@@ -17,6 +13,9 @@ import java.util.function.Consumer;
  * 未持有时系统不会调用该服务，退化为普通 placeCall 逻辑（无回归）。
  */
 public final class CallRedirectionPolicy {
+    /** startActivityForResult 请求码，供 {@code Activity.onActivityResult} 识别角色申请结果。 */
+    public static final int REQUEST_CODE = 0x51ED;
+
     private CallRedirectionPolicy() {}
 
     public static boolean isRoleHeld(Context context) {
@@ -39,19 +38,24 @@ public final class CallRedirectionPolicy {
         }
     }
 
-    /** 发起角色申请（系统会弹确认框）。必须在 Activity 上下文调用。返回是否成功发起。 */
+    /**
+     * 发起角色申请：弹出系统确认框（与「设为默认电话应用」同一套 {@code createRequestRoleIntent} 流程）。
+     *
+     * @return true 表示已成功弹出系统授权框（含「本就已持有」的情况）；false 表示该角色当前设备不可申请。
+     *         用户的选择结果经 {@code Activity.onActivityResult(REQUEST_CODE)} 回调；
+     *         也可在下次回到设置页时用 {@link #isRoleHeld(Context)} 复查。
+     */
     public static boolean requestRole(Activity activity) {
         try {
             RoleManager rm = activity.getSystemService(RoleManager.class);
             if (rm == null) return false;
             if (rm.isRoleHeld(RoleManager.ROLE_CALL_REDIRECTION)) return true;
-            Executor executor = activity.getMainExecutor();
-            rm.addRoleHolderAsUser(
-                    RoleManager.ROLE_CALL_REDIRECTION,
-                    Process.myUserHandle(),
-                    0,
-                    executor,
-                    granted -> BridgeLog.info("call_redirection_role_granted=" + granted));
+            Intent intent = rm.createRequestRoleIntent(RoleManager.ROLE_CALL_REDIRECTION);
+            if (intent == null) {
+                BridgeLog.info("call_redirection_role_not_requestable");
+                return false;
+            }
+            activity.startActivityForResult(intent, REQUEST_CODE);
             return true;
         } catch (Throwable error) {
             BridgeLog.error("call_redirection_role_request_failed", error);
