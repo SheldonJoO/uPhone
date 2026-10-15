@@ -19,6 +19,7 @@ final class LocalCallAudioController {
     private final Context appContext;
     private final ShizukuBridgeManager privilegedBridge;
     private boolean silencing;
+    private AudioManager.OnModeChangedListener modeListener;
 
     LocalCallAudioController(Context context) {
         appContext = context.getApplicationContext();
@@ -39,8 +40,44 @@ final class LocalCallAudioController {
             BridgeLog.info("local_call_output_no_audio_manager");
             return;
         }
-        if (shouldSilence) applySilence(am);
-        else applyUnsilence(am);
+        if (shouldSilence) {
+            applySilence(am);
+            ensureModeListener(am);
+        } else {
+            applyUnsilence(am);
+            removeModeListener(am);
+        }
+    }
+
+    /**
+     * 系统在通话接通/音频模式切换时会重置 STREAM_VOICE_CALL 的音量与静音，
+     * 且这个重置往往发生在 InCallService 的 onStateChanged 回调之后，
+     * 导致「ACTIVE 时施加过一次」的静音被冲掉、听筒重新漏音。
+     * 这里监听音频模式变化，一旦进入通话态就立刻重新施加静音，堵住漏音窗口。
+     */
+    private void ensureModeListener(AudioManager am) {
+        if (modeListener != null) return;
+        modeListener = new AudioManager.OnModeChangedListener() {
+            @Override public void onModeChanged(int mode) {
+                if (mode == AudioManager.MODE_IN_CALL || mode == AudioManager.MODE_IN_COMMUNICATION) {
+                    AudioManager current = (AudioManager) appContext.getSystemService(Context.AUDIO_SERVICE);
+                    if (current != null) applySilence(current);
+                }
+            }
+        };
+        try {
+            am.addOnModeChangedListener(appContext.getMainExecutor(), modeListener);
+        } catch (Exception error) {
+            BridgeLog.error("local_call_output_modelistener_failed", error);
+            modeListener = null;
+        }
+    }
+
+    private void removeModeListener(AudioManager am) {
+        if (modeListener != null) {
+            try { am.removeOnModeChangedListener(modeListener); } catch (Exception ignored) {}
+            modeListener = null;
+        }
     }
 
     private void applySilence(AudioManager am) {

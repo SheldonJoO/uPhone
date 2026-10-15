@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="launcher_icon_background">#E0E5EC</color>
+    <color name="launcher_icon_background">#43CC5C</color>
 
     <!-- Neumorphism 浅色主题色板（试改） -->
     <color name="neu_bg">#E0E5EC</color>

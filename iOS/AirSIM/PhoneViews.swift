@@ -527,7 +527,9 @@ struct RecentsView: View {
     @State private var contactPickerNumber: String?
     @State private var showContactPicker = false
     @State private var dialBackNumber: String?
+    @State private var dialBackCallID: String?
     @State private var showDialBackMenu = false
+    @State private var rowFrames: [String: CGRect] = [:]
     @State private var newContactItem: NewContactItem?
 
     /// 已删除的通话记录 ID（持久化）
@@ -596,6 +598,7 @@ struct RecentsView: View {
             mainContent
             callDetailsOverlay
             toastOverlay
+            dialBackBubbleOverlay
         }
         .animation(.easeInOut(duration: 0.2), value: selectedCall?.id)
         .animation(.easeInOut(duration: 0.25), value: toastText)
@@ -639,26 +642,6 @@ struct RecentsView: View {
                     contactPickerNumber = nil
                 }
             )
-        }
-        .confirmationDialog(L10n.t("选择回拨号码"), isPresented: $showDialBackMenu, titleVisibility: .visible) {
-            if let number = dialBackNumber,
-               let dialNumber = RecentCallDialPolicy.numberToDial(number) {
-                let sims = model.currentAndroidAgent?.simCards ?? []
-                if sims.count > 1 {
-                    ForEach(sims) { sim in
-                        Button(sim.fullLabel) {
-                            SimSelectionStore.select(subscriptionID: sim.subscriptionID,
-                                                     for: model.currentAndroidAgent?.id)
-                            onCall(dialNumber)
-                        }
-                    }
-                } else {
-                    Button(L10n.t("回拨")) {
-                        onCall(dialNumber)
-                    }
-                }
-                Button(L10n.t("取消"), role: .cancel) {}
-            }
         }
         .allowsHitTesting(selectedCall == nil)
     }
@@ -749,6 +732,91 @@ struct RecentsView: View {
         .scrollContentBackground(.hidden)
         .environment(\.defaultMinListRowHeight, PhoneListMetrics.rowHeight)
         .phoneReportsTabBarCompactState()
+        .onPreferenceChange(RecentsRowFrameKey.self) { frames in
+            rowFrames = frames
+        }
+    }
+
+    /// 回拨气泡：锚定到被左滑「选择回拨」的那一行下方，而非固定在屏幕底部。
+    @ViewBuilder
+    private var dialBackBubbleOverlay: some View {
+        if showDialBackMenu,
+           let callID = dialBackCallID,
+           let number = dialBackNumber,
+           let frame = rowFrames[callID],
+           let dialNumber = RecentCallDialPolicy.numberToDial(number) {
+            let sims = model.currentAndroidAgent?.simCards ?? []
+            let screenWidth = UIScreen.main.bounds.width
+            let bubbleWidth: CGFloat = 240
+            let margin: CGFloat = 12
+            let offsetX = min(max(frame.midX - bubbleWidth / 2, margin),
+                              screenWidth - bubbleWidth - margin)
+            Color.black.opacity(0.12)
+                .ignoresSafeArea()
+                .onTapGesture { dismissDialBackMenu() }
+                .overlay(alignment: .topLeading) {
+                    dialBackBubble(dialNumber: dialNumber, sims: sims)
+                        .frame(width: bubbleWidth)
+                        .offset(x: offsetX, y: frame.maxY + 6)
+                }
+                .transition(.opacity)
+                .zIndex(2)
+        }
+    }
+
+    private func dialBackBubble(dialNumber: String, sims: [SimCard]) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(L10n.t("选择回拨号码"))
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(.primary)
+            if sims.count > 1 {
+                ForEach(sims) { sim in
+                    Button {
+                        SimSelectionStore.select(subscriptionID: sim.subscriptionID,
+                                                 for: model.currentAndroidAgent?.id)
+                        onCall(dialNumber)
+                        dismissDialBackMenu()
+                    } label: {
+                        HStack {
+                            Text(sim.fullLabel)
+                            Spacer()
+                            Image(systemName: "phone.fill")
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                }
+            } else {
+                Button {
+                    onCall(dialNumber)
+                    dismissDialBackMenu()
+                } label: {
+                    HStack {
+                        Text(L10n.t("回拨"))
+                        Spacer()
+                        Image(systemName: "phone.fill")
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(14)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .strokeBorder(Color.primary.opacity(0.08), lineWidth: 1)
+        )
+        .shadow(color: .black.opacity(0.15), radius: 12, y: 4)
+    }
+
+    private func dismissDialBackMenu() {
+        showDialBackMenu = false
+        dialBackNumber = nil
+        dialBackCallID = nil
     }
 
     private func historyRow(for call: CallRecord) -> some View {
@@ -805,6 +873,22 @@ struct RecentsView: View {
         .swipeActions(edge: .leading, allowsFullSwipe: true) {
             leadingSwipeActions(for: call)
         }
+        .background(
+            GeometryReader { proxy in
+                Color.clear.preference(
+                    key: RecentsRowFrameKey.self,
+                    value: [call.id: proxy.frame(in: .global)]
+                )
+            }
+        )
+    }
+
+    /// 最近通话行的屏幕坐标，供回拨气泡锚定到具体行使用。
+    private struct RecentsRowFrameKey: PreferenceKey {
+        static let defaultValue: [String: CGRect] = [:]
+        static func reduce(value: inout [String: CGRect], nextValue: () -> [String: CGRect]) {
+            value.merge(nextValue(), uniquingKeysWith: { $1 })
+        }
     }
 
     @ViewBuilder
@@ -850,6 +934,7 @@ struct RecentsView: View {
            RecentCallDialPolicy.numberToDial(number) != nil {
             Button {
                 dialBackNumber = number
+                dialBackCallID = call.id
                 showDialBackMenu = true
             } label: {
                 Label(L10n.t("选择回拨"), systemImage: "phone.fill")
@@ -2906,17 +2991,19 @@ private struct DTMFKeypadView: View {
 
 private struct DTMFGlassButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
+        // 不再给按键加按压青色高亮：青色高亮 + GlassEffectContainer 会让左上角「1」键
+        // 的按压底色向相邻键漫延，出现异常的蓝色底块。改用 interactive 玻璃本身的
+        // 按压反馈 + 缩放反馈，所有键统一，不产生蓝底。
         Group {
             if #available(iOS 26.0, *) {
                 configuration.label
-                    .glassEffect(.regular.tint(configuration.isPressed ? .cyan : .clear).interactive(), in: Circle())
+                    .glassEffect(.regular.interactive(), in: Circle())
             } else {
                 configuration.label
                     .background(.ultraThinMaterial, in: Circle())
-                    .overlay(Circle().fill(Color.cyan.opacity(configuration.isPressed ? 0.28 : 0)))
             }
         }
-        .foregroundStyle(configuration.isPressed ? Color.cyan : Color.primary)
+        .foregroundStyle(Color.primary)
         .scaleEffect(configuration.isPressed ? 0.91 : 1)
         .animation(.spring(response: 0.2, dampingFraction: 0.7), value: configuration.isPressed)
     }

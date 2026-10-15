@@ -52,6 +52,16 @@ enum DeviceRegistry {
     static func remove(deviceID: String) {
         let devices = allDevices().filter { $0.deviceID != deviceID }
         _ = saveAll(devices)
+        // 若被解绑的正是当前活跃设备，必须一并清掉旧的单设备「活跃槽」
+        // （airsim.push-device-id / push-relay-url / keychain device-secret）。
+        // 否则 archiveActiveDeviceIfNeeded() 之后被调用时会凭这些残留凭据把该设备
+        // upsert 回注册表，导致"解散配对"后反复出现幽灵离线值守机。
+        let defaults = UserDefaults.standard
+        if defaults.string(forKey: deviceIDKey) == deviceID {
+            defaults.removeObject(forKey: deviceIDKey)
+            defaults.removeObject(forKey: relayURLKey)
+            delete(account: activeSecretAccount)
+        }
         if activeDeviceID() == deviceID {
             _ = save(Data(), account: activeAccount)
         }
