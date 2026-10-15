@@ -280,6 +280,8 @@ public final class MainActivity extends Activity {
 
         root.addView(pageTitle("余奉电话助理", dutyOn ? "值守中" : "待命"));
 
+        root.addView(buildSetupChecklist(), matchWithTop(14));
+
         LinearLayout hero = card(SURFACE_HIGH, 26);
         hero.setOrientation(LinearLayout.VERTICAL);
         hero.setPadding(dp(20), dp(22), dp(20), dp(22));
@@ -347,6 +349,97 @@ public final class MainActivity extends Activity {
         status.setVisibility(View.GONE);
         root.addView(status);
         return scroll(root);
+    }
+
+    /**
+     * 首次设置向导：把权限、默认拨号、双卡重定向、双卡设置、配对、音频桥、值守按固定顺序
+     * 摊成一张清单，未完成项带「去设置 ›」直达对应页面/授权。全部完成后折叠为一行，
+     * 避免用户在四个页签里乱找导致漏掉关键步骤、iPhone 连不上。
+     */
+    private View buildSetupChecklist() {
+        boolean dialer = dialerRoleHeld();
+        boolean redir = CallRedirectionPolicy.isRoleHeld(this);
+        boolean simSet = !SimCards.activeCards(this).isEmpty();
+        boolean paired = VoWLANPairingStore.configured(this);
+        boolean audio = shizukuReady() && pcmReady();
+        boolean duty = DutyStore.isDutyOn(this);
+
+        if (dialer && redir && simSet && paired && audio && duty) {
+            LinearLayout done = card(SURFACE, 18);
+            done.setOrientation(LinearLayout.VERTICAL);
+            done.setPadding(dp(16), dp(14), dp(16), dp(14));
+            LinearLayout row = row();
+            TextView mark = label("✓", 16, PRIMARY, Gravity.CENTER);
+            row.addView(mark);
+            TextView title = label("设置已完成：iPhone 可经本机接打电话与短信", 15, TEXT, Gravity.START);
+            title.setTypeface(Typeface.DEFAULT_BOLD);
+            row.addView(title, weighted());
+            done.addView(row);
+            return done;
+        }
+
+        String[][] steps = {
+            {"设为默认电话应用", dialer ? "已完成" : "在系统设置把本应用设为默认电话/拨号应用", dialer ? "done" : "todo"},
+            {"授予通话重定向权限", redir ? "已完成" : "允许本应用拦截去电并选择卡槽", redir ? "done" : "todo"},
+            {"填写双卡设置", simSet ? "已完成" : "在「更多 › 设置」确认双卡号码", simSet ? "done" : "todo"},
+            {"配对 iPhone", paired ? "已完成" : "生成六位配对码，在 iPhone 上输入", paired ? "done" : "todo"},
+            {"音频桥（Shizuku + PCM）", audio ? "已完成" : "授权 Shizuku 并启动 PCM 桥，保证通话不漏音", audio ? "done" : "todo"},
+            {"开启值守", duty ? "已完成" : "打开值守开关，本机开始为 iPhone 服务", duty ? "done" : "todo"}
+        };
+
+        LinearLayout cardView = card(SURFACE, 18);
+        cardView.setOrientation(LinearLayout.VERTICAL);
+        cardView.setPadding(dp(16), dp(14), dp(16), dp(14));
+        cardView.addView(overline("首次设置向导（按顺序完成）"));
+
+        for (int i = 0; i < steps.length; i++) {
+            final int index = i;
+            String[] step = steps[i];
+            boolean done = "done".equals(step[2]);
+
+            LinearLayout item = row();
+            item.setGravity(Gravity.CENTER_VERTICAL);
+            item.setPadding(dp(4), dp(10), dp(4), dp(10));
+            item.setClickable(true);
+            item.setFocusable(true);
+
+            TextView marker = label(done ? "✓" : String.valueOf(i + 1), 14,
+                    done ? Color.WHITE : TEXT, Gravity.CENTER);
+            marker.setTypeface(Typeface.DEFAULT_BOLD);
+            marker.setBackground(solidPill(done ? PRIMARY : BORDER, 13));
+            marker.setMinWidth(dp(26));
+            marker.setMinHeight(dp(26));
+            marker.setGravity(Gravity.CENTER);
+            item.addView(marker);
+
+            LinearLayout copy = column(0);
+            TextView title = label(step[0], 15, TEXT, Gravity.START);
+            title.setTypeface(Typeface.DEFAULT_BOLD);
+            copy.addView(title);
+            copy.addView(label(step[1], 12, done ? PRIMARY : MUTED, Gravity.START), matchWithTop(2));
+            LinearLayout.LayoutParams copyParams = weighted();
+            copyParams.leftMargin = dp(12);
+            item.addView(copy, copyParams);
+
+            TextView go = label(done ? "✓" : "去设置 ›", 13, done ? PRIMARY : BLUE, Gravity.END);
+            item.addView(go);
+
+            item.setOnClickListener(ignored -> setupChecklistNavigate(index));
+            cardView.addView(item, matchWithTop(6));
+        }
+        return cardView;
+    }
+
+    private void setupChecklistNavigate(int step) {
+        switch (step) {
+        case 0: requestDialerRole(); break;
+        case 1: CallRedirectionPolicy.requestRole(this); break;
+        case 2: openMore(MoreSection.SETTINGS); break;
+        case 3: openPairingPage(); break;
+        case 4: openMore(MoreSection.SETTINGS); break;
+        case 5: toggleDuty(); break;
+        default: break;
+        }
     }
 
     private String dutySummary(boolean dutyOn, boolean paired) {

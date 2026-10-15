@@ -1098,7 +1098,7 @@ final class VoIPPushController: NSObject {
         do {
             let status = try await fetchCloudAgentStatusForDiagnostics(using: registration)
             guard status.cloudOnline else {
-                report.fail(.agentHeartbeat, detail: "Relay 已连接，但 AVF Agent 90 秒内无心跳")
+                report.fail(.agentHeartbeat, detail: "Relay 已连接，但 AVF Agent 90 秒内无心跳；若只在局域网使用，请在「连接方式」开启「仅 Wi-Fi 直连模式」改用本地自检")
                 onUpdate(report)
                 return report
             }

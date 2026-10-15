@@ -119,6 +119,9 @@ struct AirSIMSettingsView: View {
     @State private var selfTestReport: CloudSelfTestReport?
     @State private var selfTestTask: Task<Void, Never>?
     @AppStorage("sideloadSkipPushCredentials") private var skipPushForSelfTest = false
+    @State private var localSelfTestPhase: SelfTestPhase = .idle
+    @State private var localSelfTestReport: CloudSelfTestReport?
+    @State private var localSelfTestTask: Task<Void, Never>?
 
     var body: some View {
         NavigationStack {
@@ -197,50 +200,88 @@ struct AirSIMSettingsView: View {
                 }
 
                 Section {
-                    Button {
-                        startCloudSelfTest()
-                    } label: {
-                        HStack {
-                            Label("运行云端模式自检", systemImage: "stethoscope")
-                            Spacer()
-                            if selfTestPhase == .running {
-                                ProgressView()
-                            }
-                        }
-                    }
-                    .disabled(localModeEnabled || selfTestPhase == .running)
-
-                    Toggle("侧载测试：跳过 Push 凭据检查", isOn: $skipPushForSelfTest)
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
-                        .disabled(localModeEnabled || selfTestPhase == .running)
-
-                    if let report = selfTestReport {
-                        ForEach(report.steps) { step in
-                            HStack(alignment: .top, spacing: 12) {
-                                Image(systemName: selfTestSymbol(for: step.state))
-                                    .foregroundStyle(selfTestColor(for: step.state))
-                                    .frame(width: 20)
-                                VStack(alignment: .leading, spacing: 3) {
-                                    Text(step.title)
-                                    Text(step.detail)
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
+                    if localModeEnabled {
+                        Button {
+                            startLocalSelfTest()
+                        } label: {
+                            HStack {
+                                Label("运行本地连接自检", systemImage: "stethoscope")
+                                Spacer()
+                                if localSelfTestPhase == .running {
+                                    ProgressView()
                                 }
                             }
                         }
-                        if selfTestPhase == .completed {
-                            Text(report.allPassed ? "云端模式自检通过" : "自检未通过，请按失败步骤修复后重试")
-                                .font(.footnote.weight(.medium))
-                                .foregroundStyle(report.allPassed ? .green : .orange)
+                        .disabled(localSelfTestPhase == .running)
+
+                        if let report = localSelfTestReport {
+                            ForEach(report.steps) { step in
+                                HStack(alignment: .top, spacing: 12) {
+                                    Image(systemName: selfTestSymbol(for: step.state))
+                                        .foregroundStyle(selfTestColor(for: step.state))
+                                        .frame(width: 20)
+                                    VStack(alignment: .leading, spacing: 3) {
+                                        Text(step.title)
+                                        Text(step.detail)
+                                            .font(.caption)
+                                            .foregroundStyle(.secondary)
+                                    }
+                                }
+                            }
+                            if localSelfTestPhase == .completed {
+                                Text(report.allPassed
+                                     ? "本地连接正常：可经同一 Wi-Fi 收发来电与短信"
+                                     : "本地自检未通过，请按失败步骤修复后重试")
+                                    .font(.footnote.weight(.medium))
+                                    .foregroundStyle(report.allPassed ? .green : .orange)
+                            }
+                        }
+                    } else {
+                        Button {
+                            startCloudSelfTest()
+                        } label: {
+                            HStack {
+                                Label("运行云端模式自检", systemImage: "stethoscope")
+                                Spacer()
+                                if selfTestPhase == .running {
+                                    ProgressView()
+                                }
+                            }
+                        }
+                        .disabled(localModeEnabled || selfTestPhase == .running)
+
+                        Toggle("侧载测试：跳过 Push 凭据检查", isOn: $skipPushForSelfTest)
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                            .disabled(localModeEnabled || selfTestPhase == .running)
+
+                        if let report = selfTestReport {
+                            ForEach(report.steps) { step in
+                                HStack(alignment: .top, spacing: 12) {
+                                    Image(systemName: selfTestSymbol(for: step.state))
+                                        .foregroundStyle(selfTestColor(for: step.state))
+                                        .frame(width: 20)
+                                    VStack(alignment: .leading, spacing: 3) {
+                                        Text(step.title)
+                                        Text(step.detail)
+                                            .font(.caption)
+                                            .foregroundStyle(.secondary)
+                                    }
+                                }
+                            }
+                            if selfTestPhase == .completed {
+                                Text(report.allPassed ? "云端模式自检通过" : "自检未通过，请按失败步骤修复后重试")
+                                    .font(.footnote.weight(.medium))
+                                    .foregroundStyle(report.allPassed ? .green : .orange)
+                            }
                         }
                     }
                 } header: {
-                    Text("云端模式自检")
+                    Text(localModeEnabled ? "本地连接自检" : "云端模式自检")
                 } footer: {
                     Text(localModeEnabled
-                        ? "本地模式不运行云端自检。"
-                        : "依次验证本机 Push 凭据、uPhone Relay 身份、设备注册和 Agent 最近 90 秒心跳；不会拨号或发送短信。免费侧载无 PushKit 能力时可打开上方跳过开关。")
+                        ? "验证本地 VoWLAN 配对凭据与局域网信令可达；不会拨号或发送短信。若显示未连接，请确认 iPhone 与安卓处于同一 Wi-Fi，且在安卓端已开启 uPhone 与音频桥。"
+                        : "依次验证本机 Push 凭据、uPhone Relay 身份、设备注册和 Agent 最近 90 秒心跳；不会拨号或发送短信。免费侧载无 PushKit 能力时可打开上方跳过开关。若只在局域网使用，请在上方开启「仅 Wi-Fi 直连模式」后改用本地连接自检。")
                 }
 
                 Section("来电策略") {
@@ -334,6 +375,51 @@ struct AirSIMSettingsView: View {
             selfTestReport = report
             selfTestPhase = .completed
             await model.refreshCloudStatusForDiagnostics()
+        }
+    }
+
+    /// 本地（VoWLAN）自检：仅在「仅 Wi-Fi 直连模式」开启时使用。
+    /// 验证本地配对凭据与局域网信令可达，不再依赖云端 Relay / PushKit / CallKit。
+    private func startLocalSelfTest() {
+        localSelfTestTask?.cancel()
+        localSelfTestPhase = .running
+        let seed: [CloudSelfTestStep] = [
+            CloudSelfTestStep(id: .configuration, title: "本地配对凭据", state: .pending, detail: "等待检查"),
+            CloudSelfTestStep(id: .agentHeartbeat, title: "VoWLAN 局域网连接", state: .pending, detail: "等待检查")
+        ]
+        localSelfTestReport = CloudSelfTestReport(steps: seed)
+        localSelfTestTask = Task { @MainActor in
+            var report = CloudSelfTestReport(steps: seed)
+            // 步骤一：本地 VoWLAN 配对凭据是否存在。
+            if VoWLANCredentialStore.load() == nil {
+                report.update(.configuration, state: .failed,
+                              detail: "尚未配对本地 VoWLAN，请先在「连接安卓手机」中完成配对")
+                report.completedAt = Date()
+                localSelfTestReport = report
+                localSelfTestPhase = .completed
+                return
+            }
+            report.update(.configuration, state: .passed, detail: "本地 VoWLAN 配对凭据已就绪")
+            // 步骤二：重新发现并验证安卓 VoWLAN 局域网信令。
+            report.update(.agentHeartbeat, state: .running, detail: "正在发现并验证安卓 VoWLAN")
+            localSelfTestReport = report
+            model.vowlan.restartBrowsing()
+            await model.vowlan.probeNow()
+            let availability = model.vowlan.availability
+            switch availability {
+            case .verified:
+                report.update(.agentHeartbeat, state: .passed, detail: "VoWLAN 已连接，信令可达")
+            case .unavailable(let reason):
+                report.update(.agentHeartbeat, state: .failed, detail: reason)
+            case .unpaired:
+                report.update(.agentHeartbeat, state: .failed, detail: "未配对 VoWLAN")
+            default:
+                report.update(.agentHeartbeat, state: .failed,
+                              detail: "未发现安卓 VoWLAN：请确认两台设备同一 Wi-Fi，且安卓已启动 uPhone 与音频桥")
+            }
+            report.completedAt = Date()
+            localSelfTestReport = report
+            localSelfTestPhase = .completed
         }
     }
 
