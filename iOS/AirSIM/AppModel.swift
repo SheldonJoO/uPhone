@@ -316,6 +316,7 @@ final class AppModel: ObservableObject {
                 agentKind: item.agentKind,
                 cloudOnline: item.cloudOnline,
                 vowlanOnline: item.vowlanOnline,
+                simCards: item.simCards,
                 isCurrent: item.id == currentID
             )
         }.sorted {
