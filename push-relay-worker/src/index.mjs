@@ -972,16 +972,33 @@ async function registerDevice(request, env) {
     return jsonResponse(401, { error: "device authentication failed" });
   }
 
+  // APNs token 由持有它们的客户端（iPhone）独占写入；其他客户端（Android）同步时
+  // 不携带这些字段。字段缺失时保留 relay 上已有的有效值，绝不把它清空成 ""，
+  // 否则会破坏来电/短信推送目标，导致云值守来电接不到。
+  const pickToken = (key) => {
+    const incoming = device[key];
+    if (incoming !== undefined && incoming !== null && String(incoming).trim().length > 0) {
+      return String(incoming).toLowerCase();
+    }
+    return (existing && existing[key]) || "";
+  };
+  const pickValue = (key, fallback) => {
+    const incoming = device[key];
+    if (incoming !== undefined && incoming !== null && String(incoming).trim().length > 0) {
+      return String(incoming).trim();
+    }
+    return (existing && existing[key]) || fallback || "";
+  };
   const record = {
     device_id: device.device_id.trim(),
     secret_hash: secretHash,
-    voip_token: (device.voip_token || "").toLowerCase(),
-    alert_token: (device.alert_token || "").toLowerCase(),
-    watch_voip_token: (device.watch_voip_token || "").toLowerCase(),
-    watch_bundle_id: stringValue(device.watch_bundle_id),
-    live_activity_push_to_start_token: (device.live_activity_push_to_start_token || "").toLowerCase(),
-    bundle_id: device.bundle_id,
-    environment: device.environment,
+    voip_token: pickToken("voip_token"),
+    alert_token: pickToken("alert_token"),
+    watch_voip_token: pickToken("watch_voip_token"),
+    watch_bundle_id: pickValue("watch_bundle_id", ""),
+    live_activity_push_to_start_token: pickToken("live_activity_push_to_start_token"),
+    bundle_id: pickValue("bundle_id", ""),
+    environment: pickValue("environment", ""),
     registered_at: new Date().toISOString(),
     ...(nonEmpty(device.android_device_name)
       ? { device_name: device.android_device_name.trim().slice(0, 64) }

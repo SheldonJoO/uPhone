@@ -125,7 +125,16 @@ public final class StandaloneAgentService extends Service {
     private void syncRegistration(JSONObject registration) throws Exception {
         int hash = registration.toString().hashCode();
         if (hash == syncedRegistrationHash) return;
-        relay.postJSON(registration, "/v1/devices/register", new JSONObject(registration.toString()), 15_000);
+        // 值守机（Android）只同步自身字段，绝不携带/覆盖 iPhone 的 APNs token。
+        // 这些 token 由 iPhone 自己经 registerDirectlyWithRelay 写入 relay；
+        // 若 Android 用配对时拷贝的旧 token（或缺失字段）去覆盖，会导致 relay 上
+        // 的 voip_token 失效/被清空，APNs 推送目标丢失，云值守来电接不到。
+        JSONObject payload = new JSONObject(registration.toString());
+        for (String key : new String[]{"voip_token", "alert_token", "watch_voip_token",
+                "live_activity_push_to_start_token"}) {
+            payload.remove(key);
+        }
+        relay.postJSON(registration, "/v1/devices/register", payload, 15_000);
         syncedRegistrationHash = hash;
         store.recordSuccess();
         BridgeLog.info("standalone_relay_registration_synced");
