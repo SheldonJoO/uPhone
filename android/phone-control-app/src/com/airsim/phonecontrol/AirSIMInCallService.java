@@ -176,22 +176,21 @@ public final class AirSIMInCallService extends InCallService {
             if (details == null) return "";
             DisconnectCause cause = details.getDisconnectCause();
             if (cause == null) return "";
-            return mapDisconnectReason(cause.getReason());
+            // getCode() 返回 int 断开码（DisconnectCause.BUSY 等），getReason() 返回 String 文案——这里要的是码。
+            return mapDisconnectReason(cause.getCode());
         } catch (Exception ignored) {
             return "";
         }
     }
 
-    private static String mapDisconnectReason(int reason) {
-        return switch (reason) {
-            case DisconnectCause.BUSY -> "busy";
-            case DisconnectCause.CANCELED -> "cancelled";
-            case DisconnectCause.LOCAL -> "local";
-            case DisconnectCause.REMOTE -> "remote";
-            case DisconnectCause.MISSED -> "missed";
-            case DisconnectCause.ERROR -> "error";
-            default -> "";
-        };
+    private static String mapDisconnectReason(int code) {
+        if (code == DisconnectCause.BUSY) return "busy";
+        if (code == DisconnectCause.CANCELED) return "cancelled";
+        if (code == DisconnectCause.LOCAL) return "local";
+        if (code == DisconnectCause.REMOTE) return "remote";
+        if (code == DisconnectCause.MISSED) return "missed";
+        if (code == DisconnectCause.ERROR) return "error";
+        return "";
     }
 
     /**
