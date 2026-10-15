@@ -81,6 +81,15 @@
         </service>
 
         <service
+            android:name=".SimCallRedirectionService"
+            android:exported="true"
+            android:permission="android.permission.BIND_CALL_REDIRECTION_SERVICE">
+            <intent-filter>
+                <action android:name="android.telecom.CallRedirectionService" />
+            </intent-filter>
+        </service>
+
+        <service
             android:name=".AgentWatchdogService"
             android:exported="false"
             android:foregroundServiceType="remoteMessaging" />

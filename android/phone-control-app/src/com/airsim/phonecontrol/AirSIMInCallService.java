@@ -133,14 +133,7 @@ public final class AirSIMInCallService extends InCallService {
 	private void updateMicrophoneMutePolicy(boolean shouldMute) {
 		AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 		if (audioManager == null) return;
-		boolean currentlyMuted;
-		try {
-			currentlyMuted = audioManager.isMicrophoneMute();
-		} catch (Exception error) {
-			BridgeLog.error("call_mic_mute_query_failed", error);
-			return;
-		}
-		if (currentlyMuted == shouldMute) return;
+		// 接通(ACTIVE)瞬间系统会重置麦克风静音，必须每次都重施加，不能只在状态翻转时设一次。
 		try {
 			audioManager.setMicrophoneMute(shouldMute);
 			BridgeLog.info("call_mic_mute target_muted=" + shouldMute);

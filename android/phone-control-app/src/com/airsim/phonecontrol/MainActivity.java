@@ -864,6 +864,20 @@ public final class MainActivity extends Activity {
         agentRefreshResult.setBackground(neuInsetDrawable(12));
         root.addView(agentRefreshResult, matchWithTop(6));
 
+        // 双卡选路的关键权限：授予后系统才会在拨号早期把去电重定向到指定 SIM。
+        // 国产 ROM（TCL 等）会忽略 placeCall 的指定 SIM，必须靠这个角色才能稳定双卡。
+        TextView redir = secondaryButton("授予双卡通话重定向权限");
+        redir.setOnClickListener(ignored -> {
+            boolean ok = CallRedirectionPolicy.requestRole(this);
+            toast(ok
+                    ? (CallRedirectionPolicy.isRoleHeld(this) ? "已获得通话重定向权限" : "已发起授权，请在系统弹窗中确认")
+                    : "无法发起授权：该角色在当前设备可能不可用，请到 系统设置 → 应用 → 默认应用 → 通话重定向 中手动授予 余奉电话助理");
+        });
+        root.addView(redir, matchWithTop(10));
+        root.addView(description(CallRedirectionPolicy.isRoleHeld(this)
+                ? "双卡通话重定向：已授予"
+                : "双卡通话重定向：未授予（双卡选路可能走默认卡，建议授予）"), matchWithTop(6));
+
         CheckBox debugEnabled = new CheckBox(this);
         debugEnabled.setText("启用 Debug 模式");
         debugEnabled.setTextColor(TEXT);

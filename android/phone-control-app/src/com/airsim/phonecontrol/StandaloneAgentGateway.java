@@ -88,6 +88,13 @@ final class StandaloneAgentGateway {
                 : Instant.ofEpochMilli(store.lastHeartbeat()).toString());
         JSONArray pending = smsStore.cloudPending();
         value.put("sms_pending", pending == null ? 0 : pending.length());
+        // 音频现场：本机静音是否真的生效、当前 VOICE_CALL 音量、扬声器/麦克风状态、Shizuku 状态。
+        // 值守机不在手边，这份数据能直接看出「通话漏音」到底是哪一层没压住。
+        try {
+            value.put("audio", new LocalCallAudioController(context).diagnostics());
+        } catch (Throwable ignored) {}
+        value.put("call_redirection_role", CallRedirectionPolicy.isRoleHeld(context));
+        value.put("call_redirection_requestable", CallRedirectionPolicy.isRequestable(context));
         synchronized (callsLock) {
             value.put("active_call", activeCall == null ? JSONObject.NULL : activeCall);
         }

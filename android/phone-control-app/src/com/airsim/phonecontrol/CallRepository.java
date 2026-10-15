@@ -89,6 +89,7 @@ public final class CallRepository {
         if (subId == SubscriptionManager.INVALID_SUBSCRIPTION_ID) return null;
         String iccId = null;
         String number = null;
+        String carrierName = null;
         try {
             SubscriptionManager subscriptions =
                     context.getSystemService(SubscriptionManager.class);
@@ -98,6 +99,7 @@ public final class CallRepository {
                     for (SubscriptionInfo info : infos) {
                         if (info.getSubscriptionId() == subId) {
                             iccId = info.getIccId();
+                            carrierName = safeCharSequence(info.getCarrierName());
                             try {
                                 number = subscriptions.getPhoneNumber(subId);
                             } catch (SecurityException ignored) {}
@@ -107,7 +109,7 @@ public final class CallRepository {
                 }
             }
         } catch (SecurityException ignored) {}
-        if (iccId == null && number == null) return null;
+        if (iccId == null && number == null && carrierName == null) return null;
         List<PhoneAccountHandle> handles;
         try {
             handles = telecomManager.getCallCapablePhoneAccounts();
@@ -153,7 +155,35 @@ public final class CallRepository {
                 } catch (SecurityException ignored) {}
             }
         }
+        // 兜底 pass：部分国产 ROM（TCL 等）既不暴露 ICC ID、也不暴露号码，但 PhoneAccount 的
+        // label 可能是运营商名（如「中国移动」）。用订阅的 carrierName 与 label 做归一化包含匹配，
+        // 给双卡选路多一条活路。
+        if (carrierName != null && !carrierName.isEmpty()) {
+            String norm = normalizeCarrier(carrierName);
+            for (PhoneAccountHandle handle : handles) {
+                try {
+                    PhoneAccount account = telecomManager.getPhoneAccount(handle);
+                    if (account == null) continue;
+                    CharSequence label = account.getLabel();
+                    if (label != null) {
+                        String normLabel = normalizeCarrier(label.toString());
+                        if (!normLabel.isEmpty() && (normLabel.contains(norm) || norm.contains(normLabel))) {
+                            return handle;
+                        }
+                    }
+                } catch (SecurityException ignored) {}
+            }
+        }
         return null;
+    }
+
+    private static String safeCharSequence(CharSequence value) {
+        return value == null ? "" : value.toString().trim();
+    }
+
+    private static String normalizeCarrier(String value) {
+        if (value == null) return "";
+        return value.replaceAll("[\\s\\-()（）]", "").toLowerCase(java.util.Locale.ROOT);
     }
 
     public static ActionResult execute(Context context, AgentCommand command, TelecomManager telecomManager) {
