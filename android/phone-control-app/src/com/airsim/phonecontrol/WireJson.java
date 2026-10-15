@@ -10,6 +10,13 @@ public final class WireJson {
     /// 通话事件（带双卡标记；未知时 subscription_id / slot_index 传 -1）。
     public static String callEvent(String eventId, String callId, String direction, String state, String number,
                                    String mode, int subscriptionId, int slotIndex) {
+        return callEvent(eventId, callId, direction, state, number, mode, subscriptionId, slotIndex, "");
+    }
+
+    /// 通话事件（带双卡标记 + 结束原因）。
+    /// reason 取值：busy(对端占线) / cancelled / local / remote / missed / error；未知或非结束事件传空串。
+    public static String callEvent(String eventId, String callId, String direction, String state, String number,
+                                   String mode, int subscriptionId, int slotIndex, String reason) {
         return "{" +
                 field("event_id", eventId) + "," +
                 field("call_id", callId) + "," +
@@ -18,7 +25,8 @@ public final class WireJson {
                 field("number", number) + "," +
                 field("mode", mode) + "," +
                 "\"subscription_id\":" + subscriptionId + "," +
-                "\"slot_index\":" + slotIndex + "}";
+                "\"slot_index\":" + slotIndex + "," +
+                field("reason", reason) + "}";
     }
 
     public static String commandResult(String id, boolean success, String error) {

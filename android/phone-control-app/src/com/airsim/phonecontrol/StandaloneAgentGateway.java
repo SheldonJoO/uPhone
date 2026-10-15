@@ -324,8 +324,10 @@ final class StandaloneAgentGateway {
     private void applyCallEvent(JSONObject event) throws Exception {
         synchronized (callsLock) {
             String state = event.optString("state", "");
+            String reason = event.optString("reason", "");
             if ("ended".equals(state)) {
                 if (activeCall != null) {
+                    if (!reason.isEmpty()) activeCall.put("reason", reason);
                     activeCall.put("state", "ended").put("ended_at", Instant.now().toString())
                             .put("updated_at", Instant.now().toString());
                     callHistory.put(activeCall);
@@ -342,6 +344,7 @@ final class StandaloneAgentGateway {
                         .put("subscription_id", event.optInt("subscription_id", -1))
                         .put("slot_index", event.optInt("slot_index", -1))
                         .put("updated_at", Instant.now().toString());
+                if (!reason.isEmpty()) activeCall.put("reason", reason);
                 // 首次进入 active 时记录接通时间；从未接通则没有该字段。
                 if ("active".equals(state) && activeCall.isNull("connected_at")) {
                     activeCall.put("connected_at", Instant.now().toString());

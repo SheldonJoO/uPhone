@@ -6,6 +6,7 @@ import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Build;
 import android.telecom.Call;
+import android.telecom.DisconnectCause;
 import android.telecom.InCallService;
 import android.telecom.PhoneAccount;
 import android.telecom.PhoneAccountHandle;
@@ -24,17 +25,17 @@ import java.util.concurrent.atomic.AtomicLong;
 public final class AirSIMInCallService extends InCallService {
     private final ExecutorService network = Executors.newSingleThreadExecutor();
     private final Map<Call, Call.Callback> callbacks = new ConcurrentHashMap<>();
-	private final Map<Call, String> callStates = new ConcurrentHashMap<>();
+    private final Map<Call, String> callStates = new ConcurrentHashMap<>();
     /** 每次通话推断出的 [subscription_id, slot_index]；未知为 -1。去电在 onCallAdded 时写入。 */
     private final Map<Call, int[]> callSimCache = new ConcurrentHashMap<>();
     private final AtomicLong events = new AtomicLong();
     private final CallEventDeduplicator deduplicator = new CallEventDeduplicator();
-	private LocalCallAudioController localAudio;
+    private LocalCallAudioController localAudio;
 
     @Override
     public void onCallAdded(Call call) {
         super.onCallAdded(call);
-		if (localAudio == null) localAudio = new LocalCallAudioController(this);
+        if (localAudio == null) localAudio = new LocalCallAudioController(this);
         // 本地黑名单（iPhone 离线时的兜底；在线时由 iPhone 策略先行处理）。
         if ("incoming".equals(direction(call))) {
             String incomingNumber = number(call);
@@ -81,13 +82,14 @@ public final class AirSIMInCallService extends InCallService {
     @Override
     public void onCallRemoved(Call call) {
         String callId = CallRepository.id(call);
-        BridgeLog.info("telecom_call_removed call_id=" + DebugRedactor.safeIdentifier(callId));
+        BridgeLog.info("telecom_call_removed call_id=" + DebugRedactor.safeIdentifier(callId)
+                + " reason=" + disconnectReason(call));
         int[] sim = inferSim(call, direction(call));
-        emit(callId, direction(call), "ended", number(call), sim[0], sim[1]);
-		deduplicator.remove(callId);
-		callStates.remove(call);
-		callSimCache.remove(call);
-		updateLocalAudioPolicy();
+        emit(callId, direction(call), "ended", number(call), sim[0], sim[1], disconnectReason(call));
+        deduplicator.remove(callId);
+        callStates.remove(call);
+        callSimCache.remove(call);
+        updateLocalAudioPolicy();
         Call.Callback callback = callbacks.remove(call);
         if (callback != null) call.unregisterCallback(callback);
         CallRepository.remove(call);
@@ -97,56 +99,62 @@ public final class AirSIMInCallService extends InCallService {
 
     private void emit(Call call, int state) {
         String wireState = TelecomStateMapper.toWireState(state);
-		callStates.put(call, wireState);
-		updateLocalAudioPolicy();
-		String callId = CallRepository.id(call);
-		String callDirection = direction(call);
-		String callNumber = number(call);
+        callStates.put(call, wireState);
+        updateLocalAudioPolicy();
+        String callId = CallRepository.id(call);
+        String callDirection = direction(call);
+        String callNumber = number(call);
         BridgeLog.debug("telecom_state_changed call_id=" + DebugRedactor.safeIdentifier(callId)
                 + " direction=" + callDirection + " state=" + wireState);
         if (!"unknown".equals(wireState) && deduplicator.shouldSend(callId, callDirection, wireState, callNumber)) {
-			int[] sim = inferSim(call, callDirection);
-			emit(callId, callDirection, wireState, callNumber, sim[0], sim[1]);
-		}
+            int[] sim = inferSim(call, callDirection);
+            String reason = "ended".equals(wireState) ? disconnectReason(call) : "";
+            emit(callId, callDirection, wireState, callNumber, sim[0], sim[1], reason);
+        }
     }
 
-	private void updateLocalAudioPolicy() {
-		if (localAudio == null) return;
-		String mode = AppConfig.mode(this);
-		boolean shouldSilence = false;
-		for (String state : callStates.values()) {
-			if (TelecomStateMapper.shouldSilenceLocalOutput(mode, state)) {
-				shouldSilence = true;
-				break;
-			}
-		}
-		localAudio.update(shouldSilence);
-		updateMicrophoneMutePolicy(shouldSilence);
-	}
+    private void updateLocalAudioPolicy() {
+        if (localAudio == null) return;
+        String mode = AppConfig.mode(this);
+        boolean shouldSilence = false;
+        for (String state : callStates.values()) {
+            if (TelecomStateMapper.shouldSilenceLocalOutput(mode, state)) {
+                shouldSilence = true;
+                break;
+            }
+        }
+        localAudio.update(shouldSilence);
+        updateMicrophoneMutePolicy(shouldSilence);
+    }
 
-	/**
-	 * üPhone 接管通话时（remote_silent），iPhone 是听筒/话筒，
-	 * 上行音频由 PhoneAudioBridge 经 VOICE_TX 数字注入，安卓本机
-	 * 麦克风必须静音，否则对端会同时听到安卓周围的环境音/回声。
-	 * 策略与本地扬声器静音保持一致。
-	 */
-	private void updateMicrophoneMutePolicy(boolean shouldMute) {
-		AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-		if (audioManager == null) return;
-		// 接通(ACTIVE)瞬间系统会重置麦克风静音，必须每次都重施加，不能只在状态翻转时设一次。
-		try {
-			audioManager.setMicrophoneMute(shouldMute);
-			BridgeLog.info("call_mic_mute target_muted=" + shouldMute);
-		} catch (Exception error) {
-			BridgeLog.error("call_mic_mute_failed target_muted=" + shouldMute, error);
-		}
-	}
+    /**
+     * üPhone 接管通话时（remote_silent），iPhone 是听筒/话筒，
+     * 上行音频由 PhoneAudioBridge 经 VOICE_TX 数字注入，安卓本机
+     * 麦克风必须静音，否则对端会同时听到安卓周围的环境音/回声。
+     * 策略与本地扬声器静音保持一致。
+     */
+    private void updateMicrophoneMutePolicy(boolean shouldMute) {
+        AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        if (audioManager == null) return;
+        // 接通(ACTIVE)瞬间系统会重置麦克风静音，必须每次都重施加，不能只在状态翻转时设一次。
+        try {
+            audioManager.setMicrophoneMute(shouldMute);
+            BridgeLog.info("call_mic_mute target_muted=" + shouldMute);
+        } catch (Exception error) {
+            BridgeLog.error("call_mic_mute_failed target_muted=" + shouldMute, error);
+        }
+    }
 
     private void emit(String callId, String direction, String state, String number,
                       int subscriptionId, int slotIndex) {
+        emit(callId, direction, state, number, subscriptionId, slotIndex, "");
+    }
+
+    private void emit(String callId, String direction, String state, String number,
+                      int subscriptionId, int slotIndex, String reason) {
         String eventId = Long.toString(System.currentTimeMillis()) + "-" + events.incrementAndGet();
         String json = WireJson.callEvent(eventId, callId, direction, state, number, AppConfig.mode(this),
-                subscriptionId, slotIndex);
+                subscriptionId, slotIndex, reason);
         network.execute(() -> {
             try {
                 new AgentClient(this).sendEvent(json);
@@ -155,6 +163,35 @@ public final class AirSIMInCallService extends InCallService {
                 BridgeLog.error("call_event_failed state=" + state, error);
             }
         });
+    }
+
+    /**
+     * 读取通话的断开原因并映射为线上 reason。
+     * 取值：busy(对端占线) / cancelled / local / remote / missed / error；未知或未断开返回空串。
+     * 这是让 iPhone 侧区分「对端占线」与普通结束、从而正确结束系统通话并停止忙音的关键信息。
+     */
+    private static String disconnectReason(Call call) {
+        try {
+            Call.Details details = call.getDetails();
+            if (details == null) return "";
+            DisconnectCause cause = details.getDisconnectCause();
+            if (cause == null) return "";
+            return mapDisconnectReason(cause.getReason());
+        } catch (Exception ignored) {
+            return "";
+        }
+    }
+
+    private static String mapDisconnectReason(int reason) {
+        return switch (reason) {
+            case DisconnectCause.BUSY -> "busy";
+            case DisconnectCause.CANCELED -> "cancelled";
+            case DisconnectCause.LOCAL -> "local";
+            case DisconnectCause.REMOTE -> "remote";
+            case DisconnectCause.MISSED -> "missed";
+            case DisconnectCause.ERROR -> "error";
+            default -> "";
+        };
     }
 
     /**
@@ -319,9 +356,9 @@ public final class AirSIMInCallService extends InCallService {
     }
 
     @Override public void onDestroy() {
-		BridgeLog.info("incall_service_destroyed");
-		if (localAudio != null) localAudio.update(false);
-		updateMicrophoneMutePolicy(false);
+        BridgeLog.info("incall_service_destroyed");
+        if (localAudio != null) localAudio.update(false);
+        updateMicrophoneMutePolicy(false);
         network.shutdownNow();
         super.onDestroy();
     }

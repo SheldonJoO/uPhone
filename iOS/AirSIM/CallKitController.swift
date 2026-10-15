@@ -467,6 +467,8 @@ final class CallKitController: NSObject {
 
     private func endedReason(for call: CallRecord?) -> CXCallEndedReason {
         guard let call else { return .failed }
+        // 对端占线（busy）：按「对端结束」上报，比 unanswered 更准确，也能让系统通话页正确收尾、停止忙音。
+        if call.reason == "busy" { return .remoteEnded }
         return call.state == "active" || call.state == "held" ? .remoteEnded : .unanswered
     }
 

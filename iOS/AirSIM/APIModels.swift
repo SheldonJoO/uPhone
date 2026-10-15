@@ -19,6 +19,8 @@ struct CallRecord: Codable, Equatable, Sendable, Identifiable {
     let slotIndex: Int? = nil
     /// Android 上报的接通时间（ISO8601，可缺省）；缺省时回退到 startedAt。
     let connectedAt: Date? = nil
+    /// Android 上报的结束原因（busy=对端占线 / cancelled / local / remote / missed / error）；可缺省。
+    let reason: String? = nil
 
     enum CodingKeys: String, CodingKey {
         case id, index, direction, state, number, missed
@@ -28,6 +30,17 @@ struct CallRecord: Codable, Equatable, Sendable, Identifiable {
         case subscriptionID = "subscription_id"
         case slotIndex = "slot_index"
         case connectedAt = "connected_at"
+        case reason
+    }
+
+    /// 结束原因的中文展示；nil 表示无特殊原因（普通挂断/接通后正常结束）。
+    /// 仅覆盖去电未接通类原因；来电未接由 missed 字段另行表示。
+    var endReasonLabel: String? {
+        switch reason {
+        case "busy": return "对方正忙"
+        case "cancelled": return "已取消"
+        default: return nil
+        }
     }
 
     /// 双卡短标签，如 "SIM 1"；无卡槽信息时返回 nil。

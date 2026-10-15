@@ -976,6 +976,12 @@ struct RecentsView: View {
             }
         }
 
+        /// 副标题状态文案：未接 > 结束原因（对方正忙/已取消）> 普通音频通话。
+        private var statusText: String {
+            if call.missed { return L10n.t("未接") }
+            return call.endReasonLabel ?? "üMobile Kit 音频"
+        }
+
         var body: some View {
             HStack(spacing: PhoneListMetrics.avatarSpacing) {
                 InitialAvatar(
@@ -991,7 +997,7 @@ struct RecentsView: View {
                     HStack(spacing: 4) {
                         Image(systemName: call.direction == "incoming" ? "arrow.down.left" : "arrow.up.right")
                             .font(.caption2.weight(.semibold))
-                        Text(call.missed ? L10n.t("未接") : "üMobile Kit 音频")
+                        Text(statusText)
                         if let place = PhoneAttribution.shared.lookup(call.number)?.shortPlace {
                             Text("· \(place)")
                         }
@@ -1001,7 +1007,7 @@ struct RecentsView: View {
                         }
                     }
                     .font(.subheadline)
-                    .foregroundStyle(call.missed ? .red : .secondary)
+                    .foregroundStyle((call.missed || call.reason == "busy") ? .red : .secondary)
                 }
                 .lineLimit(1)
                 .frame(maxWidth: .infinity, alignment: .leading)
