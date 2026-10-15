@@ -830,13 +830,16 @@ public final class MainActivity extends Activity {
 		refreshInstallerStatus();
 		}
 
-        root.addView(sectionTitle("Shizuku 权限与 PCM 桥"), matchWithTop(22));
-        LinearLayout shizukuCard = card(SURFACE, 22);
-        shizukuCard.setOrientation(LinearLayout.VERTICAL);
-        shizukuCard.setPadding(dp(16), dp(16), dp(16), dp(16));
+        // 一键值守：Shizuku/PCM 桥属一次性设置，默认折叠，避免常态占用设置页；
+        // 未就绪（首次或异常）时自动展开，提示用户完成授权。
+        boolean shizukuPcmReady = shizukuReady() && pcmReady();
+        final boolean[] shizukuExpanded = { !shizukuPcmReady };
+        final LinearLayout shizukuBody = card(SURFACE, 22);
+        shizukuBody.setOrientation(LinearLayout.VERTICAL);
+        shizukuBody.setPadding(dp(16), dp(16), dp(16), dp(16));
         shizukuStatus = label("", 14, TEXT, Gravity.START);
-        shizukuCard.addView(shizukuStatus);
-        shizukuCard.addView(description("首次通过无线调试启动并授权；之后 余奉电话助理 会自动恢复 PCM 桥。"), matchWithTop(6));
+        shizukuBody.addView(shizukuStatus);
+        shizukuBody.addView(description("首次通过无线调试启动并授权；之后 余奉电话助理 会自动恢复 PCM 桥。"), matchWithTop(6));
         LinearLayout shizukuActions = row();
         TextView authorize = secondaryButton("授权并启动");
         authorize.setOnClickListener(ignored -> {
@@ -850,8 +853,22 @@ public final class MainActivity extends Activity {
         });
         shizukuActions.addView(authorize, weightedWithEnd(5));
         shizukuActions.addView(open, weightedWithStart(5));
-        shizukuCard.addView(shizukuActions, matchWithTop(12));
-        root.addView(shizukuCard, matchWithTop(10));
+        shizukuBody.addView(shizukuActions, matchWithTop(12));
+        shizukuBody.setVisibility(shizukuExpanded[0] ? View.VISIBLE : View.GONE);
+        LinearLayout shizukuGroup = new LinearLayout(this);
+        shizukuGroup.setOrientation(LinearLayout.VERTICAL);
+        TextView shizukuHeader = label("Shizuku 权限与 PCM 桥" + (shizukuPcmReady ? "（已就绪）" : "（待设置）"), 16, TEXT, Gravity.START);
+        shizukuHeader.setTypeface(Typeface.DEFAULT_BOLD);
+        shizukuHeader.setPadding(dp(4), dp(10), dp(4), dp(10));
+        shizukuHeader.setCompoundDrawablesWithIntrinsicBounds(0, 0, android.R.drawable.ic_menu_more, 0);
+        shizukuHeader.setOnClickListener(ignored -> {
+            shizukuExpanded[0] = !shizukuExpanded[0];
+            shizukuBody.setVisibility(shizukuExpanded[0] ? View.VISIBLE : View.GONE);
+        });
+        shizukuGroup.addView(shizukuHeader);
+        shizukuGroup.addView(shizukuBody, matchWithTop(6));
+        root.addView(shizukuGroup, matchWithTop(22));
+
 
         root.addView(sectionTitle("电话角色与诊断"), matchWithTop(22));
         TextView dialer = secondaryButton("设为默认电话应用");
