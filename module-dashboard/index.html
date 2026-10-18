@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>4G 模块管理后台 · 大疆 / 移远</title>
+<style>
+  :root {
+    --bg: #0b0f14;
+    --bg-2: #0f141b;
+    --panel: #141b24;
+    --panel-2: #1a2330;
+    --border: #232d3b;
+    --border-2: #2c3849;
+    --text: #e6edf3;
+    --muted: #8b98a9;
+    --faint: #5b6675;
+    --green: #22c55e;
+    --green-dim: #166534;
+    --amber: #f59e0b;
+    --red: #ef4444;
+    --blue: #3b82f6;
+    --cyan: #06b6d4;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    overflow: hidden;
+  }
+  .app { display: flex; height: 100vh; }
+
+  /* ── 侧栏 ── */
+  .sidebar {
+    width: 232px; flex-shrink: 0;
+    background: linear-gradient(180deg, #0d1218, #0a0e13);
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    padding: 18px 12px;
+  }
+  .brand { display: flex; align-items: center; gap: 10px; padding: 4px 8px 18px; border-bottom: 1px solid var(--border); }
+  .brand-logo {
+    width: 34px; height: 34px; border-radius: 9px;
+    background: linear-gradient(135deg, #22c55e, #15803d);
+    display: grid; place-items: center; font-size: 17px;
+    box-shadow: 0 0 0 1px #22c55e33, 0 4px 14px #22c55e22;
+  }
+  .brand h1 { font-size: 15px; font-weight: 700; letter-spacing: .3px; }
+  .brand small { display: block; font-size: 11px; color: var(--faint); font-weight: 500; }
+  .nav { margin-top: 14px; display: flex; flex-direction: column; gap: 2px; flex: 1; }
+  .nav-label { font-size: 10px; color: var(--faint); text-transform: uppercase; letter-spacing: 1px; padding: 12px 10px 6px; }
+  .nav-item {
+    display: flex; align-items: center; gap: 11px;
+    padding: 9px 11px; border-radius: 9px; cursor: pointer;
+    color: var(--muted); font-size: 13.5px; font-weight: 500;
+    border: 1px solid transparent; transition: all .14s ease; user-select: none;
+  }
+  .nav-item:hover { background: var(--panel); color: var(--text); }
+  .nav-item.active { background: var(--panel-2); color: var(--text); border-color: var(--border-2); }
+  .nav-item.active .ico { color: var(--green); }
+  .nav-item .ico { width: 18px; text-align: center; font-size: 15px; }
+  .sidebar-foot { border-top: 1px solid var(--border); padding-top: 12px; font-size: 11px; color: var(--faint); line-height: 1.7; }
+  .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+
+  /* ── 主区 ── */
+  .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  .topbar {
+    height: 58px; flex-shrink: 0;
+    display: flex; align-items: center; gap: 14px;
+    padding: 0 20px; border-bottom: 1px solid var(--border);
+    background: rgba(15,20,27,.7); backdrop-filter: blur(8px);
+  }
+  .topbar h2 { font-size: 16px; font-weight: 650; }
+  .topbar .spacer { flex: 1; }
+  .module-select {
+    background: var(--panel); color: var(--text);
+    border: 1px solid var(--border-2); border-radius: 9px;
+    padding: 7px 12px; font-size: 13px; font-family: var(--sans);
+    cursor: pointer; outline: none; min-width: 190px;
+  }
+  .pill {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: var(--panel); border: 1px solid var(--border-2);
+    border-radius: 999px; padding: 6px 13px; font-size: 12.5px; font-weight: 600;
+  }
+  .pill.online { color: var(--green); border-color: #22c55e44; }
+  .pill.offline { color: var(--red); border-color: #ef444444; }
+  .signal-pill { color: var(--text); font-family: var(--mono); }
+  .iconbtn {
+    background: var(--panel); border: 1px solid var(--border-2); color: var(--muted);
+    border-radius: 9px; width: 36px; height: 36px; cursor: pointer; font-size: 15px;
+    display: grid; place-items: center; transition: all .14s;
+  }
+  .iconbtn:hover { color: var(--text); border-color: var(--green); }
+
+  .content { flex: 1; overflow-y: auto; padding: 22px; }
+  .content::-webkit-scrollbar { width: 10px; }
+  .content::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 5px; }
+
+  .section { display: none; animation: fade .18s ease; }
+  .section.active { display: block; }
+  @keyframes fade { from { opacity: 0; transform: translateY(4px);} to { opacity: 1; transform: none;} }
+
+  .grid { display: grid; gap: 14px; }
+  .g-2 { grid-template-columns: repeat(2, 1fr); }
+  .g-3 { grid-template-columns: repeat(3, 1fr); }
+  .g-4 { grid-template-columns: repeat(4, 1fr); }
+  @media (max-width: 980px){ .g-4{grid-template-columns:repeat(2,1fr);} .g-3{grid-template-columns:1fr;} }
+
+  .card {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 13px; padding: 16px;
+  }
+  .card h3 { font-size: 12px; color: var(--muted); font-weight: 600; letter-spacing: .4px; margin-bottom: 10px; display:flex; align-items:center; gap:7px; }
+  .stat .val { font-size: 24px; font-weight: 700; font-family: var(--mono); letter-spacing: -.5px; }
+  .stat .val.green { color: var(--green); }
+  .stat .val.amber { color: var(--amber); }
+  .stat .sub { font-size: 12px; color: var(--faint); margin-top: 3px; }
+  .kv { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed var(--border); font-size: 13px; }
+  .kv:last-child { border-bottom: none; }
+  .kv .k { color: var(--muted); }
+  .kv .v { font-family: var(--mono); color: var(--text); text-align: right; word-break: break-all; }
+
+  .bars { display: inline-flex; align-items: flex-end; gap: 2px; height: 18px; }
+  .bars i { width: 4px; background: var(--border-2); border-radius: 1px; }
+  .bars i.on { background: var(--green); }
+  .bars i:nth-child(1){height:5px}.bars i:nth-child(2){height:8px}.bars i:nth-child(3){height:11px}.bars i:nth-child(4){height:14px}.bars i:nth-child(5){height:18px}
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; color: var(--faint); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .5px; padding: 8px 10px; border-bottom: 1px solid var(--border); }
+  td { padding: 10px; border-bottom: 1px solid var(--border); color: var(--text); }
+  tr:last-child td { border-bottom: none; }
+  td.mono, th.mono { font-family: var(--mono); }
+  .tag { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+  .tag.in { background: #22c55e1a; color: var(--green); }
+  .tag.out { background: #3b82f61a; color: var(--blue); }
+  .tag.miss { background: #ef44441a; color: var(--red); }
+  .tag.active { background: #22c55e1a; color: var(--green); }
+  .tag.idle { background: #8b98a91a; color: var(--muted); }
+
+  .sim { position: relative; }
+  .sim .slot-badge { position: absolute; top: 14px; right: 14px; }
+  .sim.inactive { opacity: .55; }
+
+  .btn {
+    background: var(--green); color: #04120a; border: none; border-radius: 9px;
+    padding: 9px 16px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: var(--sans);
+    transition: filter .14s;
+  }
+  .btn:hover { filter: brightness(1.1); }
+  .btn.ghost { background: var(--panel-2); color: var(--text); border: 1px solid var(--border-2); }
+  .btn.blue { background: var(--blue); color: #fff; }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+
+  input, select, textarea {
+    background: var(--bg-2); border: 1px solid var(--border-2); color: var(--text);
+    border-radius: 9px; padding: 9px 12px; font-size: 13px; font-family: var(--sans); outline: none; width: 100%;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--green); }
+  input.mono, textarea.mono { font-family: var(--mono); }
+  label.field { display: block; }
+  label.field span { display: block; font-size: 12px; color: var(--muted); margin-bottom: 5px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  @media (max-width: 720px){ .form-row{grid-template-columns:1fr;} }
+
+  /* AT 控制台 */
+  .console {
+    background: #070a0e; border: 1px solid var(--border); border-radius: 11px;
+    font-family: var(--mono); font-size: 13px; line-height: 1.65;
+    height: 420px; overflow-y: auto; padding: 14px;
+  }
+  .console .line { white-space: pre-wrap; word-break: break-all; }
+  .console .cmd { color: var(--green); }
+  .console .cmd::before { content: "AT> "; color: var(--faint); }
+  .console .ok { color: #a7f3d0; }
+  .console .err { color: #fca5a5; }
+  .console .info { color: var(--muted); }
+  .console-input { display: flex; gap: 10px; margin-top: 12px; }
+  .console-input input { font-family: var(--mono); }
+  .quick-at { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 10px; }
+  .quick-at button {
+    background: var(--panel-2); border: 1px solid var(--border-2); color: var(--muted);
+    border-radius: 7px; padding: 5px 10px; font-size: 12px; font-family: var(--mono); cursor: pointer;
+  }
+  .quick-at button:hover { color: var(--green); border-color: var(--green); }
+
+  .banner {
+    background: linear-gradient(90deg, #16653422, #22c55e11);
+    border: 1px solid #22c55e33; border-radius: 11px;
+    padding: 12px 16px; font-size: 12.5px; color: #bbf7d0; margin-bottom: 16px;
+    display: flex; gap: 10px; align-items: flex-start;
+  }
+  .banner .ico { font-size: 16px; }
+  .muted { color: var(--muted); }
+  .faint { color: var(--faint); }
+  .mono { font-family: var(--mono); }
+  .row { display: flex; gap: 12px; align-items: center; }
+  .between { justify-content: space-between; }
+  .mt { margin-top: 14px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- ── 侧栏 ── -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-logo">📡</div>
+      <div>
+        <h1>模块管理后台</h1>
+        <small>DJI · Quectel 4G</small>
+      </div>
+    </div>
+    <nav class="nav" id="nav">
+      <div class="nav-label">监控</div>
+      <div class="nav-item active" data-tab="overview"><span class="ico">📊</span>总览</div>
+      <div class="nav-item" data-tab="sim"><span class="ico">💳</span>SIM 卡</div>
+      <div class="nav-item" data-tab="calls"><span class="ico">📞</span>通话</div>
+      <div class="nav-item" data-tab="sms"><span class="ico">💬</span>短信</div>
+      <div class="nav-label">配置</div>
+      <div class="nav-item" data-tab="sip"><span class="ico">🔗</span>SIP 网关</div>
+      <div class="nav-item" data-tab="at"><span class="ico">⌨️</span>AT 控制台</div>
+      <div class="nav-item" data-tab="settings"><span class="ico">⚙️</span>设置</div>
+    </nav>
+    <div class="sidebar-foot">
+      <div><span class="dot" style="background:var(--green)"></span>网关 <span class="mono" id="foot-gw">demo</span></div>
+      <div>固件 <span class="mono" id="foot-fw">—</span></div>
+      <div>© 2026 üPhone</div>
+    </div>
+  </aside>
+
+  <!-- ── 主区 ── -->
+  <div class="main">
+    <header class="topbar">
+      <h2 id="page-title">总览</h2>
+      <div class="spacer"></div>
+      <select class="module-select" id="module-select"></select>
+      <span class="pill online" id="conn-pill"><span class="dot" style="background:var(--green)"></span>在线</span>
+      <span class="pill signal-pill" id="signal-pill">📶 —</span>
+      <button class="iconbtn" id="refresh-btn" title="刷新">⟳</button>
+    </header>
+
+    <div class="content" id="content">
+      <div class="banner">
+        <span class="ico">🧪</span>
+        <span><b>演示模式</b>：当前展示内置模拟数据。把下方 <span class="mono">DEMO</span> 设为 <span class="mono">false</span> 并实现同源 API（见 index.html 顶部「API 契约」注释），即可对接 Mac/NAS 上真实的 cellbridge 网关。</span>
+      </div>
+
+      <!-- 总览 -->
+      <section class="section active" data-sec="overview">
+        <div class="grid g-4" id="overview-stats"></div>
+        <div class="grid g-2 mt">
+          <div class="card">
+            <h3>📶 信号质量</h3>
+            <div class="row" style="gap:26px; flex-wrap:wrap;">
+              <div><div class="faint" style="font-size:11px">RSRP</div><div class="mono" style="font-size:20px;font-weight:700" id="rsrp">—</div></div>
+              <div><div class="faint" style="font-size:11px">RSRQ</div><div class="mono" style="font-size:20px;font-weight:700" id="rsrq">—</div></div>
+              <div><div class="faint" style="font-size:11px">SINR</div><div class="mono" style="font-size:20px;font-weight:700" id="sinr">—</div></div>
+              <div><div class="faint" style="font-size:11px">强度</div><div class="row" style="margin-top:4px"><span class="bars" id="sig-bars"></span><span class="mono" id="sig-dbm"></span></div></div>
+            </div>
+            <div class="mt"><div class="faint" style="font-size:11px;margin-bottom:6px">实时波动</div><canvas id="sig-chart" height="70" style="width:100%"></canvas></div>
+          </div>
+          <div class="card">
+            <h3>🧾 最近事件</h3>
+            <div id="events" class="mono" style="font-size:12px;line-height:2"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SIM -->
+      <section class="section" data-sec="sim">
+        <div class="grid g-2" id="sim-grid"></div>
+      </section>
+
+      <!-- 通话 -->
+      <section class="section" data-sec="calls">
+        <div class="card">
+          <div class="row between" style="margin-bottom:12px">
+            <h3 style="margin:0">📞 通话记录</h3>
+            <div class="row">
+              <input id="test-number" placeholder="输入号码测试拨号" style="width:180px" class="mono" />
+              <button class="btn" id="test-dial">测试拨号</button>
+            </div>
+          </div>
+          <table>
+            <thead><tr><th>方向</th><th>号码</th><th>卡</th><th>时长</th><th class="mono">时间</th></tr></thead>
+            <tbody id="calls-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 短信 -->
+      <section class="section" data-sec="sms">
+        <div class="card" style="margin-bottom:14px">
+          <h3>✉️ 发送短信</h3>
+          <div class="form-row">
+            <label class="field"><span>接收号码</span><input id="sms-to" class="mono" placeholder="+8613xxxxxxxxx" /></label>
+            <label class="field"><span>使用卡槽</span><select id="sms-slot"><option value="1">卡槽 1</option><option value="2">卡槽 2</option></select></label>
+          </div>
+          <label class="field"><span>内容</span><textarea id="sms-body" rows="2" placeholder="短信内容"></textarea></label>
+          <div class="mt"><button class="btn" id="sms-send">发送</button></div>
+        </div>
+        <div class="card">
+          <h3>📥 短信记录</h3>
+          <table>
+            <thead><tr><th>类型</th><th>号码</th><th>内容</th><th class="mono">时间</th></tr></thead>
+            <tbody id="sms-body-list"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- SIP -->
+      <section class="section" data-sec="sip">
+        <div class="grid g-2">
+          <div class="card">
+            <h3>🔗 SIP 网关配置</h3>
+            <div class="form-row">
+              <label class="field"><span>服务器</span><input id="sip-server" class="mono" /></label>
+              <label class="field"><span>端口</span><input id="sip-port" class="mono" /></label>
+            </div>
+            <div class="form-row">
+              <label class="field"><span>用户名</span><input id="sip-user" class="mono" /></label>
+              <label class="field"><span>密码</span><input id="sip-pass" type="password" class="mono" /></label>
+            </div>
+            <div class="form-row">
+              <label class="field"><span>编码</span><select id="sip-codec"><option>PCMU</option><option>PCMA</option><option>G729</option><option>OPUS</option></select></label>
+              <label class="field"><span>传输</span><select id="sip-transport"><option>UDP</option><option>TCP</option><option>TLS</option></select></label>
+            </div>
+            <button class="btn" id="sip-save">保存并注册</button>
+          </div>
+          <div class="card">
+            <h3>注册状态</h3>
+            <div class="kv"><span class="k">状态</span><span class="v" id="sip-reg-status">—</span></div>
+            <div class="kv"><span class="k">注册地址</span><span class="v" id="sip-reg-addr">—</span></div>
+            <div class="kv"><span class="k">过期时间</span><span class="v" id="sip-reg-exp">—</span></div>
+            <div class="kv"><span class="k">用户代理</span><span class="v">cellbridge-gateway</span></div>
+            <div class="mt muted" style="font-size:12px">SIP 账号用于把模块接入语音网关（与 cellbridge-gateway 一致），iPhone 端经 Relay/CallKit 呼入呼出。</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- AT 控制台 -->
+      <section class="section" data-sec="at">
+        <div class="card">
+          <div class="row between" style="margin-bottom:12px">
+            <h3 style="margin:0">⌨️ AT 指令控制台</h3>
+            <button class="btn ghost" id="at-clear">清空</button>
+          </div>
+          <div class="console" id="at-console"></div>
+          <div class="console-input">
+            <input id="at-input" class="mono" placeholder="输入 AT 指令，如 AT+CSQ" />
+            <button class="btn" id="at-send">发送</button>
+          </div>
+          <div class="quick-at" id="at-quick"></div>
+        </div>
+      </section>
+
+      <!-- 设置 -->
+      <section class="section" data-sec="settings">
+        <div class="card" style="max-width:640px">
+          <h3>⚙️ 模块与连接</h3>
+          <div class="form-row">
+            <label class="field"><span>模块厂商</span><select id="set-vendor"><option value="dji">大疆 DJI</option><option value="quectel">移远 Quectel</option></select></label>
+            <label class="field"><span>型号</span><input id="set-model" class="mono" /></label>
+          </div>
+          <div class="form-row">
+            <label class="field"><span>连接方式</span><select id="set-transport"><option value="usb">USB 串口</option><option value="network">网络（TCP）</option></select></label>
+            <label class="field"><span id="set-addr-label">AT 串口设备</span><input id="set-addr" class="mono" placeholder="/dev/ttyUSB2 或 192.168.1.10" /></label>
+          </div>
+          <div class="form-row">
+            <label class="field"><span>端口（网络方式）</span><input id="set-port" class="mono" placeholder="9527" /></label>
+            <label class="field"><span>Relay 地址</span><input id="set-relay" class="mono" placeholder="https://airsim-push.dntmove.asia" /></label>
+          </div>
+          <button class="btn" id="set-save">保存设置</button>
+          <div class="mt muted" style="font-size:12px">这些参数与 iOS App「设置 → 硬件值守模块」一致，供 Mac/NAS 网关建立 AT/SIP 桥接时读取。</div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   API 契约（供 Mac/NAS 上的 cellbridge 网关实现；DEMO=false 后启用）
+   ─────────────────────────────────────────────────────────────
+   GET  /api/status    → { online, model, imei, iccid, carrier, netType,
+                           rsrp, rsrq, sinr, bars, dataRx, dataTx, uptime,
+                           fw, sipRegistered }
+   GET  /api/sim       → [{ slot, active, iccid, msisdn, carrier, signal }]
+   GET  /api/calls     → [{ dir:'in'|'out'|'miss', number, slot, duration, at }]
+   GET  /api/sms       → [{ dir:'in'|'out', number, body, at }]
+   POST /api/sms       → body { to, body, slot }
+   POST /api/calls/dial→ body { number, slot }
+   GET  /api/sip       → { server, port, user, codec, transport, status, addr, expires }
+   POST /api/sip       → 同上（保存并触发注册）
+   POST /api/at        → body { command } → { response }
+   GET  /api/settings  → { vendor, model, transport, addr, port, relay }
+   POST /api/settings  → 同上
+   ═══════════════════════════════════════════════════════════════ */
+const DEMO = true;
+
+const MODULES = {
+  "dji-qdc507": {
+    label: "大疆 QDC507", vendor: "dji", model: "QDC507", fw: "QDC507_V2.1.4",
+    online: true, imei: "860123045678901", iccid: "8986001234567890123",
+    carrier: "中国移动", netType: "4G LTE", rsrp: -82, rsrq: -11, sinr: 18, bars: 4,
+    dataRx: "1.2 GB", dataTx: "340 MB", uptime: "3 天 06:42:11", sipRegistered: true,
+    sims: [
+      { slot: 1, active: true,  iccid: "8986001234567890123", msisdn: "+8613800138000", carrier: "中国移动", signal: 4 },
+      { slot: 2, active: false, iccid: "8986011567890123456", msisdn: "+8613900139000", carrier: "中国联通", signal: 3 },
+    ],
+    sip: { server: "sip.cellbridge.local", port: "5060", user: "dji01", codec: "PCMU", transport: "UDP", status: "已注册", addr: "sip:5060 @udp", expires: "3600s" },
+    settings: { vendor: "dji", model: "QDC507", transport: "usb", addr: "/dev/ttyUSB2", port: "", relay: "https://airsim-push.dntmove.asia" },
+  },
+  "dji-eg25g": {
+    label: "大疆 EG25-G", vendor: "dji", model: "EG25-G", fw: "EG25GGBR07A08",
+    online: true, imei: "861234056789012", iccid: "8986019912345678901",
+    carrier: "中国电信", netType: "4G LTE", rsrp: -95, rsrq: -13, sinr: 12, bars: 3,
+    dataRx: "860 MB", dataTx: "120 MB", uptime: "1 天 12:08:55", sipRegistered: true,
+    sims: [
+      { slot: 1, active: true, iccid: "8986019912345678901", msisdn: "+8618900189000", carrier: "中国电信", signal: 3 },
+      { slot: 2, active: false, iccid: "", msisdn: "", carrier: "—", signal: 0 },
+    ],
+    sip: { server: "sip.cellbridge.local", port: "5060", user: "eg25g01", codec: "PCMA", transport: "TCP", status: "已注册", addr: "sip:5060 @tcp", expires: "1800s" },
+    settings: { vendor: "dji", model: "EG25-G", transport: "network", addr: "192.168.1.20", port: "9527", relay: "https://airsim-push.dntmove.asia" },
+  },
+  "quectel-eg25g": {
+    label: "移远 EG25-G", vendor: "quectel", model: "EG25-G", fw: "EG25GGBR07A07",
+    online: true, imei: "863456051234567", iccid: "8986029876543210987",
+    carrier: "中国联通", netType: "4G LTE", rsrp: -78, rsrq: -9, sinr: 22, bars: 5,
+    dataRx: "3.4 GB", dataTx: "980 MB", uptime: "12 天 02:31:40", sipRegistered: true,
+    sims: [
+      { slot: 1, active: true, iccid: "8986029876543210987", msisdn: "+8615000150000", carrier: "中国联通", signal: 5 },
+      { slot: 2, active: true, iccid: "8986021123456789012", msisdn: "+8613100131000", carrier: "中国移动", signal: 4 },
+    ],
+    sip: { server: "sip.cellbridge.local", port: "5060", user: "qeg25g01", codec: "PCMU", transport: "UDP", status: "已注册", addr: "sip:5060 @udp", expires: "3600s" },
+    settings: { vendor: "quectel", model: "EG25-G", transport: "usb", addr: "/dev/ttyUSB3", port: "", relay: "https://airsim-push.dntmove.asia" },
+  },
+  "quectel-eg912y": {
+    label: "移远 EG912Y-IE", vendor: "quectel", model: "EG912Y-IE", fw: "EG912YEUAAR01A03",
+    online: false, imei: "—", iccid: "—", carrier: "—", netType: "—", rsrp: 0, rsrq: 0, sinr: 0, bars: 0,
+    dataRx: "0", dataTx: "0", uptime: "—", sipRegistered: false,
+    sims: [ { slot: 1, active: false, iccid: "", msisdn: "", carrier: "—", signal: 0 } ],
+    sip: { server: "sip.cellbridge.local", port: "5060", user: "eg912y01", codec: "PCMU", transport: "UDP", status: "未注册", addr: "—", expires: "—" },
+    settings: { vendor: "quectel", model: "EG912Y-IE", transport: "usb", addr: "/dev/ttyUSB4", port: "", relay: "https://airsim-push.dntmove.asia" },
+  },
+};
+
+const DEMO_CALLS = [
+  { dir: "in",  number: "+8613800138000", slot: 1, duration: "02:31", at: "今天 09:12" },
+  { dir: "out", number: "+8613900139000", slot: 2, duration: "05:08", at: "今天 08:40" },
+  { dir: "miss",number: "+8610000000000", slot: 1, duration: "—",     at: "昨天 22:15" },
+  { dir: "out", number: "10086",          slot: 1, duration: "00:42", at: "昨天 20:03" },
+  { dir: "in",  number: "+8615000150000", slot: 1, duration: "12:06", at: "昨天 15:47" },
+];
+const DEMO_SMS = [
+  { dir: "in",  number: "10086",  body: "【中国移动】您本月已使用流量 1.2GB，剩余 8.8GB。", at: "今天 10:02" },
+  { dir: "in",  number: "95588",  body: "验证码 204817，谨防泄露。", at: "今天 09:30" },
+  { dir: "out", number: "+8613800138000", body: "已收到，稍后回电。", at: "昨天 21:11" },
+];
+const DEMO_EVENTS = [
+  "[09:12] 来电 +8613800138000 → 转送 iPhone",
+  "[08:40] 去电 +8613900139000 (卡2) 接通",
+  "[08:38] SIP REGISTER 200 OK",
+  "[08:36] 模块上线，信号 -82dBm",
+  "[昨天 22:15] 未接 +8610000000000",
+];
+
+const state = { module: "dji-qdc507", tab: "overview" };
+const $ = (s) => document.querySelector(s);
+const cur = () => MODULES[state.module];
+
+/* ── 模块下拉 ── */
+function initModuleSelect() {
+  const sel = $("#module-select");
+  sel.innerHTML = Object.entries(MODULES).map(([k, m]) =>
+    `<option value="${k}">${m.label}</option>`).join("");
+  sel.value = state.module;
+  sel.onchange = (e) => { state.module = e.target.value; renderAll(); };
+}
+
+/* ── 顶栏 ── */
+function renderTopbar() {
+  const m = cur();
+  const pill = $("#conn-pill");
+  pill.className = "pill " + (m.online ? "online" : "offline");
+  pill.innerHTML = `<span class="dot" style="background:${m.online ? 'var(--green)' : 'var(--red)'}"></span>${m.online ? "在线" : "离线"}`;
+  $("#signal-pill").textContent = m.online ? `📶 ${m.bars}/5 (${m.rsrp}dBm)` : "📶 —";
+  $("#foot-fw").textContent = m.fw;
+  $("#foot-gw").textContent = DEMO ? "demo" : "live";
+}
+
+/* ── 总览 ── */
+function bars(on) {
+  let h = "";
+  for (let i = 1; i <= 5; i++) h += `<i class="${i <= on ? "on" : ""}"></i>`;
+  return `<span class="bars">${h}</span>`;
+}
+function renderOverview() {
+  const m = cur();
+  const stats = [
+    { k: "连接状态", v: m.online ? "在线" : "离线", cls: m.online ? "green" : "amber", sub: m.netType },
+    { k: "信号强度", v: `${m.bars}/5`, cls: m.bars >= 3 ? "green" : "amber", sub: `RSRP ${m.rsrp} dBm` },
+    { k: "运营商", v: m.carrier, sub: m.netType },
+    { k: "SIP 注册", v: m.sipRegistered ? "已注册" : "未注册", cls: m.sipRegistered ? "green" : "amber", sub: m.sip.user },
+  ];
+  $("#overview-stats").innerHTML = stats.map(s =>
+    `<div class="card stat"><h3>${s.k}</h3><div class="val ${s.cls || ""}">${s.v}</div><div class="sub">${s.sub}</div></div>`).join("");
+
+  $("#rsrp").textContent = m.online ? m.rsrp + " dBm" : "—";
+  $("#rsrq").textContent = m.online ? m.rsrq + " dB" : "—";
+  $("#sinr").textContent = m.online ? m.sinr + " dB" : "—";
+  $("#sig-bars").innerHTML = bars(m.bars);
+  $("#sig-dbm").textContent = m.online ? `${m.rsrp} dBm` : "";
+  drawChart();
+  $("#events").innerHTML = (m.online ? DEMO_EVENTS : ["[--:--] 模块离线，等待连接…"]).map(e =>
+    `<div class="info">${e}</div>`).join("");
+}
+function drawChart() {
+  const c = $("#sig-chart"); if (!c) return;
+  const ctx = c.getContext("2d");
+  const w = c.width = c.clientWidth; const h = c.height = 70;
+  ctx.clearRect(0, 0, w, h);
+  const m = cur();
+  const base = m.online ? (100 + m.bars * 12) : 6;
+  ctx.strokeStyle = "#22c55e"; ctx.lineWidth = 2; ctx.beginPath();
+  for (let x = 0; x < w; x++) {
+    const y = h - (base / 100) * h - Math.sin(x / 22) * 6 - (Math.random() * 4 - 2);
+    x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+  ctx.fillStyle = "#22c55e18"; ctx.lineTo(w, h); ctx.lineTo(0, h); ctx.fill();
+}
+
+/* ── SIM ── */
+function renderSim() {
+  const m = cur();
+  $("#sim-grid").innerHTML = m.sims.map(s => `
+    <div class="card sim ${s.active ? "" : "inactive"}">
+      <span class="tag slot-badge ${s.active ? "active" : "idle"}">${s.active ? "使用中" : "未激活"}</span>
+      <h3>💳 SIM 卡槽 ${s.slot}</h3>
+      <div class="row" style="margin-bottom:10px">${bars(s.signal)}<span class="mono muted">${s.signal}/5</span></div>
+      <div class="kv"><span class="k">ICCID</span><span class="v">${s.iccid || "—"}</span></div>
+      <div class="kv"><span class="k">号码</span><span class="v">${s.msisdn || "—"}</span></div>
+      <div class="kv"><span class="k">运营商</span><span class="v">${s.carrier}</span></div>
+      <div class="kv"><span class="k">状态</span><span class="v">${s.active ? "已注册" : "空槽 / 未插卡"}</span></div>
+    </div>`).join("");
+}
+
+/* ── 通话 ── */
+function renderCalls() {
+  const tag = { in: ["in", "呼入"], out: ["out", "呼出"], miss: ["miss", "未接"] };
+  $("#calls-body").innerHTML = DEMO_CALLS.map(c => `
+    <tr>
+      <td><span class="tag ${tag[c.dir][0]}">${tag[c.dir][1]}</span></td>
+      <td class="mono">${c.number}</td>
+      <td>卡 ${c.slot}</td>
+      <td class="mono">${c.duration}</td>
+      <td class="mono faint">${c.at}</td>
+    </tr>`).join("");
+}
+
+/* ── 短信 ── */
+function renderSms() {
+  const tag = { in: ["in", "接收"], out: ["out", "发送"] };
+  $("#sms-body-list").innerHTML = DEMO_SMS.map(s => `
+    <tr>
+      <td><span class="tag ${tag[s.dir][0]}">${tag[s.dir][1]}</span></td>
+      <td class="mono">${s.number}</td>
+      <td>${s.body}</td>
+      <td class="mono faint">${s.at}</td>
+    </tr>`).join("");
+}
+
+/* ── SIP ── */
+function renderSip() {
+  const s = cur().sip;
+  $("#sip-server").value = s.server; $("#sip-port").value = s.port;
+  $("#sip-user").value = s.user; $("#sip-codec").value = s.codec; $("#sip-transport").value = s.transport;
+  $("#sip-reg-status").innerHTML = `<span class="tag ${s.status === "已注册" ? "active" : "idle"}">${s.status}</span>`;
+  $("#sip-reg-addr").textContent = s.addr; $("#sip-reg-exp").textContent = s.expires;
+}
+
+/* ── 设置 ── */
+function renderSettings() {
+  const s = cur().settings;
+  $("#set-vendor").value = s.vendor; $("#set-model").value = s.model;
+  $("#set-transport").value = s.transport; $("#set-addr").value = s.addr;
+  $("#set-port").value = s.port; $("#set-relay").value = s.relay;
+  $("#set-addr-label").textContent = s.transport === "usb" ? "AT 串口设备" : "主机地址";
+}
+
+/* ── AT 控制台 ── */
+const AT_RESPONSES = {
+  "AT": ["OK"],
+  "ATI": ["Quectel EG25-G / DJI QDC507", "Revision: EG25GGBR07A08", "OK"],
+  "AT+CGMM": ["EG25-G", "OK"],
+  "AT+CGMR": ["EG25GGBR07A08", "OK"],
+  "AT+CGSN": ["863456051234567", "OK"],
+  "AT+CCID": ["+CCID: 8986029876543210987", "OK"],
+  "AT+CSQ": ["+CSQ: 28,99", "OK"],
+  "AT+CREG?": ["+CREG: 2,1,\"4E2A\",\"0A4B0E1\",7", "OK"],
+  "AT+COPS?": ["+COPS: 0,0,\"CHN-UNICOM\",7", "OK"],
+  "AT+CGATT?": ["+CGATT: 1", "OK"],
+  "AT+CPIN?": ["+CPIN: READY", "OK"],
+  "AT+CMGF=1": ["OK"],
+  "AT+CMGS": ["> "],
+  "ATD": ["OK", "(拨号中…)"],
+  "ATH": ["OK", "(已挂断)"],
+  "AT+CFUN=1,1": ["OK", "(重启模块…)"],
+};
+function atEcho(cmd) {
+  const c = cmd.trim();
+  const con = $("#at-console");
+  const add = (cls, txt) => { const d = document.createElement("div"); d.className = "line " + cls; d.textContent = txt; con.appendChild(d); con.scrollTop = con.scrollHeight; };
+  if (!c) return;
+  add("cmd", c);
+  if (!DEMO) { /* 真网关：POST /api/at */ GatewayAT(c); return; }
+  const key = Object.keys(AT_RESPONSES).find(k => c.toUpperCase().startsWith(k));
+  setTimeout(() => {
+    if (key) AT_RESPONSES[key].forEach(r => add(/^\+/.test(r) || key === "ATI" ? "ok" : "ok", r));
+    else if (/^AT\+?/i.test(c)) add("info", "（演示）未模拟该指令，返回 OK"); add("ok", "OK");
+  }, 120);
+}
+function initAT() {
+  const quick = ["AT", "ATI", "AT+CGMM", "AT+CGSN", "AT+CCID", "AT+CSQ", "AT+CREG?", "AT+COPS?", "AT+CPIN?"];
+  $("#at-quick").innerHTML = quick.map(q => `<button data-c="${q}">${q}</button>`).join("");
+  $("#at-quick").querySelectorAll("button").forEach(b => b.onclick = () => { $("#at-input").value = b.dataset.c; atEcho(b.dataset.c); });
+  const send = () => { const v = $("#at-input").value; atEcho(v); $("#at-input").value = ""; };
+  $("#at-send").onclick = send;
+  $("#at-input").addEventListener("keydown", e => { if (e.key === "Enter") send(); });
+  $("#at-clear").onclick = () => $("#at-console").innerHTML = "";
+  addLine("info", "AT 控制台就绪。输入指令后回车发送。演示模式返回模拟数据。");
+}
+function addLine(cls, txt) {
+  const con = $("#at-console"); const d = document.createElement("div");
+  d.className = "line " + cls; d.textContent = txt; con.appendChild(d); con.scrollTop = con.scrollHeight;
+}
+
+/* ── 交互绑定 ── */
+function initNav() {
+  $("#nav").querySelectorAll(".nav-item").forEach(it => it.onclick = () => {
+    $("#nav").querySelectorAll(".nav-item").n = 0;
+    document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
+    it.classList.add("active");
+    state.tab = it.dataset.tab;
+    document.querySelectorAll(".section").forEach(s => s.classList.toggle("active", s.dataset.sec === state.tab));
+    $("#page-title").textContent = it.textContent.trim();
+    if (state.tab === "overview") drawChart();
+  });
+}
+function initActions() {
+  $("#refresh-btn").onclick = renderAll;
+  $("#test-dial").onclick = () => {
+    const n = $("#test-number").value.trim();
+    if (!n) return toast("请输入号码");
+    toast(`演示：正在用 ${cur().label} 拨号 ${n} …`);
+    if (!DEMO) fetch("/api/calls/dial", { method: "POST", body: JSON.stringify({ number: n, slot: 1 }) });
+  };
+  $("#sms-send").onclick = () => {
+    const to = $("#sms-to").value.trim(), body = $("#sms-body").value.trim();
+    if (!to || !body) return toast("号码和内容不能为空");
+    DEMO_SMS.unshift({ dir: "out", number: to, body, at: "刚刚" });
+    renderSms(); toast("演示：短信已发送");
+    if (!DEMO) fetch("/api/sms", { method: "POST", body: JSON.stringify({ to, body, slot: $("#sms-slot").value }) });
+  };
+  $("#sip-save").onclick = () => { toast("演示：SIP 配置已保存，正在注册…"); if (!DEMO) fetch("/api/sip", { method: "POST", body: JSON.stringify(cur().sip) }); };
+  $("#set-save").onclick = () => { toast("演示：设置已保存"); };
+  $("#set-transport").onchange = e => $("#set-addr-label").textContent = e.target.value === "usb" ? "AT 串口设备" : "主机地址";
+}
+function toast(msg) {
+  let t = $("#toast");
+  if (!t) { t = document.createElement("div"); t.id = "toast";
+    t.style.cssText = "position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a2330;border:1px solid #22c55e55;color:#e6edf3;padding:11px 20px;border-radius:10px;font-size:13px;z-index:99;box-shadow:0 8px 30px #0008;transition:opacity .3s";
+    document.body.appendChild(t); }
+  t.textContent = msg; t.style.opacity = "1";
+  clearTimeout(t._h); t._h = setTimeout(() => t.style.opacity = "0", 2200);
+}
+
+function renderAll() { renderTopbar(); renderOverview(); renderSim(); renderCalls(); renderSms(); renderSip(); renderSettings(); }
+
+initModuleSelect(); initNav(); initAT(); initActions(); renderAll();
+window.addEventListener("resize", () => { if (state.tab === "overview") drawChart(); });
+</script>
+</body>
+</html>
