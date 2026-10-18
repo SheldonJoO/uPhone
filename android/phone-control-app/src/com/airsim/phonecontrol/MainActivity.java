@@ -552,6 +552,11 @@ public final class MainActivity extends Activity {
         StandaloneAgentService.start(this);
         refreshStatus();
         if (!dialerRoleHeld()) requestDialerRole();
+        // 电池优化白名单：TCL 等 OEM 的 Doze/省电会限制甚至杀前台服务，导致值守掉线、
+        // 通话/短信中断（"不稳定"的可修根因）。开启值守时引导用户豁免本 App。
+        if (!BatteryOptimizationPolicy.isExempt(this)) {
+            BatteryOptimizationPolicy.requestExemption(this);
+        }
         BridgeLog.info("duty_started");
         toast("已开始值守");
         showPage(Page.DUTY);

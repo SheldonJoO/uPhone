@@ -1,6 +1,7 @@
 import SwiftUI
 import UIKit
 import AVFoundation
+import AudioToolbox
 import Contacts
 import ContactsUI
 
@@ -284,8 +285,8 @@ struct DialPadView: View {
         model.numberInput = DialPadDeletePolicy.removingLast(from: model.numberInput)
     }
 
-    private func playDialKeySound() {
-        guard !model.isMuted else { return }
+    private func playDialKeyFeedback() {
+        // 拨号键反馈（震动+按键音）与通话麦克风静音无关，去掉 isMuted 门控。
         dialKeyFeedback.play()
     }
 
@@ -329,7 +330,7 @@ struct DialPadView: View {
                 return
             }
             model.numberInput.append(digit)
-            playDialKeySound()
+            playDialKeyFeedback()
         } label: {
             VStack(spacing: 0) {
                 Text(digit)
@@ -349,7 +350,7 @@ struct DialPadView: View {
                 if digit == "0" {
                     zeroWasLongPressed = true
                     model.numberInput.append("+")
-                    playDialKeySound()
+                    playDialKeyFeedback()
                 }
             }
         )
@@ -505,10 +506,18 @@ private struct PairedAndroidAgentsView: View {
     }
 }
 
-/// 使用系统输入点击音，不启动新的音频会话，避免干扰 CallKit 路由。
+/// 拨号键反馈：震动 + 按键音双通道。
+/// 旧实现用 UIDevice.playInputClick()（键盘按键音）——依赖系统「键盘按键音」开关、
+/// 静音开关/铃声关时不出声、且完全不震动，用户感知为"没反馈"。
+/// 现改为：UIImpactFeedbackGenerator 触觉（与静音开关无关，保证有震动）
+/// + AudioServicesPlaySystemSound(1104) 系统 tock 按键音（不依赖键盘按键音设置）。
 private final class DialKeyFeedback {
+    private let impact = UIImpactFeedbackGenerator(style: .light)
+    init() { impact.prepare() }
     func play() {
-        UIDevice.current.playInputClick()
+        impact.impactOccurred()
+        impact.prepare() // 预激活下一次，降低连续按键的触觉延迟
+        AudioServicesPlaySystemSound(1104)
     }
 }
 

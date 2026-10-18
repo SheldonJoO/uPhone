@@ -200,6 +200,18 @@ struct AirSIMSettingsView: View {
                 }
 
                 Section {
+                    NavigationLink {
+                        HardwareModuleSettingsView()
+                    } label: {
+                        Label("硬件值守模块（大疆 / 移远）", systemImage: "cpu")
+                    }
+                } header: {
+                    Text("硬件值守模块")
+                } footer: {
+                    Text("可选：用大疆 DJI 或移远 Quectel 4G 模块代替安卓手机做值守后端（Mac / NAS 常驻场景）。当前为预留配置入口，选定后按界面指引接入。")
+                }
+
+                Section {
                     if localModeEnabled {
                         Button {
                             startLocalSelfTest()
@@ -977,5 +989,139 @@ private struct QuietRuleEditor: View {
                 }
             }
         }
+    }
+}
+
+// MARK: - 硬件值守模块（大疆 / 移远）预留配置
+// 参照 Sheldon 的大疆 4G 模块项目（dontmove-kit / cellbridge-mac / DJiPhone-Kit：
+// DJI QDC507 / EG25-G 模块 + AT 指令 + SIP 网关）预留接入入口。
+// 当前版本仅保存配置参数，真正的 AT/SIP 桥接将在 Mac / NAS 值守版本接入。
+
+enum HardwareModuleKind: String, CaseIterable, Identifiable {
+    case none
+    case dji
+    case quectel
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .none: return "不使用（安卓手机值守）"
+        case .dji: return "大疆 DJI 模块"
+        case .quectel: return "移远 Quectel 模块"
+        }
+    }
+
+    var subtitle: String {
+        switch self {
+        case .none: return "当前默认：用安卓手机做值守机"
+        case .dji: return "QDC507 / EG25-G，USB 或网络，AT + SIP"
+        case .quectel: return "EG25-G / EG912Y / EC200N，AT + SIP"
+        }
+    }
+
+    var models: [String] {
+        switch self {
+        case .none: return []
+        case .dji: return ["QDC507", "EG25-G"]
+        case .quectel: return ["EG25-G", "EG912Y-IE", "EC200N-CN"]
+        }
+    }
+}
+
+struct HardwareModuleSettingsView: View {
+    @AppStorage("hardwareModuleKind") private var kindRaw: String = HardwareModuleKind.none.rawValue
+    @AppStorage("hardwareModuleModel") private var moduleModel: String = ""
+    @AppStorage("hardwareModuleTransport") private var transport: String = "usb"
+    @AppStorage("hardwareModuleHost") private var host: String = ""
+    @AppStorage("hardwareModulePort") private var port: String = ""
+    @AppStorage("hardwareModuleATPath") private var atPath: String = ""
+    @AppStorage("hardwareModuleSIPUser") private var sipUser: String = ""
+    @AppStorage("hardwareModuleSIPPassword") private var sipPassword: String = ""
+    @AppStorage("hardwareModuleSIPDomain") private var sipDomain: String = ""
+
+    private var kind: HardwareModuleKind {
+        HardwareModuleKind(rawValue: kindRaw) ?? .none
+    }
+
+    private var isNetwork: Bool { transport == "network" }
+
+    var body: some View {
+        Form {
+            Section {
+                Picker("模块类型", selection: $kindRaw) {
+                    ForEach(HardwareModuleKind.allCases) { item in
+                        Text(item.title).tag(item.rawValue)
+                    }
+                }
+                if kind != .none {
+                    Text(kind.subtitle)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            } header: {
+                Text("模块类型")
+            } footer: {
+                Text("选择用哪种 4G 模块做值守后端；留空则继续用安卓手机。")
+            }
+
+            if kind != .none {
+                Section {
+                    Picker("型号", selection: $moduleModel) {
+                        ForEach(kind.models, id: \.self) { m in
+                            Text(m).tag(m)
+                        }
+                    }
+                    Picker("连接方式", selection: $transport) {
+                        Text("USB 串口").tag("usb")
+                        Text("网络（TCP）").tag("network")
+                    }
+                    if isNetwork {
+                        TextField("主机地址（如 192.168.1.10）", text: $host)
+                            .keyboardType(.URL)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+                        TextField("端口（如 9527）", text: $port)
+                            .keyboardType(.numberPad)
+                    } else {
+                        TextField("AT 串口设备（如 /dev/ttyUSB2）", text: $atPath)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+                    }
+                } header: {
+                    Text("模块连接")
+                } footer: {
+                    Text(isNetwork
+                        ? "网络方式：模块经 TCP 暴露 AT/SIP，填入 Mac/NAS 上模块的地址与端口。"
+                        : "USB 方式：填入模块在 Mac/NAS 上的 AT 串口设备路径。")
+                }
+
+                Section {
+                    TextField("SIP 用户名", text: $sipUser)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                    SecureField("SIP 密码", text: $sipPassword)
+                    TextField("SIP 域名 / 注册地址", text: $sipDomain)
+                        .keyboardType(.URL)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                } header: {
+                    Text("SIP 账号")
+                } footer: {
+                    Text("用于把模块接入 SIP 网关（与 cellbridge-gateway 一致）；留空则用默认。")
+                }
+
+                Section {
+                    Label("接入状态：预留配置", systemImage: "hammer")
+                    Text("这些参数会保存，供 Mac / NAS 值守版本建立 AT / SIP 桥接时使用。当前正式版仍以安卓手机值守为准，选择模块不会立即切换后端。")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                } header: {
+                    Text("说明")
+                }
+            }
+        }
+        .navigationTitle("硬件值守模块")
+        .navigationBarTitleDisplayMode(.inline)
     }
 }

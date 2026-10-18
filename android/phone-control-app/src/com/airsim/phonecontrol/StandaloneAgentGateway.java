@@ -93,8 +93,9 @@ final class StandaloneAgentGateway {
         try {
             value.put("audio", new LocalCallAudioController(context).diagnostics());
         } catch (Throwable ignored) {}
-        value.put("call_redirection_role", CallRedirectionPolicy.isRoleHeld(context));
-        value.put("call_redirection_requestable", CallRedirectionPolicy.isRequestable(context));
+            value.put("call_redirection_role", CallRedirectionPolicy.isRoleHeld(context));
+            value.put("call_redirection_requestable", CallRedirectionPolicy.isRequestable(context));
+            value.put("battery_optimization_exempt", BatteryOptimizationPolicy.isExempt(context));
         synchronized (callsLock) {
             value.put("active_call", activeCall == null ? JSONObject.NULL : activeCall);
         }
