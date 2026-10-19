@@ -27,7 +27,6 @@
 		A10000000000000000000015 /* WiredHTTPTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000011 /* WiredHTTPTransport.swift */; };
 		A10000000000000000000016 /* AirSIMLiveActivityExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = B10000000000000000000017 /* AirSIMLiveActivityExtension.appex */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		A10000000000000000000017 /* LocalHistoryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000018 /* LocalHistoryStore.swift */; };
-		A10000000000000000000018 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000019 /* AppIcon.icon */; };
 		A1000000000000000000001A /* VoIPPushController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000001B /* VoIPPushController.swift */; };
 		A2000000000000000000002A /* Neumorphism.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000000000000000000002B /* Neumorphism.swift */; };
 		A1000000000000000000001B /* WatchCallCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000001D /* WatchCallCoordinator.swift */; };
@@ -38,6 +37,7 @@
 		A10000000000000000000020 /* WatchCallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000021 /* WatchCallView.swift */; };
 		A10000000000000000000021 /* AirSIMWatchApp.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = B10000000000000000000022 /* AirSIMWatchApp.app */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		A10000000000000000000023 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000019 /* AppIcon.icon */; };
+		A1000000000000000000003B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000003A /* Assets.xcassets */; };
 		A10000000000000000000024 /* IPhoneCloudCallSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000024 /* IPhoneCloudCallSession.swift */; };
 		A10000000000000000000025 /* VirtualCallTTSController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000025 /* VirtualCallTTSController.swift */; };
 		A10000000000000000000029 /* AgentVerboseTrace.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000029 /* AgentVerboseTrace.swift */; };
@@ -131,6 +131,7 @@
 		B10000000000000000000017 /* AirSIMLiveActivityExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = AirSIMLiveActivityExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		B10000000000000000000018 /* LocalHistoryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalHistoryStore.swift; sourceTree = "<group>"; };
 		B10000000000000000000019 /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIcon.icon; sourceTree = "<group>"; };
+		B1000000000000000000003A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B1000000000000000000001B /* VoIPPushController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoIPPushController.swift; sourceTree = "<group>"; };
 		B2000000000000000000002B /* Neumorphism.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Neumorphism.swift; sourceTree = "<group>"; };
 		B1000000000000000000001C /* AirSIM.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = AirSIM.entitlements; sourceTree = "<group>"; };
@@ -237,6 +238,7 @@
 				B10000000000000000000009 /* PhoneViews.swift */,
 				B1000000000000000000000A /* AirSIMSetupView.swift */,
 				B10000000000000000000018 /* LocalHistoryStore.swift */,
+				B1000000000000000000003A /* Assets.xcassets */,
 				B10000000000000000000019 /* AppIcon.icon */,
 				B1000000000000000000000B /* Info.plist */,
 				B1000000000000000000001C /* AirSIM.entitlements */,
@@ -417,7 +419,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A10000000000000000000018 /* AppIcon.icon in Resources */,
+				A1000000000000000000003B /* Assets.xcassets in Resources */,
 				A10000000000000000000035 /* phone.dat in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
