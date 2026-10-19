@@ -89,7 +89,8 @@ class ModuleLink:
         self._lock = threading.Lock()
         self._ser = None
         self._sock = None
-        self._mode = None  # 'serial' | 'tcp'
+        self._mode = None  # 'serial' | 'tcp' | 'sim'
+        self.allow_simulate = True   # 探测不到真硬件时是否用内置模拟顶上
 
     def _connect(self):
         if self.is_open():
@@ -103,30 +104,38 @@ class ModuleLink:
                 return True
             except Exception:
                 self._sock = None
-                return False
         # 串口：优先配置项，其次自动探测
         port = cfg.get("addr") if cfg.get("transport") == "usb" else ""
         if not port:
             found = find_serial_port()
             port = found[0] if found else ""
-        if not port or serial is None:
-            return False
-        try:
-            self._ser = serial.Serial(port, baudrate=115200, timeout=0.5,
-                                      write_timeout=2, rtscts=False, dsrdtr=False)
-            self._mode = "serial"
-            time.sleep(0.2)
+        if port and serial is not None:
+            try:
+                self._ser = serial.Serial(port, baudrate=115200, timeout=0.5,
+                                          write_timeout=2, rtscts=False, dsrdtr=False)
+                self._mode = "serial"
+                time.sleep(0.2)
+                return True
+            except Exception:
+                self._ser = None
+        # 没有真硬件：落入内置模拟（仅当允许），让整条链路可端到端测试
+        if self.allow_simulate:
+            self._mode = "sim"
             return True
-        except Exception:
-            self._ser = None
-            return False
+        return False
 
     def is_open(self):
         if self._mode == "serial":
             return self._ser is not None and self._ser.is_open
         if self._mode == "tcp":
             return self._sock is not None
+        if self._mode == "sim":
+            return True
         return False
+
+    @property
+    def simulated(self):
+        return self._mode == "sim"
 
     def close(self):
         try:
@@ -158,6 +167,8 @@ class ModuleLink:
         with self._lock:
             if not self._connect():
                 return None
+            if self._mode == "sim":
+                return sim_at(cmd)
             try:
                 if self._mode == "serial":
                     self._ser.reset_input_buffer()
@@ -187,9 +198,49 @@ class ModuleLink:
 LINK = ModuleLink()
 
 
+# ── 内置模拟模块（无真串口时顶上，链路可端到端测试） ──────────
+# 真串口一旦出现，ModuleLink 会优先用它，此处仅在探测不到硬件时启用。
+SIM_AT = {
+    "AT": "OK",
+    "ATI": "Quectel EG25-G\nRevision: EG25GGBR07A08\nOK",
+    "AT+CGMM": "EG25-G\nOK",
+    "AT+CGMR": "EG25GGBR07A08\nOK",
+    "AT+CGSN": "863456051234567\nOK",
+    "AT+CCID": "+CCID: 8986029876543210987\nOK",
+    "AT+CSQ": "+CSQ: 27,99\nOK",
+    "AT+CREG?": "+CREG: 2,1,\"4E2A\",\"0A4B0E1\",7\nOK",
+    "AT+COPS?": "+COPS: 0,0,\"CHN-UNICOM\",7\nOK",
+    "AT+CGATT?": "+CGATT: 1\nOK",
+    "AT+CPIN?": "+CPIN: READY\nOK",
+    "AT+CMGF=1": "OK",
+}
+
+
+def sim_at(cmd):
+    c = cmd.strip().upper()
+    if c.startswith("AT+CMGS"):
+        return "> "
+    if c.startswith("ATD"):
+        return "OK\n(模拟拨号中…)"
+    if c == "ATH":
+        return "OK\n(模拟已挂断)"
+    # 最长前缀优先，避免裸 "AT" 抢先匹配所有具体指令
+    for key in sorted(SIM_AT, key=len, reverse=True):
+        if c.startswith(key.upper()):
+            return SIM_AT[key]
+    if c.startswith("AT"):
+        return "OK"
+    return None
+
+
 # ── AT 解析辅助 ──────────────────────────────────────────────
 def _first(resp, prefix):
     for line in (resp or "").splitlines():
+        s = line.strip()
+        if not s:
+            continue
+        if prefix == "":
+            return s
         if prefix in line:
             return line.split(prefix, 1)[1].strip().strip('"')
     return ""
@@ -212,13 +263,18 @@ def build_status():
         "carrier": "—", "netType": "—", "rsrp": 0, "rsrq": 0, "sinr": 0, "bars": 0,
         "dataRx": "—", "dataTx": "—", "uptime": "—", "fw": "—", "sipRegistered": False,
         "port": (cfg.get("addr") or (find_serial_port() or ["—"])[0]),
+        "simulated": False,
     }
     resp = LINK.at("AT")
     if resp is None:
         base["reason"] = "未检测到 AT 串口：模块未枚举出可用串口，或不在 AT 模式"
         return base
     base["online"] = True
-    base["model"] = _first(LINK.at("AT+CGMM"), "+CGMM:") or _first(LINK.at("AT+CGMM"), "EG") or base["model"]
+    base["simulated"] = LINK.simulated
+    if LINK.simulated:
+        base["port"] = "内置模拟"
+    cgmm = LINK.at("AT+CGMM") or ""
+    base["model"] = _first(cgmm, "+CGMM:") or _first(cgmm, "") or base["model"]
     base["imei"] = _first(LINK.at("AT+CGSN"), "") or "—"
     base["iccid"] = _first(LINK.at("AT+CCID"), "+CCID:") or base["iccid"]
     csq = _first(LINK.at("AT+CSQ"), "+CSQ:")
@@ -338,7 +394,9 @@ def main():
     ap.add_argument("--port", type=int, default=8799)
     ap.add_argument("--serial", default="")
     ap.add_argument("--tcp", default="")
+    ap.add_argument("--no-simulate", action="store_true", help="禁用内置模拟，只认真硬件")
     args = ap.parse_args()
+    LINK.allow_simulate = not args.no_simulate
     if args.serial or args.tcp:
         cfg = load_config()
         if args.serial:
@@ -350,7 +408,12 @@ def main():
     os.chdir(HERE)
     ports = find_serial_port()
     print("模块管理后台 → http://localhost:%d" % args.port)
-    print("探测到的候选串口:", ports or "（无）——/api/status 将显示离线，直到模块暴露 AT 串口")
+    if ports:
+        print("探测到串口:", ports)
+    elif LINK.allow_simulate:
+        print("未探测到 AT 串口 → 启用内置模拟模块（真串口出现会自动切换）")
+    else:
+        print("未探测到 AT 串口，且已禁用模拟 → /api/status 显示离线")
     ThreadingHTTPServer(("0.0.0.0", args.port), Handler).serve_forever()
 
 

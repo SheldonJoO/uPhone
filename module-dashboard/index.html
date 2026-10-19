@@ -489,7 +489,8 @@ function renderTopbar() {
   const pill = $("#conn-pill");
   pill.className = "pill " + (m.online ? "online" : "offline");
   pill.innerHTML = `<span class="dot" style="background:${m.online ? 'var(--green)' : 'var(--red)'}"></span>${m.online ? "在线" : "离线"}`;
-  $("#signal-pill").textContent = m.online ? `📶 ${m.bars}/5 (${m.rsrp}dBm)` : "📶 —";
+  const sim = m._simulated ? " 🧪模拟" : "";
+  $("#signal-pill").textContent = m.online ? `📶 ${m.bars}/5 (${m.rsrp}dBm)${sim}` : "📶 —";
   $("#foot-fw").textContent = m.fw;
   $("#foot-gw").textContent = DEMO ? "demo" : "live";
 }
@@ -705,6 +706,7 @@ async function loadRealData() {
       uptime: status.uptime || m.uptime, sipRegistered: status.sipRegistered,
       dataRx: status.dataRx || m.dataRx, dataTx: status.dataTx || m.dataTx,
     });
+    m._simulated = !!(status && status.simulated);
     if (sim && sim.length) m.sims = sim;
     if (calls) { DEMO_CALLS.length = 0; DEMO_CALLS.push(...calls); }
     if (sms) { DEMO_SMS.length = 0; DEMO_SMS.push(...sms); }
