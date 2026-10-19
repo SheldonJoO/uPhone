@@ -400,8 +400,72 @@
           <button class="btn" id="set-save">保存设置</button>
           <div class="mt muted" style="font-size:12.5px;line-height:1.6">与 iOS App「设置 → 硬件值守模块」一致，供 Mac/NAS 网关建立 AT/SIP 桥接时读取。</div>
         </div>
-      </section>
-    </main>
+    </section>
+
+    <!-- VoWiFi / IMS -->
+    <section class="section" data-sec="vowifi">
+      <div class="page-head"><h2>VoWiFi / IMS</h2><p>Voice &amp; SMS over Wi-Fi · IKEv2 → ePDG → IMS</p></div>
+      <div class="grid g-2">
+        <div class="card"><h3 data-i="cloud">VoWiFi 状态</h3>
+          <div id="vw-status"></div>
+          <div class="btn-row mt"><button class="btn sm" id="vw-toggle">开启 VoWiFi</button><button class="btn ghost sm" id="vw-register">注册 IMS</button></div>
+        </div>
+        <div class="card"><h3 data-i="link">IMS / ePDG 隧道</h3>
+          <div id="vw-ims"></div>
+        </div>
+      </div>
+      <div class="card mt"><h3 data-i="settings">配置</h3>
+        <div class="form-row"><label class="field"><span>ePDG FQDN</span><input id="vw-epdg" class="mono" /></label><label class="field"><span>IMS APN</span><input id="vw-imsapn" class="mono" /></label></div>
+        <div class="form-row"><label class="field"><span>Realm</span><input id="vw-realm" class="mono" /></label><label class="field"><span>路由偏好</span><select id="vw-pref"><option>Wi-Fi 优先</option><option>蜂窝优先</option><option>仅 Wi-Fi</option></select></label></div>
+        <button class="btn sm" id="vw-save">保存配置</button>
+        <div class="mt muted" style="font-size:12.5px;line-height:1.6">VoWiFi 让通话/短信走 Wi-Fi（IKEv2 到 ePDG，再进运营商 IMS）。开启后 iPhone 端即可经 Relay/CallKit 呼入呼出，蜂窝与 Wi-Fi 互为备份。</div>
+      </div>
+    </section>
+
+    <!-- eSIM -->
+    <section class="section" data-sec="esim">
+      <div class="page-head"><h2>eSIM</h2><p>eUICC Profile 管理（AT+QSIMCFG / LPA）</p></div>
+      <div class="card" style="margin-bottom:14px"><h3 data-i="sim">eUICC</h3>
+        <div class="kv"><span class="k">EID</span><span class="v mono" id="es-eid">—</span></div>
+        <div class="kv"><span class="k">启用中的 Profile</span><span class="v" id="es-active">—</span></div>
+        <div class="kv"><span class="k">剩余槽位</span><span class="v" id="es-slots">—</span></div>
+      </div>
+      <div class="card"><h3 data-i="sim">Profile 列表</h3>
+        <table><thead><tr><th>名称</th><th>ICCID</th><th>提供商</th><th>状态</th><th></th></tr></thead><tbody id="es-body"></tbody></table>
+        <div class="form-row mt"><label class="field"><span>下载 Profile（SM-DP+ 激活码）</span><input id="es-code" class="mono" placeholder="LPA:1$smdp.example.com$ACTIVATION-CODE" /></label><div style="align-self:flex-end"><button class="btn sm" id="es-download">下载</button></div></div>
+      </div>
+    </section>
+
+    <!-- 代理 / 共享 -->
+    <section class="section" data-sec="proxy">
+      <div class="page-head"><h2>代理 / 蜂窝共享</h2><p>SOCKS5 代理与 USB 网络共享</p></div>
+      <div class="grid g-2">
+        <div class="card"><h3 data-i="share">SOCKS5 代理</h3>
+          <div id="px-status"></div>
+          <div class="form-row mt"><label class="field"><span>端口</span><input id="px-port" class="mono" value="1080" /></label><label class="field"><span>认证</span><select id="px-auth"><option>无</option><option>用户名/密码</option></select></label></div>
+          <div class="btn-row"><button class="btn sm" id="px-toggle">启动代理</button></div>
+          <div class="mt muted" style="font-size:12.5px;line-height:1.6">在模块内置 Linux（ADB root）上跑 SOCKS5，其他设备经蜂窝出口上网。</div>
+        </div>
+        <div class="card"><h3 data-i="wifi">蜂窝共享（Tethering）</h3>
+          <div id="px-tether"></div>
+          <div class="btn-row mt"><button class="btn blue sm" id="px-ecm">切 CDC-ECM 网卡</button><button class="btn ghost sm" id="px-ncm">切 CDC-NCM</button><button class="btn ghost sm" id="px-rndis">RNDIS</button></div>
+          <div class="mt muted" style="font-size:12.5px;line-height:1.6">把模块切成 USB 网卡（改 usbcfg 后 CFUN=1,1 重启枚举），Mac/NAS 即多一块蜂窝网卡。</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 实时日志 -->
+    <section class="section" data-sec="logs">
+      <div class="page-head"><h2>实时日志</h2><p>模块 URC / 系统日志流</p></div>
+      <div class="card">
+        <div class="row between" style="margin-bottom:10px">
+          <label class="row" style="gap:8px"><span class="toggle"><input type="checkbox" id="lg-auto" checked><span class="tr"></span></span><span class="muted" style="font-size:13px;font-weight:600">自动滚动</span></label>
+          <div class="row"><select id="lg-level" style="width:auto"><option>全部</option><option>INFO</option><option>WARN</option><option>ERROR</option></select><button class="btn ghost sm" id="lg-clear">清空</button></div>
+        </div>
+        <div class="console" id="lg-console" style="height:460px"></div>
+      </div>
+    </section>
+  </main>
   </div>
 </div>
 <nav id="bottomnav"></nav>
@@ -432,6 +496,9 @@ const P = {
   tool:'<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>',
   settings:'<line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/>',
   radio:'<circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"/>',
+  list:'<line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>',
+  share:'<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>',
+  cloud:'<path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>',
 };
 const ICON = (n, s=18) => `<svg class="ic" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${P[n]||""}</svg>`;
 document.querySelectorAll("[data-i]").forEach(el => el.insertAdjacentHTML("afterbegin", ICON(el.dataset.i, 15)));
@@ -439,9 +506,9 @@ document.getElementById("side-mark").innerHTML = ICON("radio", 20);
 document.getElementById("mob-mark").innerHTML = ICON("radio", 17);
 
 const NAV = [
-  { g: "监控", items: [["overview","总览","grid"],["cell","蜂窝小区","cpu"],["gnss","定位","mappin"],["data","数据流量","data"]] },
-  { g: "通信", items: [["voice","语音通话","phone"],["sms","短信","message"],["ussd","USSD","hash"],["phonebook","通讯录","book"]] },
-  { g: "网络", items: [["network","网络配置","wifi"],["sim","SIM 卡","sim"],["sip","SIP 网关","link"]] },
+  { g: "监控", items: [["overview","总览","grid"],["cell","蜂窝小区","cpu"],["gnss","定位","mappin"],["data","数据流量","data"],["logs","实时日志","list"]] },
+  { g: "通信", items: [["voice","语音通话","phone"],["sms","短信","message"],["ussd","USSD","hash"],["phonebook","通讯录","book"],["vowifi","VoWiFi / IMS","cloud"]] },
+  { g: "网络", items: [["network","网络配置","wifi"],["sim","SIM 卡","sim"],["esim","eSIM","sim"],["sip","SIP 网关","link"],["proxy","代理 / 共享","share"]] },
   { g: "系统", items: [["at","AT 控制台","terminal"],["maintain","固件维护","tool"],["settings","设置","settings"]] },
 ];
 const NAV_FLAT = NAV.flatMap(g => g.items);
@@ -506,6 +573,18 @@ const MODULES = {
     sip:{server:"sip.cellbridge.local",port:"5060",user:"eg912y01",codec:"PCMU",transport:"UDP",status:"未注册",addr:"—",expires:"—"},
     settings:{vendor:"quectel",model:"EG912Y-IE",transport:"usb",addr:"/dev/ttyUSB4",port:"",relay:"https://airsim-push.dntmove.asia"} },
 };
+
+const DEF_VOWIFI = { on:false, imsState:"未注册", epdg:"epdg.epc.mnc001.mcc460.pub.3gppnetwork.org", tunnel:"未连接", ipsec:"—", sipIms:"未注册", smsIms:"未注册", carrier:"支持", imsApn:"ims", realm:"ims.mnc001.mcc460.3gppnetwork.org", pref:"Wi-Fi 优先" };
+const DEF_ESIM = { eid:"89049032000000000000000000000001", active:"8986029876543210987", slots:2,
+  profiles:[ {name:"主号",iccid:"8986029876543210987",provider:"中国联通",state:"enabled"}, {name:"备用",iccid:"8986011223344556677",provider:"Airalo",state:"disabled"} ] };
+const DEF_PROXY = { on:false, port:"1080", auth:"无", uptime:"—" };
+const DEF_TETHER = { mode:"QMI", status:"QMI 模式（默认）" };
+Object.values(MODULES).forEach(m => {
+  m.vowifi = Object.assign({}, DEF_VOWIFI, m.vowifi || {});
+  m.esim = Object.assign({}, DEF_ESIM, m.esim || {});
+  m.proxy = Object.assign({}, DEF_PROXY, m.proxy || {});
+  m.tether = Object.assign({}, DEF_TETHER, m.tether || {});
+});
 
 const DEMO_CALLS = [
   { dir:"in", number:"+8613800138000", slot:1, duration:"02:31", at:"今天 09:12" },
@@ -743,7 +822,7 @@ async function loadRealData() {
 }
 function renderAll(){ renderTopbar(); renderOverview(); renderCell(); renderGnss(); renderData(); renderVoice(); renderSms(); renderPhonebook(); renderNetwork(); renderSim(); renderSip(); renderMaintain(); renderSettings(); }
 
-buildNav(); initModuleSelect(); initAT(); initActions(); renderAll(); loadRealData();
+buildNav(); initModuleSelect(); initAT(); initActions(); initNewActions(); renderAll(); loadRealData(); startLogs();
 window.addEventListener("resize", ()=>{ if(state.tab==="overview") drawChart(); });
 </script>
 </body>

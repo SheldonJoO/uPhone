@@ -370,6 +370,9 @@ class Handler(SimpleHTTPRequestHandler):
             return self._json(load_config().get("sip", {}))
         if path == "/api/settings":
             return self._json(load_config())
+        if path == "/api/logs":
+            # 真实日志流：可在此汇总模块 URC / 系统日志；暂无则回心跳
+            return self._json({"lines": [{"level": "INFO", "msg": "log stream ready"}]})
         return super().do_GET()              # 静态文件
 
     def do_POST(self):
