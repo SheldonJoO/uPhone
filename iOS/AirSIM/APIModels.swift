@@ -175,7 +175,9 @@ struct CloudAgentStatus: Decodable, Equatable, Sendable {
 
     init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
-        cloudOnline = try values.decode(Bool.self, forKey: .cloudOnline)
+        // 与 CloudAndroidAgent 保持一致：cloud_online 缺失时按离线处理，
+        // 避免 Relay 偶发不返回该字段时整条自检以「心跳查询失败」假性失败。
+        cloudOnline = try values.decodeIfPresent(Bool.self, forKey: .cloudOnline) ?? false
         agentVersion = try values.decodeIfPresent(String.self, forKey: .agentVersion)
         atOK = try values.decodeIfPresent(Bool.self, forKey: .atOK)
         cellularState = try values.decodeIfPresent(String.self, forKey: .cellularState)
