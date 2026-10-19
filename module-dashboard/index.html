@@ -20,6 +20,28 @@
     --ring: 0 0 0 4px rgba(15,163,126,.14);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  /* ── 夜间模式（覆盖变量即可全站变暗） ── */
+  body.dark {
+    --page:#0D1218; --card:#161E29; --ink:#E6EDF5; --muted:#8B98A9; --faint:#5F6B7C;
+    --line:#26313F; --line-2:#1F2833;
+    --green:#17B98A; --green-d:#35D6A4;
+    --grad:linear-gradient(135deg,#17B98A 0%,#0E9C74 100%);
+    --blue:#4E94F5; --amber:#F0A83C; --danger:#F26D72;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 28px rgba(0,0,0,.35);
+    --shadow-sm:0 1px 2px rgba(0,0,0,.35),0 2px 8px rgba(0,0,0,.25);
+    --ring:0 0 0 4px rgba(23,185,138,.25);
+  }
+  body.dark .map-box { background: repeating-linear-gradient(45deg,#141B24,#141B24 10px,#10161E 10px,#10161E 20px); }
+  body.dark .bars i { background:#2C3849; }
+  body.dark .btn.ghost { background:#1A2330; }
+  body.dark .console { background:#0A0E14; }
+  body.dark .quick-at button { background:#1A2330; }
+  body.dark .tag.in, body.dark .tag.ok, body.dark .tag.on { background:rgba(23,185,138,.18); }
+  body.dark .tag.out { background:rgba(78,148,245,.18); }
+  body.dark .tag.miss { background:rgba(242,109,114,.18); }
+  body.dark .tag.warn { background:rgba(240,168,60,.18); }
+  body.dark .tag.idle, body.dark .tag.off { background:rgba(139,152,169,.16); }
+  body.dark .nav-item.active { background:rgba(23,185,138,.16); }
   html, body { height: 100%; }
   body { background: var(--page); color: var(--ink); font-family: var(--sans); font-size: 14.5px; overscroll-behavior: none; -webkit-font-smoothing: antialiased; }
   .app { display: flex; height: 100vh; height: 100dvh; }
@@ -186,6 +208,7 @@
       <select class="module-select" id="module-select"></select>
       <span class="pill online" id="conn-pill"><span class="dot"></span>在线</span>
       <span class="pill" id="signal-pill">📶 —</span>
+      <button class="iconbtn" id="theme-btn" title="夜间模式"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
       <button class="iconbtn" id="refresh-btn" title="刷新"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></button>
     </header>
 
@@ -478,6 +501,25 @@
    ═════════════════════════════════════════════════════════════════ */
 const DEMO = location.protocol === "file:" || new URLSearchParams(location.search).has("demo");
 
+/* ── 夜间模式 ── */
+const MOON = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+const SUN = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+function applyTheme(dark) {
+  document.body.classList.toggle("dark", dark);
+  try { localStorage.setItem("md-theme", dark ? "dark" : "light"); } catch (e) {}
+  const b = document.getElementById("theme-btn");
+  if (b) b.innerHTML = `<svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${dark ? SUN : MOON}</svg>`;
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute("content", dark ? "#0D1218" : "#FFFFFF");
+}
+function initTheme() {
+  let saved = null; try { saved = localStorage.getItem("md-theme"); } catch (e) {}
+  const dark = saved ? saved === "dark" : (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
+  applyTheme(dark);
+  const b = document.getElementById("theme-btn");
+  if (b) b.onclick = () => applyTheme(!document.body.classList.contains("dark"));
+}
+
 /* ── SVG 线性图标（统一专业） ── */
 const P = {
   grid:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/>',
@@ -769,8 +811,9 @@ function atEcho(cmd) {
 }
 
 /* ── 操作 ── */
-function toast(msg){ let t=$("#toast"); if(!t){ t=document.createElement("div"); t.id="toast"; t.style.cssText="position:fixed;left:50%;bottom:110px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:11px 20px;border-radius:12px;font-size:13px;font-weight:600;z-index:99;box-shadow:0 10px 30px rgba(19,26,42,.3);transition:opacity .3s"; document.body.appendChild(t);} t.textContent=msg; t.style.opacity="1"; clearTimeout(t._h); t._h=setTimeout(()=>t.style.opacity="0",2200); }
+function toast(msg){ let t=$("#toast"); if(!t){ t=document.createElement("div"); t.id="toast"; t.style.cssText="position:fixed;left:50%;bottom:110px;transform:translateX(-50%);background:#1A2333;color:#fff;border:1px solid var(--line);padding:11px 20px;border-radius:12px;font-size:13px;font-weight:600;z-index:99;box-shadow:0 10px 30px rgba(0,0,0,.35);transition:opacity .3s"; document.body.appendChild(t);} t.textContent=msg; t.style.opacity="1"; clearTimeout(t._h); t._h=setTimeout(()=>t.style.opacity="0",2200); }
 function post(path, body){ if(DEMO){ toast("演示模式：已模拟"); return; } fetch(path,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body||{})}).then(()=>toast("已发送")).catch(()=>toast("发送失败")); }
+function postRaw(path, body, onDone){ if(DEMO) return; fetch(path,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body||{})}).then(r=>r.json()).then(d=>{ if(onDone) onDone(d); }).catch(()=>toast("请求失败")); }
 function initActions() {
   $("#refresh-btn").onclick = () => { renderAll(); loadRealData(); };
   $("#voice-dial").onclick = () => { const n=$("#dial-number").value.trim(); if(!n) return toast("请输入号码"); toast(`拨号 ${n} …`); post("/api/calls/dial",{number:n,slot:1}); };
@@ -820,9 +863,55 @@ async function loadRealData() {
   } catch(e){ $("#mode-banner-text").innerHTML = "<b>无法连接后端</b>：请确认 server.py 正在运行。"; }
   renderAll();
 }
-function renderAll(){ renderTopbar(); renderOverview(); renderCell(); renderGnss(); renderData(); renderVoice(); renderSms(); renderPhonebook(); renderNetwork(); renderSim(); renderSip(); renderMaintain(); renderSettings(); }
+function renderVowifi() {
+  const v = cur().vowifi;
+  $("#vw-status").innerHTML = `<div class="kv"><span class="k">VoWiFi</span><span class="v"><span class="tag ${v.on?"on":"off"}">${v.on?"已开启":"已关闭"}</span></span></div><div class="kv"><span class="k">IMS 注册</span><span class="v"><span class="tag ${v.imsState==="已注册"?"ok":"idle"}">${v.imsState}</span></span></div><div class="kv"><span class="k">运营商支持</span><span class="v">${v.carrier}</span></div><div class="kv"><span class="k">路由偏好</span><span class="v">${v.pref}</span></div>`;
+  $("#vw-ims").innerHTML = `<div class="kv"><span class="k">ePDG 隧道</span><span class="v"><span class="tag ${v.tunnel==="已连接"?"ok":"idle"}">${v.tunnel}</span></span></div><div class="kv"><span class="k">IPsec SA</span><span class="v">${v.ipsec}</span></div><div class="kv"><span class="k">SIP over IMS</span><span class="v">${v.sipIms}</span></div><div class="kv"><span class="k">SMS over IMS</span><span class="v">${v.smsIms}</span></div><div class="kv"><span class="k">ePDG FQDN</span><span class="v" style="font-size:11.5px">${v.epdg}</span></div>`;
+  $("#vw-epdg").value=v.epdg; $("#vw-imsapn").value=v.imsApn; $("#vw-realm").value=v.realm; $("#vw-pref").value=v.pref;
+  $("#vw-toggle").textContent = v.on ? "关闭 VoWiFi" : "开启 VoWiFi";
+}
+function renderEsim() {
+  const e = cur().esim;
+  $("#es-eid").textContent = e.eid; $("#es-active").textContent = e.active; $("#es-slots").textContent = (e.slots - e.profiles.length) + " / " + e.slots;
+  const tag = { enabled:["ok","使用中"], disabled:["idle","已停用"], available:["out","可用"] };
+  $("#es-body").innerHTML = e.profiles.map((p,i) => `<tr><td>${p.name}</td><td class="mono" style="font-size:12px">${p.iccid}</td><td>${p.provider}</td><td><span class="tag ${tag[p.state][0]}">${tag[p.state][1]}</span></td><td style="text-align:right"><button class="btn ghost sm" data-es="${i}">${p.state==="enabled"?"停用":"启用"}</button> <button class="btn ghost sm" data-esdel="${i}">删除</button></td></tr>`).join("");
+  document.querySelectorAll("[data-es]").forEach(b => b.onclick = () => { const p=e.profiles[+b.dataset.es]; p.state = p.state==="enabled"?"disabled":"enabled"; if(p.state==="enabled"){ e.profiles.forEach(o=>{if(o!==p)o.state="disabled";}); e.active=p.iccid; } renderEsim(); toast("已切换 Profile"); });
+  document.querySelectorAll("[data-esdel]").forEach(b => b.onclick = () => { e.profiles.splice(+b.dataset.esdel,1); renderEsim(); toast("已删除"); });
+}
+function renderProxy() {
+  const px = cur().proxy, th = cur().tether;
+  $("#px-status").innerHTML = `<div class="kv"><span class="k">状态</span><span class="v"><span class="tag ${px.on?"on":"off"}">${px.on?"运行中":"已停止"}</span></span></div><div class="kv"><span class="k">监听</span><span class="v">0.0.0.0:${px.port} (socks5)</span></div><div class="kv"><span class="k">认证</span><span class="v">${px.auth}</span></div><div class="kv"><span class="k">运行时长</span><span class="v">${px.uptime}</span></div>`;
+  $("#px-toggle").textContent = px.on ? "停止代理" : "启动代理";
+  $("#px-tether").innerHTML = `<div class="kv"><span class="k">当前模式</span><span class="v">${th.mode}</span></div><div class="kv"><span class="k">USB 网卡</span><span class="v">${th.mode==="QMI"?"未启用（QMI）":"en5 · 100Mbps"}</span></div><div class="kv"><span class="k">usbcfg</span><span class="v mono" style="font-size:11.5px">2C7C:0125 DIAG,NMEA,MODEM,AT,ECM,ADB</span></div>`;
+}
+let lgTimer = null;
+function renderLogs() {}
+function lgLine(cls, txt) { const c=$("#lg-console"); if(!c) return; const d=document.createElement("div"); d.className="line "+cls; const t=new Date(); d.textContent = `[${String(t.getHours()).padStart(2,"0")}:${String(t.getMinutes()).padStart(2,"0")}:${String(t.getSeconds()).padStart(2,"0")}] ${txt}`; c.appendChild(d); if($("#lg-auto")&&$("#lg-auto").checked) c.scrollTop=c.scrollHeight; }
+function startLogs() {
+  if (lgTimer) return;
+  const m = cur();
+  const samples = ["+QIND: csisrv 3","SIP REGISTER 200 OK","+CREG: 2,1","PDP activated, IP 10.66.23.181","GNSS fix 3D, 12 sats","RRC connected, LTE B3","AT command OK"];
+  lgLine("info", "日志流已启动 · " + m.label);
+  lgTimer = setInterval(() => {
+    if (state.tab !== "logs") return;
+    if (!DEMO) { fetch("/api/logs").then(r=>r.json()).then(d=>{ (d.lines||[]).forEach(l=>lgLine(l.level==="ERROR"?"err":l.level==="WARN"?"info":"ok", l.msg)); }).catch(()=>{}); return; }
+    if (Math.random() < .7) lgLine("ok", samples[Math.random()*samples.length|0]); else if (Math.random() < .5) lgLine("info", "keepalive");
+  }, DEMO ? 1300 : 2000);
+}
+function initNewActions() {
+  $("#vw-toggle").onclick = () => { const v=cur().vowifi; v.on=!v.on; if(v.on){ v.imsState="注册中…"; v.tunnel="连接中…"; postRaw("/api/vowifi",{action:"on"}); setTimeout(()=>{ v.imsState="已注册"; v.tunnel="已连接"; v.ipsec="IKEv2 SA up"; v.sipIms="已注册"; v.smsIms="已注册"; renderVowifi(); }, 1400); } else { v.imsState="未注册"; v.tunnel="未连接"; v.ipsec="—"; v.sipIms="未注册"; v.smsIms="未注册"; postRaw("/api/vowifi",{action:"off"}); } renderVowifi(); toast(v.on?"VoWiFi 开启中…":"VoWiFi 已关闭"); };
+  $("#vw-register").onclick = () => { const v=cur().vowifi; v.imsState="注册中…"; renderVowifi(); postRaw("/api/vowifi",{action:"register"}); setTimeout(()=>{ v.imsState="已注册"; renderVowifi(); toast("IMS 已注册"); }, 1100); };
+  $("#vw-save").onclick = () => { const v=cur().vowifi; v.epdg=$("#vw-epdg").value; v.imsApn=$("#vw-imsapn").value; v.realm=$("#vw-realm").value; v.pref=$("#vw-pref").value; toast("VoWiFi 配置已保存"); };
+  $("#es-download").onclick = () => { const code=$("#es-code").value.trim(); if(!code) return toast("输入激活码"); cur().esim.profiles.push({name:"新 Profile", iccid:"8986"+Math.random().toString().slice(2,15), provider:"SM-DP+", state:"disabled"}); renderEsim(); toast("Profile 下载中…"); $("#es-code").value=""; };
+  $("#px-toggle").onclick = () => { const px=cur().proxy; px.on=!px.on; px.port=$("#px-port").value||"1080"; px.auth=$("#px-auth").value; if(px.on){ px.uptime="00:00"; px._t=setInterval(()=>{ if(!px.on)return; const s=(px.uptime.split(":")[1]|0)+1; px.uptime="00:"+String(s).padStart(2,"0"); if(state.tab==="proxy")renderProxy(); },1000);} else { clearInterval(px._t); px.uptime="—"; } renderProxy(); toast(px.on?"SOCKS5 启动中 :"+px.port:"SOCKS5 已停止"); postRaw("/api/proxy",{on:px.on,port:px.port}, d=>{ if(d.deployed===false) toast("模块未连接：需 ADB 部署 socks5.py"); else if(d.mode==="adb") toast("已部署到模块 :"+px.port); }); };
+  $("#px-ecm").onclick = () => { cur().tether={mode:"CDC-ECM",status:"已切换，需重启枚举"}; renderProxy(); toast("已设 CDC-ECM，重启模块后生效"); };
+  $("#px-ncm").onclick = () => { cur().tether={mode:"CDC-NCM",status:"已切换，需重启枚举"}; renderProxy(); toast("已设 CDC-NCM，重启模块后生效"); };
+  $("#px-rndis").onclick = () => { cur().tether={mode:"RNDIS",status:"已切换，需 HoRNDIS 驱动"}; renderProxy(); toast("已设 RNDIS，macOS 需 HoRNDIS 驱动"); };
+  $("#lg-clear").onclick = () => $("#lg-console").innerHTML = "";
+}
+function renderAll(){ renderTopbar(); renderOverview(); renderCell(); renderGnss(); renderData(); renderVoice(); renderSms(); renderPhonebook(); renderNetwork(); renderSim(); renderSip(); renderMaintain(); renderSettings(); renderVowifi(); renderEsim(); renderProxy(); }
 
-buildNav(); initModuleSelect(); initAT(); initActions(); initNewActions(); renderAll(); loadRealData(); startLogs();
+buildNav(); initTheme(); initModuleSelect(); initAT(); initActions(); initNewActions(); renderAll(); loadRealData(); startLogs();
 window.addEventListener("resize", ()=>{ if(state.tab==="overview") drawChart(); });
 </script>
 </body>

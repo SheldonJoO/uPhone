@@ -20,6 +20,7 @@ import json
 import os
 import re
 import socket
+import subprocess
 import threading
 import time
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
@@ -196,6 +197,20 @@ class ModuleLink:
 
 
 LINK = ModuleLink()
+
+
+def _adb(args, timeout=15):
+    try:
+        return subprocess.run(["adb"] + args, capture_output=True, text=True, timeout=timeout)
+    except Exception:
+        return None
+
+
+def adb_connected():
+    r = _adb(["devices"], 8)
+    if r and r.returncode == 0:
+        return any(("\tdevice" in l) for l in r.stdout.splitlines()[1:])
+    return False
 
 
 # ── 内置模拟模块（无真串口时顶上，链路可端到端测试） ──────────
@@ -409,6 +424,33 @@ class Handler(SimpleHTTPRequestHandler):
             if "roam" in data:
                 LINK.at('AT+QCFG="roamservice",%s' % (2 if data["roam"] else 1))
             return self._json({"saved": True})
+        if path == "/api/proxy":
+            on = bool(data.get("on", True))
+            port = str(data.get("port", "1080"))
+            here = os.path.dirname(os.path.abspath(__file__))
+            script = os.path.join(here, "socks5.py")
+            if adb_connected() and os.path.exists(script):
+                _adb(["push", script, "/data/local/tmp/socks5.py"])
+                if on:
+                    _adb(["shell", "chmod 755 /data/local/tmp/socks5.py"])
+                    _adb(["shell", "pkill -f socks5.py"])
+                    _adb(["shell", "nohup python /data/local/tmp/socks5.py %s >/dev/null 2>&1 &" % port], timeout=10)
+                    return self._json({"deployed": True, "on": True, "port": port, "mode": "adb"})
+                _adb(["shell", "pkill -f socks5.py"])
+                return self._json({"deployed": True, "on": False, "mode": "adb"})
+            cmd = "adb push socks5.py /data/local/tmp/ && adb shell 'nohup python /data/local/tmp/socks5.py %s >/dev/null 2>&1 &'" % port
+            return self._json({"deployed": False, "on": on, "port": port, "mode": "manual", "command": cmd,
+                               "note": "先 AT+QADBKEY 解锁模块 ADB root 并装 Android platform-tools；或把 socks5.py 拷到模块用 python 直接跑。"})
+        if path == "/api/vowifi":
+            action = data.get("action", "on")
+            cmds = []
+            if action in ("on", "register"):
+                cmds = ['AT+QCFG="ims",1', 'AT+CFUN=1,1']
+            else:
+                cmds = ['AT+QCFG="ims",0']
+            resp = [{"cmd": c, "out": LINK.at(c)} for c in cmds]
+            return self._json({"action": action, "commands": resp,
+                               "note": "VoWiFi 全流程(IMS 注册 + IKEv2 到 ePDG)与运营商/ePDG 强相关，此处先打开 IMS 并触发重注册；ePDG/Realm 在配置页。"})
         if path == "/api/sip":
             cfg = load_config()
             cfg["sip"].update({k: data.get(k, cfg["sip"].get(k)) for k in
