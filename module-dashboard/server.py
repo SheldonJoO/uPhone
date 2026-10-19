@@ -213,6 +213,8 @@ SIM_AT = {
     "AT+CGATT?": "+CGATT: 1\nOK",
     "AT+CPIN?": "+CPIN: READY\nOK",
     "AT+CMGF=1": "OK",
+    "AT+QTEMP": "+QTEMP: 35\nOK",
+    "AT+CUSD": '+CUSD: 0,"您当前余额 38.60 元，流量剩余 8.8GB。",15\nOK',
 }
 
 
@@ -294,6 +296,24 @@ def build_status():
         base["netType"] = {"7": "4G LTE", "2": "3G", "6": "2G"}.get(act, "4G LTE")
     base["fw"] = _first(LINK.at("AT+CGMR"), "") or base["fw"]
     base["sipRegistered"] = cfg["sip"].get("status") == "已注册"
+    base["imsi"] = _first(LINK.at("AT+CIMI"), "") or "—"
+    _qt = _first(LINK.at("AT+QTEMP"), "+QTEMP:")
+    base["temp"] = (_qt + "°C") if _qt else "—"
+    if LINK.simulated:
+        base.update({
+            "imsi": "460041234567890", "temp": "35°C",
+            "cell": {"earfcn": 1850, "pci": 404, "tac": "0A4B0E1", "band": "B3", "cellId": "1234ABCD",
+                     "rsrp": base["rsrp"] or -78, "rsrq": -9, "sinr": 22, "enb": "460-01-1234"},
+            "gnss": {"on": True, "lat": "22.5431", "lon": "113.9476", "alt": 36, "speed": 0, "sats": 12, "hdop": 0.9, "fix": "3D"},
+            "net": {"net": "LTE", "domain": "CS+PS", "band": "B3/B8", "apn": "cmnet", "pdp": "IP", "dataOn": True, "roam": False, "ip": "10.66.23.181"},
+            "data": {"rx": "3.4 GB", "tx": "980 MB", "session": "210 MB", "lifetime": "28.7 GB"},
+        })
+    else:
+        base.setdefault("cell", {"earfcn": 0, "pci": 0, "tac": "—", "band": "—", "cellId": "—",
+                                 "rsrp": base["rsrp"], "rsrq": base["rsrq"], "sinr": base["sinr"], "enb": "—"})
+        base.setdefault("gnss", {"on": False, "sats": 0, "fix": "无"})
+        base.setdefault("net", {"net": base["netType"], "apn": "", "ip": "—"})
+        base.setdefault("data", {"rx": base["dataRx"], "tx": base["dataTx"], "session": "—", "lifetime": "—"})
     return base
 
 
@@ -371,6 +391,21 @@ class Handler(SimpleHTTPRequestHandler):
             LINK.at('AT+CMGS="%s"' % to)
             resp = LINK.at(body + "\x1a", timeout=5)
             return self._json({"sent": resp is not None and "OK" in (resp or "")})
+        if path == "/api/ussd":
+            code = (data.get("code") or "").strip()
+            LINK.at('AT+CSCS="GSM"')
+            resp = LINK.at('AT+CUSD=1,"%s",15' % code, timeout=8)
+            m = re.search(r'"([^"]*)"', resp or "")
+            out = m.group(1) if m else _first(resp or "", "+CUSD:")
+            return self._json({"code": code, "response": out or (resp if resp is not None else "ERROR: 模块未连接")})
+        if path == "/api/network":
+            if data.get("apn"):
+                LINK.at('AT+CGDCONT=1,"%s","%s"' % (data.get("pdp", "IP"), data["apn"]))
+            if "dataOn" in data:
+                LINK.at("AT+CGATT=1" if data["dataOn"] else "AT+CGATT=0")
+            if "roam" in data:
+                LINK.at('AT+QCFG="roamservice",%s' % (2 if data["roam"] else 1))
+            return self._json({"saved": True})
         if path == "/api/sip":
             cfg = load_config()
             cfg["sip"].update({k: data.get(k, cfg["sip"].get(k)) for k in

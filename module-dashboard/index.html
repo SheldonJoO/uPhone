@@ -4,626 +4,747 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <meta name="theme-color" content="#FFFFFF" />
-<title>模块管理 · 大疆 / 移远</title>
+<title>模块控制台 · 大疆 / 移远</title>
 <style>
-  /* ── 干净现代风：白卡片 + 浅灰底 + 绿色品牌强调 ── */
   :root {
-    --page: #F4F6F9;
-    --card: #FFFFFF;
-    --ink: #131A2A;
-    --muted: #6B7789;
-    --faint: #9AA6B5;
-    --line: #E9EDF3;
-    --green: #0FA37E;
-    --green-d: #0B8A69;
-    --grad: linear-gradient(135deg, #17B98A 0%, #0E9C74 100%);
-    --blue: #2F80ED;
-    --amber: #E08600;
-    --danger: #E5484D;
+    --page: #F4F6F9; --card: #FFFFFF; --ink: #131A2A; --muted: #6B7789; --faint: #9AA6B5;
+    --line: #E9EDF3; --line-2: #EFF2F6;
+    --green: #0FA37E; --green-d: #0B8A69; --grad: linear-gradient(135deg, #17B98A 0%, #0E9C74 100%);
+    --blue: #2F80ED; --amber: #E08600; --danger: #E5484D; --purple: #7C5CBF;
+    --mono: ui-monono, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
     --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
     --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-    --r: 16px;
+    --r: 14px;
     --shadow: 0 1px 2px rgba(19,26,42,.04), 0 10px 28px rgba(19,26,42,.07);
-    --shadow-sm: 0 1px 2px rgba(19,26,42,.05), 0 2px 8px rgba(19,26,42,.06);
+    --shadow-sm: 0 1px 2px rgba(19,26,42,.05), 0 2px 8px rgba(19,26,42,.05);
     --ring: 0 0 0 4px rgba(15,163,126,.14);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   html, body { height: 100%; }
-  body { background: var(--page); color: var(--ink); font-family: var(--sans); font-size: 15px; overscroll-behavior: none; -webkit-font-smoothing: antialiased; }
-  .app { display: flex; flex-direction: column; height: 100vh; height: 100dvh; }
+  body { background: var(--page); color: var(--ink); font-family: var(--sans); font-size: 14.5px; overscroll-behavior: none; -webkit-font-smoothing: antialiased; }
+  .app { display: flex; height: 100vh; height: 100dvh; }
+  svg.ic { display: block; }
 
-  /* ── 顶栏（白，品牌渐变标） ── */
-  .topbar {
-    flex-shrink: 0; display: flex; align-items: center; gap: 10px;
-    padding: 12px 16px; padding-top: max(12px, env(safe-area-inset-top));
-    background: var(--card); border-bottom: 1px solid var(--line); z-index: 20;
-  }
-  .brand { width: 38px; height: 38px; border-radius: 11px; background: var(--grad); display: grid; place-items: center; font-size: 19px; box-shadow: 0 4px 12px rgba(15,163,126,.32); flex-shrink: 0; }
-  .topbar .title { font-size: 17px; font-weight: 800; letter-spacing: .2px; line-height: 1.1; }
-  .topbar .title small { display: block; font-size: 11px; font-weight: 600; color: var(--faint); margin-top: 1px; }
+  /* ── 侧栏（桌面） ── */
+  .sidebar { width: 232px; flex-shrink: 0; background: var(--card); border-right: 1px solid var(--line); display: flex; flex-direction: column; }
+  .side-brand { display: flex; align-items: center; gap: 11px; padding: 18px 16px; border-bottom: 1px solid var(--line); }
+  .side-brand .mark { width: 38px; height: 38px; border-radius: 11px; background: var(--grad); display: grid; place-items: center; color: #fff; box-shadow: 0 4px 12px rgba(15,163,126,.3); flex-shrink: 0; }
+  .side-brand h1 { font-size: 15px; font-weight: 800; }
+  .side-brand small { display: block; font-size: 11px; color: var(--faint); font-weight: 600; }
+  .side-nav { flex: 1; overflow-y: auto; padding: 10px 10px 20px; }
+  .nav-group { font-size: 10.5px; font-weight: 800; color: var(--faint); letter-spacing: 1px; text-transform: uppercase; padding: 14px 10px 6px; }
+  .nav-item { display: flex; align-items: center; gap: 11px; padding: 9px 11px; border-radius: 10px; cursor: pointer; color: var(--muted); font-size: 13.5px; font-weight: 600; transition: .13s; user-select: none; margin-bottom: 2px; }
+  .nav-item:hover { background: var(--page); color: var(--ink); }
+  .nav-item.active { background: rgba(15,163,126,.1); color: var(--green-d); }
+  .nav-item .badge { margin-left: auto; font-size: 10px; font-weight: 800; background: var(--danger); color: #fff; border-radius: 6px; padding: 1px 6px; }
+  .side-foot { border-top: 1px solid var(--line); padding: 12px 14px; font-size: 11px; color: var(--faint); line-height: 1.8; }
+
+  .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  .topbar { flex-shrink: 0; display: flex; align-items: center; gap: 10px; padding: 11px 16px; padding-top: max(11px, env(safe-area-inset-top)); background: var(--card); border-bottom: 1px solid var(--line); }
+  .topbar .mob-brand { display: none; }
   .topbar .spacer { flex: 1; }
-  .module-select {
-    background: var(--page); color: var(--ink); border: 1px solid var(--line); border-radius: 11px;
-    padding: 9px 12px; font-size: 13px; font-weight: 700; font-family: var(--sans);
-    cursor: pointer; outline: none; max-width: 42vw; appearance: none; -webkit-appearance: none; padding-right: 32px;
-    background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%);
-    background-position: calc(100% - 17px) 52%, calc(100% - 12px) 52%; background-size: 5px 5px; background-repeat: no-repeat;
-  }
-  .pill { display: inline-flex; align-items: center; gap: 6px; background: var(--page); border: 1px solid var(--line); border-radius: 999px; padding: 7px 12px; font-size: 12.5px; font-weight: 700; white-space: nowrap; }
+  .module-select { background: var(--page); color: var(--ink); border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; font-size: 13px; font-weight: 700; font-family: var(--sans); cursor: pointer; outline: none; max-width: 44vw; appearance: none; -webkit-appearance: none; padding-right: 30px;
+    background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%); background-position: calc(100% - 16px) 52%, calc(100% - 11px) 52%; background-size: 5px 5px; background-repeat: no-repeat; }
+  .pill { display: inline-flex; align-items: center; gap: 6px; background: var(--page); border: 1px solid var(--line); border-radius: 999px; padding: 6px 11px; font-size: 12px; font-weight: 700; white-space: nowrap; }
   .pill .dot { width: 8px; height: 8px; border-radius: 50%; }
   .pill.online { color: var(--green-d); } .pill.online .dot { background: var(--green); box-shadow: 0 0 0 3px rgba(15,163,126,.18); }
   .pill.offline { color: var(--danger); } .pill.offline .dot { background: var(--danger); }
-  .iconbtn { background: var(--page); border: 1px solid var(--line); color: var(--muted); border-radius: 11px; width: 38px; height: 38px; cursor: pointer; font-size: 16px; display: grid; place-items: center; transition: .12s; flex-shrink: 0; }
+  .iconbtn { background: var(--page); border: 1px solid var(--line); color: var(--muted); border-radius: 10px; width: 36px; height: 36px; cursor: pointer; display: grid; place-items: center; transition: .12s; flex-shrink: 0; }
   .iconbtn:hover { color: var(--green-d); border-color: var(--green); }
-  .iconbtn:active { background: var(--line); }
 
-  /* ── Tab：桌面横排 / 手机底部 ── */
-  #nav { display: flex; gap: 4px; flex-shrink: 0; background: var(--card); padding: 6px 12px; border-bottom: 1px solid var(--line); overflow-x: auto; scrollbar-width: none; }
-  #nav::-webkit-scrollbar { display: none; }
-  .nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 8px 15px; border-radius: 12px; cursor: pointer; color: var(--muted); font-size: 11.5px; font-weight: 700; min-width: 58px; transition: .15s; user-select: none; }
-  .nav-item .ico { font-size: 19px; line-height: 1; }
-  .nav-item:hover { color: var(--ink); }
-  .nav-item.active { color: #fff; background: var(--grad); box-shadow: 0 4px 12px rgba(15,163,126,.28); }
-  @media (max-width: 760px) {
-    #nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; padding: 7px 6px; padding-bottom: max(7px, env(safe-area-inset-bottom)); border-top: 1px solid var(--line); border-bottom: none; box-shadow: 0 -4px 20px rgba(19,26,42,.06); justify-content: space-around; background: var(--card); }
-    .nav-item { flex: 1; min-width: 0; border-radius: 12px; }
-    .nav-item.active { background: rgba(15,163,126,.12); color: var(--green-d); box-shadow: none; }
-    .nav-item.active .ico { transform: translateY(-1px); }
+  /* 手机底部 Tab */
+  #bottomnav { display: none; }
+  @media (max-width: 860px) {
+    .sidebar { display: none; }
+    .topbar .mob-brand { display: flex; align-items: center; gap: 9px; font-weight: 800; font-size: 15px; }
+    .topbar .mob-brand .mark { width: 30px; height: 30px; border-radius: 9px; background: var(--grad); display: grid; place-items: center; color: #fff; }
+    #bottomnav { display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; background: var(--card); border-top: 1px solid var(--line); box-shadow: 0 -4px 20px rgba(19,26,42,.06); padding: 6px 4px; padding-bottom: max(6px, env(safe-area-inset-bottom)); overflow-x: auto; scrollbar-width: none; }
+    #bottomnav::-webkit-scrollbar { display: none; }
+    #bottomnav .nav-item { flex-direction: column; gap: 2px; min-width: 62px; font-size: 10px; padding: 6px 8px; }
+    #bottomnav .nav-item.active { background: rgba(15,163,126,.12); color: var(--green-d); }
   }
 
-  /* ── 内容 ── */
-  .content { flex: 1; overflow-y: auto; padding: 16px; }
-  @media (max-width: 760px){ .content { padding: 14px 14px 100px; } }
+  .content { flex: 1; overflow-y: auto; padding: 18px; }
+  @media (max-width: 860px){ .content { padding: 14px 14px 92px; } }
   .section { display: none; animation: fade .22s ease; }
   .section.active { display: block; }
   @keyframes fade { from { opacity: 0; transform: translateY(8px);} to { opacity: 1; transform: none;} }
+  .page-head { margin-bottom: 16px; }
+  .page-head h2 { font-size: 20px; font-weight: 800; letter-spacing: .2px; }
+  .page-head p { font-size: 13px; color: var(--muted); margin-top: 3px; font-weight: 600; }
 
   .grid { display: grid; gap: 14px; }
-  .g-2 { grid-template-columns: repeat(2, 1fr); }
-  .g-3 { grid-template-columns: repeat(3, 1fr); }
-  .g-4 { grid-template-columns: repeat(4, 1fr); }
-  @media (max-width: 900px){ .g-4{grid-template-columns:repeat(2,1fr);} .g-3{grid-template-columns:1fr 1fr;} }
-  @media (max-width: 540px){ .g-2,.g-3,.g-4{grid-template-columns:1fr;} }
+  .g-2 { grid-template-columns: repeat(2, 1fr); } .g-3 { grid-template-columns: repeat(3, 1fr); } .g-4 { grid-template-columns: repeat(4, 1fr); }
+  @media (max-width: 1000px){ .g-4{grid-template-columns:repeat(2,1fr);} }
+  @media (max-width: 640px){ .g-2,.g-3,.g-4{grid-template-columns:1fr;} }
 
-  .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--r); padding: 18px; box-shadow: var(--shadow-sm); }
-  .card h3 { font-size: 12.5px; color: var(--muted); font-weight: 700; letter-spacing: .3px; margin-bottom: 14px; display: flex; align-items: center; gap: 7px; }
-  .stat .val { font-size: 28px; font-weight: 800; font-family: var(--mono); letter-spacing: -.6px; color: var(--ink); }
-  .stat .val.green { color: var(--green); }
-  .stat .val.amber { color: var(--amber); }
-  .stat .sub { font-size: 12.5px; color: var(--faint); margin-top: 4px; font-weight: 600; }
-  .kv { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 13.5px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; box-shadow: var(--shadow-sm); }
+  .card h3 { font-size: 12.5px; color: var(--muted); font-weight: 700; letter-spacing: .3px; margin-bottom: 13px; display: flex; align-items: center; gap: 8px; }
+  .card h3 svg { color: var(--green); }
+  .stat .val { font-size: 27px; font-weight: 800; font-family: var(--mono); letter-spacing: -.6px; }
+  .stat .val.green { color: var(--green); } .stat .val.amber { color: var(--amber); } .stat .val.red { color: var(--danger); } .stat .val.blue { color: var(--blue); }
+  .stat .sub { font-size: 12px; color: var(--faint); margin-top: 4px; font-weight: 600; }
+  .kv { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--line-2); font-size: 13.5px; }
   .kv:last-child { border-bottom: none; }
   .kv .k { color: var(--muted); font-weight: 600; }
   .kv .v { font-family: var(--mono); color: var(--ink); text-align: right; word-break: break-all; font-weight: 600; }
 
   .bars { display: inline-flex; align-items: flex-end; gap: 3px; height: 18px; }
-  .bars i { width: 5px; background: #D7DEE7; border-radius: 2px; }
-  .bars i.on { background: var(--green); }
+  .bars i { width: 5px; background: #D7DEE7; border-radius: 2px; } .bars i.on { background: var(--green); }
   .bars i:nth-child(1){height:6px}.bars i:nth-child(2){height:9px}.bars i:nth-child(3){height:12px}.bars i:nth-child(4){height:15px}.bars i:nth-child(5){height:18px}
 
   table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
-  th { text-align: left; color: var(--faint); font-weight: 700; font-size: 11px; letter-spacing: .5px; padding: 8px 10px; border-bottom: 1px solid var(--line); }
-  td { padding: 12px 10px; border-bottom: 1px solid var(--line); }
+  th { text-align: left; color: var(--faint); font-weight: 700; font-size: 11px; letter-spacing: .4px; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+  td { padding: 11px 10px; border-bottom: 1px solid var(--line-2); }
   tr:last-child td { border-bottom: none; }
   td.mono, th.mono { font-family: var(--mono); }
-  .tag { display: inline-block; padding: 3px 10px; border-radius: 8px; font-size: 11.5px; font-weight: 700; }
+  .tag { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 7px; font-size: 11.5px; font-weight: 700; }
   .tag.in { background: rgba(15,163,126,.12); color: var(--green-d); }
   .tag.out { background: rgba(47,128,237,.12); color: var(--blue); }
   .tag.miss { background: rgba(229,72,77,.12); color: var(--danger); }
-  .tag.active { background: rgba(15,163,126,.12); color: var(--green-d); }
+  .tag.ok { background: rgba(15,163,126,.12); color: var(--green-d); }
+  .tag.warn { background: rgba(224,134,0,.13); color: var(--amber); }
   .tag.idle { background: rgba(107,119,137,.12); color: var(--muted); }
+  .tag.on { background: rgba(15,163,126,.14); color: var(--green-d); }
+  .tag.off { background: rgba(107,119,137,.12); color: var(--muted); }
 
-  .sim.inactive { opacity: .62; }
-  .sim .slot-badge { float: right; }
-
-  .btn { background: var(--grad); color: #fff; border: none; border-radius: 12px; padding: 11px 20px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: var(--sans); box-shadow: 0 4px 14px rgba(15,163,126,.28); transition: .14s; }
-  .btn:hover { filter: brightness(1.05); }
-  .btn:active { transform: translateY(1px); box-shadow: 0 2px 8px rgba(15,163,126,.24); }
+  .btn { background: var(--grad); color: #fff; border: none; border-radius: 10px; padding: 9px 16px; font-size: 13.5px; font-weight: 700; cursor: pointer; font-family: var(--sans); box-shadow: 0 3px 10px rgba(15,163,126,.26); transition: .13s; display: inline-flex; align-items: center; gap: 6px; }
+  .btn:hover { filter: brightness(1.06); } .btn:active { transform: translateY(1px); }
   .btn.ghost { background: var(--card); color: var(--ink); border: 1px solid var(--line); box-shadow: var(--shadow-sm); }
-  .btn.blue { background: var(--blue); box-shadow: 0 4px 14px rgba(47,128,237,.28); }
+  .btn.warn { background: var(--amber); box-shadow: 0 3px 10px rgba(224,134,0,.26); }
+  .btn.danger { background: var(--danger); box-shadow: 0 3px 10px rgba(229,72,77,.26); }
+  .btn.blue { background: var(--blue); box-shadow: 0 3px 10px rgba(47,128,237,.26); }
+  .btn.sm { padding: 7px 12px; font-size: 12.5px; }
   .btn:disabled { opacity: .5; }
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
 
-  input, select, textarea { background: var(--card); border: 1px solid var(--line); color: var(--ink); border-radius: 11px; padding: 11px 14px; font-size: 14px; font-family: var(--sans); outline: none; width: 100%; transition: .14s; }
+  input, select, textarea { background: var(--card); border: 1px solid var(--line); color: var(--ink); border-radius: 10px; padding: 10px 13px; font-size: 13.5px; font-family: var(--sans); outline: none; width: 100%; transition: .13s; }
   input:focus, select:focus, textarea:focus { border-color: var(--green); box-shadow: var(--ring); }
   input.mono, textarea.mono { font-family: var(--mono); }
-  label.field { display: block; }
-  label.field > span { display: block; font-size: 12.5px; color: var(--muted); margin-bottom: 6px; font-weight: 700; }
-  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+  label.field { display: block; } label.field > span { display: block; font-size: 12px; color: var(--muted); margin-bottom: 5px; font-weight: 700; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
   @media (max-width: 560px){ .form-row{grid-template-columns:1fr;} }
 
-  .console { background: #0F1622; border-radius: 13px; font-family: var(--mono); font-size: 13px; line-height: 1.7; height: 380px; overflow-y: auto; padding: 15px; color: #D6DEE9; }
+  .toggle { position: relative; width: 46px; height: 27px; flex-shrink: 0; }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .toggle .tr { position: absolute; inset: 0; background: #D7DEE7; border-radius: 999px; transition: .18s; cursor: pointer; }
+  .toggle .tr::before { content: ""; position: absolute; width: 21px; height: 21px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: .18s; box-shadow: 0 1px 3px rgba(0,0,0,.2); }
+  .toggle input:checked + .tr { background: var(--green); }
+  .toggle input:checked + .tr::before { transform: translateX(19px); }
+  .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 11px 0; border-bottom: 1px solid var(--line-2); }
+  .toggle-row:last-child { border-bottom: none; }
+  .toggle-row .lab { font-size: 13.5px; font-weight: 600; } .toggle-row .lab small { display: block; color: var(--faint); font-weight: 600; font-size: 11.5px; margin-top: 1px; }
+
+  .console { background: #0F1622; border-radius: 12px; font-family: var(--mono); font-size: 13px; line-height: 1.7; height: 400px; overflow-y: auto; padding: 14px; color: #D6DEE9; }
   .console .line { white-space: pre-wrap; word-break: break-all; }
-  .console .cmd { color: #35D6A4; font-weight: 700; }
-  .console .cmd::before { content: "▸ "; color: #5A6B80; }
-  .console .ok { color: #E6EDF5; }
-  .console .err { color: #FF7A80; }
-  .console .info { color: #7E8CA0; }
+  .console .cmd { color: #35D6A4; font-weight: 700; } .console .cmd::before { content: "▸ "; color: #5A6B80; }
+  .console .ok { color: #E6EDF5; } .console .err { color: #FF7A80; } .console .info { color: #7E8CA0; }
   .console-input { display: flex; gap: 10px; margin-top: 12px; }
-  .quick-at { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
-  .quick-at button { background: var(--card); border: 1px solid var(--line); color: var(--muted); border-radius: 10px; padding: 7px 12px; font-size: 12px; font-family: var(--mono); cursor: pointer; font-weight: 600; transition: .12s; }
+  .at-group { margin-top: 14px; } .at-group .gl { font-size: 11px; color: var(--faint); font-weight: 700; margin-bottom: 7px; }
+  .quick-at { display: flex; flex-wrap: wrap; gap: 7px; }
+  .quick-at button { background: var(--card); border: 1px solid var(--line); color: var(--muted); border-radius: 9px; padding: 6px 11px; font-size: 11.5px; font-family: var(--mono); cursor: pointer; font-weight: 600; transition: .12s; }
   .quick-at button:hover { color: var(--green-d); border-color: var(--green); }
 
-  .banner { background: var(--card); border: 1px solid var(--line); border-left: 3px solid var(--green); border-radius: 12px; padding: 12px 15px; font-size: 12.5px; color: var(--muted); margin-bottom: 14px; display: flex; gap: 10px; align-items: flex-start; line-height: 1.6; font-weight: 600; box-shadow: var(--shadow-sm); }
+  .dialer { display: grid; grid-template-columns: repeat(3, 72px); gap: 14px; justify-content: center; margin: 8px auto; }
+  .dialer button { width: 72px; height: 72px; border-radius: 50%; border: none; background: var(--card); box-shadow: var(--shadow-sm); font-size: 26px; font-weight: 600; color: var(--ink); cursor: pointer; transition: .1s; font-family: var(--sans); }
+  .dialer button:active { box-shadow: var(--ring); transform: scale(.96); color: var(--green-d); }
+  .call-btn { width: 66px; height: 66px; border-radius: 50%; border: none; background: var(--grad); color: #fff; font-size: 24px; cursor: pointer; display: grid; place-items: center; box-shadow: 0 6px 18px rgba(15,163,126,.35); transition: .12s; }
+  .call-btn.end { background: var(--danger); box-shadow: 0 6px 18px rgba(229,72,77,.35); }
+  .call-btn:active { transform: scale(.94); }
+
+  .map-box { height: 180px; border-radius: 12px; background: repeating-linear-gradient(45deg,#EEF2F7,#EEF2F7 10px,#E7ECF2 10px,#E7ECF2 20px); display: grid; place-items: center; position: relative; overflow: hidden; }
+  .map-pin { width: 22px; height: 22px; background: var(--danger); border-radius: 50% 50% 50% 0; transform: rotate(-45deg); box-shadow: 0 4px 10px rgba(229,72,77,.4); position: relative; }
+  .map-pin::after { content: ""; width: 9px; height: 9px; background: #fff; border-radius: 50%; position: absolute; top: 6px; left: 6px; }
+
+  .banner { background: var(--card); border: 1px solid var(--line); border-left: 3px solid var(--green); border-radius: 11px; padding: 11px 14px; font-size: 12.5px; color: var(--muted); margin-bottom: 14px; display: flex; gap: 10px; align-items: flex-start; line-height: 1.6; font-weight: 600; box-shadow: var(--shadow-sm); }
   .banner b { color: var(--ink); }
-  .muted { color: var(--muted); } .faint { color: var(--faint); } .mono { font-family: var(--mono); }
+  .muted{color:var(--muted);} .faint{color:var(--faint);} .mono{font-family:var(--mono);}
   .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-  .between { justify-content: space-between; }
-  .mt { margin-top: 14px; }
+  .between { justify-content: space-between; } .mt { margin-top: 14px; }
+  .empty { text-align: center; color: var(--faint); padding: 28px; font-size: 13px; font-weight: 600; }
 </style>
 </head>
 <body>
 <div class="app">
-  <header class="topbar">
-    <div class="brand">📡</div>
-    <div class="title">模块管理<small>大疆 · 移远 4G</small></div>
-    <div class="spacer"></div>
-    <select class="module-select" id="module-select"></select>
-    <span class="pill online" id="conn-pill"><span class="dot"></span>在线</span>
-    <span class="pill" id="signal-pill">📶 —</span>
-    <button class="iconbtn" id="refresh-btn" title="刷新">⟳</button>
-  </header>
-
-  <nav id="nav">
-    <div class="nav-item active" data-tab="overview"><span class="ico">📊</span>总览</div>
-    <div class="nav-item" data-tab="sim"><span class="ico">💳</span>SIM</div>
-    <div class="nav-item" data-tab="calls"><span class="ico">📞</span>通话</div>
-    <div class="nav-item" data-tab="sms"><span class="ico">💬</span>短信</div>
-    <div class="nav-item" data-tab="sip"><span class="ico">🔗</span>SIP</div>
-    <div class="nav-item" data-tab="at"><span class="ico">⌨️</span>AT</div>
-    <div class="nav-item" data-tab="settings"><span class="ico">⚙️</span>设置</div>
-  </nav>
-
-  <main class="content" id="content">
-    <div class="banner" id="mode-banner">
-      <span>🧪</span><span id="mode-banner-text"></span>
+  <!-- 侧栏（桌面） -->
+  <aside class="sidebar">
+    <div class="side-brand">
+      <div class="mark" id="side-mark"></div>
+      <div><h1>模块控制台</h1><small>大疆 · 移远 4G</small></div>
     </div>
+    <nav class="side-nav" id="sidenav"></nav>
+    <div class="side-foot">
+      <div>后端 <span class="mono" id="foot-gw">demo</span></div>
+      <div>固件 <span class="mono" id="foot-fw">—</span></div>
+    </div>
+  </aside>
 
-    <!-- 总览 -->
-    <section class="section active" data-sec="overview">
-      <div class="grid g-4" id="overview-stats"></div>
-      <div class="grid g-2 mt">
+  <div class="main">
+    <header class="topbar">
+      <div class="mob-brand"><span class="mark" id="mob-mark"></span>模块控制台</div>
+      <div class="spacer"></div>
+      <select class="module-select" id="module-select"></select>
+      <span class="pill online" id="conn-pill"><span class="dot"></span>在线</span>
+      <span class="pill" id="signal-pill">📶 —</span>
+      <button class="iconbtn" id="refresh-btn" title="刷新"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></button>
+    </header>
+
+    <main class="content" id="content">
+      <div class="banner" id="mode-banner"><span>🧪</span><span id="mode-banner-text"></span></div>
+
+      <!-- 总览 -->
+      <section class="section active" data-sec="overview">
+        <div class="page-head"><h2>总览</h2><p>模块状态、信号、网络与数据一览</p></div>
+        <div class="grid g-4" id="ov-stats"></div>
+        <div class="grid g-2 mt">
+          <div class="card"><h3 data-i="signal">信号质量</h3>
+            <div class="row" style="gap:22px">
+              <div><div class="faint" style="font-size:11px;font-weight:700">RSRP</div><div class="mono" style="font-size:19px;font-weight:800" id="rsrp">—</div></div>
+              <div><div class="faint" style="font-size:11px;font-weight:700">RSRQ</div><div class="mono" style="font-size:19px;font-weight:800" id="rsrq">—</div></div>
+              <div><div class="faint" style="font-size:11px;font-weight:700">SINR</div><div class="mono" style="font-size:19px;font-weight:800" id="sinr">—</div></div>
+              <div><div class="faint" style="font-size:11px;font-weight:700">强度</div><div class="row" style="margin-top:5px"><span class="bars" id="sig-bars"></span><span class="mono" id="sig-dbm" style="font-weight:700"></span></div></div>
+            </div>
+            <div class="mt"><div class="faint" style="font-size:11px;margin-bottom:6px;font-weight:700">实时波动</div><canvas id="sig-chart" height="66" style="width:100%"></canvas></div>
+          </div>
+          <div class="card"><h3 data-i="cpu">服务小区</h3><div id="ov-cell"></div></div>
+        </div>
+        <div class="grid g-3 mt">
+          <div class="card"><h3 data-i="mappin">定位 GNSS</h3><div id="ov-gnss"></div></div>
+          <div class="card"><h3 data-i="data">数据流量</h3><div id="ov-data"></div></div>
+          <div class="card"><h3 data-i="book">最近事件</h3><div id="events" class="mono" style="font-size:12px;line-height:2"></div></div>
+        </div>
+      </section>
+
+      <!-- 小区 -->
+      <section class="section" data-sec="cell">
+        <div class="page-head"><h2>蜂窝小区</h2><p>AT+QENG 服务小区与邻区</p></div>
+        <div class="card"><h3 data-i="cpu">服务小区</h3><div id="cell-serving"></div></div>
+        <div class="card mt"><h3 data-i="cpu">邻区</h3><div id="cell-neigh"></div></div>
+      </section>
+
+      <!-- 定位 -->
+      <section class="section" data-sec="gnss">
+        <div class="page-head"><h2>定位 GNSS</h2><p>AT+QGPS 卫星定位</p></div>
+        <div class="grid g-2">
+          <div class="card"><h3 data-i="mappin">位置</h3>
+            <div class="map-box" id="gnss-map"><div class="map-pin"></div></div>
+            <div class="mt" id="gnss-info"></div>
+            <div class="btn-row mt"><button class="btn sm" id="gnss-on">开启定位</button><button class="btn ghost sm" id="gnss-refresh">刷新坐标</button></div>
+          </div>
+          <div class="card"><h3 data-i="signal">卫星</h3><div id="gnss-sats"></div>
+            <div class="mt"><h3 data-i="terminal" style="margin-bottom:8px">NMEA</h3><div class="mono faint" id="gnss-nmea" style="font-size:11.5px;line-height:1.8"></div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 流量 -->
+      <section class="section" data-sec="data">
+        <div class="page-head"><h2>数据流量</h2><p>蜂窝数据使用统计</p></div>
+        <div class="grid g-3" id="data-stats"></div>
+        <div class="card mt"><h3 data-i="data">按卡槽</h3><div id="data-sim"></div></div>
+      </section>
+
+      <!-- 语音 -->
+      <section class="section" data-sec="voice">
+        <div class="page-head"><h2>语音通话</h2><p>拨号 / 接听 / DTMF / 通话设置</p></div>
+        <div class="grid g-2">
+          <div class="card">
+            <h3 data-i="phone">拨号</h3>
+            <input id="dial-number" class="mono" placeholder="输入号码" style="text-align:center;font-size:18px;letter-spacing:1px;margin-bottom:14px" />
+            <div class="dialer" id="dialer"></div>
+            <div class="row" style="justify-content:center;gap:22px;margin-top:6px">
+              <button class="call-btn end" id="voice-hangup" title="挂断"><svg class="ic" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.68 13.31a16 16 0 0 0 3.41 2.6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.42 19.42 0 0 1-3.33-2.67m-2.67-3.34a19.79 19.79 0 0 1-3.07-8.63A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91"/><line x1="23" y1="1" x2="1" y2="23"/></svg></button>
+              <button class="call-btn" id="voice-dial" title="拨打"><svg class="ic" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></button>
+              <button class="call-btn" id="voice-answer" title="接听" style="background:var(--blue);box-shadow:0 6px 18px rgba(47,128,237,.35)"><svg class="ic" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15.05 5A5 5 0 0 1 19 8.95M15.05 1A9 9 0 0 1 23 8.94"/><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72"/></svg></button>
+            </div>
+          </div>
+          <div class="card">
+            <h3 data-i="phone">通话设置</h3>
+            <div class="toggle-row"><div class="lab">主叫号码显示 (CLIP)<small>AT+CLIP</small></div><label class="toggle"><input type="checkbox" id="v-clip" checked><span class="tr"></span></label></div>
+            <div class="toggle-row"><div class="lab">呼叫等待 (CCWA)<small>AT+CCWA</small></div><label class="toggle"><input type="checkbox" id="v-wait"><span class="tr"></span></label></div>
+            <div class="toggle-row"><div class="lab">呼叫转移 (CCFC)<small>遇忙转移至语音信箱</small></div><label class="toggle"><input type="checkbox" id="v-fwd"><span class="tr"></span></label></div>
+            <div class="form-row mt"><label class="field"><span>通话音量 (AT+CLVL)</span><input id="v-vol" class="mono" value="4" /></label><label class="field"><span>麦克风增益 (AT+CMIC)</span><input id="v-mic" class="mono" value="3" /></label></div>
+            <button class="btn sm" id="v-save">保存通话设置</button>
+          </div>
+        </div>
+        <div class="card mt"><h3 data-i="phone">通话记录</h3><table><thead><tr><th>方向</th><th>号码</th><th>卡</th><th>时长</th><th class="mono">时间</th></tr></thead><tbody id="calls-body"></tbody></table></div>
+      </section>
+
+      <!-- 短信 -->
+      <section class="section" data-sec="sms">
+        <div class="page-head"><h2>短信</h2><p>AT+CMGF / AT+CMGS 收发管理</p></div>
+        <div class="card" style="margin-bottom:14px"><h3 data-i="message">发送短信</h3>
+          <div class="form-row"><label class="field"><span>接收号码</span><input id="sms-to" class="mono" placeholder="+8613xxxxxxxxx" /></label><label class="field"><span>使用卡槽</span><select id="sms-slot"><option value="1">卡槽 1</option><option value="2">卡槽 2</option></select></label></div>
+          <label class="field"><span>内容</span><textarea id="sms-body" rows="2" placeholder="短信内容"></textarea></label>
+          <div class="mt"><button class="btn" id="sms-send">发送</button></div>
+        </div>
+        <div class="card"><h3 data-i="message">短信记录</h3><table><thead><tr><th>类型</th><th>号码</th><th>内容</th><th class="mono">时间</th></tr></thead><tbody id="sms-body-list"></tbody></table></div>
+      </section>
+
+      <!-- USSD -->
+      <section class="section" data-sec="ussd">
+        <div class="page-head"><h2>USSD</h2><p>AT+CUSD 补充业务（查余额/流量等）</p></div>
         <div class="card">
-          <h3>📶 信号质量</h3>
-          <div class="row" style="gap:24px">
-            <div><div class="faint" style="font-size:11px;font-weight:700">RSRP</div><div class="mono" style="font-size:20px;font-weight:800" id="rsrp">—</div></div>
-            <div><div class="faint" style="font-size:11px;font-weight:700">RSRQ</div><div class="mono" style="font-size:20px;font-weight:800" id="rsrq">—</div></div>
-            <div><div class="faint" style="font-size:11px;font-weight:700">SINR</div><div class="mono" style="font-size:20px;font-weight:800" id="sinr">—</div></div>
-            <div><div class="faint" style="font-size:11px;font-weight:700">强度</div><div class="row" style="margin-top:5px"><span class="bars" id="sig-bars"></span><span class="mono" id="sig-dbm" style="font-weight:700"></span></div></div>
-          </div>
-          <div class="mt"><div class="faint" style="font-size:11px;margin-bottom:6px;font-weight:700">实时波动</div><canvas id="sig-chart" height="70" style="width:100%"></canvas></div>
+          <div class="form-row"><label class="field"><span>USSD 码</span><input id="ussd-code" class="mono" placeholder="*100#" /></label><div style="align-self:flex-end"><button class="btn" id="ussd-send">发送</button></div></div>
+          <div class="quick-at"><button data-u="*100#">*100# 查余额</button><button data-u="*108#">*108# 话费</button><button data-u="*#*#4636#*#*">测试</button></div>
+          <div class="mt"><h3 data-i="hash" style="margin-bottom:8px">响应</h3><div class="console" id="ussd-log" style="height:220px"></div></div>
         </div>
+      </section>
+
+      <!-- 通讯录 -->
+      <section class="section" data-sec="phonebook">
+        <div class="page-head"><h2>通讯录</h2><p>AT+CPBR / AT+CPBW SIM 卡联系人</p></div>
         <div class="card">
-          <h3>🧾 最近事件</h3>
-          <div id="events" class="mono" style="font-size:12.5px;line-height:2"></div>
+          <div class="row between" style="margin-bottom:12px">
+            <div class="form-row" style="margin:0;grid-template-columns:1fr 1fr auto;gap:10px;flex:1">
+              <input id="pb-name" placeholder="姓名" /><input id="pb-number" class="mono" placeholder="号码" /><button class="btn sm" id="pb-add">新增</button>
+            </div>
+          </div>
+          <table><thead><tr><th>#</th><th>姓名</th><th>号码</th><th></th></tr></thead><tbody id="pb-body"></tbody></table>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- SIM -->
-    <section class="section" data-sec="sim">
-      <div class="grid g-2" id="sim-grid"></div>
-    </section>
-
-    <!-- 通话 -->
-    <section class="section" data-sec="calls">
-      <div class="card">
-        <div class="row between" style="margin-bottom:12px">
-          <h3 style="margin:0">📞 通话记录</h3>
-          <div class="row">
-            <input id="test-number" placeholder="测试拨号号码" style="width:170px" class="mono" />
-            <button class="btn" id="test-dial">拨号</button>
+      <!-- 网络 -->
+      <section class="section" data-sec="network">
+        <div class="page-head"><h2>网络配置</h2><p>APN / 频段 / 漫游 / 数据连接</p></div>
+        <div class="grid g-2">
+          <div class="card"><h3 data-i="wifi">蜂窝数据</h3>
+            <div class="toggle-row"><div class="lab">数据连接 (PDP)<small>AT+CGACT 附着/分离</small></div><label class="toggle"><input type="checkbox" id="n-data" checked><span class="tr"></span></label></div>
+            <div class="toggle-row"><div class="lab">数据漫游<small>AT+QCFG="roamservice"</small></div><label class="toggle"><input type="checkbox" id="n-roam"><span class="tr"></span></label></div>
+            <div class="form-row mt"><label class="field"><span>APN (AT+CGDCONT)</span><input id="n-apn" class="mono" placeholder="cmnet" /></label><label class="field"><span>PDP 类型</span><select id="n-pdp"><option>IP</option><option>IPV6</option><option>IPV4V6</option></select></label></div>
+            <div class="btn-row"><button class="btn sm" id="n-save">保存并激活</button><button class="btn ghost sm" id="n-ip">查询 IP (QIACT?)</button></div>
+          </div>
+          <div class="card"><h3 data-i="signal">接入技术 / 频段</h3>
+            <div class="kv"><span class="k">当前网络</span><span class="v" id="n-net">—</span></div>
+            <div class="kv"><span class="k">服务域</span><span class="v" id="n-domain">—</span></div>
+            <div class="kv"><span class="k">频段</span><span class="v" id="n-band">—</span></div>
+            <div class="kv"><span class="k">IP 地址</span><span class="v" id="n-ipaddr">—</span></div>
+            <div class="form-row mt"><label class="field"><span>扫描模式 (nwscanmode)</span><select id="n-scan"><option value="0">自动</option><option value="1">仅 LTE</option><option value="2">仅 UMTS</option><option value="3">仅 GSM</option></select></label><label class="field"><span>网络选择 (COPS)</span><select id="n-cops"><option value="0">自动</option><option value="1">手动</option></select></label></div>
+            <div class="btn-row"><button class="btn ghost sm" id="n-scanbtn">扫网</button><button class="btn ghost sm" id="n-reattach">重新注册</button></div>
           </div>
         </div>
-        <table>
-          <thead><tr><th>方向</th><th>号码</th><th>卡</th><th>时长</th><th class="mono">时间</th></tr></thead>
-          <tbody id="calls-body"></tbody>
-        </table>
-      </div>
-    </section>
+      </section>
 
-    <!-- 短信 -->
-    <section class="section" data-sec="sms">
-      <div class="card" style="margin-bottom:14px">
-        <h3>✉️ 发送短信</h3>
-        <div class="form-row">
-          <label class="field"><span>接收号码</span><input id="sms-to" class="mono" placeholder="+8613xxxxxxxxx" /></label>
-          <label class="field"><span>使用卡槽</span><select id="sms-slot"><option value="1">卡槽 1</option><option value="2">卡槽 2</option></select></label>
+      <!-- SIM -->
+      <section class="section" data-sec="sim">
+        <div class="page-head"><h2>SIM 卡</h2><p>双卡 / ICCID / PIN / 切换</p></div>
+        <div class="grid g-2" id="sim-grid"></div>
+        <div class="card mt"><h3 data-i="sim">PIN 与状态</h3>
+          <div class="toggle-row"><div class="lab">启用 PIN 锁<small>AT+QPINC</small></div><label class="toggle"><input type="checkbox" id="sim-pin"><span class="tr"></span></label></div>
+          <div class="form-row mt"><label class="field"><span>PIN 码</span><input id="sim-pincode" class="mono" type="password" placeholder="••••" /></label><div style="align-self:flex-end"><button class="btn sm" id="sim-pinsave">应用</button></div></div>
+          <div class="kv"><span class="k">卡检测 (QSIMDET)</span><span class="v" id="sim-det">—</span></div>
+          <div class="kv"><span class="k">剩余 PIN 尝试</span><span class="v" id="sim-remain">—</span></div>
         </div>
-        <label class="field"><span>内容</span><textarea id="sms-body" rows="2" placeholder="短信内容"></textarea></label>
-        <div class="mt"><button class="btn" id="sms-send">发送</button></div>
-      </div>
-      <div class="card">
-        <h3>📥 短信记录</h3>
-        <table>
-          <thead><tr><th>类型</th><th>号码</th><th>内容</th><th class="mono">时间</th></tr></thead>
-          <tbody id="sms-body-list"></tbody>
-        </table>
-      </div>
-    </section>
+      </section>
 
-    <!-- SIP -->
-    <section class="section" data-sec="sip">
-      <div class="grid g-2">
+      <!-- SIP -->
+      <section class="section" data-sec="sip">
+        <div class="page-head"><h2>SIP 网关</h2><p>接入 cellbridge 语音网关</p></div>
+        <div class="grid g-2">
+          <div class="card"><h3 data-i="link">SIP 网关配置</h3>
+            <div class="form-row"><label class="field"><span>服务器</span><input id="sip-server" class="mono" /></label><label class="field"><span>端口</span><input id="sip-port" class="mono" /></label></div>
+            <div class="form-row"><label class="field"><span>用户名</span><input id="sip-user" class="mono" /></label><label class="field"><span>密码</span><input id="sip-pass" type="password" class="mono" /></label></div>
+            <div class="form-row"><label class="field"><span>编码</span><select id="sip-codec"><option>PCMU</option><option>PCMA</option><option>G729</option><option>OPUS</option></select></label><label class="field"><span>传输</span><select id="sip-transport"><option>UDP</option><option>TCP</option><option>TLS</option></select></label></div>
+            <button class="btn" id="sip-save">保存并注册</button>
+          </div>
+          <div class="card"><h3 data-i="link">注册状态</h3>
+            <div class="kv"><span class="k">状态</span><span class="v" id="sip-reg-status">—</span></div>
+            <div class="kv"><span class="k">注册地址</span><span class="v" id="sip-reg-addr">—</span></div>
+            <div class="kv"><span class="k">过期时间</span><span class="v" id="sip-reg-exp">—</span></div>
+            <div class="kv"><span class="k">用户代理</span><span class="v">cellbridge-gateway</span></div>
+            <div class="mt muted" style="font-size:12.5px;line-height:1.6">SIP 账号用于把模块接入语音网关，iPhone 端经 Relay / CallKit 呼入呼出。</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- AT -->
+      <section class="section" data-sec="at">
+        <div class="page-head"><h2>AT 控制台</h2><p>直接下发 AT 指令（Quectel 全系）</p></div>
         <div class="card">
-          <h3>🔗 SIP 网关配置</h3>
-          <div class="form-row">
-            <label class="field"><span>服务器</span><input id="sip-server" class="mono" /></label>
-            <label class="field"><span>端口</span><input id="sip-port" class="mono" /></label>
-          </div>
-          <div class="form-row">
-            <label class="field"><span>用户名</span><input id="sip-user" class="mono" /></label>
-            <label class="field"><span>密码</span><input id="sip-pass" type="password" class="mono" /></label>
-          </div>
-          <div class="form-row">
-            <label class="field"><span>编码</span><select id="sip-codec"><option>PCMU</option><option>PCMA</option><option>G729</option><option>OPUS</option></select></label>
-            <label class="field"><span>传输</span><select id="sip-transport"><option>UDP</option><option>TCP</option><option>TLS</option></select></label>
-          </div>
-          <button class="btn" id="sip-save">保存并注册</button>
+          <div class="row between" style="margin-bottom:12px"><h3 style="margin:0" data-i="terminal">指令</h3><button class="btn ghost sm" id="at-clear">清空</button></div>
+          <div class="console" id="at-console"></div>
+          <div class="console-input"><input id="at-input" class="mono" placeholder="输入 AT 指令，如 AT+QENG=&quot;servingcell&quot;" /><button class="btn" id="at-send">发送</button></div>
+          <div id="at-groups"></div>
         </div>
-        <div class="card">
-          <h3>注册状态</h3>
-          <div class="kv"><span class="k">状态</span><span class="v" id="sip-reg-status">—</span></div>
-          <div class="kv"><span class="k">注册地址</span><span class="v" id="sip-reg-addr">—</span></div>
-          <div class="kv"><span class="k">过期时间</span><span class="v" id="sip-reg-exp">—</span></div>
-          <div class="kv"><span class="k">用户代理</span><span class="v">cellbridge-gateway</span></div>
-          <div class="mt muted" style="font-size:12.5px;line-height:1.6">SIP 账号用于把模块接入语音网关（与 cellbridge-gateway 一致），iPhone 端经 Relay / CallKit 呼入呼出。</div>
-        </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- AT 控制台 -->
-    <section class="section" data-sec="at">
-      <div class="card">
-        <div class="row between" style="margin-bottom:12px">
-          <h3 style="margin:0">⌨️ AT 指令控制台</h3>
-          <button class="btn ghost" id="at-clear">清空</button>
+      <!-- 维护 -->
+      <section class="section" data-sec="maintain">
+        <div class="page-head"><h2>固件与维护</h2><p>版本 / 温度 / 重启 / USB 配置</p></div>
+        <div class="grid g-2">
+          <div class="card"><h3 data-i="tool">模块信息</h3>
+            <div class="kv"><span class="k">固件版本</span><span class="v" id="mt-fw">—</span></div>
+            <div class="kv"><span class="k">硬件</span><span class="v" id="mt-hw">—</span></div>
+            <div class="kv"><span class="k">温度</span><span class="v" id="mt-temp">—</span></div>
+            <div class="kv"><span class="k">USB 配置 (usbcfg)</span><span class="v mono" id="mt-usb" style="font-size:11.5px">—</span></div>
+          </div>
+          <div class="card"><h3 data-i="tool">操作</h3>
+            <div class="btn-row">
+              <button class="btn blue sm" id="mt-reboot">重启模块 (CFUN=1,1)</button>
+              <button class="btn warn sm" id="mt-power">关机 (QPOWD)</button>
+              <button class="btn ghost sm" id="mt-adb">切换 ADB</button>
+              <button class="btn danger sm" id="mt-reset">恢复出厂 (CRESET)</button>
+            </div>
+            <div class="mt muted" style="font-size:12.5px;line-height:1.6">重启/关机会让模块重新枚举 USB，期间管理后台将短暂离线。恢复出厂会清空所有自定义配置，请谨慎。</div>
+          </div>
         </div>
-        <div class="console" id="at-console"></div>
-        <div class="console-input">
-          <input id="at-input" class="mono" placeholder="输入 AT 指令，如 AT+CSQ" />
-          <button class="btn" id="at-send">发送</button>
-        </div>
-        <div class="quick-at" id="at-quick"></div>
-      </div>
-    </section>
+      </section>
 
-    <!-- 设置 -->
-    <section class="section" data-sec="settings">
-      <div class="card" style="max-width:640px">
-        <h3>⚙️ 模块与连接</h3>
-        <div class="form-row">
-          <label class="field"><span>模块厂商</span><select id="set-vendor"><option value="dji">大疆 DJI</option><option value="quectel">移远 Quectel</option></select></label>
-          <label class="field"><span>型号</span><input id="set-model" class="mono" /></label>
+      <!-- 设置 -->
+      <section class="section" data-sec="settings">
+        <div class="page-head"><h2>设置</h2><p>模块与连接参数</p></div>
+        <div class="card" style="max-width:640px"><h3 data-i="settings">模块与连接</h3>
+          <div class="form-row"><label class="field"><span>模块厂商</span><select id="set-vendor"><option value="dji">大疆 DJI</option><option value="quectel">移远 Quectel</option></select></label><label class="field"><span>型号</span><input id="set-model" class="mono" /></label></div>
+          <div class="form-row"><label class="field"><span>连接方式</span><select id="set-transport"><option value="usb">USB 串口</option><option value="network">网络（TCP）</option></select></label><label class="field"><span id="set-addr-label">AT 串口设备</span><input id="set-addr" class="mono" placeholder="/dev/ttyUSB2 或 192.168.1.10" /></label></div>
+          <div class="form-row"><label class="field"><span>端口（网络方式）</span><input id="set-port" class="mono" placeholder="9527" /></label><label class="field"><span>Relay 地址</span><input id="set-relay" class="mono" /></label></div>
+          <button class="btn" id="set-save">保存设置</button>
+          <div class="mt muted" style="font-size:12.5px;line-height:1.6">与 iOS App「设置 → 硬件值守模块」一致，供 Mac/NAS 网关建立 AT/SIP 桥接时读取。</div>
         </div>
-        <div class="form-row">
-          <label class="field"><span>连接方式</span><select id="set-transport"><option value="usb">USB 串口</option><option value="network">网络（TCP）</option></select></label>
-          <label class="field"><span id="set-addr-label">AT 串口设备</span><input id="set-addr" class="mono" placeholder="/dev/ttyUSB2 或 192.168.1.10" /></label>
-        </div>
-        <div class="form-row">
-          <label class="field"><span>端口（网络方式）</span><input id="set-port" class="mono" placeholder="9527" /></label>
-          <label class="field"><span>Relay 地址</span><input id="set-relay" class="mono" placeholder="https://airsim-push.dntmove.asia" /></label>
-        </div>
-        <button class="btn" id="set-save">保存设置</button>
-        <div class="mt muted" style="font-size:12.5px;line-height:1.6">这些参数与 iOS App「设置 → 硬件值守模块」一致，供 Mac/NAS 网关建立 AT/SIP 桥接时读取。</div>
-      </div>
-    </section>
-  </main>
+      </section>
+    </main>
+  </div>
 </div>
+<nav id="bottomnav"></nav>
 
 <script>
-/* ═══════════════════════════════════════════════════════════════
-   API 契约（供 Mac/NAS 上的 cellbridge 网关实现；DEMO=false 后启用）
-   GET /api/status /api/sim /api/calls /api/sms /api/sip /api/settings
-   POST /api/sms /api/calls/dial /api/sip /api/at /api/settings
-   ═══════════════════════════════════════════════════════════════ */
+/* ═════════════════════════════════════════════════════════════════
+   大疆 QDC507 / 移远 EG25-G 模块控制台
+   数据源：DEMO=false 时来自 server.py（pyserial AT）；否则内置模拟。
+   API：status/cell/gnss/network/sim/data/calls/sms/sip/phonebook/maintain/at/settings
+   ═════════════════════════════════════════════════════════════════ */
 const DEMO = location.protocol === "file:" || new URLSearchParams(location.search).has("demo");
 
+/* ── SVG 线性图标（统一专业） ── */
+const P = {
+  grid:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/>',
+  signal:'<path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/>',
+  cpu:'<rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 14h3M1 9h3M1 14h3"/>',
+  mappin:'<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>',
+  data:'<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>',
+  phone:'<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>',
+  message:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+  hash:'<line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/>',
+  book:'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>',
+  wifi:'<path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/>',
+  sim:'<rect x="2" y="4" width="20" height="16" rx="2"/><line x1="2" y1="9" x2="22" y2="9"/><line x1="6" y1="14" x2="10" y2="14"/>',
+  link:'<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>',
+  terminal:'<polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/>',
+  tool:'<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>',
+  settings:'<line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/>',
+  radio:'<circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"/>',
+};
+const ICON = (n, s=18) => `<svg class="ic" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${P[n]||""}</svg>`;
+document.querySelectorAll("[data-i]").forEach(el => el.insertAdjacentHTML("afterbegin", ICON(el.dataset.i, 15)));
+document.getElementById("side-mark").innerHTML = ICON("radio", 20);
+document.getElementById("mob-mark").innerHTML = ICON("radio", 17);
+
+const NAV = [
+  { g: "监控", items: [["overview","总览","grid"],["cell","蜂窝小区","cpu"],["gnss","定位","mappin"],["data","数据流量","data"]] },
+  { g: "通信", items: [["voice","语音通话","phone"],["sms","短信","message"],["ussd","USSD","hash"],["phonebook","通讯录","book"]] },
+  { g: "网络", items: [["network","网络配置","wifi"],["sim","SIM 卡","sim"],["sip","SIP 网关","link"]] },
+  { g: "系统", items: [["at","AT 控制台","terminal"],["maintain","固件维护","tool"],["settings","设置","settings"]] },
+];
+const NAV_FLAT = NAV.flatMap(g => g.items);
+
+function buildNav() {
+  const side = document.getElementById("sidenav");
+  side.innerHTML = NAV.map(g => `<div class="nav-group">${g.g}</div>` + g.items.map(([id,label,ic]) =>
+    `<div class="nav-item" data-tab="${id}">${ICON(ic,17)}<span>${label}</span></div>`).join("")).join("");
+  const bot = document.getElementById("bottomnav");
+  bot.innerHTML = NAV_FLAT.map(([id,label,ic]) =>
+    `<div class="nav-item${id==="overview"?" active":""}" data-tab="${id}">${ICON(ic,19)}<span>${label}</span></div>`).join("");
+  document.querySelectorAll(".nav-item").forEach(it => it.onclick = () => goto(it.dataset.tab));
+}
+function goto(tab) {
+  document.querySelectorAll(".nav-item").forEach(n => n.classList.toggle("active", n.dataset.tab === tab));
+  document.querySelectorAll(".section").forEach(s => s.classList.toggle("active", s.dataset.sec === tab));
+  if (tab === "overview") drawChart();
+  document.getElementById("content").scrollTop = 0;
+}
+
+/* ── 数据模型（演示） ── */
+const CELL = (o={}) => Object.assign({ earfcn:1850, pci:231, tac:"0A4B", band:"B3", cellId:"0123ABCD", rsrp:-82, rsrq:-11, sinr:18, enb:"460-00-1234" }, o);
+const GNSS = (o={}) => Object.assign({ on:true, lat:"22.5431", lon:"113.9476", alt:36, speed:0, sats:11, hdop:0.9, fix:"3D" }, o);
+const NET = (o={}) => Object.assign({ net:"LTE", domain:"CS+PS", band:"B3/B38", apn:"cmnet", pdp:"IP", dataOn:true, roam:false, ip:"10.66.23.181", scan:0 }, o);
 const MODULES = {
-  "dji-qdc507": {
-    label: "大疆 QDC507", vendor: "dji", model: "QDC507", fw: "QDC507_V2.1.4",
-    online: true, imei: "860123045678901", iccid: "8986001234567890123",
-    carrier: "中国移动", netType: "4G LTE", rsrp: -82, rsrq: -11, sinr: 18, bars: 4,
-    dataRx: "1.2 GB", dataTx: "340 MB", uptime: "3 天 06:42:11", sipRegistered: true,
-    sims: [
-      { slot: 1, active: true,  iccid: "8986001234567890123", msisdn: "+8613800138000", carrier: "中国移动", signal: 4 },
-      { slot: 2, active: false, iccid: "8986011567890123456", msisdn: "+8613900139000", carrier: "中国联通", signal: 3 },
-    ],
-    sip: { server: "sip.cellbridge.local", port: "5060", user: "dji01", codec: "PCMU", transport: "UDP", status: "已注册", addr: "sip:5060 @udp", expires: "3600s" },
-    settings: { vendor: "dji", model: "QDC507", transport: "usb", addr: "/dev/ttyUSB2", port: "", relay: "https://airsim-push.dntmove.asia" },
-  },
-  "dji-eg25g": {
-    label: "大疆 EG25-G", vendor: "dji", model: "EG25-G", fw: "EG25GGBR07A08",
-    online: true, imei: "861234056789012", iccid: "8986019912345678901",
-    carrier: "中国电信", netType: "4G LTE", rsrp: -95, rsrq: -13, sinr: 12, bars: 3,
-    dataRx: "860 MB", dataTx: "120 MB", uptime: "1 天 12:08:55", sipRegistered: true,
-    sims: [
-      { slot: 1, active: true, iccid: "8986019912345678901", msisdn: "+8618900189000", carrier: "中国电信", signal: 3 },
-      { slot: 2, active: false, iccid: "", msisdn: "", carrier: "—", signal: 0 },
-    ],
-    sip: { server: "sip.cellbridge.local", port: "5060", user: "eg25g01", codec: "PCMA", transport: "TCP", status: "已注册", addr: "sip:5060 @tcp", expires: "1800s" },
-    settings: { vendor: "dji", model: "EG25-G", transport: "network", addr: "192.168.1.20", port: "9527", relay: "https://airsim-push.dntmove.asia" },
-  },
-  "quectel-eg25g": {
-    label: "移远 EG25-G", vendor: "quectel", model: "EG25-G", fw: "EG25GGBR07A07",
-    online: true, imei: "863456051234567", iccid: "8986029876543210987",
-    carrier: "中国联通", netType: "4G LTE", rsrp: -78, rsrq: -9, sinr: 22, bars: 5,
-    dataRx: "3.4 GB", dataTx: "980 MB", uptime: "12 天 02:31:40", sipRegistered: true,
-    sims: [
-      { slot: 1, active: true, iccid: "8986029876543210987", msisdn: "+8615000150000", carrier: "中国联通", signal: 5 },
-      { slot: 2, active: true, iccid: "8986021123456789012", msisdn: "+8613100131000", carrier: "中国移动", signal: 4 },
-    ],
-    sip: { server: "sip.cellbridge.local", port: "5060", user: "qeg25g01", codec: "PCMU", transport: "UDP", status: "已注册", addr: "sip:5060 @udp", expires: "3600s" },
-    settings: { vendor: "quectel", model: "EG25-G", transport: "usb", addr: "/dev/ttyUSB3", port: "", relay: "https://airsim-push.dntmove.asia" },
-  },
-  "quectel-eg912y": {
-    label: "移远 EG912Y-IE", vendor: "quectel", model: "EG912Y-IE", fw: "EG912YEUAAR01A03",
-    online: false, imei: "—", iccid: "—", carrier: "—", netType: "—", rsrp: 0, rsrq: 0, sinr: 0, bars: 0,
-    dataRx: "0", dataTx: "0", uptime: "—", sipRegistered: false,
-    sims: [ { slot: 1, active: false, iccid: "", msisdn: "", carrier: "—", signal: 0 } ],
-    sip: { server: "sip.cellbridge.local", port: "5060", user: "eg912y01", codec: "PCMU", transport: "UDP", status: "未注册", addr: "—", expires: "—" },
-    settings: { vendor: "quectel", model: "EG912Y-IE", transport: "usb", addr: "/dev/ttyUSB4", port: "", relay: "https://airsim-push.dntmove.asia" },
-  },
+  "dji-qdc507": { label:"大疆 QDC507", vendor:"dji", model:"QDC507", fw:"QDC507GLEFM21", hw:"MDM9607 Cat.4",
+    online:true, imei:"860123045678901", iccid:"8986001234567890123", imsi:"460001234567890",
+    carrier:"中国移动", netType:"4G LTE", rsrp:-82, rsrq:-11, sinr:18, bars:4, temp:"38°C",
+    data:{rx:"1.2 GB", tx:"340 MB", session:"86 MB", lifetime:"12.4 GB"}, sipRegistered:true,
+    cell:CELL(), gnss:GNSS({sats:12, lat:"22.5428", lon:"113.9479"}), net:NET({band:"B3", apn:"cmnet"}),
+    sims:[ {slot:1,active:true,iccid:"8986001234567890123",imsi:"460001234567890",msisdn:"+8613800138000",carrier:"中国移动",signal:4,pin:false},
+           {slot:2,active:false,iccid:"8986011567890123456",imsi:"460011234567890",msisdn:"+8613900139000",carrier:"中国联通",signal:3,pin:false} ],
+    voice:{clip:true,wait:false,fwd:false,vol:4,mic:3},
+    sip:{server:"sip.cellbridge.local",port:"5060",user:"dji01",codec:"PCMU",transport:"UDP",status:"已注册",addr:"sip:5060 @udp",expires:"3600s"},
+    settings:{vendor:"dji",model:"QDC507",transport:"usb",addr:"/dev/cu.usbmodemQDC507",port:"",relay:"https://airsim-push.dntmove.asia"} },
+  "dji-eg25g": { label:"大疆 EG25-G", vendor:"dji", model:"EG25-G", fw:"EG25GGBR07A08", hw:"EG25-G Cat.4",
+    online:true, imei:"861234056789012", iccid:"8986019912345678901", imsi:"460111234567890",
+    carrier:"中国电信", netType:"4G LTE", rsrp:-95, rsrq:-13, sinr:12, bars:3, temp:"41°C",
+    data:{rx:"860 MB", tx:"120 MB", session:"12 MB", lifetime:"4.1 GB"}, sipRegistered:true,
+    cell:CELL({rsrp:-95,rsrq:-13,sinr:12,band:"B1",pci:88}), gnss:GNSS({sats:8,fix:"2D",hdop:2.1}), net:NET({net:"LTE",apn:"ctnet",band:"B1/B5"}),
+    sims:[ {slot:1,active:true,iccid:"8986019912345678901",imsi:"460111234567890",msisdn:"+8618900189000",carrier:"中国电信",signal:3,pin:false},
+           {slot:2,active:false,iccid:"",imsi:"",msisdn:"",carrier:"—",signal:0,pin:false} ],
+    voice:{clip:true,wait:true,fwd:false,vol:3,mic:4},
+    sip:{server:"sip.cellbridge.local",port:"5060",user:"eg25g01",codec:"PCMA",transport:"TCP",status:"已注册",addr:"sip:5060 @tcp",expires:"1800s"},
+    settings:{vendor:"dji",model:"EG25-G",transport:"network",addr:"192.168.1.20",port:"9527",relay:"https://airsim-push.dntmove.asia"} },
+  "quectel-eg25g": { label:"移远 EG25-G", vendor:"quectel", model:"EG25-G", fw:"EG25GGBR07A07", hw:"EG25-G Cat.4",
+    online:true, imei:"863456051234567", iccid:"8986029876543210987", imsi:"460041234567890",
+    carrier:"中国联通", netType:"4G LTE", rsrp:-78, rsrq:-9, sinr:22, bars:5, temp:"35°C",
+    data:{rx:"3.4 GB", tx:"980 MB", session:"210 MB", lifetime:"28.7 GB"}, sipRegistered:true,
+    cell:CELL({rsrp:-78,rsrq:-9,sinr:22,band:"B3/B8",pci:404,cellId:"0F2A1B3C"}), gnss:GNSS({sats:14,hdop:0.7}), net:NET({apn:"3gnet",band:"B3/B8",ip:"10.72.44.9"}),
+    sims:[ {slot:1,active:true,iccid:"8986029876543210987",imsi:"460041234567890",msisdn:"+8615000150000",carrier:"中国联通",signal:5,pin:false},
+           {slot:2,active:true,iccid:"8986021123456789012",imsi:"460001234567899",msisdn:"+8613100131000",carrier:"中国移动",signal:4,pin:false} ],
+    voice:{clip:true,wait:true,fwd:true,vol:4,mic:3},
+    sip:{server:"sip.cellbridge.local",port:"5060",user:"qeg25g01",codec:"PCMU",transport:"UDP",status:"已注册",addr:"sip:5060 @udp",expires:"3600s"},
+    settings:{vendor:"quectel",model:"EG25-G",transport:"usb",addr:"/dev/ttyUSB3",port:"",relay:"https://airsim-push.dntmove.asia"} },
+  "quectel-eg912y": { label:"移远 EG912Y-IE", vendor:"quectel", model:"EG912Y-IE", fw:"EG912YEUAAR01A03", hw:"EG912Y Cat.1",
+    online:false, imei:"—", iccid:"—", imsi:"—", carrier:"—", netType:"—", rsrp:0, rsrq:0, sinr:0, bars:0, temp:"—",
+    data:{rx:"0", tx:"0", session:"0", lifetime:"0"}, sipRegistered:false,
+    cell:CELL({rsrp:0,rsrq:0,sinr:0}), gnss:GNSS({on:false,sats:0,fix:"无"}), net:NET({net:"—",apn:"",ip:"—",dataOn:false}),
+    sims:[ {slot:1,active:false,iccid:"",imsi:"",msisdn:"",carrier:"—",signal:0,pin:false} ],
+    voice:{clip:false,wait:false,fwd:false,vol:2,mic:2},
+    sip:{server:"sip.cellbridge.local",port:"5060",user:"eg912y01",codec:"PCMU",transport:"UDP",status:"未注册",addr:"—",expires:"—"},
+    settings:{vendor:"quectel",model:"EG912Y-IE",transport:"usb",addr:"/dev/ttyUSB4",port:"",relay:"https://airsim-push.dntmove.asia"} },
 };
 
 const DEMO_CALLS = [
-  { dir: "in",  number: "+8613800138000", slot: 1, duration: "02:31", at: "今天 09:12" },
-  { dir: "out", number: "+8613900139000", slot: 2, duration: "05:08", at: "今天 08:40" },
-  { dir: "miss",number: "+8610000000000", slot: 1, duration: "—",     at: "昨天 22:15" },
-  { dir: "out", number: "10086",          slot: 1, duration: "00:42", at: "昨天 20:03" },
-  { dir: "in",  number: "+8615000150000", slot: 1, duration: "12:06", at: "昨天 15:47" },
+  { dir:"in", number:"+8613800138000", slot:1, duration:"02:31", at:"今天 09:12" },
+  { dir:"out", number:"+8613900139000", slot:2, duration:"05:08", at:"今天 08:40" },
+  { dir:"miss",number:"+8610000000000", slot:1, duration:"—", at:"昨天 22:15" },
+  { dir:"out", number:"10086", slot:1, duration:"00:42", at:"昨天 20:03" },
 ];
 const DEMO_SMS = [
-  { dir: "in",  number: "10086",  body: "【中国移动】您本月已使用流量 1.2GB，剩余 8.8GB。", at: "今天 10:02" },
-  { dir: "in",  number: "95588",  body: "验证码 204817，谨防泄露。", at: "今天 09:30" },
-  { dir: "out", number: "+8613800138000", body: "已收到，稍后回电。", at: "昨天 21:11" },
+  { dir:"in", number:"10086", body:"【中国移动】您本月已使用流量 1.2GB，剩余 8.8GB。", at:"今天 10:02" },
+  { dir:"in", number:"95588", body:"验证码 204817，谨防泄露。", at:"今天 09:30" },
+  { dir:"out", number:"+8613800138000", body:"已收到，稍后回电。", at:"昨天 21:11" },
 ];
 const DEMO_EVENTS = [
-  "[09:12] 来电 +8613800138000 → 转送 iPhone",
-  "[08:40] 去电 +8613900139000 (卡2) 接通",
-  "[08:38] SIP REGISTER 200 OK",
-  "[08:36] 模块上线，信号 -82dBm",
-  "[昨天 22:15] 未接 +8610000000000",
+  "[09:12] 来电 +8613800138000 → 转送 iPhone", "[08:40] 去电 +8613900139000 (卡2) 接通",
+  "[08:38] SIP REGISTER 200 OK", "[08:36] 模块上线，LTE B3 信号 -82dBm", "[08:35] GNSS 3D 定位，12 星",
 ];
+const DEMO_PB = [ {n:"张伟",p:"+8613800138000"},{n:"李娜",p:"+8613900139000"},{n:"客服",p:"10086"} ];
 
-const state = { module: "dji-qdc507", tab: "overview" };
-const $ = (s) => document.querySelector(s);
+const state = { module:"dji-qdc507", tab:"overview" };
+const $ = s => document.querySelector(s);
 const cur = () => MODULES[state.module];
+const bars = on => { let h=""; for(let i=1;i<=5;i++) h+=`<i class="${i<=on?"on":""}"></i>`; return `<span class="bars">${h}</span>`; };
 
 function initModuleSelect() {
   const sel = $("#module-select");
-  sel.innerHTML = Object.entries(MODULES).map(([k, m]) =>
-    `<option value="${k}">${m.label}</option>`).join("");
+  sel.innerHTML = Object.entries(MODULES).map(([k,m]) => `<option value="${k}">${m.label}</option>`).join("");
   sel.value = state.module;
-  sel.onchange = (e) => { state.module = e.target.value; renderAll(); loadRealData(); };
+  sel.onchange = e => { state.module = e.target.value; renderAll(); loadRealData(); };
 }
-
 function renderTopbar() {
   const m = cur();
-  const pill = $("#conn-pill");
-  pill.className = "pill " + (m.online ? "online" : "offline");
-  pill.innerHTML = `<span class="dot"></span>${m.online ? "在线" : "离线"}`;
-  const sim = m._simulated ? " 🧪模拟" : "";
-  $("#signal-pill").textContent = m.online ? `📶 ${m.bars}/5${sim}` : "📶 —";
+  $("#conn-pill").className = "pill " + (m.online?"online":"offline");
+  $("#conn-pill").innerHTML = `<span class="dot"></span>${m.online?"在线":"离线"}`;
+  $("#signal-pill").textContent = m.online ? `📶 ${m.bars}/5${m._sim?" 🧪":""}` : "📶 —";
+  $("#foot-gw").textContent = DEMO ? "demo" : "live";
+  $("#foot-fw").textContent = m.fw || "—";
 }
 
-function bars(on) {
-  let h = "";
-  for (let i = 1; i <= 5; i++) h += `<i class="${i <= on ? "on" : ""}"></i>`;
-  return `<span class="bars">${h}</span>`;
-}
+/* ── 各 section 渲染 ── */
 function renderOverview() {
   const m = cur();
   const stats = [
-    { k: "连接状态", v: m.online ? "在线" : "离线", cls: m.online ? "green" : "amber", sub: m.netType },
-    { k: "信号强度", v: `${m.bars}/5`, cls: m.bars >= 3 ? "green" : "amber", sub: `RSRP ${m.rsrp} dBm` },
-    { k: "运营商", v: m.carrier, sub: m.netType },
-    { k: "SIP 注册", v: m.sipRegistered ? "已注册" : "未注册", cls: m.sipRegistered ? "green" : "amber", sub: m.sip.user },
+    {k:"连接状态", v:m.online?"在线":"离线", cls:m.online?"green":"red", sub:m.netType},
+    {k:"信号强度", v:`${m.bars}/5`, cls:m.bars>=3?"green":"amber", sub:`RSRP ${m.rsrp} dBm`},
+    {k:"运营商", v:m.carrier, sub:m.netType},
+    {k:"SIP 注册", v:m.sipRegistered?"已注册":"未注册", cls:m.sipRegistered?"green":"amber", sub:m.sip.user},
   ];
-  $("#overview-stats").innerHTML = stats.map(s =>
-    `<div class="card stat"><h3>${s.k}</h3><div class="val ${s.cls || ""}">${s.v}</div><div class="sub">${s.sub}</div></div>`).join("");
-  $("#rsrp").textContent = m.online ? m.rsrp + " dBm" : "—";
-  $("#rsrq").textContent = m.online ? m.rsrq + " dB" : "—";
-  $("#sinr").textContent = m.online ? m.sinr + " dB" : "—";
-  $("#sig-bars").innerHTML = bars(m.bars);
-  $("#sig-dbm").textContent = m.online ? `${m.rsrp}` : "";
+  $("#ov-stats").innerHTML = stats.map(s => `<div class="card stat"><h3>${s.k}</h3><div class="val ${s.cls}">${s.v}</div><div class="sub">${s.sub}</div></div>`).join("");
+  $("#rsrp").textContent = m.online? m.rsrp+" dBm":"—"; $("#rsrq").textContent = m.online? m.rsrq+" dB":"—"; $("#sinr").textContent = m.online? m.sinr+" dB":"—";
+  $("#sig-bars").innerHTML = bars(m.bars); $("#sig-dbm").textContent = m.online? String(m.rsrp):"";
+  const c = m.cell;
+  $("#ov-cell").innerHTML = m.online ? `<div class="kv"><span class="k">频段</span><span class="v">${c.band}</span></div><div class="kv"><span class="k">PCI</span><span class="v">${c.pci}</span></div><div class="kv"><span class="k">小区 ID</span><span class="v">${c.cellId}</span></div><div class="kv"><span class="k">TAC</span><span class="v">${c.tac}</span></div>` : `<div class="empty">离线</div>`;
+  const g = m.gnss;
+  $("#ov-gnss").innerHTML = g.on ? `<div class="kv"><span class="k">定位</span><span class="v">${g.fix}</span></div><div class="kv"><span class="k">卫星</span><span class="v">${g.sats}</span></div><div class="kv"><span class="k">坐标</span><span class="v" style="font-size:12px">${g.lat}, ${g.lon}</span></div>` : `<div class="empty">GNSS 未开启</div>`;
+  $("#ov-data").innerHTML = `<div class="kv"><span class="k">接收</span><span class="v">${m.data.rx}</span></div><div class="kv"><span class="k">发送</span><span class="v">${m.data.tx}</span></div><div class="kv"><span class="k">本次会话</span><span class="v">${m.data.session}</span></div>`;
+  $("#events").innerHTML = (m.online?DEMO_EVENTS:["[--:--] 模块离线"]).map(e=>`<div class="info">${e}</div>`).join("");
   drawChart();
-  $("#events").innerHTML = (m.online ? DEMO_EVENTS : ["[--:--] 模块离线，等待连接…"]).map(e =>
-    `<div class="info">${e}</div>`).join("");
 }
 function drawChart() {
-  const c = $("#sig-chart"); if (!c) return;
-  const ctx = c.getContext("2d");
-  const w = c.width = c.clientWidth; const h = c.height = 70;
-  ctx.clearRect(0, 0, w, h);
-  const m = cur();
-  const base = m.online ? (100 + m.bars * 12) : 6;
-  ctx.strokeStyle = "#0FA37E"; ctx.lineWidth = 2.5; ctx.beginPath();
-  for (let x = 0; x < w; x++) {
-    const y = h - (base / 100) * h - Math.sin(x / 22) * 6 - (Math.random() * 4 - 2);
-    x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-  }
-  ctx.stroke();
-  ctx.fillStyle = "rgba(15,163,126,.12)"; ctx.lineTo(w, h); ctx.lineTo(0, h); ctx.fill();
+  const c = $("#sig-chart"); if(!c) return; const x = c.getContext("2d");
+  const w = c.width = c.clientWidth, h = c.height = 66; x.clearRect(0,0,w,h);
+  const m = cur(), base = m.online ? (100 + m.bars*12) : 6;
+  x.strokeStyle = "#0FA37E"; x.lineWidth = 2.5; x.beginPath();
+  for(let i=0;i<w;i++){ const y = h-(base/100)*h - Math.sin(i/22)*6 - (Math.random()*4-2); i===0?x.moveTo(i,y):x.lineTo(i,y); }
+  x.stroke(); x.fillStyle="rgba(15,163,126,.12)"; x.lineTo(w,h); x.lineTo(0,h); x.fill();
 }
-
+function renderCell() {
+  const m = cur(), c = m.cell;
+  $("#cell-serving").innerHTML = m.online ? `<div class="kv"><span class="k">网络类型</span><span class="v">${m.netType}</span></div><div class="kv"><span class="k">频段 (EARFCN ${c.earfcn})</span><span class="v">${c.band}</span></div><div class="kv"><span class="k">PCI</span><span class="v">${c.pci}</span></div><div class="kv"><span class="k">TAC</span><span class="v">${c.tac}</span></div><div class="kv"><span class="k">eNodeB / 小区 ID</span><span class="v">${c.enb} / ${c.cellId}</span></div><div class="kv"><span class="k">RSRP / RSRQ / SINR</span><span class="v">${c.rsrp} / ${c.rsrq} / ${c.sinr} dB</span></div>` : `<div class="empty">离线</div>`;
+  $("#cell-neigh").innerHTML = m.online ? `<table><thead><tr><th>频段</th><th>PCI</th><th>RSRP</th><th>RSRQ</th></tr></thead><tbody>
+    <tr><td class="mono">B3</td><td class="mono">${c.pci-2}</td><td class="mono">${c.rsrp-4}</td><td class="mono">${c.rsrq-1}</td></tr>
+    <tr><td class="mono">B3</td><td class="mono">${c.pci+5}</td><td class="mono">${c.rsrp-9}</td><td class="mono">${c.rsrq-2}</td></tr>
+    <tr><td class="mono">B8</td><td class="mono">${c.pci+18}</td><td class="mono">${c.rsrp-15}</td><td class="mono">${c.rsrq-3}</td></tr></tbody></table>` : `<div class="empty">离线</div>`;
+}
+function renderGnss() {
+  const m = cur(), g = m.gnss;
+  $("#gnss-info").innerHTML = g.on ? `<div class="kv"><span class="k">纬度</span><span class="v">${g.lat}° N</span></div><div class="kv"><span class="k">经度</span><span class="v">${g.lon}° E</span></div><div class="kv"><span class="k">海拔</span><span class="v">${g.alt} m</span></div><div class="kv"><span class="k">速度</span><span class="v">${g.speed} km/h</span></div><div class="kv"><span class="k">定位类型</span><span class="v">${g.fix}</span></div><div class="kv"><span class="k">HDOP</span><span class="v">${g.hdop}</span></div>` : `<div class="empty">GNSS 未开启</div>`;
+  let sats = "";
+  for(let i=1;i<=12;i++){ const on = i<=g.sats; sats += `<div class="row" style="justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--line-2)"><span class="mono faint">GPS ${String(i).padStart(2,"0")}</span><span class="tag ${on?"on":"off"}">${on?(30+i*2)+" dBHz":"无信号"}</span></div>`; }
+  $("#gnss-sats").innerHTML = g.on ? sats : `<div class="empty">未开启</div>`;
+  $("#gnss-nmea").textContent = g.on ? `$GNGGA,063600.00,${g.lat},N,${g.lon},E,1,${g.sats},${g.hdop},${g.alt}.0,M,...\n$GNRMC,063600.00,A,${g.lat},N,${g.lon},E,0.0,,,,\n$GPGSV,...,${g.sats} in view` : "（GNSS 关闭）";
+  $("#gnss-on").textContent = g.on ? "关闭定位" : "开启定位";
+  $("#gnss-map").style.opacity = g.on ? 1 : .3;
+}
+function renderData() {
+  const m = cur(), d = m.data;
+  const stats = [ {k:"累计接收",v:d.rx,cls:"green"},{k:"累计发送",v:d.tx,cls:"blue"},{k:"本次会话",v:d.session,cls:"amber"} ];
+  $("#data-stats").innerHTML = stats.map(s => `<div class="card stat"><h3>${s.k}</h3><div class="val ${s.cls}">${s.v}</div></div>`).join("");
+  $("#data-sim").innerHTML = m.sims.map(s => `<div class="kv"><span class="k">卡槽 ${s.slot} · ${s.carrier}</span><span class="v">${s.active?(Math.random()*900|0)+" MB":"—"}</span></div>`).join("") + `<div class="kv"><span class="k">生命周期总量</span><span class="v">${d.lifetime}</span></div>`;
+}
+function renderVoice() {
+  const m = cur(), v = m.voice;
+  $("#dialer").innerHTML = ["1","2","3","4","5","6","7","8","9","*","0","#"].map(d => `<button data-d="${d}">${d}</button>`).join("");
+  document.querySelectorAll("#dialer button").forEach(b => b.onclick = () => { $("#dial-number").value += b.dataset.d; });
+  $("#v-clip").checked = v.clip; $("#v-wait").checked = v.wait; $("#v-fwd").checked = v.fwd; $("#v-vol").value = v.vol; $("#v-mic").value = v.mic;
+  renderCalls();
+}
+function renderCalls() {
+  const tag = { in:["in","呼入"], out:["out","呼出"], miss:["miss","未接"] };
+  $("#calls-body").innerHTML = DEMO_CALLS.map(c => `<tr><td><span class="tag ${tag[c.dir][0]}">${tag[c.dir][1]}</span></td><td class="mono">${c.number}</td><td>卡 ${c.slot}</td><td class="mono">${c.duration}</td><td class="mono faint">${c.at}</td></tr>`).join("");
+}
+function renderSms() {
+  const tag = { in:["in","接收"], out:["out","发送"] };
+  $("#sms-body-list").innerHTML = DEMO_SMS.map(s => `<tr><td><span class="tag ${tag[s.dir][0]}">${tag[s.dir][1]}</span></td><td class="mono">${s.number}</td><td>${s.body}</td><td class="mono faint">${s.at}</td></tr>`).join("");
+}
+function renderPhonebook() {
+  $("#pb-body").innerHTML = DEMO_PB.map((c,i) => `<tr><td class="mono faint">${i+1}</td><td>${c.n}</td><td class="mono">${c.p}</td><td style="text-align:right"><button class="btn ghost sm" data-del="${i}">删除</button></td></tr>`).join("");
+  document.querySelectorAll("[data-del]").forEach(b => b.onclick = () => { DEMO_PB.splice(+b.dataset.del,1); renderPhonebook(); toast("已删除"); });
+}
+function renderNetwork() {
+  const m = cur(), n = m.net;
+  $("#n-data").checked = n.dataOn; $("#n-roam").checked = n.roam; $("#n-apn").value = n.apn; $("#n-pdp").value = n.pdp;
+  $("#n-net").textContent = m.netType; $("#n-domain").textContent = n.domain; $("#n-band").textContent = n.band; $("#n-ipaddr").textContent = n.ip;
+}
 function renderSim() {
   const m = cur();
-  $("#sim-grid").innerHTML = m.sims.map(s => `
-    <div class="card sim ${s.active ? "" : "inactive"}">
-      <span class="tag slot-badge ${s.active ? "active" : "idle"}">${s.active ? "使用中" : "未激活"}</span>
-      <h3>💳 SIM 卡槽 ${s.slot}</h3>
-      <div class="row" style="margin-bottom:10px">${bars(s.signal)}<span class="mono muted">${s.signal}/5</span></div>
-      <div class="kv"><span class="k">ICCID</span><span class="v">${s.iccid || "—"}</span></div>
-      <div class="kv"><span class="k">号码</span><span class="v">${s.msisdn || "—"}</span></div>
-      <div class="kv"><span class="k">运营商</span><span class="v">${s.carrier}</span></div>
-      <div class="kv"><span class="k">状态</span><span class="v">${s.active ? "已注册" : "空槽 / 未插卡"}</span></div>
-    </div>`).join("");
+  $("#sim-grid").innerHTML = m.sims.map(s => `<div class="card ${s.active?"":"sim"}" style="${s.active?"":"opacity:.6"}">
+    <span class="tag ${s.active?"ok":"idle"}" style="float:right">${s.active?"使用中":"未激活"}</span>
+    <h3 data-i="sim">SIM 卡槽 ${s.slot}</h3>
+    <div class="row" style="margin-bottom:10px">${bars(s.signal)}<span class="mono muted">${s.signal}/5</span></div>
+    <div class="kv"><span class="k">ICCID</span><span class="v">${s.iccid||"—"}</span></div>
+    <div class="kv"><span class="k">IMSI</span><span class="v">${s.imsi||"—"}</span></div>
+    <div class="kv"><span class="k">号码</span><span class="v">${s.msisdn||"—"}</span></div>
+    <div class="kv"><span class="k">运营商</span><span class="v">${s.carrier}</span></div>
+    <div class="kv"><span class="k">PIN 锁</span><span class="v">${s.pin?"开":"关"}</span></div></div>`).join("");
+  $("#sim-det").textContent = m.sims.filter(s=>s.active).length + " 张在位";
+  $("#sim-remain").textContent = "3";
 }
-
-function renderCalls() {
-  const tag = { in: ["in", "呼入"], out: ["out", "呼出"], miss: ["miss", "未接"] };
-  $("#calls-body").innerHTML = DEMO_CALLS.map(c => `
-    <tr>
-      <td><span class="tag ${tag[c.dir][0]}">${tag[c.dir][1]}</span></td>
-      <td class="mono">${c.number}</td>
-      <td>卡 ${c.slot}</td>
-      <td class="mono">${c.duration}</td>
-      <td class="mono faint">${c.at}</td>
-    </tr>`).join("");
-}
-
-function renderSms() {
-  const tag = { in: ["in", "接收"], out: ["out", "发送"] };
-  $("#sms-body-list").innerHTML = DEMO_SMS.map(s => `
-    <tr>
-      <td><span class="tag ${tag[s.dir][0]}">${tag[s.dir][1]}</span></td>
-      <td class="mono">${s.number}</td>
-      <td>${s.body}</td>
-      <td class="mono faint">${s.at}</td>
-    </tr>`).join("");
-}
-
 function renderSip() {
   const s = cur().sip;
-  $("#sip-server").value = s.server; $("#sip-port").value = s.port;
-  $("#sip-user").value = s.user; $("#sip-codec").value = s.codec; $("#sip-transport").value = s.transport;
-  $("#sip-reg-status").innerHTML = `<span class="tag ${s.status === "已注册" ? "active" : "idle"}">${s.status}</span>`;
-  $("#sip-reg-addr").textContent = s.addr; $("#sip-reg-exp").textContent = s.expires;
+  $("#sip-server").value=s.server; $("#sip-port").value=s.port; $("#sip-user").value=s.user; $("#sip-codec").value=s.codec; $("#sip-transport").value=s.transport;
+  $("#sip-reg-status").innerHTML = `<span class="tag ${s.status==="已注册"?"ok":"idle"}">${s.status}</span>`;
+  $("#sip-reg-addr").textContent=s.addr; $("#sip-reg-exp").textContent=s.expires;
 }
-
+function renderMaintain() {
+  const m = cur();
+  $("#mt-fw").textContent=m.fw; $("#mt-hw").textContent=m.hw; $("#mt-temp").textContent=m.temp; $("#mt-usb").textContent="2C7C:0125 AT,NMEA,MODEM,DIAG";
+}
 function renderSettings() {
   const s = cur().settings;
-  $("#set-vendor").value = s.vendor; $("#set-model").value = s.model;
-  $("#set-transport").value = s.transport; $("#set-addr").value = s.addr;
-  $("#set-port").value = s.port; $("#set-relay").value = s.relay;
-  $("#set-addr-label").textContent = s.transport === "usb" ? "AT 串口设备" : "主机地址";
+  $("#set-vendor").value=s.vendor; $("#set-model").value=s.model; $("#set-transport").value=s.transport; $("#set-addr").value=s.addr; $("#set-port").value=s.port; $("#set-relay").value=s.relay;
+  $("#set-addr-label").textContent = s.transport==="usb"?"AT 串口设备":"主机地址";
 }
 
-const AT_RESPONSES = {
-  "AT": ["OK"], "ATI": ["Quectel EG25-G", "Revision: EG25GGBR07A08", "OK"],
-  "AT+CGMM": ["EG25-G", "OK"], "AT+CGMR": ["EG25GGBR07A08", "OK"],
-  "AT+CGSN": ["863456051234567", "OK"], "AT+CCID": ["+CCID: 8986029876543210987", "OK"],
-  "AT+CSQ": ["+CSQ: 28,99", "OK"], "AT+CREG?": ["+CREG: 2,1,\"4E2A\",\"0A4B0E1\",7", "OK"],
-  "AT+COPS?": ["+COPS: 0,0,\"CHN-UNICOM\",7", "OK"], "AT+CGATT?": ["+CGATT: 1", "OK"],
-  "AT+CPIN?": ["+CPIN: READY", "OK"], "AT+CMGF=1": ["OK"], "ATD": ["OK", "(拨号中…)"], "ATH": ["OK", "(已挂断)"],
+/* ── AT 控制台 ── */
+const AT_GROUPS = {
+  "基础": ["AT","ATI","AT+CGMM","AT+CGMR","AT+QGMR","AT+CGSN","AT+QGSN"],
+  "信号/网络": ["AT+CSQ","AT+COPS?","AT+CREG?","AT+QNWINFO","AT+QENG=\"servingcell\"","AT+QCFG=\"nwscanmode\""],
+  "数据/APN": ["AT+CGDCONT?","AT+CGATT?","AT+QIACT?","AT+QPING=1,\"8.8.8.8\""],
+  "SIM": ["AT+CCID","AT+CPIN?","AT+QSIMSTAT","AT+QSIMDET","AT+CIMI"],
+  "短信/语音": ["AT+CMGF=1","AT+CPMS?","AT+CLIP?","AT+CCWA?","AT+CLVL?"],
+  "GNSS": ["AT+QGPS?","AT+QGPSLOC?","AT+QGPSCFG?"],
+  "USSD": ["AT+CUSD=1,\"*100#\",15"],
+  "系统": ["AT+QTEMP","AT+CFUN=1,1","AT+QPOWD","AT+QCFG=\"usbcfg\"","AT+CRESET"],
 };
-function atEcho(cmd) {
-  const c = cmd.trim();
-  const con = $("#at-console");
-  const add = (cls, txt) => { const d = document.createElement("div"); d.className = "line " + cls; d.textContent = txt; con.appendChild(d); con.scrollTop = con.scrollHeight; };
-  if (!c) return;
-  add("cmd", c);
-  if (!DEMO) {
-    fetch("/api/at", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ command: c }) })
-      .then(r => r.json())
-      .then(res => { (res.response || "").split("\n").forEach(l => add(l.trim().startsWith("ERROR") ? "err" : "ok", l || "(空)")); })
-      .catch(() => add("err", "请求失败：后端未连接"));
-    return;
-  }
-  const key = Object.keys(AT_RESPONSES).find(k => c.toUpperCase().startsWith(k));
-  setTimeout(() => {
-    if (key) AT_RESPONSES[key].forEach(r => add(/^\+/.test(r) ? "ok" : "ok", r));
-    else add("info", "（演示）未模拟该指令"); add("ok", "OK");
-  }, 120);
-}
+const AT_SIM = {
+  "AT":"OK","ATI":"Quectel EG25-G\nRevision: EG25GGBR07A08\nOK","AT+CGMM":"EG25-G\nOK","AT+CGMR":"EG25GGBR07A08\nOK",
+  "AT+QGMR":"EG25GGBR07A08\nOK","AT+CGSN":"863456051234567\nOK","AT+QGSN":"863456051234567\nOK",
+  "AT+CSQ":"+CSQ: 27,99\nOK","AT+COPS?":"+COPS: 0,0,\"CHN-UNICOM\",7\nOK","AT+CREG?":"+CREG: 2,1,\"4E2A\",\"0A4B0E1\",7\nOK",
+  "AT+QNWINFO":"+QNWINFO: \"FDD LTE\",\"460-01\",\"LTE BAND 3\",1850\nOK","AT+QENG=\"SERVINGCELL\"":"+QENG: \"servingcell\",\"NOCONN\",\"LTE\",\"FDD\",460,01,0A4B0E1,1234ABCD,1850,404,3,3,3,-78,-9,22\nOK",
+  "AT+CGDCONT?":"+CGDCONT: 1,\"IP\",\"cmnet\",\"\",0,0,0,0\nOK","AT+CGATT?":"+CGATT: 1\nOK","AT+QIACT?":"+QIACT: 1,1,1,\"10.66.23.181\"\nOK",
+  "AT+CCID":"+CCID: 8986029876543210987\nOK","AT+CPIN?":"+CPIN: READY\nOK","AT+QSIMSTAT":"+QSIMSTAT: 1,1\nOK","AT+CIMI":"460041234567890\nOK",
+  "AT+CPMS?":"+CPMS: \"ME\",10,\"ME\",10,\"ME\",10\nOK","AT+CLIP?":"+CLIP: 0,1\nOK","AT+CCWA?":"+CCWA: 1\nOK","AT+CLVL?":"+CLVL: 4\nOK",
+  "AT+QGPS?":"+QGPS: 1\nOK","AT+QGPSLOC?":"+QGPSLOC: 2218.6,N,11356.8,E,22.5,1.2,3\nOK",
+  "AT+CUSD=1,\"*100#\",15":"+CUSD: 0,\"余额 38.6 元\",15\nOK",
+  "AT+QTEMP":"+QTEMP: 35\nOK","AT+CFUN=1,1":"OK","AT+QPOWD":"OK","AT+QCFG=\"USBCFG\"":"+QCFG: \"usbcfg\",0x2C7C,0x125,1,1,1,1,1,1,1\nOK","AT+CRESET":"OK",
+};
 function initAT() {
-  const quick = ["AT", "ATI", "AT+CGMM", "AT+CGSN", "AT+CCID", "AT+CSQ", "AT+CREG?", "AT+COPS?", "AT+CPIN?"];
-  $("#at-quick").innerHTML = quick.map(q => `<button data-c="${q}">${q}</button>`).join("");
-  $("#at-quick").querySelectorAll("button").forEach(b => b.onclick = () => { $("#at-input").value = b.dataset.c; atEcho(b.dataset.c); });
-  const send = () => { const v = $("#at-input").value; atEcho(v); $("#at-input").value = ""; };
-  $("#at-send").onclick = send;
-  $("#at-input").addEventListener("keydown", e => { if (e.key === "Enter") send(); });
+  $("#at-groups").innerHTML = Object.entries(AT_GROUPS).map(([g,cmds]) =>
+    `<div class="at-group"><div class="gl">${g}</div><div class="quick-at">${cmds.map(c=>`<button data-c="${c.replace(/"/g,'&quot;')}">${c}</button>`).join("")}</div></div>`).join("");
+  document.querySelectorAll("#at-groups button").forEach(b => b.onclick = () => atEcho(b.dataset.c));
+  const send = () => { const v=$("#at-input").value; atEcho(v); $("#at-input").value=""; };
+  $("#at-send").onclick = send; $("#at-input").addEventListener("keydown", e=>{ if(e.key==="Enter") send(); });
   $("#at-clear").onclick = () => $("#at-console").innerHTML = "";
-  addLine("info", DEMO ? "AT 控制台（演示模式）。输入指令回车发送。" : "AT 控制台已连接后端。输入指令回车发送。");
+  atLine("info", DEMO ? "AT 控制台（演示模式）。点击快捷指令或输入后回车。" : "AT 控制台已连接后端。");
 }
-function addLine(cls, txt) {
-  const con = $("#at-console"); const d = document.createElement("div");
-  d.className = "line " + cls; d.textContent = txt; con.appendChild(d); con.scrollTop = con.scrollHeight;
+function atLine(cls, txt) { const c=$("#at-console"); const d=document.createElement("div"); d.className="line "+cls; d.textContent=txt; c.appendChild(d); c.scrollTop=c.scrollHeight; }
+function atEcho(cmd) {
+  const c = (cmd||"").trim(); if(!c) return; atLine("cmd", c);
+  if(!DEMO){ fetch("/api/at",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({command:c})}).then(r=>r.json()).then(res=>{ (res.response||"").split("\n").forEach(l=>atLine(l.trim().startsWith("ERROR")?"err":"ok", l||"(空)")); }).catch(()=>atLine("err","请求失败：后端未连接")); return; }
+  setTimeout(()=>{ const k=Object.keys(AT_SIM).find(k=>c.toUpperCase().startsWith(k.toUpperCase())); if(k) AT_SIM[k].split("\n").forEach(l=>atLine(/^\+/.test(l)?"ok":"ok",l)); else atLine("info","（演示）未模拟，返回 OK"), atLine("ok","OK"); }, 90);
 }
 
-function initNav() {
-  $("#nav").querySelectorAll(".nav-item").forEach(it => it.onclick = () => {
-    document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
-    it.classList.add("active");
-    state.tab = it.dataset.tab;
-    document.querySelectorAll(".section").forEach(s => s.classList.toggle("active", s.dataset.sec === state.tab));
-    if (state.tab === "overview") drawChart();
-  });
-}
+/* ── 操作 ── */
+function toast(msg){ let t=$("#toast"); if(!t){ t=document.createElement("div"); t.id="toast"; t.style.cssText="position:fixed;left:50%;bottom:110px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:11px 20px;border-radius:12px;font-size:13px;font-weight:600;z-index:99;box-shadow:0 10px 30px rgba(19,26,42,.3);transition:opacity .3s"; document.body.appendChild(t);} t.textContent=msg; t.style.opacity="1"; clearTimeout(t._h); t._h=setTimeout(()=>t.style.opacity="0",2200); }
+function post(path, body){ if(DEMO){ toast("演示模式：已模拟"); return; } fetch(path,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body||{})}).then(()=>toast("已发送")).catch(()=>toast("发送失败")); }
 function initActions() {
   $("#refresh-btn").onclick = () => { renderAll(); loadRealData(); };
-  $("#test-dial").onclick = () => {
-    const n = $("#test-number").value.trim();
-    if (!n) return toast("请输入号码");
-    toast(`正在用 ${cur().label} 拨号 ${n} …`);
-    if (!DEMO) fetch("/api/calls/dial", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ number: n, slot: 1 }) });
-  };
-  $("#sms-send").onclick = () => {
-    const to = $("#sms-to").value.trim(), body = $("#sms-body").value.trim();
-    if (!to || !body) return toast("号码和内容不能为空");
-    DEMO_SMS.unshift({ dir: "out", number: to, body, at: "刚刚" });
-    renderSms(); toast("短信已发送");
-    if (!DEMO) fetch("/api/sms", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ to, body, slot: $("#sms-slot").value }) });
-  };
-  $("#sip-save").onclick = () => {
-    toast("SIP 配置已保存，正在注册…");
-    if (!DEMO) fetch("/api/sip", { method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ server: $("#sip-server").value, port: $("#sip-port").value, user: $("#sip-user").value, codec: $("#sip-codec").value, transport: $("#sip-transport").value }) });
-  };
-  $("#set-save").onclick = () => {
-    toast("设置已保存");
-    if (!DEMO) fetch("/api/settings", { method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ vendor: $("#set-vendor").value, model: $("#set-model").value, transport: $("#set-transport").value, addr: $("#set-addr").value, port: $("#set-port").value, relay: $("#set-relay").value }) });
-  };
-  $("#set-transport").onchange = e => $("#set-addr-label").textContent = e.target.value === "usb" ? "AT 串口设备" : "主机地址";
+  $("#voice-dial").onclick = () => { const n=$("#dial-number").value.trim(); if(!n) return toast("请输入号码"); toast(`拨号 ${n} …`); post("/api/calls/dial",{number:n,slot:1}); };
+  $("#voice-hangup").onclick = () => { toast("已挂断"); post("/api/at",{command:"ATH"}); };
+  $("#voice-answer").onclick = () => { toast("接听"); post("/api/at",{command:"ATA"}); };
+  $("#v-save").onclick = () => { const v=cur().voice; v.clip=$("#v-clip").checked; v.wait=$("#v-wait").checked; v.fwd=$("#v-fwd").checked; v.vol=+$("#v-vol").value; v.mic=+$("#v-mic").value; toast("通话设置已保存"); };
+  $("#sms-send").onclick = () => { const to=$("#sms-to").value.trim(), b=$("#sms-body").value.trim(); if(!to||!b) return toast("号码和内容不能为空"); DEMO_SMS.unshift({dir:"out",number:to,body:b,at:"刚刚"}); renderSms(); toast("短信已发送"); post("/api/sms",{to,body:b,slot:$("#sms-slot").value}); };
+  $("#ussd-send").onclick = () => sendUssd($("#ussd-code").value.trim());
+  document.querySelectorAll("[data-u]").forEach(b => b.onclick = () => { $("#ussd-code").value = b.dataset.u; sendUssd(b.dataset.u); });
+  $("#pb-add").onclick = () => { const n=$("#pb-name").value.trim(), p=$("#pb-number").value.trim(); if(!n||!p) return toast("姓名和号码不能为空"); DEMO_PB.push({n,p}); renderPhonebook(); toast("已新增"); $("#pb-name").value=""; $("#pb-number").value=""; };
+  $("#n-save").onclick = () => { const n=cur().net; n.apn=$("#n-apn").value; n.dataOn=$("#n-data").checked; n.roam=$("#n-roam").checked; n.pdp=$("#n-pdp").value; toast("网络配置已保存"); post("/api/network",{apn:n.apn,dataOn:n.dataOn,roam:n.roam}); };
+  $("#n-ip").onclick = () => { toast("查询中…"); if(!DEMO) fetch("/api/network").then(r=>r.json()).then(d=>{ if(d&&d.ip){ cur().net.ip=d.ip; $("#n-ipaddr").textContent=d.ip; } }).catch(()=>{}); else $("#n-ipaddr").textContent = cur().net.ip; };
+  $("#n-scanbtn").onclick = () => { toast("正在扫网…"); post("/api/at",{command:"AT+COPS=?"}); };
+  $("#n-reattach").onclick = () => { toast("重新注册中…"); post("/api/at",{command:"AT+CFUN=1,1"}); };
+  $("#sim-pinsave").onclick = () => { toast("PIN 已应用"); post("/api/at",{command:"AT+QPINC=\""+($("#sim-pincode").value||"1234")+"\""}); };
+  $("#sip-save").onclick = () => { toast("SIP 已保存，正在注册…"); const s=cur().sip; s.server=$("#sip-server").value; s.port=$("#sip-port").value; s.user=$("#sip-user").value; s.codec=$("#sip-codec").value; s.transport=$("#sip-transport").value; post("/api/sip",{server:s.server,port:s.port,user:s.user,codec:s.codec,transport:s.transport}); };
+  $("#set-save").onclick = () => { toast("设置已保存"); const s=cur().settings; s.vendor=$("#set-vendor").value; s.model=$("#set-model").value; s.transport=$("#set-transport").value; s.addr=$("#set-addr").value; s.port=$("#set-port").value; s.relay=$("#set-relay").value; post("/api/settings",s); };
+  $("#set-transport").onchange = e => $("#set-addr-label").textContent = e.target.value==="usb"?"AT 串口设备":"主机地址";
+  $("#gnss-on").onclick = () => { const g=cur().gnss; g.on=!g.on; renderGnss(); toast(g.on?"定位已开启":"定位已关闭"); post("/api/at",{command:g.on?"AT+QGPS=1":"AT+QGPSEND"}); };
+  $("#gnss-refresh").onclick = () => { toast("刷新坐标…"); post("/api/at",{command:"AT+QGPSLOC?"}); };
+  $("#mt-reboot").onclick = () => { if(confirm("确认重启模块？将短暂离线。")) post("/api/at",{command:"AT+CFUN=1,1"}); };
+  $("#mt-power").onclick = () => { if(confirm("确认关闭模块？")) post("/api/at",{command:"AT+QPOWD=1"}); };
+  $("#mt-adb").onclick = () => { toast("切换 ADB…"); post("/api/at",{command:"AT+QADBKEY?"}); };
+  $("#mt-reset").onclick = () => { if(confirm("恢复出厂将清空所有配置，确认？")) post("/api/at",{command:"AT+CRESET"}); };
 }
-function toast(msg) {
-  let t = $("#toast");
-  if (!t) { t = document.createElement("div"); t.id = "toast";
-    t.style.cssText = "position:fixed;left:50%;bottom:104px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:11px 20px;border-radius:12px;font-size:13px;font-weight:600;z-index:99;box-shadow:0 10px 30px rgba(19,26,42,.3);transition:opacity .3s";
-    document.body.appendChild(t); }
-  t.textContent = msg; t.style.opacity = "1";
-  clearTimeout(t._h); t._h = setTimeout(() => t.style.opacity = "0", 2200);
-}
+function sendUssd(code){ if(!code) return toast("输入 USSD 码"); const con=$("#ussd-log"); const add=(t)=>{const d=document.createElement("div");d.className="line";d.textContent=t;con.appendChild(d);con.scrollTop=con.scrollHeight;}; add("▸ "+code); if(!DEMO){ fetch("/api/ussd",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({code})}).then(r=>r.json()).then(d=>add(d.response||"(无响应)")).catch(()=>add("请求失败")); } else setTimeout(()=>add("【中国联通】您当前余额 38.60 元，流量剩余 8.8GB。"), 200); }
 
-async function jget(p) { const r = await fetch(p); return r.ok ? r.json() : null; }
+/* ── 真机数据 ── */
+async function jget(p){ const r=await fetch(p); return r.ok? r.json():null; }
 async function loadRealData() {
   const banner = $("#mode-banner");
-  if (DEMO) { banner.style.display = "none"; return; }
+  if(DEMO){ banner.style.display="none"; return; }
   try {
-    const [status, sim, calls, sms, sip] = await Promise.all(
-      ["/api/status", "/api/sim", "/api/calls", "/api/sms", "/api/sip"].map(jget));
+    const [status,sim,calls,sms,sip] = await Promise.all(["/api/status","/api/sim","/api/calls","/api/sms","/api/sip"].map(jget));
     const m = cur();
-    if (status) Object.assign(m, {
-      online: status.online, model: status.model || m.model, imei: status.imei || m.imei,
-      iccid: status.iccid || m.iccid, carrier: status.carrier || m.carrier,
-      netType: status.netType || m.netType, rsrp: status.rsrp || 0, rsrq: status.rsrq || 0,
-      sinr: status.sinr || 0, bars: status.bars || 0, fw: status.fw || m.fw,
-      uptime: status.uptime || m.uptime, sipRegistered: status.sipRegistered,
-      dataRx: status.dataRx || m.dataRx, dataTx: status.dataTx || m.dataTx,
-    });
-    m._simulated = !!(status && status.simulated);
-    if (sim && sim.length) m.sims = sim;
-    if (calls) { DEMO_CALLS.length = 0; DEMO_CALLS.push(...calls); }
-    if (sms) { DEMO_SMS.length = 0; DEMO_SMS.push(...sms); }
-    if (sip) m.sip = Object.assign(m.sip, sip);
-    if (status && status.simulated) {
-      $("#mode-banner-text").innerHTML = "<b>模拟模式</b>：macOS 未暴露模块 AT 串口，当前为内置模拟数据（带 🧪 标）。真串口出现自动切换真机。";
-    } else if (status && !status.online) {
-      $("#mode-banner-text").innerHTML = "<b>模块离线</b>：" + (status.reason || "未检测到 AT 串口");
-    } else {
-      $("#mode-banner-text").innerHTML = "<b>真机在线</b>：数据来自真实模块。";
-    }
-  } catch (e) {
-    $("#mode-banner-text").innerHTML = "<b>无法连接后端</b>：请确认 server.py 正在运行。";
-  }
+    if(status) Object.assign(m, {online:status.online, model:status.model||m.model, imei:status.imei||m.imei, iccid:status.iccid||m.iccid, imsi:status.imsi||m.imsi, carrier:status.carrier||m.carrier, netType:status.netType||m.netType, rsrp:status.rsrp||0, rsrq:status.rsrq||0, sinr:status.sinr||0, bars:status.bars||0, fw:status.fw||m.fw, temp:status.temp||m.temp, sipRegistered:status.sipRegistered});
+    m._sim = !!(status&&status.simulated);
+    if(status&&status.cell) m.cell = Object.assign(m.cell, status.cell);
+    if(status&&status.gnss) m.gnss = Object.assign(m.gnss, status.gnss);
+    if(status&&status.net) m.net = Object.assign(m.net, status.net);
+    if(status&&status.data) m.data = Object.assign(m.data, status.data);
+    if(sim&&sim.length) m.sims = sim;
+    if(calls){ DEMO_CALLS.length=0; DEMO_CALLS.push(...calls); }
+    if(sms){ DEMO_SMS.length=0; DEMO_SMS.push(...sms); }
+    if(sip) m.sip = Object.assign(m.sip, sip);
+    $("#mode-banner-text").innerHTML = status&&status.simulated ? "<b>模拟模式</b>：macOS 未暴露 AT 串口，为内置模拟数据。真串口出现自动切换。" : (status&&!status.online) ? "<b>模块离线</b>："+(status.reason||"未检测到 AT 串口") : "<b>真机在线</b>：数据来自真实模块。";
+  } catch(e){ $("#mode-banner-text").innerHTML = "<b>无法连接后端</b>：请确认 server.py 正在运行。"; }
   renderAll();
 }
+function renderAll(){ renderTopbar(); renderOverview(); renderCell(); renderGnss(); renderData(); renderVoice(); renderSms(); renderPhonebook(); renderNetwork(); renderSim(); renderSip(); renderMaintain(); renderSettings(); }
 
-function renderAll() { renderTopbar(); renderOverview(); renderSim(); renderCalls(); renderSms(); renderSip(); renderSettings(); }
-
-initModuleSelect(); initNav(); initAT(); initActions(); renderAll(); loadRealData();
-window.addEventListener("resize", () => { if (state.tab === "overview") drawChart(); });
+buildNav(); initModuleSelect(); initAT(); initActions(); renderAll(); loadRealData();
+window.addEventListener("resize", ()=>{ if(state.tab==="overview") drawChart(); });
 </script>
 </body>
 </html>
