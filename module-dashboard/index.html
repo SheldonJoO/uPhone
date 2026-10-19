@@ -401,7 +401,7 @@
    GET  /api/settings  → { vendor, model, transport, addr, port, relay }
    POST /api/settings  → 同上
    ═══════════════════════════════════════════════════════════════ */
-const DEMO = true;
+const DEMO = location.protocol === "file:" || new URLSearchParams(location.search).has("demo");
 
 const MODULES = {
   "dji-qdc507": {
@@ -480,7 +480,7 @@ function initModuleSelect() {
   sel.innerHTML = Object.entries(MODULES).map(([k, m]) =>
     `<option value="${k}">${m.label}</option>`).join("");
   sel.value = state.module;
-  sel.onchange = (e) => { state.module = e.target.value; renderAll(); };
+  sel.onchange = (e) => { state.module = e.target.value; renderAll(); loadRealData(); };
 }
 
 /* ── 顶栏 ── */
@@ -619,7 +619,15 @@ function atEcho(cmd) {
   const add = (cls, txt) => { const d = document.createElement("div"); d.className = "line " + cls; d.textContent = txt; con.appendChild(d); con.scrollTop = con.scrollHeight; };
   if (!c) return;
   add("cmd", c);
-  if (!DEMO) { /* 真网关：POST /api/at */ GatewayAT(c); return; }
+  if (!DEMO) {
+    // 真机后端：POST /api/at
+    fetch("/api/at", { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ command: c }) })
+      .then(r => r.json())
+      .then(res => { (res.response || "").split("\n").forEach(l => add(l.startsWith("ERROR") ? "err" : "ok", l || "(空)")); })
+      .catch(() => add("err", "请求失败：后端未连接"));
+    return;
+  }
   const key = Object.keys(AT_RESPONSES).find(k => c.toUpperCase().startsWith(k));
   setTimeout(() => {
     if (key) AT_RESPONSES[key].forEach(r => add(/^\+/.test(r) || key === "ATI" ? "ok" : "ok", r));
@@ -654,7 +662,7 @@ function initNav() {
   });
 }
 function initActions() {
-  $("#refresh-btn").onclick = renderAll;
+  $("#refresh-btn").onclick = () => { renderAll(); loadRealData(); };
   $("#test-dial").onclick = () => {
     const n = $("#test-number").value.trim();
     if (!n) return toast("请输入号码");
@@ -681,9 +689,33 @@ function toast(msg) {
   clearTimeout(t._h); t._h = setTimeout(() => t.style.opacity = "0", 2200);
 }
 
+/* ── 真机数据加载（DEMO=false 时） ── */
+async function jget(p) { const r = await fetch(p); return r.ok ? r.json() : null; }
+async function loadRealData() {
+  if (DEMO) return;
+  try {
+    const [status, sim, calls, sms, sip] = await Promise.all(
+      ["/api/status", "/api/sim", "/api/calls", "/api/sms", "/api/sip"].map(jget));
+    const m = cur();
+    if (status) Object.assign(m, {
+      online: status.online, model: status.model || m.model, imei: status.imei || m.imei,
+      iccid: status.iccid || m.iccid, carrier: status.carrier || m.carrier,
+      netType: status.netType || m.netType, rsrp: status.rsrp || 0, rsrq: status.rsrq || 0,
+      sinr: status.sinr || 0, bars: status.bars || 0, fw: status.fw || m.fw,
+      uptime: status.uptime || m.uptime, sipRegistered: status.sipRegistered,
+      dataRx: status.dataRx || m.dataRx, dataTx: status.dataTx || m.dataTx,
+    });
+    if (sim && sim.length) m.sims = sim;
+    if (calls) { DEMO_CALLS.length = 0; DEMO_CALLS.push(...calls); }
+    if (sms) { DEMO_SMS.length = 0; DEMO_SMS.push(...sms); }
+    if (sip) m.sip = Object.assign(m.sip, sip);
+  } catch (e) { console.warn("加载真机数据失败", e); }
+  renderAll();
+}
+
 function renderAll() { renderTopbar(); renderOverview(); renderSim(); renderCalls(); renderSms(); renderSip(); renderSettings(); }
 
-initModuleSelect(); initNav(); initAT(); initActions(); renderAll();
+initModuleSelect(); initNav(); initAT(); initActions(); renderAll(); loadRealData();
 window.addEventListener("resize", () => { if (state.tab === "overview") drawChart(); });
 </script>
 </body>
