@@ -1,4 +1,5 @@
 import SwiftUI
+import Foundation
 
 /// AirSIM 只引导安卓配对；不检查旧模块 USB ECM、AT 或 QDC507 固件。
 struct AirSIMFirstConnectionView: View {
@@ -1039,6 +1040,12 @@ struct HardwareModuleSettingsView: View {
     @AppStorage("hardwareModuleSIPUser") private var sipUser: String = ""
     @AppStorage("hardwareModuleSIPPassword") private var sipPassword: String = ""
     @AppStorage("hardwareModuleSIPDomain") private var sipDomain: String = ""
+    @AppStorage(ModuleBackendKeys.host) private var backendHost: String = ""
+    @AppStorage(ModuleBackendKeys.port) private var backendPort: String = "8799"
+    @AppStorage(ModuleBackendKeys.sipServer) private var sipServer: String = ""
+    @AppStorage(ModuleBackendKeys.sipPort) private var sipPort: String = "5060"
+    @AppStorage(ModuleBackendKeys.sipCodec) private var sipCodec: String = "PCMU"
+    @AppStorage(ModuleBackendKeys.sipTransport) private var sipTransport: String = "UDP"
 
     private var kind: HardwareModuleKind {
         HardwareModuleKind(rawValue: kindRaw) ?? .none
@@ -1105,10 +1112,46 @@ struct HardwareModuleSettingsView: View {
                         .keyboardType(.URL)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
+                    Divider()
+                    TextField("SIP 服务器", text: $sipServer)
+                        .keyboardType(.URL)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                    TextField("SIP 端口", text: $sipPort)
+                        .keyboardType(.numberPad)
+                    Picker("编码", selection: $sipCodec) {
+                        Text("PCMU").tag("PCMU")
+                        Text("PCMA").tag("PCMA")
+                    }
+                    Picker("传输", selection: $sipTransport) {
+                        Text("UDP").tag("UDP")
+                        Text("TCP").tag("TCP")
+                        Text("TLS").tag("TLS")
+                    }
                 } header: {
-                    Text("SIP 账号")
+                    Text("SIP 账号（与网页控制台一致）")
                 } footer: {
                     Text("用于把模块接入 SIP 网关（与 cellbridge-gateway 一致）；留空则用默认。")
+                }
+
+                Section {
+                    TextField("模块后台主机（如 192.168.1.20）", text: $backendHost)
+                        .keyboardType(.URL)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                    TextField("模块后台端口（默认 8799）", text: $backendPort)
+                        .keyboardType(.numberPad)
+                    if kind != .none {
+                        NavigationLink {
+                            ModuleConsoleView()
+                        } label: {
+                            Label("打开模块控制台", systemImage: "terminal")
+                        }
+                    }
+                } header: {
+                    Text("模块后台（网页控制台同一后端）")
+                } footer: {
+                    Text("填入运行 module-dashboard 的主机与端口，App 即可像网页一样读取模块实时状态并下发短信 / USSD / VoWiFi / SIP 指令。")
                 }
 
                 Section {
@@ -1123,5 +1166,492 @@ struct HardwareModuleSettingsView: View {
         }
         .navigationTitle("硬件值守模块")
         .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+// MARK: - 模块控制台：iOS 端镜像网页管理后台（同一 module-dashboard 后端）
+// 网页控制台由 server.py 通过 AT 指令驱动大疆/移远模块；iOS 端此处用 URLSession
+// 直连同一后端的 /api/*，展示与网页一致的实时状态并下发同类指令，做到两端「匹配」。
+
+enum ModuleBackendKeys {
+    static let host = "hardwareModuleBackendHost"
+    static let port = "hardwareModuleBackendPort"
+    static let sipServer = "hardwareModuleSIPServer"
+    static let sipPort = "hardwareModuleSIPPort"
+    static let sipCodec = "hardwareModuleSIPCodec"
+    static let sipTransport = "hardwareModuleSIPTransport"
+}
+
+struct ModuleCell: Codable {
+    let earfcn: Int?
+    let pci: Int?
+    let tac: String?
+    let band: String?
+    let cellId: String?
+    let rsrp: Int?
+    let rsrq: Int?
+    let sinr: Int?
+    let enb: String?
+}
+
+struct ModuleGnss: Codable {
+    let on: Bool?
+    let lat: String?
+    let lon: String?
+    let alt: Int?
+    let speed: Int?
+    let sats: Int?
+    let hdop: Double?
+    let fix: String?
+}
+
+struct ModuleNet: Codable {
+    let net: String?
+    let domain: String?
+    let band: String?
+    let apn: String?
+    let pdp: String?
+    let dataOn: Bool?
+    let roam: Bool?
+    let ip: String?
+}
+
+struct ModuleDataStats: Codable {
+    let rx: String?
+    let tx: String?
+    let session: String?
+    let lifetime: String?
+}
+
+struct ModuleStatus: Codable {
+    let online: Bool
+    let model: String?
+    let imei: String?
+    let iccid: String?
+    let carrier: String?
+    let netType: String?
+    let rsrp: Int?
+    let rsrq: Int?
+    let sinr: Int?
+    let bars: Int?
+    let fw: String?
+    let sipRegistered: Bool?
+    let simulated: Bool?
+    let imsi: String?
+    let temp: String?
+    let cell: ModuleCell?
+    let gnss: ModuleGnss?
+    let net: ModuleNet?
+    let data: ModuleDataStats?
+}
+
+/// 直连 module-dashboard 后端（server.py）的轻量客户端；与 AirSIMAPI/WiredHTTPTransport
+/// 无关——后者绑定安卓 VoWLAN 代理与 USB ECM，此处走普通 Wi-Fi/局域网 HTTP。
+struct ModuleDashboardClient {
+    let baseURL: URL
+    private let session: URLSession
+
+    init(baseURL: URL) {
+        self.baseURL = baseURL
+        self.session = URLSession(configuration: .ephemeral)
+    }
+
+    func status() async throws -> ModuleStatus {
+        try await get(ModuleStatus.self, "api/status")
+    }
+
+    func sendSMS(to: String, message: String) async throws -> Bool {
+        let r = try await post(["to": to, "body": message], "api/sms")
+        return r["sent"] as? Bool ?? false
+    }
+
+    func sendUSSD(code: String) async throws -> String {
+        let r = try await post(["code": code], "api/ussd")
+        return r["response"] as? String ?? ""
+    }
+
+    func setVoWiFi(on: Bool) async throws -> String {
+        let r = try await post(["action": on ? "on" : "off"], "api/vowifi")
+        return r["note"] as? String ?? (on ? "已开启 VoWiFi / IMS" : "已关闭 VoWiFi / IMS")
+    }
+
+    func registerSIP(_ payload: [String: String]) async throws -> String {
+        let r = try await post(payload, "api/sip")
+        return (r["status"] as? String) ?? "已提交 SIP 注册"
+    }
+
+    func sendAT(_ command: String) async throws -> String {
+        let r = try await post(["command": command], "api/at")
+        return r["response"] as? String ?? ""
+    }
+
+    private func get<T: Decodable>(_ type: T.Type, _ path: String) async throws -> T {
+        var req = URLRequest(url: baseURL.appendingPathComponent(path))
+        req.timeoutInterval = 8
+        let (data, response) = try await session.data(for: req)
+        if let http = response as? HTTPURLResponse, !(200..<300).contains(http.statusCode) {
+            throw ModuleDashboardError.http(http.statusCode)
+        }
+        return try JSONDecoder().decode(T.self, from: data)
+    }
+
+    private func post(_ body: [String: Any], _ path: String) async throws -> [String: Any] {
+        var req = URLRequest(url: baseURL.appendingPathComponent(path))
+        req.httpMethod = "POST"
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.httpBody = try JSONSerialization.data(withJSONObject: body)
+        req.timeoutInterval = 12
+        let (data, _) = try await session.data(for: req)
+        return (try? JSONSerialization.jsonObject(with: data) as? [String: Any]) ?? [:]
+    }
+}
+
+enum ModuleDashboardError: LocalizedError {
+    case http(Int)
+    case invalidURL
+    var errorDescription: String? {
+        switch self {
+        case let .http(code): return "模块后台返回错误（HTTP \(code)）"
+        case .invalidURL: return "模块后台地址无效"
+        }
+    }
+}
+
+/// 与网页控制台「总览」同步的移动端镜像：实时状态 + 短信/USSD/VoWiFi/SIP/AT。
+struct ModuleConsoleView: View {
+    @AppStorage(ModuleBackendKeys.host) private var backendHost = ""
+    @AppStorage(ModuleBackendKeys.port) private var backendPort = "8799"
+    @AppStorage(ModuleBackendKeys.sipServer) private var sipServer = ""
+    @AppStorage(ModuleBackendKeys.sipPort) private var sipPort = "5060"
+    @AppStorage(ModuleBackendKeys.sipCodec) private var sipCodec = "PCMU"
+    @AppStorage(ModuleBackendKeys.sipTransport) private var sipTransport = "UDP"
+    @AppStorage("hardwareModuleSIPUser") private var sipUser = ""
+    @AppStorage("hardwareModuleSIPPassword") private var sipPassword = ""
+    @AppStorage("hardwareModuleSIPDomain") private var sipDomain = ""
+
+    @State private var status: ModuleStatus?
+    @State private var loading = false
+    @State private var errorText: String?
+    @State private var toast: String?
+    @State private var smsTo = ""
+    @State private var smsBody = ""
+    @State private var ussdCode = ""
+    @State private var atCommand = ""
+    @State private var atResult = ""
+
+    private var client: ModuleDashboardClient? {
+        let host = backendHost.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !host.isEmpty,
+              let url = URL(string: "http://\(host):\(backendPort.isEmpty ? "8799" : backendPort)") else {
+            return nil
+        }
+        return ModuleDashboardClient(baseURL: url)
+    }
+
+    var body: some View {
+        Form {
+            if client == nil {
+                Section {
+                    Text("尚未配置模块后台地址。请返回「硬件值守模块」填写「模块后台主机」与「端口」（与网页控制台同一个地址）。")
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
+                } header: { Text("提示") }
+            } else {
+                overviewSection
+                communicationSection
+                networkSection
+                atSection
+            }
+        }
+        .navigationTitle("模块控制台")
+        .navigationBarTitleDisplayMode(.inline)
+        .task { await refresh() }
+        .refreshable { await refresh() }
+        .overlay(alignment: .bottom) {
+            if let toast { toastView(toast) }
+        }
+    }
+
+    private var overviewSection: some View {
+        Section {
+            if loading && status == nil {
+                ProgressView("正在读取模块状态…")
+            } else if let s = status {
+                VStack(alignment: .leading, spacing: 10) {
+                    HStack {
+                        Image(systemName: s.online ? "antenna.radiowaves.left.and.right" : "antenna.radiowaves.left.and.right.slash")
+                            .foregroundStyle(s.online ? .green : .secondary)
+                        Text(s.online ? "模块在线" : "模块离线")
+                            .font(.headline)
+                        Spacer()
+                        if let bars = s.bars { SignalBarsView(bars: bars) }
+                    }
+                    keyValue("型号", s.model)
+                    keyValue("运营商", s.carrier)
+                    keyValue("网络", s.netType)
+                    keyValue("RSRP", s.rsrp.map { "\($0) dBm" })
+                    keyValue("RSRQ", s.rsrq.map { "\($0) dB" })
+                    keyValue("SINR", s.sinr.map { "\($0) dB" })
+                    keyValue("IMEI", s.imei)
+                    keyValue("ICCID", s.iccid)
+                    keyValue("IMSI", s.imsi)
+                    keyValue("固件", s.fw)
+                    keyValue("温度", s.temp)
+                    if let net = s.net {
+                        keyValue("APN", net.apn)
+                        keyValue("IP", net.ip)
+                        keyValue("数据开关", net.dataOn.map { $0 ? "开" : "关" })
+                        keyValue("漫游", net.roam.map { $0 ? "开" : "关" })
+                    }
+                    if let g = s.gnss, g.on == true {
+                        keyValue("定位", "\(g.lat ?? "-"), \(g.lon ?? "-")（\(g.fix ?? "-") · \(g.sats ?? 0) 星）")
+                    }
+                    if let d = s.data {
+                        keyValue("本次流量", d.session)
+                        keyValue("累计流量", d.lifetime)
+                    }
+                    if let cell = s.cell {
+                        keyValue("小区", "EARFCN \(cell.earfcn ?? 0) · PCI \(cell.pci ?? 0) · \(cell.band ?? "-")")
+                        keyValue("TAC/CellID", "\(cell.tac ?? "-") / \(cell.cellId ?? "-")")
+                    }
+                    if let sim = s.sipRegistered {
+                        Label(sim ? "SIP 已注册" : "SIP 未注册", systemImage: sim ? "checkmark.shield" : "shield")
+                            .font(.subheadline)
+                            .foregroundStyle(sim ? .green : .orange)
+                    }
+                }
+                .phoneCard()
+            } else if let errorText {
+                Text(errorText).foregroundStyle(.red)
+            }
+            Button {
+                Task { await refresh() }
+            } label: { Label("刷新状态", systemImage: "arrow.clockwise") }
+        } header: { Text("总览（与网页控制台同步）") }
+    }
+
+    private var communicationSection: some View {
+        Section {
+            NavigationLink {
+                ModuleSMSView(client: client!)
+            } label: { Label("发送短信", systemImage: "message") }
+            NavigationLink {
+                ModuleUSSDView(client: client!)
+            } label: { Label("查询 USSD", systemImage: "number") }
+            NavigationLink {
+                ModuleVoWiFiView(client: client!)
+            } label: { Label("VoWiFi / IMS", systemImage: "wifi.exclamationmark") }
+            Button {
+                Task { await registerSIP() }
+            } label: { Label("注册 SIP 网关", systemImage: "phone.bubble.left") }
+        } header: { Text("通信") }
+    }
+
+    private var networkSection: some View {
+        Section {
+            NavigationLink {
+                ModuleSIPConfigView()
+            } label: { Label("SIP 网关配置", systemImage: "server.rack") }
+        } header: { Text("网络") }
+    }
+
+    private var atSection: some View {
+        Section {
+            TextField("AT 指令，如 AT+CSQ", text: $atCommand)
+                .textInputAutocapitalization(.characters)
+                .autocorrectionDisabled()
+            Button("发送 AT") { Task { await sendAT() } }
+                .disabled(atCommand.isEmpty)
+            if !atResult.isEmpty {
+                Text(atResult)
+                    .font(.system(.footnote, design: .monospaced))
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(10)
+                    .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
+            }
+        } header: { Text("AT 调试") }
+    }
+
+    private func keyValue(_ k: String, _ v: String?) -> some View {
+        HStack(alignment: .top) {
+            Text(k).foregroundStyle(.secondary)
+            Spacer()
+            Text(v ?? "—").multilineTextAlignment(.trailing)
+        }
+        .font(.subheadline)
+    }
+
+    private func toastView(_ message: String) -> some View {
+        Text(message)
+            .font(.caption.weight(.medium))
+            .padding(.horizontal, 14).padding(.vertical, 9)
+            .background(.thinMaterial, in: Capsule())
+            .padding(.bottom, 12)
+    }
+
+    private func refresh() async {
+        guard let client else { return }
+        loading = true; errorText = nil
+        do { status = try await client.status() }
+        catch { errorText = (error as? ModuleDashboardError)?.errorDescription ?? error.localizedDescription }
+        loading = false
+    }
+
+    private func registerSIP() async {
+        guard let client else { return }
+        do {
+            let payload = [
+                "server": sipServer, "port": sipPort, "user": sipUser,
+                "codec": sipCodec, "transport": sipTransport
+            ].filter { !$0.value.isEmpty }
+            let msg = try await client.registerSIP(payload)
+            toast = msg
+            await refresh()
+        } catch {
+            toast = (error as? ModuleDashboardError)?.errorDescription ?? error.localizedDescription
+        }
+    }
+
+    private func sendAT() async {
+        guard let client else { return }
+        do { atResult = try await client.sendAT(atCommand) }
+        catch { atResult = (error as? ModuleDashboardError)?.errorDescription ?? error.localizedDescription }
+    }
+}
+
+private struct SignalBarsView: View {
+    let bars: Int
+    var body: some View {
+        HStack(spacing: 2) {
+            ForEach(0..<5, id: \.self) { i in
+                RoundedRectangle(cornerRadius: 1)
+                    .fill(i < bars ? Color.green : Color.secondary.opacity(0.3))
+                    .frame(width: 3, height: 4 + CGFloat(i) * 3)
+            }
+        }
+    }
+}
+
+struct ModuleSMSView: View {
+    let client: ModuleDashboardClient
+    @State private var to = ""
+    @State private var message = ""
+    @State private var result: String?
+    @State private var sending = false
+
+    var body: some View {
+        Form {
+            Section {
+                TextField("收件人号码", text: $to).keyboardType(.phonePad).monospacedDigit()
+                TextField("短信内容", text: $message, axis: .vertical).lineLimit(3...8)
+                Button { Task { await send() } } label: { Label("发送", systemImage: "paperplane") }
+                    .disabled(to.isEmpty || message.isEmpty || sending)
+                if let result { Text(result).foregroundStyle(.secondary) }
+            } header: { Text("发送短信（经模块）") }
+        }
+        .navigationTitle("模块短信").navigationBarTitleDisplayMode(.inline)
+    }
+
+    private func send() async {
+        sending = true
+        do { let ok = try await client.sendSMS(to: to, message: message); result = ok ? "已发送" : "发送失败" }
+        catch { result = (error as? ModuleDashboardError)?.errorDescription ?? error.localizedDescription }
+        sending = false
+    }
+}
+
+struct ModuleUSSDView: View {
+    let client: ModuleDashboardClient
+    @State private var code = ""
+    @State private var result: String?
+    @State private var querying = false
+
+    var body: some View {
+        Form {
+            Section {
+                TextField("USSD 代码，如 *101#", text: $code)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                    .monospacedDigit()
+                Button { Task { await query() } } label: { Label("查询", systemImage: "magnifyingglass") }
+                    .disabled(code.isEmpty || querying)
+                if let result { Text(result).foregroundStyle(.secondary) }
+            } header: { Text("查询 USSD（经模块）") }
+        }
+        .navigationTitle("模块 USSD").navigationBarTitleDisplayMode(.inline)
+    }
+
+    private func query() async {
+        querying = true
+        do { result = try await client.sendUSSD(code: code) }
+        catch { result = (error as? ModuleDashboardError)?.errorDescription ?? error.localizedDescription }
+        querying = false
+    }
+}
+
+struct ModuleVoWiFiView: View {
+    let client: ModuleDashboardClient
+    @State private var on = false
+    @State private var note: String?
+    @State private var busy = false
+
+    var body: some View {
+        Form {
+            Section {
+                Toggle("启用 VoWiFi / IMS", isOn: $on)
+                Button { Task { await apply() } } label: { Label("应用并重新注册", systemImage: "arrow.triangle.2.circlepath") }
+                    .disabled(busy)
+                if let note { Text(note).font(.footnote).foregroundStyle(.secondary) }
+            } header: { Text("VoWiFi / IMS") } footer: {
+                Text("发送 AT+QCFG=\"ims\",1 并触发 CFUN 重注册；ePDG / Realm 在 SIP 网关配置中填写。")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
+        }
+        .navigationTitle("VoWiFi / IMS").navigationBarTitleDisplayMode(.inline)
+    }
+
+    private func apply() async {
+        busy = true
+        do { note = try await client.setVoWiFi(on: on) }
+        catch { note = (error as? ModuleDashboardError)?.errorDescription ?? error.localizedDescription }
+        busy = false
+    }
+}
+
+struct ModuleSIPConfigView: View {
+    @AppStorage(ModuleBackendKeys.sipServer) private var server = ""
+    @AppStorage(ModuleBackendKeys.sipPort) private var port = "5060"
+    @AppStorage(ModuleBackendKeys.sipCodec) private var codec = "PCMU"
+    @AppStorage(ModuleBackendKeys.sipTransport) private var transport = "UDP"
+    @AppStorage("hardwareModuleSIPUser") private var user = ""
+    @AppStorage("hardwareModuleSIPPassword") private var password = ""
+    @AppStorage("hardwareModuleSIPDomain") private var domain = ""
+
+    var body: some View {
+        Form {
+            Section {
+                TextField("SIP 服务器", text: $server)
+                    .keyboardType(.URL).textInputAutocapitalization(.never).autocorrectionDisabled()
+                TextField("端口", text: $port).keyboardType(.numberPad)
+                TextField("用户名", text: $user)
+                    .textInputAutocapitalization(.never).autocorrectionDisabled()
+                SecureField("密码", text: $password)
+                TextField("域名 / 注册地址", text: $domain)
+                    .keyboardType(.URL).textInputAutocapitalization(.never).autocorrectionDisabled()
+            } header: { Text("账号") }
+            Section {
+                Picker("编码", selection: $codec) {
+                    Text("PCMU").tag("PCMU")
+                    Text("PCMA").tag("PCMA")
+                }
+                Picker("传输", selection: $transport) {
+                    Text("UDP").tag("UDP")
+                    Text("TCP").tag("TCP")
+                    Text("TLS").tag("TLS")
+                }
+            } header: { Text("参数（与网页控制台一致）") }
+        }
+        .navigationTitle("SIP 网关配置").navigationBarTitleDisplayMode(.inline)
     }
 }

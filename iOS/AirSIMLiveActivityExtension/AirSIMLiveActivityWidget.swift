@@ -653,14 +653,10 @@ private struct LiveActivityGlassButtonStyle: ViewModifier {
 
     @ViewBuilder
     func body(content: Content) -> some View {
-        if #available(iOSApplicationExtension 26.0, *) {
-            if prominent {
-                content.buttonStyle(.glassProminent).tint(tint)
-            } else {
-                content.buttonStyle(.glass).tint(tint)
-            }
-        } else {
+        if prominent {
             content.buttonStyle(.borderedProminent).tint(tint)
+        } else {
+            content.buttonStyle(.bordered).tint(tint)
         }
     }
 }

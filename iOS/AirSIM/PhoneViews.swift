@@ -219,14 +219,18 @@ struct DialPadView: View {
 
     @ViewBuilder
     private func dialKeyGrid(metrics: DialPadLayoutMetrics) -> some View {
+#if compiler(>=6.2)
         if #available(iOS 26.0, *) {
             // 融合距离必须明显小于按键的真实间距，否则 Liquid Glass 会把相邻圆键吸成一体。
             GlassEffectContainer(spacing: 6) {
                 dialKeyRows(metrics: metrics)
             }
         } else {
+#endif
             dialKeyRows(metrics: metrics)
+#if compiler(>=6.2)
         }
+#endif
     }
 
     private func dialKeyRows(metrics: DialPadLayoutMetrics) -> some View {
@@ -1191,7 +1195,7 @@ struct CallRecordingFile: Identifiable {
 
 /// 录音播放器：同一时间只播一个；来电打断时自动停止。
 @MainActor
-private final class RecordingPlayer: NSObject, ObservableObject, @MainActor AVAudioPlayerDelegate {
+private final class RecordingPlayer: NSObject, ObservableObject, AVAudioPlayerDelegate {
     @Published var playingID: String?
     private var player: AVAudioPlayer?
 
@@ -2240,11 +2244,15 @@ struct ContactsView: View {
 private extension View {
     @ViewBuilder
     func dialKeySurface() -> some View {
+#if compiler(>=6.2)
         if #available(iOS 26.0, *) {
             glassEffect(.regular.interactive(), in: Circle())
         } else {
+#endif
             background(Color(uiColor: .tertiarySystemFill), in: Circle())
+#if compiler(>=6.2)
         }
+#endif
     }
 
     /// Neumorphism 拨号键：浅色模式下凸起黏土圆，深色模式保持原样。
@@ -2912,6 +2920,7 @@ private struct CallControlGlass: ViewModifier {
 
     @ViewBuilder
     func body(content: Content) -> some View {
+#if compiler(>=6.2)
         if #available(iOS 26.0, *) {
             switch shape {
             case .capsule:
@@ -2920,13 +2929,16 @@ private struct CallControlGlass: ViewModifier {
                 content.glassEffect(.regular.tint(tint).interactive(), in: Circle())
             }
         } else {
+#endif
             switch shape {
             case .capsule:
                 content.background(.ultraThinMaterial, in: Capsule())
             case .circle:
                 content.background(.ultraThinMaterial, in: Circle())
             }
+#if compiler(>=6.2)
         }
+#endif
     }
 }
 
@@ -2959,11 +2971,15 @@ private struct DTMFKeypadView: View {
                     .accessibilityLabel(enteredDigits.isEmpty ? "尚未输入按键" : enteredDigits)
                 // GlassEffectContainer 的融合距离必须明显小于按键真实间距（横向 24pt / 纵向 16pt），
                 // 否则 Liquid Glass 会把相邻圆键吸成一体，按"1"时按压高亮会漫到旁边的键上。
+#if compiler(>=6.2)
                 if #available(iOS 26.0, *) {
                     GlassEffectContainer(spacing: 4) { keypad }
                 } else {
+#endif
                     keypad
+#if compiler(>=6.2)
                 }
+#endif
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .padding(24)
@@ -3004,13 +3020,17 @@ private struct DTMFGlassButtonStyle: ButtonStyle {
         // 的按压底色向相邻键漫延，出现异常的蓝色底块。改用 interactive 玻璃本身的
         // 按压反馈 + 缩放反馈，所有键统一，不产生蓝底。
         Group {
+#if compiler(>=6.2)
             if #available(iOS 26.0, *) {
                 configuration.label
                     .glassEffect(.regular.interactive(), in: Circle())
             } else {
+#endif
                 configuration.label
                     .background(.ultraThinMaterial, in: Circle())
+#if compiler(>=6.2)
             }
+#endif
         }
         .foregroundStyle(Color.primary)
         .scaleEffect(configuration.isPressed ? 0.91 : 1)

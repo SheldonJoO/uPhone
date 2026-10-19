@@ -1,6 +1,18 @@
 import AVFoundation
 import Network
 
+/// 通话音频会话的蓝牙选项：iOS 26 SDK 起拆成 A2DP / HFP 两个开关，
+/// 旧 SDK 只有统一的 allowBluetooth。按编译器版本选取，两处构建都能过。
+enum AirSIMCallAudioOptions {
+    static var bluetooth: AVAudioSession.CategoryOptions {
+#if compiler(>=6.2)
+        .allowBluetoothHFP
+#else
+        .allowBluetooth
+#endif
+    }
+}
+
 enum PCMRoute: Equatable, Sendable {
     case moduleLocal
     case vowlan(endpoint: VoWLANEndpoint, credential: VoWLANCredential)
@@ -469,7 +481,7 @@ final class AudioSessionController: ObservableObject {
         try session.setCategory(
             .playAndRecord,
             mode: .voiceChat,
-            options: [.allowBluetoothHFP]
+            options: [AirSIMCallAudioOptions.bluetooth]
         )
         try session.setPreferredSampleRate(48_000)
         try session.setPreferredIOBufferDuration(0.02)

@@ -1255,7 +1255,11 @@ private final class IPhoneCloudCallMediaBridge: @unchecked Sendable {
 
     func prepareForCallKit() throws {
         let session = AVAudioSession.sharedInstance()
-        try session.setCategory(.playAndRecord, mode: .voiceChat, options: [.allowBluetoothHFP])
+        try session.setCategory(
+            .playAndRecord,
+            mode: .voiceChat,
+            options: [AirSIMCallAudioOptions.bluetooth]
+        )
         try session.setPreferredSampleRate(48_000)
         try session.setPreferredIOBufferDuration(0.02)
         // 每通电话从听筒开始；用户随后可在通话页切换扬声器。

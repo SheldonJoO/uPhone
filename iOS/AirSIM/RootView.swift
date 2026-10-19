@@ -261,24 +261,35 @@ struct PhoneCard: ViewModifier {
                 .padding(16)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .neuCard()
-        } else if #available(iOS 26.0, *) {
-            content
-                .padding(16)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .glassEffect(
-                    .regular,
-                    in: RoundedRectangle(cornerRadius: 18, style: .continuous)
-                )
         } else {
-            content
-                .padding(16)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(
-                    Color(uiColor: .secondarySystemGroupedBackground),
-                    in: RoundedRectangle(cornerRadius: 14, style: .continuous)
-                )
+#if compiler(>=6.2)
+            if #available(iOS 26.0, *) {
+                content
+                    .padding(16)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .glassEffect(
+                        .regular,
+                        in: RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    )
+            } else {
+                phoneCardDarkSurface(content)
+            }
+#else
+            phoneCardDarkSurface(content)
+#endif
         }
     }
+}
+
+@ViewBuilder
+private func phoneCardDarkSurface<C: View>(_ content: C) -> some View {
+    content
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            Color(uiColor: .secondarySystemGroupedBackground),
+            in: RoundedRectangle(cornerRadius: 14, style: .continuous)
+        )
 }
 
 struct PhoneGlassSurface: ViewModifier {
@@ -288,6 +299,7 @@ struct PhoneGlassSurface: ViewModifier {
 
     @ViewBuilder
     func body(content: Content) -> some View {
+#if compiler(>=6.2)
         if #available(iOS 26.0, *) {
             let glass = interactive
                 ? Glass.regular.tint(tint).interactive()
@@ -297,6 +309,7 @@ struct PhoneGlassSurface: ViewModifier {
                 in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
             )
         } else {
+#endif
             content
                 .background(
                     .regularMaterial,
@@ -306,7 +319,9 @@ struct PhoneGlassSurface: ViewModifier {
                     RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                         .strokeBorder(.primary.opacity(0.08))
                 }
+#if compiler(>=6.2)
         }
+#endif
     }
 }
 
@@ -317,6 +332,7 @@ private struct PhoneToolbarGlassMorph: ViewModifier {
 
     @ViewBuilder
     func body(content: Content) -> some View {
+#if compiler(>=6.2)
         if #available(iOS 26.0, *) {
             GlassEffectContainer(spacing: 14) {
                 content
@@ -330,8 +346,11 @@ private struct PhoneToolbarGlassMorph: ViewModifier {
             }
             .transition(.opacity.combined(with: .scale(scale: 0.82)))
         } else {
+#endif
             content
+#if compiler(>=6.2)
         }
+#endif
     }
 }
 
@@ -343,14 +362,18 @@ func phoneMorphingToolbarItem<Content: View>(
     id: String,
     @ViewBuilder content: () -> Content
 ) -> some ToolbarContent {
+#if compiler(>=6.2)
     if #available(iOS 26.0, *) {
         ToolbarItem(placement: placement) {
             content().phoneToolbarGlassMorph(id: id)
         }
         .sharedBackgroundVisibility(.hidden)
     } else {
+#endif
         ToolbarItem(placement: placement, content: content)
+#if compiler(>=6.2)
     }
+#endif
 }
 
 extension View {
@@ -370,11 +393,15 @@ extension View {
 
     @ViewBuilder
     func phoneTabBarMinimizeOnScroll() -> some View {
+#if compiler(>=6.2)
         if #available(iOS 26.0, *) {
             self.tabBarMinimizeBehavior(.onScrollDown)
         } else {
+#endif
             self
+#if compiler(>=6.2)
         }
+#endif
     }
 
     func phoneToolbarGlassMorph(id: String) -> some View {

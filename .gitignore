@@ -1,0 +1,4 @@
+__pycache__/
+.DS_Store
+iOS/build/
+module-dashboard/module_config.json

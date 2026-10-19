@@ -35,7 +35,11 @@ final class VirtualCallTTSController: NSObject, AVSpeechSynthesizerDelegate {
             throw VirtualCallTTSError.invalidPayload
         }
         let session = AVAudioSession.sharedInstance()
-        try session.setCategory(.playAndRecord, mode: .voiceChat, options: [.allowBluetoothHFP])
+        try session.setCategory(
+            .playAndRecord,
+            mode: .voiceChat,
+            options: [AirSIMCallAudioOptions.bluetooth]
+        )
         call = incoming
         started = false
     }
