@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
 	package="com.airsim.phonecontrol"
-	android:versionCode="78"
-	android:versionName="0.9.5">
+	android:versionCode="79"
+	android:versionName="0.9.7">
 	<queries>
 		<package android:name="moe.shizuku.privileged.api" />
 		<package android:name="com.android.virtualization.terminal" />
@@ -26,6 +26,12 @@
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
 	<uses-permission android:name="moe.shizuku.manager.permission.API_V23" />
+    <!-- 蓝牙配对通道：Wi-Fi 不可用（AP 隔离 / 只连了热点）时的替代握手路径 -->
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <uses-feature android:name="android.hardware.bluetooth_le" android:required="false" />
 
     <application
         android:name=".BridgeApplication"

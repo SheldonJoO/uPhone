@@ -56,18 +56,18 @@ public final class MainActivity extends Activity {
     private static final int ROLE_REQUEST = 100;
     private static final int DEFAULT_APPS_REQUEST = 102;
 
-    // Neumorphism 浅色主题（试改）：底 #E0E5EC，双阴影塑造凸起/凹陷
-    private static final int BG = Color.rgb(224, 229, 236);
-    private static final int SURFACE = Color.rgb(224, 229, 236);
-    private static final int SURFACE_HIGH = Color.rgb(224, 229, 236);
-    private static final int BORDER = Color.rgb(163, 177, 198);
-    private static final int PRIMARY = Color.rgb(24, 154, 118);
-    private static final int CYAN = Color.rgb(14, 124, 134);
-    private static final int BLUE = Color.rgb(47, 128, 237);
-    private static final int TEXT = Color.rgb(46, 58, 77);
-    private static final int MUTED = Color.rgb(107, 120, 137);
-    private static final int WARNING = Color.rgb(178, 106, 0);
-    private static final int DANGER = Color.rgb(214, 69, 69);
+    // 暗色主题：底 #10151C，亮阴影 #1E2632 / 暗阴影 #05080C 塑造凸起与凹陷
+    private static final int BG = Color.rgb(16, 21, 28);
+    private static final int SURFACE = Color.rgb(16, 21, 28);
+    private static final int SURFACE_HIGH = Color.rgb(30, 38, 50);
+    private static final int BORDER = Color.rgb(30, 38, 50);
+    private static final int PRIMARY = Color.rgb(47, 191, 143);
+    private static final int CYAN = Color.rgb(34, 211, 238);
+    private static final int BLUE = Color.rgb(76, 154, 255);
+    private static final int TEXT = Color.rgb(230, 237, 243);
+    private static final int MUTED = Color.rgb(139, 152, 165);
+    private static final int WARNING = Color.rgb(245, 166, 35);
+    private static final int DANGER = Color.rgb(255, 90, 90);
 
     // 一键值守：主路径只剩「值守」一页；通话 / 设置 / 诊断收进「更多」里的次级分段，
     // 不再占用底部导航，避免值守机每次打开都要在四个页签里找开关。
@@ -81,7 +81,8 @@ public final class MainActivity extends Activity {
     private final List<TextView> navigationItems = new ArrayList<>();
     private final List<TextView> moreSectionItems = new ArrayList<>();
     private Page currentPage = Page.DUTY;
-    private MoreSection currentMore = MoreSection.CALLS;
+    // 「更多」页默认落设置：通话测试是诊断工具，不该占据着陆视图。
+    private MoreSection currentMore = MoreSection.SETTINGS;
 
     private EditText endpoint;
     private EditText token;
@@ -636,7 +637,7 @@ public final class MainActivity extends Activity {
         segments.setPadding(dp(4), dp(4), dp(4), dp(4));
         segments.setBackground(neuDrawable("neu_bar_bg"));
         moreSectionItems.clear();
-        segments.addView(moreSegmentItem("通话", MoreSection.CALLS), weighted());
+        segments.addView(moreSegmentItem("通话测试", MoreSection.CALLS), weighted());
         segments.addView(moreSegmentItem("设置", MoreSection.SETTINGS), weighted());
         segments.addView(moreSegmentItem("诊断", MoreSection.DEBUG), weighted());
         root.addView(segments, matchWithTop(12));
@@ -1079,7 +1080,26 @@ public final class MainActivity extends Activity {
         contentHost.removeAllViews();
         contentHost.addView(pairingPage(), new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        startPairing();
+        // BLE 配对通道需要运行期授权（API 31+）；未授权时静默降级为纯 Wi-Fi 配对。
+        if (Build.VERSION.SDK_INT >= 31) {
+            java.util.List<String> missing = new ArrayList<>();
+            if (checkSelfPermission(android.Manifest.permission.BLUETOOTH_ADVERTISE)
+                    != PackageManager.PERMISSION_GRANTED) {
+                missing.add(android.Manifest.permission.BLUETOOTH_ADVERTISE);
+            }
+            if (checkSelfPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
+                    != PackageManager.PERMISSION_GRANTED) {
+                missing.add(android.Manifest.permission.BLUETOOTH_CONNECT);
+            }
+            if (!missing.isEmpty()) {
+                requestPermissions(missing.toArray(new String[0]), 103);
+            }
+        }
+        // 已配对的机器不再自动开窗广播：避免「配对完还能在配对页看到设备」，
+        // 以及重复配对 stage 新身份生成无名 ghost。重配由用户显式发起。
+        if (!AppConfig.configured(this)) {
+            startPairing();
+        }
     }
 
     private View pairingPage() {
@@ -1092,10 +1112,30 @@ public final class MainActivity extends Activity {
         });
         root.addView(back, new LinearLayout.LayoutParams(dp(56), dp(52)));
 
-        TextView title = label("一次性配对", 30, TEXT, Gravity.START);
+        boolean alreadyPaired = AppConfig.configured(this);
+        TextView title = label(alreadyPaired ? "已配对 iPhone" : "一次性配对", 30, TEXT, Gravity.START);
         title.setTypeface(Typeface.DEFAULT_BOLD);
         root.addView(title, matchWithTop(8));
-        root.addView(description("让 iPhone 与本机连接同一 Wi‑Fi 或手机热点"), matchWithTop(6));
+        root.addView(description(alreadyPaired
+                ? "本机已与 iPhone 配对。仅在更换 iPhone 或需要刷新凭据时才重新配对。"
+                : "让 iPhone 与本机连接同一 Wi‑Fi 或手机热点"), matchWithTop(6));
+
+        if (alreadyPaired) {
+            TextView rePair = primaryButton("重新配对（替换当前配对）", BLUE);
+            rePair.setOnClickListener(ignored -> {
+                rePair.setEnabled(false);
+                startPairing();
+                toast("配对窗口已开启，请在 iPhone 上重新扫码或输入配对码");
+                rePair.postDelayed(() -> rePair.setEnabled(true), 3_000);
+            });
+            root.addView(rePair, matchWithTop(16));
+
+            TextView bleHint = label("Wi-Fi 不可用时也可用蓝牙配对：窗口开启后，在 iPhone"
+                    + "「添加值守机 › 配对安卓开发机」里选择蓝牙发现的设备。", 13, MUTED, Gravity.START);
+            root.addView(bleHint, matchWithTop(10));
+            root.addView(noteLine("当前配对无需重复操作"), matchWithTop(18));
+            return scroll(root);
+        }
 
         LinearLayout pairingCard = card(SURFACE, 28);
         pairingCard.setOrientation(LinearLayout.VERTICAL);
@@ -1139,12 +1179,20 @@ public final class MainActivity extends Activity {
         });
         root.addView(cancel, matchWithTop(18));
 
-        TextView note = label("临时密钥 · 仅可使用一次", 13, MUTED, Gravity.CENTER);
+        TextView note = label("临时密钥 · 仅可使用一次 · 同时经 Wi-Fi 与蓝牙广播", 13, MUTED, Gravity.CENTER);
         note.setCompoundDrawablesWithIntrinsicBounds(android.R.drawable.ic_lock_idle_lock, 0, 0, 0);
         note.setCompoundDrawableTintList(ColorStateList.valueOf(MUTED));
         note.setCompoundDrawablePadding(dp(8));
         root.addView(note, matchWithTop(20));
         return scroll(root);
+    }
+
+    private TextView noteLine(String text) {
+        TextView note = label(text, 13, MUTED, Gravity.CENTER);
+        note.setCompoundDrawablesWithIntrinsicBounds(android.R.drawable.ic_lock_idle_lock, 0, 0, 0);
+        note.setCompoundDrawableTintList(ColorStateList.valueOf(MUTED));
+        note.setCompoundDrawablePadding(dp(8));
+        return note;
     }
 
     private LinearLayout debugFilters() {

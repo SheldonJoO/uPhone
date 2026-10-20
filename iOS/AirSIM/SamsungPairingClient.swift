@@ -1,16 +1,27 @@
 import Foundation
 import Network
+import CoreBluetooth
+
+/// 配对传输通道：Wi-Fi（NSD + TCP）或蓝牙（GATT）。协议载荷完全一致。
+enum PairingTransport {
+    case tcp(endpoint: NWEndpoint, expiresAt: Date)
+    case ble(sessionID: String, serverPublicKey: Data, expiresAt: Date)
+}
 
 struct SamsungPairingService: Identifiable {
-    let endpoint: NWEndpoint
-    let sessionID: String
-    let serverPublicKey: Data
-    let expiresAt: Date
+    let id: String
+    let displayName: String
+    let transport: PairingTransport
+    /// 安卓广播的当前 device_id 尾段；与注册表活跃设备一致即「同一台手机重配」。
+    var deviceIDHint: String = ""
+    /// TCP 通道的安卓临时公钥（TXT key）；BLE 通道的公钥在 transport 内。
+    var serverPublicKey: Data = Data()
 
-    var id: String { sessionID }
-    var displayName: String {
-        if case let .service(name, _, _, _) = endpoint { return name }
-        return "安卓手机桥"
+    var expiresAt: Date {
+        switch transport {
+        case let .tcp(_, expiresAt): return expiresAt
+        case let .ble(_, _, expiresAt): return expiresAt
+        }
     }
 }
 
@@ -70,11 +81,21 @@ final class SamsungPairingBrowser: ObservableObject {
               serverPublicKey.count == 32,
               let expiresText = record["expires"],
               let expiresMillis = Double(expiresText) else { return nil }
+        var deviceIDHint = ""
+        if let did = record["did"], !did.isEmpty { deviceIDHint = did }
+        let displayName: String
+        if case let .service(name, _, _, _) = result.endpoint {
+            displayName = name
+        } else {
+            displayName = "安卓手机桥"
+        }
         return SamsungPairingService(
-            endpoint: result.endpoint,
-            sessionID: sessionID,
-            serverPublicKey: serverPublicKey,
-            expiresAt: Date(timeIntervalSince1970: expiresMillis / 1_000)
+            id: sessionID,
+            displayName: displayName,
+            transport: .tcp(endpoint: result.endpoint,
+                            expiresAt: Date(timeIntervalSince1970: expiresMillis / 1_000)),
+            deviceIDHint: deviceIDHint,
+            serverPublicKey: serverPublicKey
         )
     }
 }
@@ -103,27 +124,72 @@ enum SamsungPairingClient {
         }
     }
 
-    static func pair(service: SamsungPairingService, code: String, registration: AgentPushRegistration) async throws -> String {
+    /// 构造密封 claim：TCP 与 BLE 共用同一份载荷。
+    static func buildClaim(
+        sessionID: String,
+        serverPublicKey: Data,
+        code: String,
+        registration: AgentPushRegistration
+    ) throws -> Data {
         guard code.range(of: #"^[0-9]{6}$"#, options: .regularExpression) != nil else {
             throw SamsungPairingClientError.invalidCode
         }
-        guard service.expiresAt > Date() else { throw SamsungPairingClientError.expired }
         let registrationData = try JSONEncoder().encode(registration)
         let sealed = try SamsungPairingCrypto.seal(
             registration: registrationData,
-            serverPublicKey: service.serverPublicKey,
-            sessionID: service.sessionID,
+            serverPublicKey: serverPublicKey,
+            sessionID: sessionID,
             code: code
         )
-        let body = try JSONEncoder().encode(Claim(
-            sessionID: service.sessionID,
+        return try JSONEncoder().encode(Claim(
+            sessionID: sessionID,
             clientPublicKey: sealed.clientPublicKey.base64URL,
             sealedRegistration: sealed.combined.base64URL
         ))
-        let responseData = try await exchange(endpoint: service.endpoint, body: body)
-        let response = try JSONDecoder().decode(Response.self, from: responseData)
+    }
+
+    /// 从通道响应中解出配对结果。BLE 通道的响应带 "status\njson" 前缀。
+    static func decodeResponse(_ data: Data) throws -> String {
+        var body = data
+        if let text = String(data: data, encoding: .utf8),
+           let newline = text.firstIndex(of: "\n"),
+           let status = Int(text[..<newline].trimmingCharacters(in: .whitespaces)) {
+            if status < 200 || status >= 300 { throw SamsungPairingClientError.rejected }
+            body = Data(text[text.index(after: newline)...].utf8)
+        }
+        let response = try JSONDecoder().decode(Response.self, from: body)
         guard response.configured else { throw SamsungPairingClientError.rejected }
         return response.deviceIDHint.map { "配对成功（设备 …\($0)）" } ?? "配对成功"
+    }
+
+    static func pair(
+        service: SamsungPairingService,
+        code: String,
+        registration: AgentPushRegistration,
+        bleBrowser: BlePairingBrowser? = nil
+    ) async throws -> String {
+        guard service.expiresAt > Date() else { throw SamsungPairingClientError.expired }
+        switch service.transport {
+        case let .tcp(endpoint, _):
+            let body = try buildClaim(
+                sessionID: service.id,
+                serverPublicKey: service.serverPublicKey,
+                code: code,
+                registration: registration
+            )
+            let responseData = try await exchange(endpoint: endpoint, body: body)
+            return try decodeResponse(responseData)
+        case let .ble(sessionID, serverPublicKey, _):
+            guard let bleBrowser else { throw BlePairingError.notConnected }
+            let body = try buildClaim(
+                sessionID: sessionID,
+                serverPublicKey: serverPublicKey,
+                code: code,
+                registration: registration
+            )
+            let responseData = try await bleBrowser.exchange(claim: body)
+            return try decodeResponse(responseData)
+        }
     }
 
     private static func exchange(endpoint: NWEndpoint, body: Data) async throws -> Data {
@@ -228,6 +294,7 @@ extension Data {
 
     var base64URL: String {
         base64EncodedString().replacingOccurrences(of: "+", with: "-")
-            .replacingOccurrences(of: "/", with: "_").replacingOccurrences(of: "=", with: "")
+            .replacingOccurrences(of: "/", with: "_")
+            .replacingOccurrences(of: "=", with: "")
     }
 }

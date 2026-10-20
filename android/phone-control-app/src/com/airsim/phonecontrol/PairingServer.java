@@ -43,6 +43,7 @@ public final class PairingServer implements Closeable {
     private volatile ServerSocket socket;
     private volatile PairingSession session;
     private volatile NsdManager.RegistrationListener registration;
+    private volatile BlePairingAdvertiser ble;
 
     public PairingServer(Context context, Listener listener) {
         this.context = context.getApplicationContext();
@@ -58,6 +59,7 @@ public final class PairingServer implements Closeable {
                 socket = server;
                 session = created;
                 advertise(server.getLocalPort(), created);
+                startBle(created);
                 String address = preferredPrivateIPv4() + ":" + server.getLocalPort();
                 listener.onStarted(created.code(), address, created.expiresAtMillis(),
                         qrPayload(created, address));
@@ -81,6 +83,18 @@ public final class PairingServer implements Closeable {
         });
     }
 
+    /** 当前设备的身份提示（relay device_id 尾段）；未配对时为空串。 */
+    private String deviceIDHint() {
+        try {
+            JSONObject registration = new StandaloneAgentStore(context).registration();
+            if (registration == null) return "";
+            String deviceID = registration.optString("device_id", "");
+            return deviceID.length() <= 6 ? deviceID : deviceID.substring(deviceID.length() - 6);
+        } catch (Exception error) {
+            return "";
+        }
+    }
+
     private boolean handle(Socket peer, PairingSession created) throws Exception {
         peer.setSoTimeout(8_000);
         InetAddress remote = peer.getInetAddress();
@@ -92,7 +106,7 @@ public final class PairingServer implements Closeable {
         BufferedInputStream input = new BufferedInputStream(peer.getInputStream());
         byte[] headers = readHeaders(input);
         String headerText = new String(headers, StandardCharsets.US_ASCII);
-        String[] lines = headerText.split("\\r\\n");
+        String[] lines = headerText.split("\\r\n");
         if (lines.length == 0 || !"POST /pair/v1/claim HTTP/1.1".equals(lines[0])) {
             BridgeLog.info("pairing_claim_rejected reason=route");
             respond(peer, 404, "{\"error\":\"not_found\"}");
@@ -100,45 +114,76 @@ public final class PairingServer implements Closeable {
         }
         int length = contentLength(lines);
         byte[] body = readExactly(input, length);
-        JSONObject claim = new JSONObject(new String(body, StandardCharsets.UTF_8));
-        if (claim.optInt("version") != 1 || !created.id().equals(claim.optString("session_id"))) {
-            BridgeLog.info("pairing_claim_rejected reason=session");
-            respond(peer, 400, "{\"error\":\"invalid_session\"}");
-            return false;
-        }
-        byte[] plaintext;
+        byte[] response = processClaim(body, created);
+        int status = statusOf(response);
+        respond(peer, status, new String(response, StandardCharsets.UTF_8));
+        return status == 200;
+    }
+
+    /** claim 的处理核心：HTTP 与 BLE 两条通道共用。返回 "status\njson" 形式响应。 */
+    private byte[] processClaim(byte[] body, PairingSession created) {
         try {
-            plaintext = created.claim(
-                    PairingCrypto.decodeBase64URL(claim.getString("client_public_key")),
-                    PairingCrypto.decodeBase64URL(claim.getString("sealed_registration")),
-                    System.currentTimeMillis());
-        } catch (GeneralSecurityException | IllegalArgumentException error) {
-            BridgeLog.info("pairing_claim_rejected reason=authentication");
-            respond(peer, 401, "{\"error\":\"pairing_auth_failed\"}");
-            return false;
+            JSONObject claim = new JSONObject(new String(body, StandardCharsets.UTF_8));
+            if (claim.optInt("version") != 1 || !created.id().equals(claim.optString("session_id"))) {
+                BridgeLog.info("pairing_claim_rejected reason=session");
+                return statusBody(400, "{\"error\":\"invalid_session\"}");
+            }
+            byte[] plaintext;
+            try {
+                plaintext = created.claim(
+                        PairingCrypto.decodeBase64URL(claim.getString("client_public_key")),
+                        PairingCrypto.decodeBase64URL(claim.getString("sealed_registration")),
+                        System.currentTimeMillis());
+            } catch (GeneralSecurityException | IllegalArgumentException error) {
+                BridgeLog.info("pairing_claim_rejected reason=authentication");
+                return statusBody(401, "{\"error\":\"pairing_auth_failed\"}");
+            }
+            try {
+                String registrationJSON = new String(plaintext, StandardCharsets.UTF_8);
+                JSONObject registration = new JSONObject(registrationJSON);
+                String vowlanSecret = registration.optString("vowlan_secret", "");
+                if (vowlanSecret.isEmpty()) throw new GeneralSecurityException("VoWLAN secret missing");
+                registration.put("android_agent_id", AndroidAgentIdentity.agentID(context));
+                registration.put("android_device_name", AndroidAgentIdentity.deviceName());
+                registration.put("android_manufacturer", android.os.Build.MANUFACTURER);
+                registration.put("android_model", android.os.Build.MODEL);
+                registration.put("android_phone_number", AndroidAgentIdentity.phoneNumber(context));
+                registration.put("android_agent_kind", RuntimeMode.isStandalone(context) ? "standalone" : "avf");
+                // VoWLAN HMAC 密钥只属于 Android 热点网关。Linux Agent 的 Push
+                // 注册结构使用严格 JSON 解码，且无须接触该密钥，因此转发前必须移除。
+                registration.remove("vowlan_secret");
+                String agentResponse = new AgentClient(context).registerPairing(registration.toString());
+                VoWLANPairingStore.saveEncoded(context, vowlanSecret);
+                VoWLANGatewayService.start(context);
+                BridgeLog.info("pairing_claim_accepted");
+                listener.onSucceeded(agentResponse);
+                // 配对成功后广播必须立刻消失：一次性窗口即刻作废（NSD + BLE 都停），
+                // 杜绝「配对完还能在配对页看到设备、重复配对生成新身份」。
+                closeQuietly();
+                return statusBody(200, agentResponse);
+            } catch (Exception error) {
+                BridgeLog.error("pairing_claim_processing_failed", error);
+                return statusBody(500, "{\"error\":\"registration_failed\"}");
+            } finally {
+                java.util.Arrays.fill(plaintext, (byte) 0);
+            }
+        } catch (Exception error) {
+            BridgeLog.info("pairing_claim_rejected reason=malformed");
+            return statusBody(400, "{\"error\":\"invalid_claim\"}");
         }
+    }
+
+    private static byte[] statusBody(int status, String json) {
+        return (status + "\n" + json).getBytes(StandardCharsets.UTF_8);
+    }
+
+    private static int statusOf(byte[] statusBody) {
+        String text = new String(statusBody, StandardCharsets.US_ASCII);
+        int newline = text.indexOf('\n');
         try {
-            String registrationJSON = new String(plaintext, StandardCharsets.UTF_8);
-            JSONObject registration = new JSONObject(registrationJSON);
-            String vowlanSecret = registration.optString("vowlan_secret", "");
-            if (vowlanSecret.isEmpty()) throw new GeneralSecurityException("VoWLAN secret missing");
-            registration.put("android_agent_id", AndroidAgentIdentity.agentID(context));
-            registration.put("android_device_name", AndroidAgentIdentity.deviceName());
-            registration.put("android_manufacturer", android.os.Build.MANUFACTURER);
-            registration.put("android_model", android.os.Build.MODEL);
-            registration.put("android_phone_number", AndroidAgentIdentity.phoneNumber(context));
-            registration.put("android_agent_kind", RuntimeMode.isStandalone(context) ? "standalone" : "avf");
-            // VoWLAN HMAC 密钥只属于 Android 热点网关。Linux Agent 的 Push
-            // 注册结构使用严格 JSON 解码，且无须接触该密钥，因此转发前必须移除。
-            registration.remove("vowlan_secret");
-            String agentResponse = new AgentClient(context).registerPairing(registration.toString());
-            VoWLANPairingStore.saveEncoded(context, vowlanSecret);
-            VoWLANGatewayService.start(context);
-            respond(peer, 200, agentResponse);
-            listener.onSucceeded(agentResponse);
-            return true;
-        } finally {
-            java.util.Arrays.fill(plaintext, (byte) 0);
+            return Integer.parseInt(text.substring(0, newline < 0 ? text.length() : newline).trim());
+        } catch (NumberFormatException error) {
+            return 500;
         }
     }
 
@@ -154,6 +199,10 @@ public final class PairingServer implements Closeable {
         info.setAttribute("session", created.id());
         info.setAttribute("key", PairingCrypto.base64URL(created.publicKey()));
         info.setAttribute("expires", Long.toString(created.expiresAtMillis()));
+        // 身份提示：iPhone 发现 did 与注册表活跃设备一致时按「同一台手机重配」
+        // 复用现有密钥，不再 stage 新身份——重复配对生成无名 ghost 的根治点。
+        String did = deviceIDHint();
+        if (!did.isEmpty()) info.setAttribute("did", did);
         registration = new NsdManager.RegistrationListener() {
             @Override public void onServiceRegistered(NsdServiceInfo ignored) {}
             @Override public void onRegistrationFailed(NsdServiceInfo ignored, int code) {
@@ -164,6 +213,28 @@ public final class PairingServer implements Closeable {
             @Override public void onUnregistrationFailed(NsdServiceInfo ignored, int code) {}
         };
         manager.registerService(info, NsdManager.PROTOCOL_DNS_SD, registration);
+    }
+
+    /** BLE 配对通道：与 NSD 窗口同生命周期，claim 走同一个 processClaim。 */
+    private void startBle(PairingSession created) {
+        try {
+            JSONObject sessionInfo = new JSONObject();
+            sessionInfo.put("v", 1);
+            sessionInfo.put("session", created.id());
+            sessionInfo.put("key", PairingCrypto.base64URL(created.publicKey()));
+            sessionInfo.put("expires", created.expiresAtMillis());
+            String did = deviceIDHint();
+            if (!did.isEmpty()) sessionInfo.put("did", did);
+            ble = new BlePairingAdvertiser(context,
+                    sessionInfo.toString().getBytes(StandardCharsets.UTF_8),
+                    body -> processClaim(body, created));
+            ble.start();
+            BridgeLog.info("pairing_ble_advertisement_started");
+        } catch (Exception error) {
+            // BLE 不可用（无硬件 / 未授权）不该阻断 Wi-Fi 配对主路径。
+            BridgeLog.info("pairing_ble_start_skipped reason=" + safeMessage(error));
+            ble = null;
+        }
     }
 
     private static byte[] readHeaders(BufferedInputStream input) throws IOException {
@@ -275,6 +346,11 @@ public final class PairingServer implements Closeable {
     }
 
     @Override public void close() throws IOException {
+        BlePairingAdvertiser activeBle = ble;
+        ble = null;
+        if (activeBle != null) {
+            try { activeBle.stop(); } catch (Exception ignored) {}
+        }
         NsdManager.RegistrationListener active = registration;
         registration = null;
         if (active != null) {

@@ -1,14 +1,17 @@
 import SwiftUI
+import CoreBluetooth
 
 struct SamsungPairingView: View {
     @EnvironmentObject private var model: AppModel
     @AppStorage(LocalModePreference.key) private var localModeEnabled = false
     @StateObject private var browser = SamsungPairingBrowser()
+    @StateObject private var bleBrowser = BlePairingBrowser()
     @State private var code = ""
+    @State private var bleCode = ""
     @State private var pairingServiceID: String?
     @State private var message = ""
     @State private var showingScanner = false
-    @State private var scannedService: SamsungPairingService?
+    @State private var connectingBLEID: UUID?
 
     var body: some View {
         Form {
@@ -42,6 +45,48 @@ struct SamsungPairingView: View {
                 Text("快捷配对")
             }
 
+            Section("蓝牙配对（Wi-Fi 不可用时）") {
+                if bleBrowser.isScanning {
+                    HStack {
+                        ProgressView()
+                        Text(bleBrowser.stateText).foregroundStyle(.secondary)
+                    }
+                } else {
+                    Button {
+                        bleBrowser.start()
+                    } label: {
+                        Label("扫描蓝牙设备", systemImage: "antenna.radiowaves.left.and.right")
+                    }
+                    .buttonStyle(.bordered)
+                    Text(bleBrowser.stateText)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+                ForEach(bleBrowser.candidates) { candidate in
+                    VStack(alignment: .leading, spacing: 10) {
+                        Label(candidate.displayName, systemImage: "dot.radiowaves.right")
+                            .font(.headline)
+                        if !candidate.deviceIDHint.isEmpty {
+                            Text("设备 …\(candidate.deviceIDHint) · 信号 \(candidate.rssi) dBm")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        TextField("安卓显示的 6 位验证码", text: $bleCode)
+                            .keyboardType(.numberPad)
+                            .textContentType(.oneTimeCode)
+                            .onChange(of: bleCode) { value in
+                                bleCode = String(value.filter(\.isNumber).prefix(6))
+                            }
+                        Button("蓝牙配对", systemImage: "lock.shield") {
+                            Task { await pairBLE(candidate) }
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .disabled(bleCode.count != 6 || connectingBLEID != nil)
+                    }
+                    .padding(.vertical, 4)
+                }
+            }
+
             Section("发现的设备") {
                 if browser.services.isEmpty {
                     HStack {
@@ -53,6 +98,11 @@ struct SamsungPairingView: View {
                     VStack(alignment: .leading, spacing: 10) {
                         Label(service.displayName, systemImage: "iphone.radiowaves.left.and.right")
                             .font(.headline)
+                        if !service.deviceIDHint.isEmpty {
+                            Text("当前身份 …\(service.deviceIDHint)（重配将复用该身份）")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
                         TextField("安卓显示的 6 位验证码", text: $code)
                             .keyboardType(.numberPad)
                             .textContentType(.oneTimeCode)
@@ -75,14 +125,18 @@ struct SamsungPairingView: View {
         }
         .navigationTitle("配对安卓开发机")
         .navigationBarTitleDisplayMode(.inline)
-        .onAppear { browser.start() }
-        .onDisappear { browser.stop() }
+        .onAppear {
+            browser.start()
+        }
+        .onDisappear {
+            browser.stop()
+            bleBrowser.stop()
+        }
         .sheet(isPresented: $showingScanner) {
             NavigationStack {
                 QRPairingScannerView(
                     onScanned: { service, scannedCode in
                         showingScanner = false
-                        scannedService = service
                         code = scannedCode
                         Task { await pair(service) }
                     },
@@ -92,15 +146,16 @@ struct SamsungPairingView: View {
                     }
                 )
                 .navigationTitle("扫描配对二维码")
-                .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
-                        Button("取消") { showingScanner = false }
+                        Button("取消") { }
                     }
                 }
             }
         }
     }
+
+    // MARK: - 配对
 
     @MainActor
     private func pair(_ service: SamsungPairingService) async {
@@ -109,18 +164,11 @@ struct SamsungPairingView: View {
             ? "正在加密并写入 VoWLAN 本地密钥…"
             : "正在加密并写入 Android Agent…"
 #if DEBUG
-        print("[AirSIM Pair] claim_started session=\(service.sessionID)")
+        print("[AirSIM Pair] claim_started session=\(service.id)")
 #endif
         defer { pairingServiceID = nil }
         do {
-            // 已有配对设备时：为新 Android 生成独立 relay 凭证（多设备），
-            // 配对成功后自动归档旧设备并切换到新设备。
-            let isAdditionalDevice = !DeviceRegistry.allDevices().isEmpty
-            guard let registration = isAdditionalDevice
-                ? VoIPPushController.shared.pairingRegistrationForNewDevice()
-                : VoIPPushController.shared.pairingRegistration() else {
-                throw SamsungPairingClientError.registrationUnavailable
-            }
+            let registration = try pairingRegistration(for: service)
             message = try await SamsungPairingCompletionCoordinator.complete(
                 performPairing: {
                     try await SamsungPairingClient.pair(
@@ -133,33 +181,101 @@ struct SamsungPairingView: View {
                     await model.vowlan.refreshAfterPairing()
                 }
             )
-            if isAdditionalDevice {
-                if let device = DeviceRegistry.activateStagedDevice(deviceName: service.displayName,
-                                                                    relayURL: registration.relayURL) {
-                    await VoIPPushController.shared.forceRegistrationSync()
-                    message = "配对成功，已切换到新设备（\(service.displayName)）"
-                    model.clearIgnoredAgent(id: device.deviceID)
-                } else {
-                    message = "配对已完成，但保存新设备凭证失败，请重试"
-                }
-            } else {
-                // 首台设备：登记进设备列表（幂等）
-                DeviceRegistry.archiveActiveDeviceIfNeeded()
-                // 删了重配的场景：同一 deviceID 之前可能在忽略名单里，放出来。
-                if !registration.deviceID.isEmpty {
-                    model.clearIgnoredAgent(id: registration.deviceID)
-                }
-            }
-            // 配对后立即刷新设备列表，sheet 里马上能看到。
-            await model.refreshPairedAndroidAgents()
-#if DEBUG
-            print("[AirSIM Pair] claim_completed session=\(service.sessionID)")
-#endif
+            finishPairing(service: service, registration: registration)
         } catch {
             message = "配对失败：\(error.localizedDescription)"
-#if DEBUG
-            print("[AirSIM Pair] claim_failed session=\(service.sessionID) error=\(String(describing: type(of: error)))")
-#endif
         }
+    }
+
+    /// 蓝牙通道：先连接并读取会话材料，再走同一套 claim。
+    @MainActor
+    private func pairBLE(_ candidate: BlePairingCandidate) async {
+        connectingBLEID = candidate.id
+        message = "正在连接蓝牙设备 \(candidate.displayName)…"
+        defer { connectingBLEID = nil }
+        do {
+            let filled = try await bleBrowser.connect(candidate)
+            let service = SamsungPairingService(
+                id: filled.sessionID,
+                displayName: filled.displayName,
+                transport: .ble(sessionID: filled.sessionID,
+                                serverPublicKey: filled.serverPublicKey,
+                                expiresAt: filled.expiresAt),
+                deviceIDHint: filled.deviceIDHint
+            )
+            message = localModeEnabled
+                ? "正在经蓝牙写入 VoWLAN 本地密钥…"
+                : "正在经蓝牙写入 Android Agent…"
+            let registration = try pairingRegistration(for: service)
+            message = try await SamsungPairingCompletionCoordinator.complete(
+                performPairing: {
+                    try await SamsungPairingClient.pair(
+                        service: service,
+                        code: bleCode,
+                        registration: registration,
+                        bleBrowser: bleBrowser
+                    )
+                },
+                refreshVoWLAN: {
+                    await model.vowlan.refreshAfterPairing()
+                }
+            )
+            finishPairing(service: service, registration: registration)
+        } catch {
+            message = "蓝牙配对失败：\(error.localizedDescription)"
+        }
+    }
+
+    /// 配对成功后的登记逻辑。
+    /// 同一台手机重配（did 匹配活跃设备）：复用身份，不归档、不产生 ghost。
+    /// 真正的新设备：stage 新身份并归档旧设备。
+    @MainActor
+    private func finishPairing(service: SamsungPairingService, registration: AgentPushRegistration) {
+        let isAdditionalDevice = !DeviceRegistry.allDevices().isEmpty
+        let rePairSameDevice = isAdditionalDevice
+            && !service.deviceIDHint.isEmpty
+            && (DeviceRegistry.activeDeviceID()?.hasSuffix(service.deviceIDHint) ?? false)
+        if isAdditionalDevice && !rePairSameDevice {
+            if let device = DeviceRegistry.activateStagedDevice(
+                deviceName: service.displayName,
+                relayURL: registration.relayURL
+            ) {
+                Task { await VoIPPushController.shared.forceRegistrationSync() }
+                model.clearIgnoredAgent(id: device.deviceID)
+            } else {
+                message = "配对已完成，但保存新设备凭证失败，请重试"
+            }
+        } else {
+            // 首台设备 / 同机重配：登记进设备列表（幂等）
+            DeviceRegistry.archiveActiveDeviceIfNeeded()
+            if !registration.deviceID.isEmpty {
+                model.clearIgnoredAgent(id: registration.deviceID)
+            }
+        }
+        Task { await model.refreshPairedAndroidAgents() }
+#if DEBUG
+        print("[AirSIM Pair] claim_completed session=\(service.id)")
+#endif
+    }
+
+    /// 按是否同一台手机重配选择注册体：
+    /// 复用身份时用当前活跃密钥（不 stage 新的），从根上消除重复配对产生的 ghost。
+    @MainActor
+    private func pairingRegistration(for service: SamsungPairingService) throws -> AgentPushRegistration {
+        let registryDevices = DeviceRegistry.allDevices()
+        let isAdditionalDevice = !registryDevices.isEmpty
+        let rePairSameDevice = isAdditionalDevice
+            && !service.deviceIDHint.isEmpty
+            && (DeviceRegistry.activeDeviceID()?.hasSuffix(service.deviceIDHint) ?? false)
+        if rePairSameDevice || !isAdditionalDevice {
+            guard let registration = VoIPPushController.shared.pairingRegistration() else {
+                throw SamsungPairingClientError.registrationUnavailable
+            }
+            return registration
+        }
+        guard let registration = VoIPPushController.shared.pairingRegistrationForNewDevice() else {
+            throw SamsungPairingClientError.registrationUnavailable
+        }
+        return registration
     }
 }

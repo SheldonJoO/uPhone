@@ -25,10 +25,11 @@ struct QRPairingPayload: Codable {
         guard let nwPort = NWEndpoint.Port(rawValue: UInt16(port)) else { return nil }
         let endpoint = NWEndpoint.hostPort(host: NWEndpoint.Host(ip), port: nwPort)
         return SamsungPairingService(
-            endpoint: endpoint,
-            sessionID: session,
-            serverPublicKey: serverPublicKey,
-            expiresAt: Date(timeIntervalSince1970: expires / 1_000)
+            id: session,
+            displayName: "安卓手机（扫码）",
+            transport: .tcp(endpoint: endpoint,
+                            expiresAt: Date(timeIntervalSince1970: expires / 1_000)),
+            serverPublicKey: serverPublicKey
         )
     }
 }

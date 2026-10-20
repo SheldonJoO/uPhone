@@ -2,6 +2,12 @@ package com.airsim.phonecontrol;
 
 import android.content.Context;
 import android.media.AudioManager;
+import android.os.Build;
+
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 让本机在远程通话期间完全静默（值守机不能漏音）。
@@ -41,6 +47,10 @@ final class LocalCallAudioController {
     private final java.util.Set<String> reasons = java.util.concurrent.ConcurrentHashMap.newKeySet();
     private boolean silencing;
     private AudioManager.OnModeChangedListener modeListener;
+    /** OEM ROM 会在通话过程中异步重置音量/静音（不止模式切换那一刻），
+     *  定时重施加兜底覆盖所有重置触发点。 */
+    private final ScheduledExecutorService reassertWorker = Executors.newSingleThreadScheduledExecutor();
+    private ScheduledFuture<?> reassertTask;
 
     LocalCallAudioController(android.content.Context context) {
         appContext = context.getApplicationContext();
@@ -85,10 +95,26 @@ final class LocalCallAudioController {
         if (shouldSilence) {
             applySilence(am);
             ensureModeListener(am);
+            startReassertLoop();
         } else {
             applyUnsilence(am);
             removeModeListener(am);
+            stopReassertLoop();
         }
+    }
+
+    private void startReassertLoop() {
+        if (reassertTask != null) return;
+        reassertTask = reassertWorker.scheduleWithFixedDelay(() -> {
+            AudioManager am = (AudioManager) appContext.getSystemService(Context.AUDIO_SERVICE);
+            if (am != null && silencing) applySilence(am);
+        }, 300, 300, TimeUnit.MILLISECONDS);
+    }
+
+    private void stopReassertLoop() {
+        ScheduledFuture<?> task = reassertTask;
+        reassertTask = null;
+        if (task != null) task.cancel(false);
     }
 
     /**
@@ -123,6 +149,11 @@ final class LocalCallAudioController {
     }
 
     private void applySilence(AudioManager am) {
+        // 0) 清理已选通信设备：连着蓝牙/耳机时通话音频会整体绕到那些设备，
+        //    先把路由拉回默认（听筒），静音才有意义。
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            try { am.clearCommunicationDevice(); } catch (Exception ignored) {}
+        }
         // 1) Shizuku 特权桥：以 shell 身份执行 cmd audio adj-mute 0，系统级静音，最可靠。
         //    失败也不放弃，继续走下面的普通 API 兜底。
         try {

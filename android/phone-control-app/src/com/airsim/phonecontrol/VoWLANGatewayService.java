@@ -96,6 +96,14 @@ public final class VoWLANGatewayService extends Service {
                     }
                 }
                 diagnosticState(hotspot, avf, paired, agentReady, pcmReady, dialerRoleHeld);
+                // PCM 桥上有真实通话时，本机静音由这里也保持一份原因：
+                // InCallService 可能因默认拨号角色丢失/服务被回收而收不到 call，
+                // 漏音的主路径就是这条没人施静音的窗口。
+                if (hasVoWLANCall()) {
+                    LocalCallAudioController.get(this).retain("pcm-call");
+                } else {
+                    LocalCallAudioController.get(this).release("pcm-call");
+                }
                 if (VoWLANNetworkPolicy.shouldAdvertise(
                         hotspot != null, paired, agentReady, pcmReady, dialerRoleHeld)) {
                     ensureStarted(hotspot, avf);
