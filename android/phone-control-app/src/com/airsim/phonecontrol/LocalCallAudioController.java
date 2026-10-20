@@ -14,26 +14,68 @@ import android.media.AudioManager;
  * 修复：只要 shouldSilence=true 就每次重新施加（不跳过），确保任何状态切换后静音都还在。
  * 同时把静音做成多层兜底：Shizuku 特权 cmd audio adj-mute 0（最可靠）→ setStreamMute
  * → adjustStreamVolume(ADJUST_MUTE) → setStreamVolume(0) → 关扬声器 → 压低 RING。
+ *
+ * 进程级单例 + 多原因保持：静音不再只靠 AirSIMInCallService 一条路。云端通话的
+ * 媒体会话（StandaloneCloudMediaManager）与 Agent 通话事件同样会 retain 静音，
+ * 任一原因 active 即静默；InCallService 未绑定（默认拨号角色丢失 / 被系统回收）时
+ * 云端通话也不再漏音。
  */
 final class LocalCallAudioController {
-    private final Context appContext;
+    private static volatile LocalCallAudioController instance;
+
+    /** 进程级单例：InCallService、云媒体会话、Agent 事件共用同一份静音状态。 */
+    static LocalCallAudioController get(android.content.Context context) {
+        LocalCallAudioController value = instance;
+        if (value == null) {
+            synchronized (LocalCallAudioController.class) {
+                value = instance;
+                if (value == null) instance = value = new LocalCallAudioController(context);
+            }
+        }
+        return value;
+    }
+
+    private final android.content.Context appContext;
     private final ShizukuBridgeManager privilegedBridge;
+    /** 当前要求静音的原因集合；任一存在即静默。 */
+    private final java.util.Set<String> reasons = java.util.concurrent.ConcurrentHashMap.newKeySet();
     private boolean silencing;
     private AudioManager.OnModeChangedListener modeListener;
 
-    LocalCallAudioController(Context context) {
+    LocalCallAudioController(android.content.Context context) {
         appContext = context.getApplicationContext();
         privilegedBridge = ShizukuBridgeManager.get(context);
     }
 
+    /** InCallService 路径：通话状态集合非空即 retain，空即 release。 */
     synchronized void update(boolean shouldSilence) {
+        if (shouldSilence) reasons.add("incall"); else reasons.remove("incall");
+        apply();
+    }
+
+    /** Agent / 云媒体路径：通话进行期间保持静音。 */
+    synchronized void retain(String reason) {
+        if (reason == null || reason.isEmpty()) return;
+        reasons.add(reason);
+        apply();
+    }
+
+    synchronized void release(String reason) {
+        if (reason == null || reason.isEmpty()) return;
+        reasons.remove(reason);
+        apply();
+    }
+
+    private synchronized void apply() {
+        boolean shouldSilence = !reasons.isEmpty();
         // 仅在「本来就没在静音、且这次也不静音」时跳过，避免无意义的重复操作；
         // 其余情况（尤其是 shouldSilence=true）一律重新施加，覆盖系统重置。
         if (!shouldSilence && !silencing) return;
         boolean changed = silencing != shouldSilence;
         silencing = shouldSilence;
         if (changed) {
-            BridgeLog.info("local_call_output_requested target_silent=" + shouldSilence);
+            BridgeLog.info("local_call_output_requested target_silent=" + shouldSilence
+                    + " reasons=" + reasons);
         }
         AudioManager am = (AudioManager) appContext.getSystemService(Context.AUDIO_SERVICE);
         if (am == null) {

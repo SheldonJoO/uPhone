@@ -1221,12 +1221,11 @@ final class VoIPPushController: NSObject {
         }
     }
 
-    /// 两端模式同步：本地配对包只含 VoWLAN 密钥，安卓会一直是 local_mode、
-    /// 从不向云端发心跳——「云端自检永远查不到心跳」的根源（两端模式错位）。
-    /// iPhone 开启云端模式时，把完整注册（Relay 凭据 + APNs token）经局域网
-    /// 推给当前安卓，自动升级为云端模式并开始发心跳，无需在安卓端重新配对。
-    private func upgradePairedAgentToCloudMode(with api: AirSIMAPI) async {
-        // 默认参数的 api 是已停用的旧模块路线（调用方拿不到 VoWLAN 路由时传入），跳过。
+    /// 把当前完整注册（Relay 凭据 + APNs token）经局域网推给当前安卓，
+    /// 让本地配对的值守机升级为云端模式并开始发心跳。
+    /// 幂等：安卓已是云端模式时，重复推送只是重写同一份注册。
+    /// 默认参数的 api 是已停用的旧模块路线，会自动跳过。
+    func pushCloudUpgradeIfPossible(with api: AirSIMAPI) async {
         guard AirSIMRoutePolicy.permits(api.route) else { return }
         let registration: AgentPushRegistration?
         if let current = currentRegistration() {
@@ -1239,6 +1238,14 @@ final class VoIPPushController: NSObject {
         guard var upgraded = registration else { return }
         upgraded.vowlanSecret = (try? VoWLANCredentialStore.loadOrCreate().encodedSecret)
         try? await api.registerVoIPPush(upgraded)
+    }
+
+    /// 两端模式同步：本地配对包只含 VoWLAN 密钥，安卓会一直是 local_mode、
+    /// 从不向云端发心跳——「云端自检永远查不到心跳」的根源（两端模式错位）。
+    /// iPhone 开启云端模式时，把完整注册（Relay 凭据 + APNs token）经局域网
+    /// 推给当前安卓，自动升级为云端模式并开始发心跳，无需在安卓端重新配对。
+    private func upgradePairedAgentToCloudMode(with api: AirSIMAPI) async {
+        await pushCloudUpgradeIfPossible(with: api)
     }
 
     /// 本地 USB/ECM 不可达时，通过 Relay 最近心跳判断 Agent 是否仍在公网在线。

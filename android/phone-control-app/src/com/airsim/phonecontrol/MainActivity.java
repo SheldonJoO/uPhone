@@ -109,9 +109,11 @@ public final class MainActivity extends Activity {
     private boolean pushConfigured;
     private String pushDetail = "尚未检查";
     private String pushDiagnostic = "尚未读取 Agent 的 Push 状态";
-	private boolean cloudEnabled;
-	private boolean cloudRelayConfigured;
-	private String cloudLastError = "";
+    private boolean cloudEnabled;
+    private boolean cloudRelayConfigured;
+    private String cloudLastError = "";
+    private long cloudLastHeartbeatMillis;
+    private int cloudHeartbeatFailures;
 	private boolean avfStartupPromptShown;
 
     private PairingServer pairingServer;
@@ -312,6 +314,8 @@ public final class MainActivity extends Activity {
 
         String connectionMode = MainScreenPresentation.connectionModeTitle(
                 vowlanReady(), cloudEnabled, cloudRelayConfigured, cloudLastError);
+        String connectionDetail = MainScreenPresentation.connectionModeDetail(
+                vowlanReady(), cloudEnabled, cloudRelayConfigured, cloudLastError);
         int connectionColor = vowlanReady() ? CYAN
                 : cloudEnabled && cloudRelayConfigured && cloudLastError.isEmpty() ? BLUE : WARNING;
         LinearLayout connectionCard = card(SURFACE, 18);
@@ -321,6 +325,26 @@ public final class MainActivity extends Activity {
         TextView connectionTitle = label(connectionMode, 17, connectionColor, Gravity.START);
         connectionTitle.setTypeface(Typeface.DEFAULT_BOLD);
         connectionCard.addView(connectionTitle, matchWithTop(5));
+        connectionCard.addView(label(connectionDetail, 12, MUTED, Gravity.START), matchWithTop(4));
+        connectionCard.addView(label(MainScreenPresentation.heartbeatLine(
+                cloudLastHeartbeatMillis, cloudHeartbeatFailures), 12, MUTED, Gravity.START),
+                matchWithTop(2));
+
+        // 云端值守开关：安卓端直接控制「远程通话与短信」，不必只依赖 iPhone 端开关。
+        // 本地配对（local_mode）的机器开启会报错——那种配对包里没有 Relay 身份，
+        // 需在 iPhone 端开启远程通话与短信自动升级，或重新走一次带云端的配对。
+        LinearLayout cloudRow = row();
+        cloudRow.setGravity(Gravity.CENTER_VERTICAL);
+        LinearLayout cloudCopy = column(dp(12));
+        cloudCopy.addView(label("云端值守（远程通话与短信）", 15, TEXT, Gravity.START));
+        cloudCopy.addView(label(cloudDutySummary(), 12, MUTED, Gravity.START));
+        cloudRow.addView(cloudCopy, weighted());
+        Switch cloudToggle = new Switch(this);
+        cloudToggle.setChecked(cloudEnabled);
+        cloudToggle.setThumbTintList(ColorStateList.valueOf(PRIMARY));
+        cloudToggle.setOnCheckedChangeListener((ignored, enabled) -> setCloudDuty(enabled));
+        cloudRow.addView(cloudToggle);
+        connectionCard.addView(cloudRow, matchWithTop(12));
         root.addView(connectionCard, matchWithTop(12));
 
         TextView pairing = primaryButton(paired ? "重新配对 iPhone" : "配对 iPhone", BLUE);
@@ -519,6 +543,46 @@ public final class MainActivity extends Activity {
         button.setClickable(true);
         button.setFocusable(true);
         return button;
+    }
+
+    /** 云端值守开关的说明文案：随配对形态变化。 */
+    private String cloudDutySummary() {
+        if (!VoWLANPairingStore.configured(this) && !AppConfig.configured(this)) {
+            return "请先配对 iPhone 再开启云端值守";
+        }
+        if (!cloudEnabled) {
+            return "开启后来电/短信经公网 Relay 送达 iPhone，人在外地也能值守";
+        }
+        return cloudRelayConfigured
+                ? "云端值守中：Agent 定期向 Relay 上报心跳与事件"
+                : "云端值守已开启，但 Relay 配置不完整";
+    }
+
+    /**
+     * 云端值守开关（安卓端直接控制「远程通话与短信」）。
+     * 本地配对（local_mode）的机器开启会被 Agent 拒绝——配对包里没有 Relay 身份，
+     * 需在 iPhone 端开启「远程通话与短信」自动升级，或重新走一次带云端的配对。
+     */
+    private void setCloudDuty(boolean enabled) {
+        BridgeLog.info("cloud_duty_toggle target_enabled=" + enabled);
+        Executors.newSingleThreadExecutor().execute(() -> {
+            try {
+                String payload = new AgentClient(this).setPushCloudEnabled(enabled);
+                boolean now = new JSONObject(payload).optBoolean("cloud_enabled", enabled);
+                runOnUiThread(() -> {
+                    toast(now ? "云端值守已开启" : "云端值守已关闭");
+                    refreshAgent();
+                });
+            } catch (Exception error) {
+                String reason = error.getMessage() == null
+                        ? error.getClass().getSimpleName() : error.getMessage();
+                BridgeLog.error("cloud_duty_toggle_failed target_enabled=" + enabled, error);
+                runOnUiThread(() -> {
+                    toast("云端值守切换失败：" + DebugRedactor.sanitize(reason));
+                    refreshAgent();
+                });
+            }
+        });
     }
 
     /** 值守总开关：开即常驻转发，关即真正停服。 */
@@ -1375,6 +1439,8 @@ public final class MainActivity extends Activity {
         cloudEnabled = enabled;
         cloudRelayConfigured = enabled && result.optBoolean("configured", false) && !relay.isEmpty();
         cloudLastError = DebugRedactor.sanitize(lastError);
+        cloudLastHeartbeatMillis = result.optLong("last_heartbeat", 0);
+        cloudHeartbeatFailures = result.optInt("heartbeat_failures", 0);
         pushConfigured = enabled && calls && messages;
         pushDetail = !enabled ? "云端已关闭" : pushConfigured ? "推送已配置" : "配置不完整";
         pushDiagnostic = "云端开关：" + (enabled ? "开启" : "关闭")

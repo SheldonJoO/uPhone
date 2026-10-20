@@ -330,19 +330,28 @@ struct AndroidAgentPresentation: Equatable, Identifiable, Sendable {
         }
     }
 
-    /// 当前生效的线路：Wi-Fi 直连优先，云中继兜底，都不通即离线。
+    /// 当前生效的线路（单选语义保留给旧调用方）：Wi-Fi 直连优先，云中继兜底，都不通即离线。
     var linkKind: DeviceLinkKind {
         if vowlanOnline { return .wifiDirect }
         if cloudOnline { return .cloud }
         return .offline
     }
 
+    /// 全部可用线路：两条都在线时并列显示。
+    /// 只显示一条会误导——用户开了「远程通话与短信」、两条线路都活着，
+    /// 卡片却只写「Wi-Fi 直连」，看起来像云端值守没生效。
+    var activeLinkKinds: [DeviceLinkKind] {
+        var kinds: [DeviceLinkKind] = []
+        if vowlanOnline { kinds.append(.wifiDirect) }
+        if cloudOnline { kinds.append(.cloud) }
+        return kinds.isEmpty ? [.offline] : kinds
+    }
+
     var linkTitle: String {
-        switch linkKind {
-        case .wifiDirect: return "Wi-Fi 直连"
-        case .cloud: return "云中继"
-        case .offline: return "离线"
-        }
+        let kinds = activeLinkKinds
+        if kinds == [.offline] { return "离线" }
+        return kinds.map { $0 == .wifiDirect ? "Wi-Fi 直连" : "云中继" }
+            .joined(separator: " + ")
     }
 
     /// SIM 卡小结："SIM 1 · 中国移动 138****0000" / 单卡显示号码 / 无卡显示占位。

@@ -97,6 +97,9 @@ final class StandaloneCloudMediaManager implements Closeable {
             if (active != null && active.descriptor.same(descriptor)) return;
             if (active != null) active.close();
             active = new CloudSession(descriptor);
+            // 云端通话期间本机必须静默：不依赖 InCallService（默认拨号角色丢失 /
+            // 服务被回收时它收不到 call），由媒体会话自己保持静音原因。
+            LocalCallAudioController.get(context).retain("cloud-media");
             sessions.execute(active);
         }
     }
@@ -106,6 +109,7 @@ final class StandaloneCloudMediaManager implements Closeable {
             if (active != null && active.descriptor.same(descriptor)) {
                 active.close();
                 active = null;
+                LocalCallAudioController.get(context).release("cloud-media");
             }
         }
     }
@@ -341,6 +345,7 @@ final class StandaloneCloudMediaManager implements Closeable {
         synchronized (lock) {
             if (active != null) active.close();
             active = null;
+            LocalCallAudioController.get(context).release("cloud-media");
         }
     }
 }

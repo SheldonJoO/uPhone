@@ -475,22 +475,26 @@ struct AirSIMSettingsView: View {
 }
 
 /// 多设备管理：配对过的安卓值守机列表，点选切换当前设备。
-/// 单条线路徽章：Wi-Fi 直连 / 云中继 / 离线。
+/// 线路徽章：Wi-Fi 直连 / 云中继 / 离线；两条线路同时在线时并列显示。
 private struct DeviceLinkBadge: View {
-    let kind: DeviceLinkKind
+    let kinds: [DeviceLinkKind]
     let title: String
 
     private var color: Color {
-        switch kind {
+        if kinds.contains(.cloud) && kinds.contains(.wifiDirect) { return .green }
+        switch kinds.first {
         case .wifiDirect: return .blue
         case .cloud: return .green
-        case .offline: return .secondary
+        default: return .secondary
         }
     }
 
     var body: some View {
         HStack(spacing: 4) {
-            Circle().fill(color).frame(width: 6, height: 6)
+            ForEach(kinds, id: \.self) { kind in
+                Circle().fill(kind == .cloud ? Color.green : Color.blue)
+                    .frame(width: 6, height: 6)
+            }
             Text(title).font(.caption2.weight(.medium))
         }
         .foregroundStyle(color)
@@ -572,7 +576,7 @@ struct GuardDeviceRows: View {
                         }
                     }
                     HStack(spacing: 8) {
-                        DeviceLinkBadge(kind: agent.linkKind, title: agent.linkTitle)
+                        DeviceLinkBadge(kinds: agent.activeLinkKinds, title: agent.linkTitle)
                         Spacer()
                         Text(agent.agentKindTitle)
                             .font(.caption)

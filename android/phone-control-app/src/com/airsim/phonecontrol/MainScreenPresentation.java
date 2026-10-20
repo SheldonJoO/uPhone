@@ -8,6 +8,7 @@ public final class MainScreenPresentation {
             boolean cloudEnabled,
             boolean relayConfigured,
             String lastError) {
+        if (vowlanReady && cloudEnabled) return "VoWLAN + 云端";
         if (vowlanReady) return "VoWLAN 模式";
         if (cloudEnabled && relayConfigured && lastError != null && !lastError.isBlank()) {
             return "云端链路异常";
@@ -22,6 +23,9 @@ public final class MainScreenPresentation {
             boolean cloudEnabled,
             boolean relayConfigured,
             String lastError) {
+        if (vowlanReady && cloudEnabled) {
+            return "两条线路都在线：同一 Wi-Fi 下走 VoWLAN，人在外地经云端 Relay";
+        }
         if (vowlanReady) return "局域网控制与 PCM 已就绪；通话优先走 VoWLAN";
         if (cloudEnabled && relayConfigured && lastError != null && !lastError.isBlank()) {
             return "Relay / Agent 最近错误：" + lastError;

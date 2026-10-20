@@ -339,6 +339,16 @@ final class AppModel: ObservableObject {
         } catch {
             cloudAgentDirectory = nil
         }
+        // 云端模式已开但安卓尚未升级成功（上次推送时 VoWLAN 不可达 / 被拒）：
+        // 每次刷新都经局域网补推一次完整注册，直到心跳恢复为止。
+        // 只在单设备场景做——多设备时无法把 VoWLAN 端点可靠映射到活跃设备，
+        // 推错身份会覆盖另一台机的配对。
+        if CloudModePreference.isEnabled(),
+           cloudAgentDirectory?.cloudOnline != true,
+           DeviceRegistry.allDevices().count <= 1,
+           let localAPI = verifiedVoWLANAPI() {
+            await VoIPPushController.shared.pushCloudUpgradeIfPossible(with: localAPI)
+        }
         NotificationCenter.default.post(name: .simCardsUpdated, object: nil)
     }
 

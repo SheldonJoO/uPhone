@@ -60,6 +60,10 @@ final class StandaloneAgentGateway {
 
     String pushStatus() throws Exception { return store.pushStatus().toString(); }
 
+    String setPushCloudEnabled(boolean enabled) throws Exception {
+        return store.setCloudEnabled(enabled).toString();
+    }
+
     String debugSnapshot() throws Exception {
         return new JSONObject().put("events", new JSONArray()).put("runtime_profile", "android-standalone")
                 .put("log_available_in_app", true).toString();
@@ -118,6 +122,13 @@ final class StandaloneAgentGateway {
     void sendCallEvent(String json) throws Exception {
         JSONObject event = new JSONObject(json);
         applyCallEvent(event);
+        // 通话进行期间（含响铃）保持本机静默：与 InCallService 路径互为兜底，
+        // 任一路径失效（服务被回收 / 默认拨号角色丢失）通话都不会漏音。
+        if ("ended".equals(event.optString("state"))) {
+            LocalCallAudioController.get(context).release("agent-call");
+        } else {
+            LocalCallAudioController.get(context).retain("agent-call");
+        }
         if (store.configured() && store.cloudEnabled()) {
             StandaloneAgentService.enqueueCallEvent(context, event.toString());
         }

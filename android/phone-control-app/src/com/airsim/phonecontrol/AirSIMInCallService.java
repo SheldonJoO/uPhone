@@ -35,7 +35,7 @@ public final class AirSIMInCallService extends InCallService {
     @Override
     public void onCallAdded(Call call) {
         super.onCallAdded(call);
-        if (localAudio == null) localAudio = new LocalCallAudioController(this);
+        if (localAudio == null) localAudio = LocalCallAudioController.get(this);
         // 本地黑名单（iPhone 离线时的兜底；在线时由 iPhone 策略先行处理）。
         if ("incoming".equals(direction(call))) {
             String incomingNumber = number(call);

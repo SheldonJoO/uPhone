@@ -49,6 +49,13 @@ public final class AgentClient {
         return request("GET", "/api/push/status", null, 5_000);
     }
 
+    /** 云端值守开关：开启后 Agent 向 Relay 注册并发送心跳，来电/短信经公网送达 iPhone。 */
+    public String setPushCloudEnabled(boolean enabled) throws Exception {
+        if (standalone != null) return standalone.setPushCloudEnabled(enabled);
+        return request("POST", "/api/push/mode",
+                "{\"enabled\":" + enabled + "}", 8_000);
+    }
+
     public String debugSnapshot() throws Exception {
         if (standalone != null) return standalone.debugSnapshot();
         return request("GET", "/api/debug?limit=100", null, 8_000);
