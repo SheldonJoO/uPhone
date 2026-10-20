@@ -60,9 +60,19 @@ public final class PairingServer implements Closeable {
                 session = created;
                 advertise(server.getLocalPort(), created);
                 startBle(created);
-                String address = preferredPrivateIPv4() + ":" + server.getLocalPort();
-                listener.onStarted(created.code(), address, created.expiresAtMillis(),
-                        qrPayload(created, address));
+                // 私有 IPv4 为可选项：BLE 配对通道本就服务「无 Wi-Fi」场景，地址解析
+                // 失败只代表不走 HTTP/扫码路径，绝不能阻断整个配对窗口，否则「无 Wi-Fi
+                // 蓝牙配对」这条路径永远打不开。没有地址时 qrPayload 留空，由 UI 提示改用蓝牙。
+                String address = "";
+                String qr = "";
+                try {
+                    String ip = preferredPrivateIPv4();
+                    address = ip + ":" + server.getLocalPort();
+                    qr = qrPayload(created, address);
+                } catch (IOException ipError) {
+                    BridgeLog.info("pairing_no_private_ip reason=" + safeMessage(ipError));
+                }
+                listener.onStarted(created.code(), address, created.expiresAtMillis(), qr);
                 timer.schedule(() -> {
                     listener.onFailed("配对窗口已过期");
                     closeQuietly();

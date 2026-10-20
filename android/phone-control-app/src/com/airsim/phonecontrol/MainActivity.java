@@ -1835,14 +1835,21 @@ public final class MainActivity extends Activity {
                 BridgeLog.info("pairing_started address=" + address + " expires_at=" + expiresAtMillis);
                 pairingCode = code;
                 pairingExpiresAt = expiresAtMillis;
+                boolean hasNetwork = qrPayload != null && !qrPayload.isEmpty();
                 runOnUiThread(() -> {
                     if (pairingCodeView != null) pairingCodeView.setText(
                             MainScreenPresentation.formatPairingCode(code));
                     if (pairingQrView != null) {
-                        android.graphics.Bitmap qr = QrCodeBitmap.encode(qrPayload, dp(200));
-                        if (qr != null) pairingQrView.setImageBitmap(qr);
+                        if (hasNetwork) {
+                            android.graphics.Bitmap qr = QrCodeBitmap.encode(qrPayload, dp(200));
+                            if (qr != null) pairingQrView.setImageBitmap(qr);
+                        } else {
+                            pairingQrView.setImageBitmap(null);
+                        }
                     }
-                    if (pairingStatus != null) pairingStatus.setText("等待 iPhone 连接…\n" + address);
+                    if (pairingStatus != null) pairingStatus.setText(hasNetwork
+                            ? "等待 iPhone 连接…\n" + address
+                            : "等待 iPhone 经蓝牙连接…（当前无共享 Wi‑Fi，扫码不可用）");
                     startPairingCountdown();
                 });
             }
