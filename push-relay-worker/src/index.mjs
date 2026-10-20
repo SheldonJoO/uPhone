@@ -961,6 +961,20 @@ function callControlReceipt(status, control) {
   return JSON.stringify({ status, ...(control || {}) });
 }
 
+// Returns true when the registration-relevant fields of `incoming` equal those of
+// `existing`, ignoring `registered_at` (which always changes on a write). Used to
+// make registration idempotent so redundant re-registrations are no-ops.
+function deviceContentEqual(incoming, existing) {
+  const relevant = (record) => Object.keys(record).filter((key) => key !== "registered_at");
+  const incomingKeys = relevant(incoming);
+  const existingKeys = relevant(existing);
+  if (incomingKeys.length !== existingKeys.length) return false;
+  for (const key of incomingKeys) {
+    if (JSON.stringify(incoming[key]) !== JSON.stringify(existing[key])) return false;
+  }
+  return true;
+}
+
 async function registerDevice(request, env) {
   const device = await readJSON(request);
   const validationError = validateRegistration(device, env.ALLOWED_BUNDLE_ID);
@@ -1014,6 +1028,17 @@ async function registerDevice(request, env) {
     force_legacy_pcm: device.force_legacy_pcm === true,
   };
   record.media_transport = assignedMediaTransport(record, env);
+
+  // Idempotent registration: if the meaningful device content is unchanged since
+  // the last registration, skip the write and the telemetry event entirely. This
+  // caps registration storms from either client — for example an Android agent
+  // that re-registers on every service restart because its in-memory dedup hash
+  // is lost — so they can no longer exhaust the KV write budget or churn the
+  // Durable Object store. The first registration (no `existing`) always writes.
+  if (existing && deviceContentEqual(record, existing)) {
+    return jsonResponse(200, { registered: true, unchanged: true });
+  }
+
   await writeDeviceRecord(env, record.device_id, record);
   await recordDashboardEvent(env, {
     type: "registration", device_id: record.device_id, status: "delivered",

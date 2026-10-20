@@ -252,7 +252,11 @@ export async function writeDeviceRecord(env, deviceID, record) {
     body: JSON.stringify(record),
   });
   if (!response.ok) throw new Error(`device registry returned HTTP ${response.status}`);
-  await bestEffortKVPut(env.DEVICES, `${DEVICE_PREFIX}${deviceID}`, record);
+  // The Durable Object registry is authoritative whenever it is bound. The KV
+  // mirror below is intentionally skipped here: writing it on every registration
+  // was the only unconditionally-fired KV write in the DO-bound path and was
+  // burning the free-tier 1,000-writes/day budget. The mirror is only needed for
+  // legacy/test deployments that have no STATUS DO (handled by the `!stub` branch).
 }
 
 export async function readDeviceRecord(env, deviceID) {
