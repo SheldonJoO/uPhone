@@ -6,6 +6,8 @@ import {
   recordDashboardEvent,
 } from "./dashboard.mjs";
 import {
+  deleteAgentHeartbeats,
+  deleteDeviceRecord,
   deleteRelayState,
   readAgentHeartbeat,
   readAgentHeartbeats,
@@ -89,6 +91,9 @@ export async function handleRequest(request, env) {
   try {
     if (url.pathname === "/v1/devices/register") {
       return await registerDevice(request, env);
+    }
+    if (url.pathname === "/v1/devices/unregister") {
+      return await unregisterDevice(request, env);
     }
     if (url.pathname === "/v1/live-activities/register") {
       return await registerLiveActivity(request, env);
@@ -1047,6 +1052,24 @@ async function registerDevice(request, env) {
   // Keep the public response shape stable for older App/Agent builds. The
   // negotiated transport lives in the device record and each call descriptor.
   return jsonResponse(200, { registered: true });
+}
+
+/// 解绑设备：删除设备注册记录与全部 Agent 心跳。
+/// iPhone 端「解散配对」时调用；即使安卓端无法送达解绑指令（本地模式 /
+/// 异网），服务端记录也会被清掉，设备列表与看板不再出现离线幽灵。
+async function unregisterDevice(request, env) {
+  const value = await readJSON(request);
+  const authenticated = await authenticate(value, env);
+  if (authenticated.response) return authenticated.response;
+  const deviceID = authenticated.device.device_id;
+  await Promise.all([
+    deleteDeviceRecord(env, deviceID),
+    deleteAgentHeartbeats(env, deviceID),
+  ]);
+  await recordDashboardEvent(env, {
+    type: "unregister", device_id: deviceID, status: "delivered", channel: "relay",
+  });
+  return jsonResponse(200, { unregistered: true });
 }
 
 async function registerLiveActivity(request, env) {

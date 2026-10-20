@@ -17,6 +17,7 @@ final class StandaloneAgentStore {
     private static final String LAST_HEARTBEAT = "last_heartbeat";
     private static final String LAST_SEEN = "last_seen";
     private static final String HEARTBEAT_FAILURES = "heartbeat_failures";
+    private static final String PAIRED_AT = "paired_at";
 
     private final SharedPreferences preferences;
 
@@ -45,7 +46,8 @@ final class StandaloneAgentStore {
                 "live_activity_push_to_start_token"}) {
             if (value.has(key)) value.put(key, value.optString(key, "").toLowerCase(Locale.ROOT));
         }
-        preferences.edit().putString(REGISTRATION, value.toString()).remove(LAST_ERROR).apply();
+        preferences.edit().putString(REGISTRATION, value.toString()).remove(LAST_ERROR)
+                .putLong(PAIRED_AT, System.currentTimeMillis()).apply();
         return value;
     }
 
@@ -59,7 +61,7 @@ final class StandaloneAgentStore {
 
     /** 真正解绑：清除云端配对，让 Agent 停止接受命令、停止心跳（VoWLAN 由调用方一并停止）。 */
     synchronized void clearRegistration() {
-        preferences.edit().remove(REGISTRATION).remove(LAST_ERROR)
+        preferences.edit().remove(REGISTRATION).remove(LAST_ERROR).remove(PAIRED_AT)
                 .putLong(LAST_SEEN, 0).apply();
         BridgeLog.info("standalone_registration_cleared");
     }
@@ -105,6 +107,18 @@ final class StandaloneAgentStore {
     String lastError() { return preferences.getString(LAST_ERROR, ""); }
     long lastSeen() { return preferences.getLong(LAST_SEEN, 0L); }
     long lastHeartbeat() { return preferences.getLong(LAST_HEARTBEAT, 0L); }
+
+    /**
+     * 配对保存时间，用于「配对过期自动解绑」的计时基准。
+     * 不能用 lastSeen：本地模式没有任何云端活动，lastSeen 恒为 0 或停留在
+     * 很久以前的旧值，会把刚配对的本地值守机立即误解绑（连带清掉 VoWLAN
+     * 配对、停掉网关广播——「未发现安卓 VoWLAN」就是这么来的）。
+     * 老版本写入的数据没有该字段时回退 lastSeen，保持原行为。
+     */
+    long pairingSavedAt() {
+        long pairedAt = preferences.getLong(PAIRED_AT, 0L);
+        return pairedAt > 0L ? pairedAt : lastSeen();
+    }
 
     JSONObject pushStatus() throws Exception {
         JSONObject registration = registration();

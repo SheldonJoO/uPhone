@@ -85,15 +85,23 @@ public final class StandaloneAgentService extends Service {
         while (running) {
             try {
                 JSONObject registration = store.registration();
-                // 配对过期兜底：最后一次来自配对 iPhone 的活动超过阈值即自动解绑，
-                // 覆盖 iPhone 端删除配对但 unpair 指令未送达（如两端异网）的情况。
-                long sincePaired = System.currentTimeMillis() - store.lastSeen();
-                if (store.configured() && sincePaired > UNPAIR_TIMEOUT_MS) {
-                    BridgeLog.info("agent_auto_unpaired_after_timeout days=" + (sincePaired / 86_400_000L));
-                    unpair(this);
+                // 配对过期兜底：只对云端模式生效。本地模式没有任何云端活动，
+                // 心跳/注册都不会刷新 lastSeen，用云端活动时间判断会把刚配对的
+                // 本地值守机立即误解绑（顺带清掉 VoWLAN 配对、停掉网关广播）。
+                if (store.configured() && !registration.optBoolean("local_mode", false)) {
+                    long sincePairing = System.currentTimeMillis() - store.pairingSavedAt();
+                    if (sincePairing > UNPAIR_TIMEOUT_MS) {
+                        BridgeLog.info("agent_auto_unpaired_after_timeout days="
+                                + (sincePairing / 86_400_000L));
+                        unpair(this);
+                        continue;
+                    }
                 }
                 if (registration == null || !store.cloudEnabled()) {
-                    update(registration == null ? "内置 Agent 在线 · 等待 iPhone 配对" : "内置 Agent 在线 · 云端已关闭");
+                    update(registration == null ? "内置 Agent 在线 · 等待 iPhone 配对"
+                            : (registration.optBoolean("local_mode", false)
+                                    ? "本地模式 · 仅 Wi-Fi 直连（云端心跳关闭）"
+                                    : "已配对 · 云端同步已关闭"));
                     Thread.sleep(2_000);
                     continue;
                 }
@@ -106,7 +114,7 @@ public final class StandaloneAgentService extends Service {
                 SMSInboxScanner.scanIfDue(this);
                 if (!commandChannelConnected) pollCommands(registration);
                 failures = 0;
-                update("内置 Agent 在线 · Relay 已连接");
+                update("云端模式 · Relay 已连接 · 心跳正常");
                 Thread.sleep(2_000);
             } catch (InterruptedException interrupted) {
                 Thread.currentThread().interrupt();

@@ -349,25 +349,53 @@ final class AppModel: ObservableObject {
         SimSelectionStore.currentDeviceID = currentAndroidAgent?.id
     }
 
-    /// 解绑设备：本地移除记录后，向 Android 下发真正的解绑指令
-    /// （云端 Relay 透传覆盖异网场景，局域网直连作为同网兜底）。
-    /// Android 收到后会清除云端 + VoWLAN 配对并停止广播，此后不再接受任何命令。
+    /// 解绑设备：先把解绑指令发出去（云端 Relay 透传 + 服务端注销 + 局域网兜底），
+    /// 再清本地记录。顺序反了会出经典 bug：DeviceRegistry.remove 会清掉活跃密钥槽，
+    /// 之后 sendCloudUnpair 从 keychain 现读凭据时已读空/被重建成新 device_id，
+    /// 解绑指令静默丢失 → 安卓继续注册/广播 →「解散配对后一会儿又出现」。
+    ///
+    /// 列表 id 与注册表 key 是两个 id 空间：云端目录 id 是安卓 Agent UUID、
+    /// VoWLAN id 是 agent_id/主机，注册表 key 是 relay device_id。直接用展示 id
+    /// 删注册表会永远删不中，残留条目一直显示为离线幽灵——所以两种 id 都要清。
     func unpairAndroidAgent(id: String) async {
-        let creds = DeviceRegistry.credentials(for: id)
+        let allDevices = DeviceRegistry.allDevices()
+        let target: PairedDevice?
+        if let matched = DeviceRegistry.device(for: id) {
+            target = matched
+        } else if allDevices.count <= 1
+                    || id == DeviceRegistry.activeDeviceID()
+                    || cloudAgentDirectory?.activeAgentID == id
+                    || cloudAgentStatus?.activeAgentID == id {
+            // 单设备场景（或展示 id 指向当前活跃设备）：回退到活跃设备凭据，
+            // 这是「本地配对 + 云端目录」双入口下的常见情况。
+            target = DeviceRegistry.credentials(for: id)
+        } else {
+            // 多设备且无法确认归属：只做本地忽略，绝不误删其他设备的云端记录。
+            target = nil
+        }
+        if let target {
+            await VoIPPushController.shared.sendCloudUnpair(
+                credentialOverride: (target.deviceID, target.deviceSecret, target.relayURL))
+            await VoIPPushController.shared.unregisterDevice(
+                deviceID: target.deviceID, deviceSecret: target.deviceSecret, relayURL: target.relayURL)
+        }
+        await VoIPPushController.shared.sendCloudUnpair()
+        if let target, let localAPI = verifiedVoWLANAPI() {
+            let deviceID = target.deviceID
+            let deviceSecret = target.deviceSecret
+            Task.detached {
+                try? await localAPI.unpairLocally(
+                    deviceID: deviceID, deviceSecret: deviceSecret)
+            }
+        }
         ignoredAgentIDs.insert(id)
+        if let target { ignoredAgentIDs.insert(target.deviceID) }
         DeviceRegistry.remove(deviceID: id)
-        if preferredAgentID == id {
+        if let target { DeviceRegistry.remove(deviceID: target.deviceID) }
+        if preferredAgentID == id || preferredAgentID == target?.deviceID {
             preferredAgentID = nil
         }
         syncSimDeviceScope()
-        await VoIPPushController.shared.sendCloudUnpair()
-        let localAPI = verifiedVoWLANAPI()
-        if let creds, let localAPI {
-            Task.detached {
-                try? await localAPI.unpairLocally(
-                    deviceID: creds.deviceID, deviceSecret: creds.deviceSecret)
-            }
-        }
     }
 
     /// 配对成功后调用：把该设备从忽略名单里放出来。

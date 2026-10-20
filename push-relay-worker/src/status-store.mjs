@@ -96,6 +96,10 @@ export class AgentStatusRegistry {
           ? Response.json(record)
           : Response.json({ error: "not found" }, { status: 404 });
       }
+      if (request.method === "DELETE") {
+        await this.storage.delete(key);
+        return new Response(null, { status: 204 });
+      }
       return new Response("method not allowed", { status: 405 });
     }
 
@@ -117,11 +121,21 @@ export class AgentStatusRegistry {
       return new Response("method not allowed", { status: 405 });
     }
 
-    if (rosterMatch && request.method === "GET") {
+    if (rosterMatch) {
       const deviceID = decodeURIComponent(rosterMatch[1]);
       const prefix = `${HEARTBEAT_PREFIX}${deviceID}:agent:`;
-      const entries = await this.storage.list({ prefix });
-      return Response.json([...entries.values()]);
+      if (request.method === "GET") {
+        const entries = await this.storage.list({ prefix });
+        return Response.json([...entries.values()]);
+      }
+      // 解绑设备时清空其全部 Agent 心跳，避免目录里永远挂着一个离线幽灵。
+      if (request.method === "DELETE") {
+        const entries = await this.storage.list({ prefix });
+        for (const key of entries.keys()) await this.storage.delete(key);
+        await this.storage.delete(`${HEARTBEAT_PREFIX}${deviceID}`);
+        return new Response(null, { status: 204 });
+      }
+      return new Response("method not allowed", { status: 405 });
     }
 
     if (agentMatch) {
@@ -267,6 +281,39 @@ export async function readDeviceRecord(env, deviceID) {
     if (response.status !== 404) throw new Error(`device registry returned HTTP ${response.status}`);
   }
   return readKVRecord(env.DEVICES, `${DEVICE_PREFIX}${deviceID}`);
+}
+
+/** 解绑设备：删除设备注册记录（KV 仅在无 STATUS DO 的 legacy 部署下清理）。 */
+export async function deleteDeviceRecord(env, deviceID) {
+  const stub = registryStub(env);
+  if (!stub) {
+    await env.DEVICES.delete(`${DEVICE_PREFIX}${deviceID}`);
+    return;
+  }
+  const response = await stub.fetch(`https://status.internal/device/${encodeURIComponent(deviceID)}`, {
+    method: "DELETE",
+  });
+  if (!response.ok && response.status !== 404) {
+    throw new Error(`device registry returned HTTP ${response.status}`);
+  }
+}
+
+/** 解绑设备：清空其全部 Agent 心跳，目录不再返回离线幽灵。 */
+export async function deleteAgentHeartbeats(env, deviceID) {
+  const stub = registryStub(env);
+  if (!stub) {
+    const prefix = `${HEARTBEAT_PREFIX}${deviceID}`;
+    const listing = await env.DEVICES.list({ prefix: `${prefix}:agent:`, limit: 100 });
+    for (const item of listing.keys || []) await env.DEVICES.delete(item.name);
+    await env.DEVICES.delete(prefix);
+    return;
+  }
+  const response = await stub.fetch(`https://status.internal/heartbeats/${encodeURIComponent(deviceID)}`, {
+    method: "DELETE",
+  });
+  if (!response.ok && response.status !== 404) {
+    throw new Error(`status registry returned HTTP ${response.status}`);
+  }
 }
 
 export async function listDeviceRecords(env) {

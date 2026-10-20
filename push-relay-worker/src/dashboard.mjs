@@ -194,7 +194,7 @@ function allowedCellularState(value) {
 }
 
 function allowedEventType(value) {
-  return ["registration", "call", "sms", "call_owner", "virtual_call"].includes(value) ? value : "system";
+  return ["registration", "unregister", "call", "sms", "call_owner", "virtual_call"].includes(value) ? value : "system";
 }
 
 function allowedChannel(value) {
@@ -290,7 +290,7 @@ function dashboardHTML(nonce) {
     const escapeText=v=>String(v??'');
     const relative=iso=>{const s=Math.max(0,Math.floor((Date.now()-Date.parse(iso))/1000));if(s<60)return s+' 秒前';if(s<3600)return Math.floor(s/60)+' 分钟前';return Math.floor(s/3600)+' 小时前'};
     const stateLabel=s=>({registered:'已注册',searching:'搜索网络',denied:'注册被拒',unregistered:'未注册',unknown:'未知'})[s]||'未知';
-    const eventLabel=t=>({registration:'设备注册',call:'来电推送',sms:'短信推送',call_owner:'通话接管',virtual_call:'虚拟来电',system:'系统事件'})[t]||'系统事件';
+    const eventLabel=t=>({registration:'设备注册',unregister:'设备解绑',call:'来电推送',sms:'短信推送',call_owner:'通话接管',virtual_call:'虚拟来电',system:'系统事件'})[t]||'系统事件';
     function el(tag,className,text){const node=document.createElement(tag);if(className)node.className=className;if(text!==undefined)node.textContent=escapeText(text);return node}
     function scheduleLoad(){clearTimeout(timer);if(!document.hidden)timer=setTimeout(load,60000)}
     async function load(){const token=sessionStorage.getItem(tokenKey);if(!token){$('#login').hidden=false;return}const response=await fetch('/dashboard/api/summary',{headers:{authorization:'Bearer '+token},cache:'no-store'});if(response.status===401){sessionStorage.removeItem(tokenKey);$('#error').textContent='Token 无效，请重新输入。';$('#login').hidden=false;return}if(!response.ok)throw new Error(response.status===503?'服务器尚未配置 DASHBOARD_TOKEN':'读取运行状态失败');const data=await response.json();render(data);$('#login').hidden=true;scheduleLoad()}

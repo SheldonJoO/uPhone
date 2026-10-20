@@ -421,7 +421,26 @@ struct AirSIMSettingsView: View {
             let availability = model.vowlan.availability
             switch availability {
             case .verified:
-                report.update(.agentHeartbeat, state: .passed, detail: "VoWLAN 已连接，信令可达")
+                var detail = "VoWLAN 已连接，信令可达"
+                // VoWLAN 通了不代表 Agent 健康：顺手查一次安卓的真实心跳状态，
+                // 免得「心跳一直测不到」在本地模式下无任何入口可查。
+                if let endpoint = model.vowlan.availability.endpoint,
+                   let credential = VoWLANCredentialStore.load() {
+                    let api = AirSIMAPI(route: .vowlan(endpoint: endpoint, credential: credential))
+                    if let status = try? await api.pushStatus() {
+                        if let age = status.heartbeatAgeSeconds {
+                            detail += status.heartbeatFresh
+                                ? " · Agent 心跳正常（\(age) 秒前）"
+                                : " · Agent 云端心跳已停（\(age) 秒前）"
+                        } else {
+                            detail += " · 云端心跳未启用（纯本地模式）"
+                        }
+                        if let lastError = status.lastError, !lastError.isEmpty {
+                            detail += " · 最近错误：\(lastError)"
+                        }
+                    }
+                }
+                report.update(.agentHeartbeat, state: .passed, detail: detail)
             case .unavailable(let reason):
                 report.update(.agentHeartbeat, state: .failed, detail: reason)
             case .unpaired:

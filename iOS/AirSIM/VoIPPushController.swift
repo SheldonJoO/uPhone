@@ -607,6 +607,10 @@ struct AgentPushStatus: Decodable, Sendable {
     let environment: String?
     let relayURL: String?
     let lastError: String?
+    let localMode: Bool?
+    /// Android 端最近一次云端心跳的 epoch 毫秒；0 = 从未发送成功过。
+    let lastHeartbeatMs: Double?
+    let heartbeatFailures: Int?
 
     enum CodingKeys: String, CodingKey {
         case cloudModeEnabled = "cloud_enabled"
@@ -616,7 +620,18 @@ struct AgentPushStatus: Decodable, Sendable {
         case environment
         case relayURL = "relay_url"
         case lastError = "last_error"
+        case localMode = "local_mode"
+        case lastHeartbeatMs = "last_heartbeat"
+        case heartbeatFailures = "heartbeat_failures"
     }
+
+    /// 距最近一次心跳的秒数；nil = 无心跳记录。
+    var heartbeatAgeSeconds: Int? {
+        guard let lastHeartbeatMs, lastHeartbeatMs > 0 else { return nil }
+        return max(0, Int((Date().timeIntervalSince1970 * 1000 - lastHeartbeatMs) / 1000))
+    }
+
+    var heartbeatFresh: Bool { (heartbeatAgeSeconds ?? 3600) <= 90 }
 }
 
 /// 只向设置页暴露可诊断的凭据状态，不泄露设备密钥或完整 Push token。
@@ -1037,6 +1052,7 @@ final class VoIPPushController: NSObject {
     }
 
     /// 只验证控制面，不发起电话或短信：本机凭据 → Relay 身份 → 注册鉴权 → Agent 心跳。
+    @MainActor
     func runCloudSelfTest(
         skipPushCredentials: Bool = false,
         onUpdate: @MainActor @escaping (CloudSelfTestReport) -> Void = { _ in }
@@ -1095,10 +1111,17 @@ final class VoIPPushController: NSObject {
 
         report.update(.agentHeartbeat, state: .running, detail: "查询 AVF Agent 最近 90 秒心跳")
         onUpdate(report)
+        // 仅 Wi-Fi 直连模式下，安卓不向云端发心跳（本地配对包只含 VoWLAN 密钥，
+        // 注册为 local_mode）。此时去 Relay 查云端心跳必然失败且提示自相矛盾，
+        // 改为在局域网内验证 Agent 并读取其真实心跳状态。
+        if LocalModePreference.isEnabled() {
+            await runLocalHeartbeatStep(into: &report, onUpdate: onUpdate)
+            return report
+        }
         do {
             let status = try await fetchCloudAgentStatusForDiagnostics(using: registration)
             guard status.cloudOnline else {
-                report.fail(.agentHeartbeat, detail: "Relay 已连接，但 AVF Agent 90 秒内无心跳；若只在局域网使用，请在「连接方式」开启「仅 Wi-Fi 直连模式」改用本地自检")
+                report.fail(.agentHeartbeat, detail: "Relay 已连接，但 90 秒内无心跳。最常见原因：① 安卓端仍是本地模式（仅 Wi-Fi 直连）——开关一次「远程通话与短信」可让安卓自动升级为云端模式；② 安卓 uPhone 未运行或未完成配对；③ 刚重装本 App 导致 device_id 变化——请在安卓端重新配对。")
                 onUpdate(report)
                 return report
             }
@@ -1113,6 +1136,62 @@ final class VoIPPushController: NSObject {
             onUpdate(report)
             return report
         }
+    }
+
+    /// 本地模式心跳检查：发现并验证安卓 VoWLAN 后，直接读取安卓 Agent 的
+    /// 推送/心跳状态（/api/push/status），如实反映本地链路的可用性。
+    @MainActor
+    private func runLocalHeartbeatStep(
+        into report: inout CloudSelfTestReport,
+        onUpdate: @MainActor (CloudSelfTestReport) -> Void
+    ) async {
+        let vowlan = VoWLANController()
+        await vowlan.startBrowsing()
+        let deadline = Date().addingTimeInterval(8)
+        while Date() < deadline, !vowlan.availability.isOnlineForDisplay {
+            try? await Task.sleep(for: .milliseconds(400))
+        }
+        guard vowlan.availability.isOnlineForDisplay, let endpoint = vowlan.availability.endpoint,
+              let credential = VoWLANCredentialStore.load() else {
+            let reason: String
+            if case let .unavailable(message) = vowlan.availability {
+                reason = message
+            } else if case .unpaired = vowlan.availability {
+                reason = "未配对"
+            } else {
+                reason = "同一 Wi-Fi 内未发现安卓广播"
+            }
+            report.fail(.agentHeartbeat, detail: "本地模式：未发现安卓 VoWLAN（\(reason)）。请确认两台设备处于同一 Wi-Fi，且安卓端 uPhone 正在运行。")
+            report.completedAt = Date()
+            onUpdate(report)
+            return
+        }
+        let api = AirSIMAPI(route: .vowlan(endpoint: endpoint, credential: credential))
+        do {
+            let status = try await api.pushStatus()
+            if let age = status.heartbeatAgeSeconds {
+                report.update(.agentHeartbeat, state: status.heartbeatFresh ? .passed : .failed,
+                              detail: status.heartbeatFresh
+                                  ? "本地模式 · VoWLAN 已连接 · Agent 心跳正常（\(age) 秒前）"
+                                  : "本地模式 · VoWLAN 已连接，但 Agent 云端心跳已停（\(age) 秒前\(status.heartbeatFailures.map { "，连续失败 \($0) 次" } ?? "")）")
+            } else if status.localMode == true {
+                report.update(.agentHeartbeat, state: .passed,
+                              detail: "本地模式 · VoWLAN 已连接 · Agent 在线（纯本地模式不发云端心跳）")
+            } else {
+                report.update(.agentHeartbeat, state: .failed,
+                              detail: "本地模式 · VoWLAN 已连接，但 Agent 尚无心跳记录；可开关一次「远程通话与短信」让安卓升级为云端模式")
+            }
+            if let lastError = status.lastError, !lastError.isEmpty {
+                report.update(.agentHeartbeat, state: report.steps.first(where: { $0.id == .agentHeartbeat })?.state ?? .failed,
+                              detail: (report.steps.first(where: { $0.id == .agentHeartbeat })?.detail ?? "")
+                                  + " · 最近错误：\(lastError)")
+            }
+        } catch {
+            report.update(.agentHeartbeat, state: .passed,
+                          detail: "本地模式 · VoWLAN 已连接，信令可达（Agent 状态查询失败：\(error.localizedDescription)）")
+        }
+        report.completedAt = Date()
+        onUpdate(report)
     }
 
     private func scheduleRegistrationRetry() {
@@ -1137,6 +1216,29 @@ final class VoIPPushController: NSObject {
             await IPhoneCloudCallSession.shared.end()
         }
         await syncRegistration(with: api)
+        if enabled {
+            await upgradePairedAgentToCloudMode(with: api)
+        }
+    }
+
+    /// 两端模式同步：本地配对包只含 VoWLAN 密钥，安卓会一直是 local_mode、
+    /// 从不向云端发心跳——「云端自检永远查不到心跳」的根源（两端模式错位）。
+    /// iPhone 开启云端模式时，把完整注册（Relay 凭据 + APNs token）经局域网
+    /// 推给当前安卓，自动升级为云端模式并开始发心跳，无需在安卓端重新配对。
+    private func upgradePairedAgentToCloudMode(with api: AirSIMAPI) async {
+        // 默认参数的 api 是已停用的旧模块路线（调用方拿不到 VoWLAN 路由时传入），跳过。
+        guard AirSIMRoutePolicy.permits(api.route) else { return }
+        let registration: AgentPushRegistration?
+        if let current = currentRegistration() {
+            registration = current
+        } else if UserDefaults.standard.bool(forKey: "sideloadSkipPushCredentials") {
+            registration = sideloadTestRegistration()
+        } else {
+            registration = nil
+        }
+        guard var upgraded = registration else { return }
+        upgraded.vowlanSecret = (try? VoWLANCredentialStore.loadOrCreate().encodedSecret)
+        try? await api.registerVoIPPush(upgraded)
     }
 
     /// 本地 USB/ECM 不可达时，通过 Relay 最近心跳判断 Agent 是否仍在公网在线。
@@ -1259,13 +1361,34 @@ final class VoIPPushController: NSObject {
     }
 
     /// 云端下发解绑：经 Relay 透传到 Android（异网主路径），由 Android 真正清除配对。
-    func sendCloudUnpair() async {
+    /// 指定 credentialOverride 时以它为准：解散配对流程会清掉本地注册表与活跃密钥槽，
+    /// 若届时再从 keychain 现读凭据，读到的可能已被清除或重建为新身份（新 device_id），
+    /// 解绑指令就会鉴权失败或路由到不存在的设备而静默丢失——幽灵离线值守机反复出现的根因。
+    func sendCloudUnpair(
+        credentialOverride: (deviceID: String, deviceSecret: String, relayURL: String)? = nil
+    ) async {
         let commandID = UUID()
         _ = try? await enqueueCloudCommand(
             commandID: commandID,
             type: "unpair",
             number: "",
-            message: nil
+            message: nil,
+            credentialOverride: credentialOverride
+        )
+    }
+
+    /// 让 Relay 直接注销设备：删除服务端注册记录与全部 Agent 心跳。
+    /// 即使解绑指令无法送达安卓（本地模式不轮询云端命令 / 两端异网），
+    /// 设备列表与看板也不会再返回这台设备（离线幽灵的最终兜底）。
+    func unregisterDevice(deviceID: String, deviceSecret: String, relayURL: String) async {
+        let base = relayURL.isEmpty ? configuredRelayURL() : relayURL
+        guard let url = RelayEndpoint.url(base: base, path: "v1/devices/unregister") else { return }
+        struct UnregisterAck: Decodable { let unregistered: Bool? }
+        // 401 = 设备记录已被删除（重复解散 / 安卓已自行解绑），目标已达成，忽略即可。
+        _ = try? await relayRequest(
+            url: url,
+            body: ["device_id": deviceID, "device_secret": deviceSecret],
+            as: UnregisterAck.self
         )
     }
 
@@ -1275,16 +1398,30 @@ final class VoIPPushController: NSObject {
         number: String,
         message: String?,
         mediaTransport: CloudMediaTransport? = nil,
-        subscriptionID: Int? = nil
+        subscriptionID: Int? = nil,
+        credentialOverride: (deviceID: String, deviceSecret: String, relayURL: String)? = nil
     ) async throws -> CloudCommandEnqueueResponse {
-        guard CloudModePreference.isEnabled() else { throw CloudCommandError.cloudModeDisabled }
-        guard let registration = cloudOperationRegistration(),
-              let url = RelayEndpoint.url(base: registration.relayURL, path: "v1/commands/enqueue") else {
+        let relayBase: String
+        let deviceID: String
+        let deviceSecret: String
+        if let credentialOverride {
+            // 显式凭据：用于被解散设备的解绑指令，本地凭据槽此刻可能已被清理。
+            relayBase = credentialOverride.relayURL.isEmpty ? configuredRelayURL() : credentialOverride.relayURL
+            deviceID = credentialOverride.deviceID
+            deviceSecret = credentialOverride.deviceSecret
+        } else {
+            guard CloudModePreference.isEnabled() else { throw CloudCommandError.cloudModeDisabled }
+            guard let registration = cloudOperationRegistration() else { throw CloudCommandError.unavailable }
+            relayBase = registration.relayURL
+            deviceID = registration.deviceID
+            deviceSecret = registration.deviceSecret
+        }
+        guard let url = RelayEndpoint.url(base: relayBase, path: "v1/commands/enqueue") else {
             throw CloudCommandError.unavailable
         }
         var body: [String: String] = [
-            "device_id": registration.deviceID,
-            "device_secret": registration.deviceSecret,
+            "device_id": deviceID,
+            "device_secret": deviceSecret,
             "command_id": commandID.uuidString.lowercased(),
             "type": type,
             "number": number,
