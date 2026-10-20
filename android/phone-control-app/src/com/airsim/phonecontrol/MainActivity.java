@@ -118,6 +118,8 @@ public final class MainActivity extends Activity {
 	private boolean avfStartupPromptShown;
 
     private PairingServer pairingServer;
+    /** 已配对机器点「重新配对」后进入活动配对视图的标记；离开配对页或配对成功后复位。 */
+    private boolean rePairingActive;
     private CountDownTimer pairingCountdown;
     private String pairingCode = "";
     private long pairingExpiresAt;
@@ -1097,7 +1099,7 @@ public final class MainActivity extends Activity {
         }
         // 已配对的机器不再自动开窗广播：避免「配对完还能在配对页看到设备」，
         // 以及重复配对 stage 新身份生成无名 ghost。重配由用户显式发起。
-        if (!AppConfig.configured(this)) {
+        if (!AppConfig.configured(this) || rePairingActive) {
             startPairing();
         }
     }
@@ -1107,26 +1109,31 @@ public final class MainActivity extends Activity {
         TextView back = label("‹", 40, TEXT, Gravity.START);
         back.setContentDescription("返回");
         back.setOnClickListener(ignored -> {
+            rePairingActive = false;
             stopPairingServer();
             showPage(Page.DUTY);
         });
         root.addView(back, new LinearLayout.LayoutParams(dp(56), dp(52)));
 
         boolean alreadyPaired = AppConfig.configured(this);
-        TextView title = label(alreadyPaired ? "已配对 iPhone" : "一次性配对", 30, TEXT, Gravity.START);
+        TextView title = label(rePairingActive ? "重新配对"
+                : alreadyPaired ? "已配对 iPhone" : "一次性配对", 30, TEXT, Gravity.START);
         title.setTypeface(Typeface.DEFAULT_BOLD);
         root.addView(title, matchWithTop(8));
-        root.addView(description(alreadyPaired
+        root.addView(description(rePairingActive
+                ? "正在生成新的一次性配对码，完成后将替换当前配对。"
+                : alreadyPaired
                 ? "本机已与 iPhone 配对。仅在更换 iPhone 或需要刷新凭据时才重新配对。"
                 : "让 iPhone 与本机连接同一 Wi‑Fi 或手机热点"), matchWithTop(6));
 
-        if (alreadyPaired) {
+        if (alreadyPaired && !rePairingActive) {
             TextView rePair = primaryButton("重新配对（替换当前配对）", BLUE);
             rePair.setOnClickListener(ignored -> {
-                rePair.setEnabled(false);
-                startPairing();
-                toast("配对窗口已开启，请在 iPhone 上重新扫码或输入配对码");
-                rePair.postDelayed(() -> rePair.setEnabled(true), 3_000);
+                // 关键：已配对分支不渲染配对卡片，pairingCodeView/qrView 均为 null，
+                // 直接 startPairing 会因 onStarted 里全部空判断而静默无 UI。
+                // 必须先切到活动配对视图（由 openPairingPage 重新走 startPairing）。
+                rePairingActive = true;
+                openPairingPage();
             });
             root.addView(rePair, matchWithTop(16));
 
@@ -1174,6 +1181,7 @@ public final class MainActivity extends Activity {
         TextView cancel = secondaryButton("取消配对");
         cancel.setTextColor(DANGER);
         cancel.setOnClickListener(ignored -> {
+            rePairingActive = false;
             stopPairingServer();
             showPage(Page.DUTY);
         });
@@ -1856,6 +1864,7 @@ public final class MainActivity extends Activity {
 
             @Override public void onSucceeded(String agentResponse) {
                 BridgeLog.info("pairing_completed");
+                rePairingActive = false;
                 boolean localMode = false;
                 try {
                     localMode = new JSONObject(agentResponse).optBoolean("local_mode", false);
@@ -2310,6 +2319,7 @@ public final class MainActivity extends Activity {
 
     @Override public void onBackPressed() {
         if (bottomBar != null && bottomBar.getVisibility() == View.GONE) {
+            rePairingActive = false;
             stopPairingServer();
             showPage(Page.DUTY);
             return;
