@@ -174,6 +174,7 @@ struct IncomingVoIPCall: Equatable, Sendable {
 
 enum CallTransport: Equatable, Sendable {
     case vowlan
+    case voble
     case moduleLocal
     case cloud
 }
@@ -393,13 +394,17 @@ enum PushDeviceIdentity {
 }
 
 enum CallTransportPolicy {
+    /// 三级递进：VoWLAN（同 Wi-Fi / 热点）› VoBLE（无网本地 BLE）› 模块本地 › 云端中继。
+    /// VoWLAN 优先；不可达时退到 VoBLE（窄带 BLE 音频）；都没有再走云端。
     static func preferred(
         vowlanReady: Bool,
+        vobleReady: Bool,
         moduleLocalReachable: Bool,
         cloudMediaAvailable: Bool,
         cloudMediaEnabled: Bool = true
     ) -> CallTransport? {
         if vowlanReady { return .vowlan }
+        if vobleReady { return .voble }
         if moduleLocalReachable { return .moduleLocal }
         if cloudMediaEnabled && cloudMediaAvailable { return .cloud }
         return nil

@@ -146,6 +146,16 @@ final class AppModel: ObservableObject {
     let vowlan = VoWLANController()
     let incomingNotifier = IncomingCallNotifier()
 
+    // 三级链路中间档：持续扫描值守机的 VoBLE 服务；安卓侧来电经 BLE 通知上报 CallKit。
+    private func setupVoBleClient() {
+        VoBleClient.shared.onIncomingCall = { [weak self] number, callerName in
+            Task { @MainActor in
+                self?.reportVoBLEIncomingCall(number: number, callerName: callerName)
+            }
+        }
+        VoBleClient.shared.ensureScanning()
+    }
+
     // MARK: - 多设备管理（配对 sheet 用）
 
     private static let ignoredAgentIDsKey = "uphone.ignored-agent-ids"
@@ -559,6 +569,7 @@ final class AppModel: ObservableObject {
         hasStarted = true
         requestMicrophoneOnForegroundIfNeeded()
         vowlan.startBrowsing()
+        setupVoBleClient()
         incomingNotifier.requestAuthorization()
         let storedValue = UserDefaults.standard.object(forKey: backgroundStandbyKey) as? Bool
         let storedLowPowerValue = UserDefaults.standard.object(forKey: lowPowerModeKey) as? Bool
@@ -1037,6 +1048,7 @@ final class AppModel: ObservableObject {
     private var liveActivityTransport: AirSIMCallActivityAttributes.ContentState.Transport? {
         switch currentCallTransport {
         case .vowlan: return .vowlan
+        case .voble: return .voble
         case .cloud: return .cloud
         case .moduleLocal: return .moduleLocal
         case nil: break
@@ -1694,9 +1706,32 @@ final class AppModel: ObservableObject {
         return (cached, .vowlan(endpoint: endpoint, credential: credential))
     }
 
+    // MARK: VoBLE 通话控制（三级链路中间档）
+
+    /// 经 BLE 建立会话并发起来电（已配对且值守机 VoBLE 服务在线）。
+    private func voBleStartCall(number: String) async throws {
+        guard let credential = VoWLANCredentialStore.load() else { throw CloudCommandError.unavailable }
+        let ok = await VoBleClient.shared.beginSession(credential: credential)
+        guard ok else { throw CloudCommandError.unavailable }
+        VoBleClient.shared.sendControl(["action": "dial", "number": number])
+    }
+
+    /// 经 BLE 建立会话并接听（与安卓 VoBleGateway 共用通话执行链）。
+    private func voBleAnswer() async throws {
+        guard let credential = VoWLANCredentialStore.load() else { throw CloudCommandError.unavailable }
+        let ok = await VoBleClient.shared.beginSession(credential: credential)
+        guard ok else { throw CloudCommandError.unavailable }
+        VoBleClient.shared.sendControl(["action": "answer"])
+    }
+
+    /// 安卓侧经 BLE 通知发起来电时，复用现有 CallKit 上报入口。
+    private func reportVoBLEIncomingCall(number: String, callerName: String) {
+        callKit.reportExternalIncomingCall(number: number, callerName: callerName)
+    }
+
     private func lockLocalTransport(
         _ transport: CallTransport,
-        api: AirSIMAPI,
+        api: AirSIMAPI?,
         pcmRoute: PCMRoute
     ) {
         currentCallTransport = transport
@@ -2044,47 +2079,61 @@ extension AppModel: CallKitActionHandling {
         backgroundStandby.suspendForCall()
         do {
             let vowlanRoute = await readyVoWLANRoute()
+            let vobleReady = VoBleClient.shared.isReady
             let cloudModeEnabled = CloudModePreference.isEnabled()
-            let routeResult = try await OutgoingCallRouteCoordinator.start(
-                number: number,
-                vowlanService: vowlanRoute?.0,
-                cloudModeEnabled: cloudModeEnabled
-            ) {
-                let status: CloudAgentStatus
-                if let cloudAgentStatus {
-                    status = cloudAgentStatus
-                } else {
-                    status = try await VoIPPushController.shared.fetchCloudAgentStatus()
+
+            // 第一档：VoWLAN（同 Wi-Fi / 安卓热点）
+            if let (vowlanAPI, pcmRoute) = vowlanRoute {
+                do {
+                    try await OutgoingCallCoordinator.start(number: number, service: vowlanAPI)
+                    lockLocalTransport(.vowlan, api: vowlanAPI, pcmRoute: pcmRoute)
+                    return
+                } catch {
+                    guard OutgoingCallFallbackPolicy.permitsCloudFallback(
+                        after: error, cloudModeEnabled: cloudModeEnabled
+                    ) else { throw error }
                 }
-                guard status.cloudOnline else { throw CloudCommandError.unavailable }
-                return try await VoIPPushController.shared.startCloudOutgoingCall(number: number)
             }
 
-            switch routeResult {
-            case .vowlan:
-                guard let (vowlanAPI, pcmRoute) = vowlanRoute else {
-                    throw CloudCommandError.unavailable
+            // 第二档：VoBLE（无网本地 BLE，窄带音频）
+            if vobleReady {
+                do {
+                    try await voBleStartCall(number: number)
+                    lockLocalTransport(.voble, api: nil, pcmRoute: .voble)
+                    try await audio.activateForCall(route: .voble, sessionAlreadyActive: false)
+                    return
+                } catch {
+                    guard cloudModeEnabled else { throw error }
                 }
-                lockLocalTransport(.vowlan, api: vowlanAPI, pcmRoute: pcmRoute)
-            case let .cloud(outgoing):
-                _ = applyCallLifecycle(CallLifecycleEvent(
-                    callID: outgoing.callID, callUUID: outgoing.uuid,
-                    generation: outgoing.generation, state: .connecting, source: .callKit,
-                    timestamp: Date(), traceID: "callkit-start-\(outgoing.uuid.uuidString.lowercased())",
-                    failure: nil
-                ))
-                try await IPhoneCloudCallSession.shared.answer(outgoing)
-                currentCallTransport = .cloud
-                lockedCallTransport = LockedCallTransport(
-                    transport: .cloud, generation: callLifecycleSnapshot.generation
-                )
-                remoteCall = CallRecord(
-                    id: outgoing.callID, index: 0, direction: "outgoing", state: "dialing",
-                    number: number, startedAt: Date(), updatedAt: Date(), endedAt: nil, missed: false
-                )
-                pendingOutgoingCall = nil
-                await startCallAudioIfReady()
             }
+
+            // 第三档：云端中继
+            guard cloudModeEnabled else { throw CloudCommandError.cloudModeDisabled }
+            let status: CloudAgentStatus
+            if let cloudAgentStatus {
+                status = cloudAgentStatus
+            } else {
+                status = try await VoIPPushController.shared.fetchCloudAgentStatus()
+            }
+            guard status.cloudOnline else { throw CloudCommandError.unavailable }
+            let outgoing = try await VoIPPushController.shared.startCloudOutgoingCall(number: number)
+            _ = applyCallLifecycle(CallLifecycleEvent(
+                callID: outgoing.callID, callUUID: outgoing.uuid,
+                generation: outgoing.generation, state: .connecting, source: .callKit,
+                timestamp: Date(), traceID: "callkit-start-\(outgoing.uuid.uuidString.lowercased())",
+                failure: nil
+            ))
+            try await IPhoneCloudCallSession.shared.answer(outgoing)
+            currentCallTransport = .cloud
+            lockedCallTransport = LockedCallTransport(
+                transport: .cloud, generation: callLifecycleSnapshot.generation
+            )
+            remoteCall = CallRecord(
+                id: outgoing.callID, index: 0, direction: "outgoing", state: "dialing",
+                number: number, startedAt: Date(), updatedAt: Date(), endedAt: nil, missed: false
+            )
+            pendingOutgoingCall = nil
+            await startCallAudioIfReady()
         } catch {
             backgroundStandby.resumeAfterCall()
             throw error
@@ -2109,9 +2158,11 @@ extension AppModel: CallKitActionHandling {
             }
             let cloudMediaEnabled = CloudModePreference.isEnabled()
             let vowlanRoute = await readyVoWLANRoute()
+            let vobleReady = VoBleClient.shared.isReady
             let moduleLocalReachable = false
             let transport = CallTransportPolicy.preferred(
                 vowlanReady: vowlanRoute != nil,
+                vobleReady: vobleReady,
                 moduleLocalReachable: moduleLocalReachable,
                 cloudMediaAvailable: pushedCall?.authenticatedMediaURL != nil,
                 cloudMediaEnabled: cloudMediaEnabled
@@ -2124,6 +2175,12 @@ extension AppModel: CallKitActionHandling {
                 try audio.prepareForCallKit()
                 try await vowlanAPI.answerCall()
                 lockLocalTransport(.vowlan, api: vowlanAPI, pcmRoute: pcmRoute)
+            case .voble:
+                guard vobleReady else { throw CallKitBridgeError.noReachableTransport }
+                try audio.prepareForCallKit()
+                try await voBleAnswer()
+                lockLocalTransport(.voble, api: nil, pcmRoute: .voble)
+                try await audio.activateForCall(route: .voble, sessionAlreadyActive: true)
             case .moduleLocal:
                 throw CallKitBridgeError.noReachableTransport
             case .cloud:

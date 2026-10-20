@@ -16,11 +16,13 @@ enum AirSIMCallAudioOptions {
 enum PCMRoute: Equatable, Sendable {
     case moduleLocal
     case vowlan(endpoint: VoWLANEndpoint, credential: VoWLANCredential)
+    case voble
 
     var host: String {
         switch self {
         case .moduleLocal: return "192.168.225.1"
         case let .vowlan(endpoint, _): return endpoint.host
+        case .voble: return ""
         }
     }
 
@@ -28,20 +30,32 @@ enum PCMRoute: Equatable, Sendable {
         switch self {
         case .moduleLocal: return 7_580
         case let .vowlan(endpoint, _): return endpoint.pcmPort
+        case .voble: return 0
         }
     }
 
     var requiresWiFi: Bool {
-        if case .vowlan = self { return true }
-        return false
+        switch self {
+        case .vowlan: return true
+        case .moduleLocal, .voble: return false
+        }
     }
 
     func handshake() throws -> Data {
         switch self {
         case .moduleLocal: throw APIError.disabledLegacyRoute
         case let .vowlan(_, credential): return try VoWLANPCMHandshake.make(credential: credential)
+        case .voble: return Data()
         }
     }
+}
+
+/// 通话音频传输层抽象：TCP PCM（NetworkPCMTransport）与 BLE µ-law（VoBlePCMTransport）
+/// 同形实现，使三级路由（VoWLAN › VoBLE › 云）可在不改动音频引擎的前提下切换。
+protocol PCMTransport: AnyObject {
+    func start()
+    func stop()
+    func sendPCM(_ pcm: Data)
 }
 
 enum VoWLANPCMHandshake {
@@ -110,7 +124,7 @@ final class AudioSessionController: ObservableObject {
 
     private var engine: AVAudioEngine?
     private var player: AVAudioPlayerNode?
-    private var transport: NetworkPCMTransport?
+    private var transport: (any PCMTransport)?
     private var encoder: VoicePCMEncoder?
     private var callTonePlayer: AVAudioPlayer?
     private var currentCallTone: CallTone?
@@ -178,26 +192,36 @@ final class AudioSessionController: ObservableObject {
             let encoder = VoicePCMEncoder()
             // 用户可能在权限弹窗或音频启动期间切换静音，新编码器必须继承期望状态。
             encoder.setMuted(muted)
-            let handshakeSequence: PCMHandshakeSequence
+            let transport: any PCMTransport
             switch route {
             case .moduleLocal:
                 _ = try route.handshake()
                 throw APIError.disabledLegacyRoute
             case .vowlan:
-                handshakeSequence = PCMHandshakeSequence { try route.handshake() }
+                let handshakeSequence = PCMHandshakeSequence { try route.handshake() }
+                transport = NetworkPCMTransport(
+                    host: NWEndpoint.Host(route.host),
+                    port: NWEndpoint.Port(rawValue: route.port)!,
+                    handshakeSequence: handshakeSequence,
+                    requiresWiFi: route.requiresWiFi,
+                    onPCM: { [weak self] pcm in
+                        Task { @MainActor [weak self] in self?.schedulePlayback(pcm) }
+                    },
+                    onEvent: { [weak self] event in
+                        Task { @MainActor [weak self] in self?.handleTransportEvent(event) }
+                    }
+                )
+            case .voble:
+                // 音频经 BLE GATT 承载，会话鉴权在 VoBleClient 内完成，不经 TCP 握手。
+                transport = VoBlePCMTransport(
+                    onPCM: { [weak self] pcm in
+                        Task { @MainActor [weak self] in self?.schedulePlayback(pcm) }
+                    },
+                    onEvent: { [weak self] event in
+                        Task { @MainActor [weak self] in self?.handleTransportEvent(event) }
+                    }
+                )
             }
-            let transport = NetworkPCMTransport(
-                host: NWEndpoint.Host(route.host),
-                port: NWEndpoint.Port(rawValue: route.port)!,
-                handshakeSequence: handshakeSequence,
-                requiresWiFi: route.requiresWiFi,
-                onPCM: { [weak self] pcm in
-                    Task { @MainActor [weak self] in self?.schedulePlayback(pcm) }
-                },
-                onEvent: { [weak self] event in
-                    Task { @MainActor [weak self] in self?.handleTransportEvent(event) }
-                }
-            )
 
             engine.attach(player)
             guard let playbackFormat = AVAudioFormat(
@@ -237,7 +261,8 @@ final class AudioSessionController: ObservableObject {
             playbackQueue.reset()
             active = true
             transportReady = false
-            routeDescription = route.requiresWiFi ? "正在连接 VoWLAN 语音…" : "正在连接模块网络语音…"
+            routeDescription = route.requiresWiFi ? "正在连接 VoWLAN 语音…"
+                : (route == .voble ? "正在连接 VoBLE 语音…" : "正在连接模块网络语音…")
             diagnosticDescription = "\(DeviceContext.displayName) PCM 尚未握手"
             moduleDiagnosticDescription = ""
             errorMessage = nil
@@ -758,7 +783,7 @@ private enum SynthesizedCallTone {
 }
 
 /// 维护低延迟 TCP 字节流；每次连接尝试都生成新的认证握手。
-private final class NetworkPCMTransport: @unchecked Sendable {
+final class NetworkPCMTransport: @unchecked Sendable, PCMTransport {
     enum Event: Sendable {
         case connected
         case statistics(NetworkPCMStatistics)
@@ -1063,7 +1088,7 @@ private final class NetworkPCMTransport: @unchecked Sendable {
     }
 }
 
-private struct NetworkPCMStatistics: Sendable {
+struct NetworkPCMStatistics: Sendable {
     let uplinkBytes: UInt64
     let uplinkPeak: Int
     let downlinkBytes: UInt64

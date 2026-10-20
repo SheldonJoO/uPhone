@@ -447,6 +447,16 @@ final class CallKitController: NSObject {
         completions.forEach { $0(error) }
     }
 
+    /// VoBLE 来电信号：复用模块状态路径的上报入口，由 VoBleClient 的来电通知触发。
+    /// 仅在当前无进行中通话时受理，避免与 VoWLAN / PushKit 路径重复上报。
+    func reportExternalIncomingCall(number: String?, callerName: String?) {
+        guard currentUUID == nil else { return }
+        currentUUID = UUID()
+        currentDirection = "incoming"
+        currentNumber = number
+        reportIncomingIfNeeded(number: number, callerName: callerName, source: "VoBLE")
+    }
+
     private func finishCurrentCall(
         previous: CallRecord?,
         reason explicitReason: CXCallEndedReason? = nil

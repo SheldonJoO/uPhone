@@ -7,12 +7,14 @@ struct AirSIMCallActivityAttributes: ActivityAttributes {
     struct ContentState: Codable, Hashable {
         enum Transport: String, Codable, Hashable {
             case vowlan
+            case voble
             case cloud
             case moduleLocal = "module_local"
 
             var title: String {
                 switch self {
                 case .vowlan: return "VoWLAN"
+                case .voble: return "VoBLE"
                 case .cloud: return "云端"
                 case .moduleLocal: return "模块本地"
                 }
@@ -21,6 +23,7 @@ struct AirSIMCallActivityAttributes: ActivityAttributes {
             var systemImage: String {
                 switch self {
                 case .vowlan: return "wifi"
+                case .voble: return "bolt.horizontal.icloud"
                 case .cloud: return "icloud.fill"
                 case .moduleLocal: return "cable.connector"
                 }

@@ -25,8 +25,9 @@ public final class VoWLANGatewayService extends Service {
     public static final int PCM_PORT = 7593;
     private final ExecutorService worker = Executors.newSingleThreadExecutor();
     private volatile boolean running;
-    private VoWLANControlGateway control;
-    private VoWLANPCMRelay pcm;
+    private volatile VoWLANControlGateway control;
+    private volatile VoWLANPCMRelay pcm;
+    private volatile VoBleGateway voble;
     private NsdManager.RegistrationListener advertisement;
     private String activeHotspot = "";
     private String lastDiagnosticState = "";
@@ -96,24 +97,34 @@ public final class VoWLANGatewayService extends Service {
                     }
                 }
                 diagnosticState(hotspot, avf, paired, agentReady, pcmReady, dialerRoleHeld);
-                // PCM 桥上有真实通话时，本机静音由这里也保持一份原因：
-                // InCallService 可能因默认拨号角色丢失/服务被回收而收不到 call，
-                // 漏音的主路径就是这条没人施静音的窗口。
-                if (hasVoWLANCall()) {
-                    LocalCallAudioController.get(this).retain("pcm-call");
-                } else {
-                    LocalCallAudioController.get(this).release("pcm-call");
-                }
-                if (VoWLANNetworkPolicy.shouldAdvertise(
-                        hotspot != null, paired, agentReady, pcmReady, dialerRoleHeld)) {
+                // 三级递进路由：VoWLAN › VoBLE › 云中继。
+                // 一级在线就停掉二级，不占 BLE；一级不可用但已配对即拉二级。
+                boolean vowlanReady = VoWLANNetworkPolicy.shouldAdvertise(
+                        hotspot != null, paired, agentReady, pcmReady, dialerRoleHeld);
+                if (vowlanReady) {
                     ensureStarted(hotspot, avf);
+                    stopVoBle();
                     update("VoWLAN 就绪 · " + hotspot.getHostAddress());
                 } else {
                     stopGateways();
-                    update(!dialerRoleHeld ? "请将 AirSIM 设为默认电话应用"
-                            : !paired ? "VoWLAN 未配对"
-                            : hotspot == null ? "正在等待同网 Wi-Fi 或手机热点"
-                            : !agentReady ? RuntimeMode.agentLabel(this) + " 尚未就绪" : "PCM 音频桥尚未就绪");
+                    if (paired && AppConfig.configured(this)) {
+                        ensureVoBle();
+                        update("VoBLE 就绪 · 蓝牙直连（无共享 Wi-Fi）");
+                    } else {
+                        stopVoBle();
+                        update(!dialerRoleHeld ? "请将 AirSIM 设为默认电话应用"
+                                : !paired ? "VoWLAN 未配对"
+                                : hotspot == null ? "正在等待同网 Wi-Fi 或手机热点"
+                                : !agentReady ? RuntimeMode.agentLabel(this) + " 尚未就绪" : "PCM 音频桥尚未就绪");
+                    }
+                }
+                // PCM 桥上有真实通话时，本机静音由这里也保持一份原因：
+                // InCallService 可能因默认拨号角色丢失/服务被回收而收不到 call，
+                // 漏音的主路径就是这条没人施静音的窗口。VoBLE 会话同理。
+                if (hasVoWLANCall() || (voble != null && voble.hasActiveSession())) {
+                    LocalCallAudioController.get(this).retain("pcm-call");
+                } else {
+                    LocalCallAudioController.get(this).release("pcm-call");
                 }
                 Thread.sleep(5_000);
             } catch (InterruptedException interrupted) {
@@ -196,6 +207,25 @@ public final class VoWLANGatewayService extends Service {
         activeHotspot = "";
     }
 
+    /** 二级通道：VoBLE 音频网关（GATT + 广播）。VoWLAN 在线时由调用方停掉。 */
+    private synchronized void ensureVoBle() {
+        if (voble != null) return;
+        try {
+            VoBleGateway gateway = new VoBleGateway(this);
+            gateway.start();
+            voble = gateway;
+        } catch (Exception error) {
+            // BLE 不可用（无硬件/未授权）时静默保持仅有云中继，不阻断值守。
+            BridgeLog.info("voble_start_skipped reason=" + error.getClass().getSimpleName());
+        }
+    }
+
+    private synchronized void stopVoBle() {
+        VoBleGateway active = voble;
+        voble = null;
+        if (active != null) active.stop();
+    }
+
     private synchronized boolean hasVoWLANCall() {
         return (control != null && control.ownsCall()) || (pcm != null && pcm.hasActiveSession());
     }
@@ -258,6 +288,7 @@ public final class VoWLANGatewayService extends Service {
         currentDiagnosticState = "服务已停止";
         running = false;
         worker.shutdownNow();
+        stopVoBle();
         stopGateways();
         super.onDestroy();
     }
