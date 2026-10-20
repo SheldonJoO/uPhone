@@ -755,6 +755,9 @@ final class VoIPPushController: NSObject {
     private var nextRegistrationAttempt = Date.distantPast
     private var registrationRetryTask: Task<Void, Never>?
     private var latestRegistrationAPI = AirSIMAPI()
+
+    /// 最近一次局域网「云端升级推送」的错误；自检 Agent 心跳失败时展示，用于定位死锁。
+    static let cloudUpgradeLastErrorKey = "cloudUpgradeLastError"
     private var activityKitRegistrationStarted = false
     private var activityKitRegistrationTasks: [Task<Void, Never>] = []
     private var observedActivityIDs = Set<String>()
@@ -1126,7 +1129,12 @@ final class VoIPPushController: NSObject {
         do {
             let status = try await fetchCloudAgentStatusForDiagnostics(using: registration)
             guard status.cloudOnline else {
-                report.fail(.agentHeartbeat, detail: "Relay 已连接，但 90 秒内无心跳。最常见原因：① 安卓端仍是本地模式（仅 Wi-Fi 直连）——开关一次「远程通话与短信」可让安卓自动升级为云端模式；② 安卓 uPhone 未运行或未完成配对；③ 刚重装本 App 导致 device_id 变化——请在安卓端重新配对。")
+                var detail = "Relay 已连接，但 90 秒内无心跳。最常见原因：① 安卓端仍是本地模式（仅 Wi-Fi 直连）——开关一次「远程通话与短信」可让安卓自动升级为云端模式；② 安卓 uPhone 未运行或未完成配对；③ 刚重装本 App 导致 device_id 变化——请在安卓端重新配对。"
+                if let pushError = UserDefaults.standard.string(forKey: Self.cloudUpgradeLastErrorKey),
+                   !pushError.isEmpty {
+                    detail += "\n最近一次局域网升级推送失败：\(pushError)"
+                }
+                report.fail(.agentHeartbeat, detail: detail)
                 onUpdate(report)
                 return report
             }
@@ -1231,6 +1239,10 @@ final class VoIPPushController: NSObject {
     /// 幂等：安卓已是云端模式时，重复推送只是重写同一份注册。
     /// 默认参数的 api 是已停用的旧模块路线，会自动跳过。
     func pushCloudUpgradeIfPossible(with api: AirSIMAPI) async {
+        // 传入 api 路由不被允许时（开关云端模式时 VoWLAN 未就绪、用了默认 AirSIMAPI()），
+        // 回退到最近一次同步用过的 api：toggle 带 VoWLAN api 跑过一次后
+        // latestRegistrationAPI 即持有正确路由，补推不再被静默跳过。
+        let api = AirSIMRoutePolicy.permits(api.route) ? api : latestRegistrationAPI
         guard AirSIMRoutePolicy.permits(api.route) else { return }
         let registration: AgentPushRegistration?
         if let current = currentRegistration() {
@@ -1242,7 +1254,20 @@ final class VoIPPushController: NSObject {
         }
         guard var upgraded = registration else { return }
         upgraded.vowlanSecret = (try? VoWLANCredentialStore.loadOrCreate().encodedSecret)
-        try? await api.registerVoIPPush(upgraded)
+        do {
+            try await api.registerVoIPPush(upgraded)
+            UserDefaults.standard.removeObject(forKey: Self.cloudUpgradeLastErrorKey)
+#if DEBUG
+            print("[AirSIM Push] 云端升级推送成功 route=\(api.route)")
+#endif
+        } catch {
+            // 曾经的 try? 把失败吞得干干净净：安卓拒绝 / 局域网不可达时无任何痕迹，
+            // 表现为「开关了远程通话与短信，安卓仍是本地模式、云端自检永远挂」的死锁。
+            UserDefaults.standard.set(error.localizedDescription, forKey: Self.cloudUpgradeLastErrorKey)
+#if DEBUG
+            print("[AirSIM Push] 云端升级推送失败 route=\(api.route) error=\(error)")
+#endif
+        }
     }
 
     /// 两端模式同步：本地配对包只含 VoWLAN 密钥，安卓会一直是 local_mode、

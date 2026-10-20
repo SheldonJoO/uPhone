@@ -580,8 +580,14 @@ public final class MainActivity extends Activity {
                 String reason = error.getMessage() == null
                         ? error.getClass().getSimpleName() : error.getMessage();
                 BridgeLog.error("cloud_duty_toggle_failed target_enabled=" + enabled, error);
+                // 本地配对的注册包里没有 Relay 身份，本机无法自行升级——必须由 iPhone
+                // 经局域网把完整注册推过来（/api/push/register）。提示里给出这条出路，
+                // 别只甩一句「本地模式不能启用云端模式」让用户干瞪眼。
+                String message = reason.contains("本地模式")
+                        ? "本机为纯本地配对（无云端身份），不能直接开云端。请在 iPhone 上开关一次「远程通话与短信」自动升级；或解绑后重新配对。"
+                        : "云端值守切换失败：" + DebugRedactor.sanitize(reason);
                 runOnUiThread(() -> {
-                    toast("云端值守切换失败：" + DebugRedactor.sanitize(reason));
+                    toast(message);
                     refreshAgent();
                 });
             }

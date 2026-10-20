@@ -351,11 +351,11 @@ final class AppModel: ObservableObject {
         }
         // 云端模式已开但安卓尚未升级成功（上次推送时 VoWLAN 不可达 / 被拒）：
         // 每次刷新都经局域网补推一次完整注册，直到心跳恢复为止。
-        // 只在单设备场景做——多设备时无法把 VoWLAN 端点可靠映射到活跃设备，
-        // 推错身份会覆盖另一台机的配对。
+        // verifiedVoWLANAPI() 已保证是一条带配对凭据的活连接，推给它就是当前值守机，
+        // 不再用注册表条数做守卫——残留的旧设备条目（如 sideload 重装后的离线条目）
+        // 会把补推永久挡死，表现为「开关了远程通话与短信，安卓仍是本地模式」。
         if CloudModePreference.isEnabled(),
            cloudAgentDirectory?.cloudOnline != true,
-           DeviceRegistry.allDevices().count <= 1,
            let localAPI = verifiedVoWLANAPI() {
             await VoIPPushController.shared.pushCloudUpgradeIfPossible(with: localAPI)
         }
