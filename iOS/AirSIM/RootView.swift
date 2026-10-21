@@ -156,6 +156,16 @@ struct RootView: View {
         } message: {
             Text(model.errorMessage ?? "")
         }
+        .alert("麦克风权限", isPresented: $model.showMicrophoneSettingsAlert) {
+            Button("前往系统设置") {
+                if let url = URL(string: UIApplication.openSettingsURLString) {
+                    UIApplication.shared.open(url)
+                }
+            }
+            Button(L10n.t("取消"), role: .cancel) {}
+        } message: {
+            Text("云通话需要使用麦克风。请在系统设置中允许 AirSIM 访问麦克风，再重新拨打或接听。")
+        }
     }
 
     /// 录音已保存的轻提示气泡（顶部）。

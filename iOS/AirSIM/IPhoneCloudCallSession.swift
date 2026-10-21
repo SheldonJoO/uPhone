@@ -625,6 +625,8 @@ final class IPhoneCloudCallSession {
     var onAudioStateChange: ((CloudCallAudioState) -> Void)?
     var onMediaHealthChange: ((CloudMediaHealthSnapshot) -> Void)?
     var onLifecycleEvent: ((CallLifecycleEvent) -> Void)?
+    /// 通话音频启动前麦克风权限被拒时回调，供 UI 引导去系统设置。
+    var onMicrophonePermissionDenied: (() -> Void)?
     private var audioRetryTask: Task<Void, Never>?
     private var reconnectTask: Task<Void, Never>?
     private var mediaHealthTask: Task<Void, Never>?
@@ -948,6 +950,11 @@ final class IPhoneCloudCallSession {
         audioRetryTask = Task { @MainActor [weak self] in
             guard let self else { return }
             defer { audioRetryTask = nil }
+            // 通话音频启动前确保麦克风权限：未决定则现场请求；已拒绝则引导去设置后失败。
+            guard await self.ensureMicrophonePermission() else {
+                self.audioState = .failed("需要麦克风权限才能进行云端通话")
+                return
+            }
             let delays = CloudCallRetryPolicy.audioDelays
             for (index, delay) in delays.enumerated() {
                 guard !Task.isCancelled, canAttemptAudio else { return }
@@ -988,6 +995,42 @@ final class IPhoneCloudCallSession {
                 }
             }
             audioState = .failed("云端 PCM 多次启动失败，请检查麦克风与网络")
+        }
+    }
+
+    /// 通话音频启动前的麦克风权限兜底：未决定则现场请求；已拒绝回调 UI 引导去设置。
+    private func ensureMicrophonePermission() async -> Bool {
+        if #available(iOS 17.0, *) {
+            switch AVAudioApplication.shared.recordPermission {
+            case .granted:
+                return true
+            case .denied:
+                onMicrophonePermissionDenied?()
+                return false
+            case .undetermined:
+                return await AVAudioApplication.requestRecordPermission()
+            @unknown default:
+                return await AVAudioApplication.requestRecordPermission()
+            }
+        }
+        switch AVAudioSession.sharedInstance().recordPermission {
+        case .granted:
+            return true
+        case .denied:
+            onMicrophonePermissionDenied?()
+            return false
+        case .undetermined:
+            return await withCheckedContinuation { continuation in
+                AVAudioSession.sharedInstance().requestRecordPermission { granted in
+                    continuation.resume(returning: granted)
+                }
+            }
+        @unknown default:
+            return await withCheckedContinuation { continuation in
+                AVAudioSession.sharedInstance().requestRecordPermission { granted in
+                    continuation.resume(returning: granted)
+                }
+            }
         }
     }
 

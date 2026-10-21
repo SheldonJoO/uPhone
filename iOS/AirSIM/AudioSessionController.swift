@@ -13,6 +13,12 @@ enum AirSIMCallAudioOptions {
     }
 }
 
+enum MicrophonePermissionStatus: Equatable, Sendable {
+    case granted
+    case denied
+    case undetermined
+}
+
 enum PCMRoute: Equatable, Sendable {
     case moduleLocal
     case vowlan(endpoint: VoWLANEndpoint, credential: VoWLANCredential)
@@ -161,6 +167,24 @@ final class AudioSessionController: ObservableObject {
             AVAudioSession.sharedInstance().requestRecordPermission { granted in
                 continuation.resume(returning: granted)
             }
+        }
+    }
+
+    /// 当前麦克风授权状态（只读），供来电前判断是否需要引导去设置。
+    var microphonePermissionStatus: MicrophonePermissionStatus {
+        if #available(iOS 17.0, *) {
+            switch AVAudioApplication.shared.recordPermission {
+            case .granted: return .granted
+            case .denied: return .denied
+            case .undetermined: return .undetermined
+            @unknown default: return .undetermined
+            }
+        }
+        switch AVAudioSession.sharedInstance().recordPermission {
+        case .granted: return .granted
+        case .denied: return .denied
+        case .undetermined: return .undetermined
+        @unknown default: return .undetermined
         }
     }
 

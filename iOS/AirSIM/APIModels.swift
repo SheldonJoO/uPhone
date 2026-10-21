@@ -159,6 +159,8 @@ struct CloudAgentStatus: Decodable, Equatable, Sendable {
     let signalDBM: Int?
     let activeAgentID: String?
     let agents: [CloudAndroidAgent]
+    /// 侧载兜底：Relay 回传的振铃中来电（无 APNs token 时推送发不出去，靠轮询发现）。
+    let incomingCall: CloudIncomingCall?
 
     enum CodingKeys: String, CodingKey {
         case cloudOnline = "cloud_online"
@@ -171,6 +173,7 @@ struct CloudAgentStatus: Decodable, Equatable, Sendable {
         case signalDBM = "signal_dbm"
         case activeAgentID = "active_agent_id"
         case agents
+        case incomingCall = "call"
     }
 
     init(from decoder: Decoder) throws {
@@ -187,6 +190,35 @@ struct CloudAgentStatus: Decodable, Equatable, Sendable {
         signalDBM = try values.decodeIfPresent(Int.self, forKey: .signalDBM)
         activeAgentID = try values.decodeIfPresent(String.self, forKey: .activeAgentID)
         agents = try values.decodeIfPresent([CloudAndroidAgent].self, forKey: .agents) ?? []
+        incomingCall = try values.decodeIfPresent(CloudIncomingCall.self, forKey: .incomingCall)
+    }
+}
+
+/// Relay 状态端点回传的振铃中来电（侧载无 APNs token 时的轮询兜底）。
+struct CloudIncomingCall: Decodable, Equatable, Sendable {
+    let callID: String
+    let callUUID: String
+    let number: String
+    let phase: String
+    /// 媒体直连续密钥：经设备鉴权的状态端点取回，用于 answer 后连接 Relay 媒体。
+    let secret: String
+    let mediaURL: String
+
+    enum CodingKeys: String, CodingKey {
+        case callID = "call_id"
+        case callUUID = "call_uuid"
+        case number, phase, secret
+        case mediaURL = "media_url"
+    }
+
+    init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        callID = try values.decode(String.self, forKey: .callID)
+        callUUID = try values.decode(String.self, forKey: .callUUID)
+        number = try values.decodeIfPresent(String.self, forKey: .number) ?? ""
+        phase = try values.decodeIfPresent(String.self, forKey: .phase) ?? ""
+        secret = try values.decode(String.self, forKey: .secret)
+        mediaURL = try values.decode(String.self, forKey: .mediaURL)
     }
 }
 

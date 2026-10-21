@@ -1126,6 +1126,9 @@ async function receiveCall(request, env) {
     generation,
     phase: "ringing",
     source: "agent",
+    // 侧载兜底需要号码：无 APNs token 时来电推送发不出去，iPhone 靠轮询
+    // /v1/devices/status 发现振铃来电（见 readRingingCallForStatus）。
+    number: stringValue(call.number),
     timestamp: nonEmpty(call.issued_at) && Number.isFinite(Date.parse(call.issued_at))
       ? call.issued_at : new Date(now).toISOString(),
     trace_id: nonEmpty(call.trace_id) ? call.trace_id : null,
@@ -1163,6 +1166,10 @@ async function receiveCall(request, env) {
       call_uuid: call.call_uuid.toLowerCase(),
       generation,
       direction: "incoming",
+      // 明文密钥仅用于侧载兜底：无 APNs token 时推送发不出去，iPhone 轮询
+      // /v1/devices/status 时经设备鉴权取回密钥直连媒体。media connect 仍只
+      // 比对 secret_hash，不因该字段放宽任何校验。
+      secret: call.call_secret,
       secret_hash: await sha256Hex(call.call_secret),
       expires_at: call.expires_at,
       media_expires_at: new Date(now + 4 * 60 * 60 * 1000).toISOString(),
@@ -1442,8 +1449,12 @@ async function receiveDeviceStatus(request, env) {
   const heartbeat = heartbeats
     .filter((item) => item && Number.isFinite(item.received_at_ms) && now - item.received_at_ms <= 90_000)
     .sort((left, right) => right.received_at_ms - left.received_at_ms)[0];
+  // 侧载兜底：无 APNs token 时来电推送根本发不出去（voipDuplicate 直接跳过）。
+  // 把振铃中的来电经状态端点回传——iPhone 轮询发现后自行上报 CallKit，
+  // 这是真机签名前唯一可用的云中来电路径。密钥经设备鉴权后取回。
+  const ringing = await readRingingCallForStatus(request, env, authenticated.device.device_id);
   if (!heartbeat) {
-    return jsonResponse(200, { cloud_online: false, agents });
+    return jsonResponse(200, { cloud_online: false, agents, ...(ringing ? { call: ringing } : {}) });
   }
   const { received_at_ms: _, ...publicStatus } = heartbeat;
   return jsonResponse(200, {
@@ -1451,7 +1462,30 @@ async function receiveDeviceStatus(request, env) {
     ...publicStatus,
     active_agent_id: publicStatus.agent_id || "legacy",
     agents,
+    ...(ringing ? { call: ringing } : {}),
   });
+}
+
+/// 读取当前振铃/接入中的来电（侧载轮询兜底用）。仅回传 2 分钟内的新鲜记录。
+async function readRingingCallForStatus(request, env, deviceID) {
+  const lifecycle = await readRelayRecord(env, `call-lifecycle:${deviceID}`);
+  if (!lifecycle || !["ringing", "connecting"].includes(lifecycle.phase)) return null;
+  const stamp = Date.parse(lifecycle.timestamp || "");
+  if (!Number.isFinite(stamp) || Date.now() - stamp > 120_000) return null;
+  const callUUID = String(lifecycle.call_uuid || "").toLowerCase();
+  const call = (await readRelayRecord(env, `call:${callUUID}`))
+    || (await readRelayRecord(env, `call:${String(lifecycle.call_uuid || "")}`));
+  if (!call || !nonEmpty(call.secret)) return null;
+  const origin = new URL(request.url).origin.replace(/^http/, "ws");
+  return {
+    call_id: lifecycle.call_id,
+    call_uuid: callUUID,
+    number: stringValue(lifecycle.number),
+    phase: lifecycle.phase,
+    secret: call.secret,
+    media_url: `${origin}/v1/calls/${callUUID}/connect`,
+    media_transport: call.media_transport || "legacy_pcm",
+  };
 }
 
 async function receiveCallOwner(request, env) {

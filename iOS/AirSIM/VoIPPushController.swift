@@ -127,6 +127,44 @@ struct IncomingVoIPCall: Equatable, Sendable {
         requestedMediaTransport = mediaTransport
     }
 
+    /// 侧载兜底：从 Relay 状态端点回传的振铃来电构造。Relay 返回的 media_url 是 https，
+    /// 需转成带身份令牌的 wss 才能直连媒体 WebSocket（与 PushKit 载荷处理一致）。
+    init(cloudIncoming call: CloudIncomingCall) throws {
+        guard !call.callUUID.isEmpty, !call.callID.isEmpty,
+              let uuid = UUID(uuidString: call.callUUID) else {
+            throw VoIPPushPayloadError.invalidCallUUID
+        }
+        guard let mediaURL = Self.cloudMediaURL(from: call.mediaURL, secret: call.secret) else {
+            throw VoIPPushPayloadError.invalidCallUUID
+        }
+        callID = call.callID
+        self.uuid = uuid
+        generation = 1
+        number = call.number.isEmpty ? nil : call.number
+        callerName = nil
+        deviceID = nil
+        deviceName = nil
+        expiresAt = Date().addingTimeInterval(5 * 60 * 60)
+        isVirtual = false
+        isOutgoing = false
+        ttsText = nil
+        authenticatedMediaURL = mediaURL
+        requestedMediaTransport = .legacyPCM
+    }
+
+    private static func cloudMediaURL(from rawURL: String, secret: String) -> URL? {
+        guard var components = URLComponents(string: rawURL),
+              let scheme = components.scheme?.lowercased(),
+              ["https", "wss"].contains(scheme),
+              components.host?.isEmpty == false else { return nil }
+        components.scheme = "wss"
+        var query = components.queryItems ?? []
+        query.append(URLQueryItem(name: "role", value: "iphone"))
+        query.append(URLQueryItem(name: "token", value: secret))
+        components.queryItems = query
+        return components.url
+    }
+
     func matches(backendID: String?, uuid: UUID?) -> Bool {
         backendID == callID || uuid == self.uuid
     }

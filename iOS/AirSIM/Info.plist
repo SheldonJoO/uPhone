@@ -56,6 +56,8 @@
 	</array>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>用于在安卓热点内发现并安全配对 uPhone 电话桥。</string>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>用于通过蓝牙直连（VoBLE）在手机与值守安卓间传输通话音频与控制信令，无需共享 Wi-Fi。</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>用于通过 AirSIM VoWLAN 或云端模式进行双向语音通话。</string>
 	<key>NSCameraUsageDescription</key>

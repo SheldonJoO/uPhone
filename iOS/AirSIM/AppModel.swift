@@ -125,6 +125,8 @@ final class AppModel: ObservableObject {
     @Published var recordingSavedNotice: String?
     @Published var recordingShareURL: URL?
     @Published var errorMessage: String?
+    /// 麦克风权限被拒时引导用户去系统设置开启（侧载重签后 TCC 清零的常见卡点）。
+    @Published var showMicrophoneSettingsAlert = false
 
     private static let recordingComplianceKey = "uPhone.recordingComplianceAccepted"
     @Published private(set) var modemStatus: ModemStatus?
@@ -132,6 +134,8 @@ final class AppModel: ObservableObject {
     @Published private(set) var connectionSummary: ModuleConnectionSummary = .offline
     @Published private(set) var cloudAgentStatus: CloudAgentStatus?
     @Published private(set) var cloudAgentDirectory: CloudAgentStatus?
+    /// 已通过轮询兜底上报过的云端振铃来电 UUID，避免每轮重复上报。
+    private var lastCloudIncomingUUID: String?
     @Published private(set) var remoteCall: CallRecord?
     @Published private(set) var pendingOutgoingCall: CallRecord?
     @Published private(set) var callPresentationSurface: CallPresentationSurface?
@@ -617,6 +621,9 @@ final class AppModel: ObservableObject {
             self?.cloudCallAudioState = state
             if state.isConnected { self?.audio.retryRequestedSpeakerRoute() }
         }
+        IPhoneCloudCallSession.shared.onMicrophonePermissionDenied = { [weak self] in
+            self?.showMicrophoneSettingsAlert = true
+        }
         IPhoneCloudCallSession.shared.onLifecycleEvent = { [weak self] event in
             guard let self else { return }
             guard self.applyCallLifecycle(event) else { return }
@@ -710,10 +717,20 @@ final class AppModel: ObservableObject {
     }
 
     private func requestMicrophoneOnForegroundIfNeeded() {
-        guard !didRequestMicrophoneOnForeground,
-              UIApplication.shared.applicationState == .active else { return }
-        didRequestMicrophoneOnForeground = true
-        Task { _ = await audio.requestMicrophonePermission() }
+        guard UIApplication.shared.applicationState == .active else { return }
+        switch audio.microphonePermissionStatus {
+        case .granted:
+            return
+        case .denied:
+            // 已拒绝：弹出去系统设置的引导（仅首次，避免反复打断）。
+            if !didRequestMicrophoneOnForeground {
+                didRequestMicrophoneOnForeground = true
+                showMicrophoneSettingsAlert = true
+            }
+        case .undetermined:
+            // 未决定：每次回到前台都尝试请求一次，直到用户做出选择（重签 IPA 后 TCC 清零的常见卡点）。
+            Task { _ = await audio.requestMicrophonePermission() }
+        }
     }
 
     func setBackgroundStandbyEnabled(_ enabled: Bool) {
@@ -796,6 +813,9 @@ final class AppModel: ObservableObject {
     }
 
     private func poll(generation: Int) async {
+        // 侧载兜底：没有 APNs VoIP token 时，云端振铃来电发不出去，改为轮询 Relay 状态发现。
+        // 放在本地轮询之前，模块离线也不影响云端来电检测。
+        await detectCloudIncomingCall(generation: generation)
         do {
             let result = try await nextAgentEvent()
             let status = result.call
@@ -1065,6 +1085,44 @@ final class AppModel: ObservableObject {
             }
         }
 
+    }
+
+    /// 侧载兜底来电检测：没有 APNs VoIP token 时，Relay 推不出去的振铃来电会留在
+    /// `devices/status` 的 call 字段里，靠本地轮询发现并上报 CallKit（触发系统铃声）。
+    private func detectCloudIncomingCall(generation: Int) async {
+        guard !LocalModePreference.isEnabled(), CloudModePreference.isEnabled() else { return }
+        guard generation == pollingGeneration else { return }
+        // 已在通话中则不再重复检测，避免与进行中的会话冲突。
+        guard !IPhoneCloudCallSession.shared.hasActiveCall else { return }
+        let status: CloudAgentStatus
+        do {
+            status = try await VoIPPushController.shared.fetchCloudAgentStatusForDiagnostics()
+        } catch {
+            return
+        }
+        guard let incoming = status.incomingCall else { return }
+        // 同一通来电每轮都会回传，只上报一次；上报失败才允许下一轮重试。
+        guard incoming.callUUID != lastCloudIncomingUUID else { return }
+        do {
+            let call = try IncomingVoIPCall(cloudIncoming: incoming)
+            lastCloudIncomingUUID = incoming.callUUID
+            callKit.reportIncomingPush(call) { [weak self] error in
+                if let error {
+#if DEBUG
+                    print("[AirSIM Cloud] 轮询来电上报失败：\(error.localizedDescription)")
+#endif
+                    // 上报失败：清空去重标记，下一轮重试。
+                    self?.lastCloudIncomingUUID = nil
+                }
+            }
+#if DEBUG
+            print("[AirSIM Cloud] 轮询发现云端振铃来电 \(incoming.callUUID)")
+#endif
+        } catch {
+#if DEBUG
+            print("[AirSIM Cloud] 轮询来电构造失败：\(error.localizedDescription)")
+#endif
+        }
     }
 
     private struct AgentPollResult {
