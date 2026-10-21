@@ -56,6 +56,17 @@ public final class VoWLANGatewayService extends Service {
         return currentDiagnosticState;
     }
 
+    /** 当前 VoWLAN 网关监听地址（如 192.168.43.1:7592）；未就绪返回空串。值守页展示用。 */
+    static String currentGatewayAddress() {
+        VoWLANGatewayService active = runningInstance;
+        if (active == null) return "";
+        synchronized (active) {
+            VoWLANControlGateway gateway = active.control;
+            if (gateway == null || active.activeHotspot.isEmpty()) return "";
+            return active.activeHotspot + ":" + gateway.localPort();
+        }
+    }
+
     public static void start(Context context) {
         BridgeLog.debug("vowlan_service_start_requested");
         try { context.startForegroundService(new Intent(context, VoWLANGatewayService.class)); }

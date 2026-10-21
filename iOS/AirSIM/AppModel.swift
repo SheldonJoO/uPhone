@@ -268,34 +268,53 @@ final class AppModel: ObservableObject {
         let cloudStatus = cloudAgentDirectory ?? cloudAgentStatus
         var values: [String: AndroidAgentPresentation] = [:]
 
-        // 中继目录返回所有历史注册（含历次重配残留的旧身份）。未入库、非活跃槽位、
-        // 且当前离线的一律隐藏——否则「配对后值守机列表出现离线设备」的幽灵永远存在
-        // （实测 ghost 的 device_id 每次重配都变，正是历史注册在目录里堆积）。
-        // 已入库设备（用户明确配对过）与活跃设备即使暂时离线也保留显示。
-        let registryIDs = Set(DeviceRegistry.allDevices().map(\.deviceID))
+        let registryDevices = DeviceRegistry.allDevices()
+        // 三套 id 空间的统一：云端目录 id 与 VoWLAN 发现 id 都是安卓 agent_id，
+        // 注册表 key 是 relay device_id。配对时写入的 androidAgentID（= agent_id）
+        // 是两者的桥。不统一的后果：注册表卡片永远拿不到 VoWLAN/云端状态
+        // （一直显示「离线」），且与发现卡片重复成两张卡——用户实锤的
+        // 「值守机 ...1f2b47」+「TCL T508N」双卡、状态不显示，根因就在此。
+        var aidToDeviceID: [String: String] = [:]
+        for device in registryDevices {
+            guard let aid = device.androidAgentID, !aid.isEmpty else { continue }
+            aidToDeviceID[aid] = device.deviceID
+        }
+        let registryIDs = Set(registryDevices.map(\.deviceID))
         let activeSlotID = DeviceRegistry.activeSlotDeviceID()
+
+        // 中继目录返回所有历史注册（含历次重配残留的旧身份）。未入库、非活跃槽位、
+        // 且当前离线的一律隐藏——否则「配对后值守机列表出现离线设备」的幽灵永远存在。
+        // 已入库设备（用户明确配对过）与活跃设备即使暂时离线也保留显示。
         for agent in cloudStatus?.agents ?? [] {
-            if !agent.cloudOnline && !registryIDs.contains(agent.id) && agent.id != activeSlotID { continue }
+            let registryKey = aidToDeviceID[agent.id]
+            if registryKey == nil, !agent.cloudOnline, !registryIDs.contains(agent.id),
+               agent.id != activeSlotID { continue }
+            let key = registryKey ?? agent.id
             let name = agent.deviceName?.isEmpty == false
                 ? agent.deviceName!
                 : [agent.manufacturer, agent.model].compactMap { $0 }.joined(separator: " ")
-            values[agent.id] = AndroidAgentPresentation(
-                id: agent.id,
-                deviceName: name.isEmpty ? "Android 手机" : name,
-                phoneNumber: agent.phoneNumber?.isEmpty == false ? agent.phoneNumber : nil,
-                agentKind: agent.agentKind,
+            let previous = values[key]
+            values[key] = AndroidAgentPresentation(
+                id: key,
+                deviceName: name.isEmpty ? (previous?.deviceName ?? "Android 手机") : name,
+                phoneNumber: agent.phoneNumber?.isEmpty == false ? agent.phoneNumber : previous?.phoneNumber,
+                agentKind: agent.agentKind ?? previous?.agentKind,
                 cloudOnline: agent.cloudOnline,
-                vowlanOnline: false,
+                vowlanOnline: previous?.vowlanOnline ?? false,
                 isCurrent: false,
-                simCards: agent.simCards
+                simCards: agent.simCards.isEmpty ? (previous?.simCards ?? []) : agent.simCards
             )
         }
 
+        var vowlanMatchedRegistry = false
         for local in vowlan.discoveredAgents {
-            let previous = values[local.id]
-            values[local.id] = AndroidAgentPresentation(
-                id: local.id,
-                deviceName: local.deviceName,
+            let registryKey = aidToDeviceID[local.id]
+            if registryKey != nil { vowlanMatchedRegistry = true }
+            let key = registryKey ?? local.id
+            let previous = values[key]
+            values[key] = AndroidAgentPresentation(
+                id: key,
+                deviceName: previous?.deviceName ?? local.deviceName,
                 phoneNumber: local.phoneNumber?.isEmpty == false ? local.phoneNumber : previous?.phoneNumber,
                 agentKind: local.agentKind ?? previous?.agentKind,
                 cloudOnline: previous?.cloudOnline ?? false,
@@ -303,6 +322,28 @@ final class AppModel: ObservableObject {
                 isCurrent: false,
                 simCards: local.simCards.isEmpty ? (previous?.simCards ?? []) : local.simCards
             )
+        }
+
+        // VoWLAN 探测通过但 NSD 没列出设备（扫码配对直接验证 IP 的常见状态：
+        // 设置页显示「VoWLAN 就绪」而 discoveredAgents 为空）。单设备场景把
+        // 在线状态补给唯一/活跃设备，别让卡片显示离线——「值守不显示状态」的修复点。
+        if !vowlanMatchedRegistry, vowlan.availability.isOnlineForDisplay {
+            let target = registryDevices.count == 1
+                ? registryDevices[0]
+                : (activeSlotID.flatMap { id in registryDevices.first { $0.deviceID == id } })
+            if let target {
+                let previous = values[target.deviceID]
+                values[target.deviceID] = AndroidAgentPresentation(
+                    id: target.deviceID,
+                    deviceName: previous?.deviceName ?? target.displayName,
+                    phoneNumber: previous?.phoneNumber,
+                    agentKind: previous?.agentKind,
+                    cloudOnline: previous?.cloudOnline ?? false,
+                    vowlanOnline: true,
+                    isCurrent: false,
+                    simCards: previous?.simCards ?? []
+                )
+            }
         }
 
         if values.isEmpty, let cloudStatus, cloudStatus.cloudOnline {
@@ -321,7 +362,7 @@ final class AppModel: ObservableObject {
         // 注册表里配对过、但云端目录和局域网都暂时看不到的设备：显示为离线。
         // 这样"值守机"列表永远完整，不会因为设备关机就消失。
         let knownIDs = Set(values.keys)
-        for device in DeviceRegistry.allDevices() where !knownIDs.contains(device.deviceID) {
+        for device in registryDevices where !knownIDs.contains(device.deviceID) {
             values[device.deviceID] = AndroidAgentPresentation(
                 id: device.deviceID,
                 deviceName: device.displayName,
@@ -341,11 +382,17 @@ final class AppModel: ObservableObject {
                 return preferred
             }
             if vowlan.availability.isOnlineForDisplay, let endpoint = vowlan.availability.endpoint {
-                return vowlan.discoveredAgents.first(where: { $0.endpoint == endpoint })?.id
+                if let discoveredID = vowlan.discoveredAgents.first(where: { $0.endpoint == endpoint })?.id {
+                    return aidToDeviceID[discoveredID] ?? discoveredID
+                }
+                if registryDevices.count == 1 { return registryDevices[0].deviceID }
             }
             guard CloudModePreference.isEnabled(), cloudStatus?.cloudOnline == true else { return nil }
-            return cloudStatus?.activeAgentID
-                ?? cloudStatus?.agents.first(where: \.cloudOnline)?.id
+            if let activeAgent = cloudStatus?.activeAgentID {
+                return aidToDeviceID[activeAgent] ?? activeAgent
+            }
+            return cloudStatus?.agents.first(where: \.cloudOnline)
+                .map { aidToDeviceID[$0.id] ?? $0.id }
         }()
 
         // 忽略名单只对"未入库"的设备生效（VoWLAN 广播发现的设备）。

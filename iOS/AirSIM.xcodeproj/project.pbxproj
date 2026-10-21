@@ -592,7 +592,7 @@
 				DEVELOPMENT_TEAM = "";
 				AIRSIM_APNS_ENVIRONMENT = sandbox;
 				AIRSIM_PUSH_ENTITLEMENTS = "AirSIM/AirSIM.entitlements";
-				AIRSIM_PUSH_RELAY_URL = "";
+				AIRSIM_PUSH_RELAY_URL = "https://airsim-push.dntmove.asia";
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = "AirSIM/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 16.3;
@@ -618,7 +618,7 @@
 				DEVELOPMENT_TEAM = "";
 				AIRSIM_APNS_ENVIRONMENT = production;
 				AIRSIM_PUSH_ENTITLEMENTS = "AirSIM/AirSIM.entitlements";
-				AIRSIM_PUSH_RELAY_URL = "";
+				AIRSIM_PUSH_RELAY_URL = "https://airsim-push.dntmove.asia";
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = "AirSIM/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 16.3;

@@ -311,6 +311,18 @@ public final class MainActivity extends Activity {
 
         root.addView(pageTitle("余奉电话助理", dutyOn ? "值守中" : "待命"));
 
+        // 双卡号码未配置引导：TCL 功能机 SubscriptionManager 经常读不到号码，
+        // 不手动填的话 iPhone 端会反复提示「双卡未设置」、云端目录也没有号码。
+        // 值守页顶部给出可直接点击的引导条，直达「更多 › 设置 › 双卡设置」。
+        if (AppConfig.sim1Number(this).isEmpty() && AppConfig.sim2Number(this).isEmpty()) {
+            TextView simBanner = label("双卡号码未填写：iPhone 端会提示「双卡未设置」。点此前往"
+                    + "「更多 › 设置」补上 SIM 1 / SIM 2 号码。", 13, WARNING, Gravity.START);
+            simBanner.setPadding(dp(14), dp(12), dp(14), dp(12));
+            simBanner.setBackground(neuDrawable("neu_card_bg"));
+            simBanner.setOnClickListener(ignored -> openMore(MoreSection.SETTINGS));
+            root.addView(simBanner, matchWithTop(10));
+        }
+
         root.addView(buildSetupChecklist(), matchWithTop(14));
 
         LinearLayout hero = card(SURFACE_HIGH, 26);
@@ -358,6 +370,12 @@ public final class MainActivity extends Activity {
         connectionCard.addView(label(MainScreenPresentation.heartbeatLine(
                 cloudLastHeartbeatMillis, cloudHeartbeatFailures), 12, MUTED, Gravity.START),
                 matchWithTop(2));
+        // 本机 VoWLAN 监听地址：值守机不在手边时，用户/支持人员要确认「连的就是这台」。
+        String gatewayAddress = VoWLANGatewayService.currentGatewayAddress();
+        if (!gatewayAddress.isEmpty()) {
+            connectionCard.addView(label("本机 VoWLAN 地址 " + gatewayAddress, 12, MUTED, Gravity.START),
+                    matchWithTop(2));
+        }
 
         // 云端值守开关：安卓端直接控制「远程通话与短信」，不必只依赖 iPhone 端开关。
         // 本地配对（local_mode）的机器开启会报错——那种配对包里没有 Relay 身份，
