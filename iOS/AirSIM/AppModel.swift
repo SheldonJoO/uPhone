@@ -592,6 +592,12 @@ final class AppModel: ObservableObject {
             UserDefaults.standard.set(false, forKey: CloudModePreference.key)
         }
         callKit.handler = self
+        // 上报系统来电前先挂起后台待机：待机的静音播放持着音频会话时，系统的
+        // 来电铃声会被压掉（实测 VoWLAN 来电「无响铃、无提示」）。呼出/接听
+        // 路径本来就挂起，只有呼入路径漏了——这里补上，两条来电路径都覆盖。
+        callKit.onBeforeIncomingReport = { [backgroundStandby] in
+            backgroundStandby.suspendForCall()
+        }
         callKit.setEnabled(!LocalModePreference.isEnabled())
         // 来电策略：白名单"包含通讯录"选项的号码来源。
         CallPolicyStore.shared.contactNumberProvider = { [weak self] in

@@ -93,6 +93,10 @@ final class CallKitController: NSObject {
     private var entitlementAvailable = true
     private var featureEnabled = !LocalModePreference.isEnabled()
     weak var handler: (any CallKitActionHandling)?
+    /// 上报系统来电前的钩子。侧载模式靠后台静音播放保活，App 持着音频会话时
+    /// 系统的来电铃声会被压掉（实测「呼入无响铃、无提示」）——上报前必须先
+    /// 释放会话，让系统铃声出来。由 AppModel 挂接 backgroundStandby.suspendForCall。
+    var onBeforeIncomingReport: (() -> Void)?
 
     private var currentUUID: UUID?
     /// 策略拦截后待自动挂断的系统通话 UUID（上报成功后立即请求结束）。
@@ -400,6 +404,9 @@ final class CallKitController: NSObject {
     private func reportIncomingIfNeeded(number: String?, callerName: String?, source: String) {
         guard !incomingReportRequested, !systemCallReported, let uuid = currentUUID else { return }
         incomingReportRequested = true
+        // 先释放后台待机占用的音频会话，再上报——否则系统来电铃声被压掉。
+        // VoWLAN 轮询与 PushKit 两条路径都经由此处，修复同时覆盖。
+        onBeforeIncomingReport?()
         debugLog("请求系统来电界面；来源=\(source)")
         provider.reportNewIncomingCall(
             with: uuid,
