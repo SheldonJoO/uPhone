@@ -9,6 +9,10 @@ struct PairedDevice: Codable, Identifiable, Equatable {
     let relayURL: String
     var deviceName: String
     let pairedAt: Date
+    /// 安卓稳定身份（ANDROID_ID 派生）。本地模式配对无 relay device_id，
+    /// 同机重配判定与 ghost 根治全靠它。可选：旧条目解码时该键缺失，
+    /// 用非可选会让整个注册表解码失败（设备列表瞬间清空）。
+    var androidAgentID: String? = nil
 
     var displayName: String {
         deviceName.isEmpty ? "值守机 …\(deviceID.suffix(6))" : deviceName
@@ -72,6 +76,29 @@ enum DeviceRegistry {
         guard let index = devices.firstIndex(where: { $0.deviceID == deviceID }) else { return }
         devices[index].deviceName = name.trimmingCharacters(in: .whitespacesAndNewlines)
         _ = saveAll(devices)
+    }
+
+    /// 把安卓稳定身份写到注册表条目上，供下次同机重配判定（本地模式无 relay id 时唯一依据）。
+    static func tagAndroidAgentID(_ deviceID: String, androidAgentID: String) {
+        guard !androidAgentID.isEmpty else { return }
+        var devices = allDevices()
+        guard let index = devices.firstIndex(where: { $0.deviceID == deviceID }),
+              devices[index].androidAgentID != androidAgentID else { return }
+        devices[index].androidAgentID = androidAgentID
+        _ = saveAll(devices)
+    }
+
+    /// 按安卓稳定身份找已配对设备（跨 relay 身份复用判定）。
+    static func device(forAndroidAgentID agentID: String) -> PairedDevice? {
+        guard !agentID.isEmpty else { return nil }
+        return allDevices().first { $0.androidAgentID == agentID }
+    }
+
+    /// 单设备旧槽位里的活跃 device_id（airsim.push-device-id）。
+    /// 云端目录过滤用：当前活跃设备即使在目录里离线也要显示，不能当僵尸隐藏。
+    static func activeSlotDeviceID() -> String? {
+        let value = UserDefaults.standard.string(forKey: "airsim.push-device-id")
+        return (value?.isEmpty == false) ? value : nil
     }
 
     static func device(for deviceID: String) -> PairedDevice? {
@@ -179,12 +206,14 @@ extension DeviceRegistry {
     /// After a successful new-device pairing: archive the previous active device,
     /// then make the staged credentials the active ones.
     @discardableResult
-    static func activateStagedDevice(deviceName: String, relayURL: String) -> PairedDevice? {
+    static func activateStagedDevice(deviceName: String, relayURL: String,
+                                     androidAgentID: String = "") -> PairedDevice? {
         guard let secret = stagedDeviceSecret() else { return nil }
         let deviceID = PushDeviceIdentity.deviceID(deviceSecret: secret)
         archiveActiveDeviceIfNeeded()
         let device = PairedDevice(deviceID: deviceID, deviceSecret: secret,
-                                  relayURL: relayURL, deviceName: deviceName, pairedAt: Date())
+                                  relayURL: relayURL, deviceName: deviceName, pairedAt: Date(),
+                                  androidAgentID: androidAgentID)
         upsert(device)
         UserDefaults.standard.set(deviceID, forKey: deviceIDKey)
         UserDefaults.standard.set(relayURL, forKey: relayURLKey)

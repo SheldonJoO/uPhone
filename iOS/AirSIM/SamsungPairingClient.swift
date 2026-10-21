@@ -14,6 +14,9 @@ struct SamsungPairingService: Identifiable {
     let transport: PairingTransport
     /// 安卓广播的当前 device_id 尾段；与注册表活跃设备一致即「同一台手机重配」。
     var deviceIDHint: String = ""
+    /// 安卓稳定身份（ANDROID_ID 派生）。本地模式配对无 relay device_id、did 为空，
+    /// 同机重配判定靠它——没有它每次重配都会被当成新设备，生成离线 ghost。
+    var androidAgentID: String = ""
     /// TCP 通道的安卓临时公钥（TXT key）；BLE 通道的公钥在 transport 内。
     var serverPublicKey: Data = Data()
 
@@ -83,6 +86,8 @@ final class SamsungPairingBrowser: ObservableObject {
               let expiresMillis = Double(expiresText) else { return nil }
         var deviceIDHint = ""
         if let did = record["did"], !did.isEmpty { deviceIDHint = did }
+        var androidAgentID = ""
+        if let aid = record["aid"], !aid.isEmpty { androidAgentID = aid }
         let displayName: String
         if case let .service(name, _, _, _) = result.endpoint {
             displayName = name
@@ -95,6 +100,7 @@ final class SamsungPairingBrowser: ObservableObject {
             transport: .tcp(endpoint: result.endpoint,
                             expiresAt: Date(timeIntervalSince1970: expiresMillis / 1_000)),
             deviceIDHint: deviceIDHint,
+            androidAgentID: androidAgentID,
             serverPublicKey: serverPublicKey
         )
     }

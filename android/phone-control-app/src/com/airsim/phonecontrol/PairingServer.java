@@ -32,6 +32,8 @@ public final class PairingServer implements Closeable {
         void onStarted(String code, String address, long expiresAtMillis, String qrPayload);
         void onSucceeded(String agentResponse);
         void onFailed(String message);
+        /** BLE 广播通道状态（开启成功/不可用原因），用于配对页显示。 */
+        void onBleStatus(String status);
     }
 
     private static final int MAX_HEADERS = 8_192;
@@ -51,6 +53,10 @@ public final class PairingServer implements Closeable {
     }
 
     public void start() {
+        // 配对窗口与 VoBLE 音频网关共用同一个 BLE 广播槽（legacy 单广播）。
+        // 先让 VoBLE 让位，否则无 Wi-Fi 场景下 VoBleGateway 占着广播，
+        // 配对广播 startAdvertising 被覆盖/失败——「扫描不到蓝牙设备」的根因。
+        VoWLANGatewayService.beginPairingWindow();
         executor.execute(() -> {
             try {
                 PairingSession created = PairingSession.create(System.currentTimeMillis());
@@ -213,6 +219,9 @@ public final class PairingServer implements Closeable {
         // 复用现有密钥，不再 stage 新身份——重复配对生成无名 ghost 的根治点。
         String did = deviceIDHint();
         if (!did.isEmpty()) info.setAttribute("did", did);
+        // aid 是安卓稳定身份（ANDROID_ID 派生，重配/本地模式都不变）。
+        // 本地配对没有 relay device_id、did 为空，同机重配判定靠它。
+        info.setAttribute("aid", AndroidAgentIdentity.agentID(context));
         registration = new NsdManager.RegistrationListener() {
             @Override public void onServiceRegistered(NsdServiceInfo ignored) {}
             @Override public void onRegistrationFailed(NsdServiceInfo ignored, int code) {
@@ -235,14 +244,18 @@ public final class PairingServer implements Closeable {
             sessionInfo.put("expires", created.expiresAtMillis());
             String did = deviceIDHint();
             if (!did.isEmpty()) sessionInfo.put("did", did);
+            // 稳定安卓身份：本地模式（无 relay device_id）下 iPhone 靠它识别同机重配。
+            sessionInfo.put("aid", AndroidAgentIdentity.agentID(context));
             ble = new BlePairingAdvertiser(context,
                     sessionInfo.toString().getBytes(StandardCharsets.UTF_8),
                     body -> processClaim(body, created));
             ble.start();
             BridgeLog.info("pairing_ble_advertisement_started");
+            listener.onBleStatus("蓝牙广播已开启 · iPhone 可在无 Wi-Fi 时发现本机");
         } catch (Exception error) {
             // BLE 不可用（无硬件 / 未授权）不该阻断 Wi-Fi 配对主路径。
             BridgeLog.info("pairing_ble_start_skipped reason=" + safeMessage(error));
+            listener.onBleStatus("蓝牙广播不可用（" + safeMessage(error) + "），仅能用 Wi-Fi 配对");
             ble = null;
         }
     }
@@ -356,6 +369,7 @@ public final class PairingServer implements Closeable {
     }
 
     @Override public void close() throws IOException {
+        VoWLANGatewayService.endPairingWindow();
         BlePairingAdvertiser activeBle = ble;
         ble = null;
         if (activeBle != null) {

@@ -1900,6 +1900,15 @@ public final class MainActivity extends Activity {
                     if (pairingStatus != null) pairingStatus.setText("配对失败：" + message);
                 });
             }
+
+            @Override public void onBleStatus(String status) {
+                runOnUiThread(() -> {
+                    if (pairingStatus != null) {
+                        String current = String.valueOf(pairingStatus.getText());
+                        pairingStatus.setText(status + (current.startsWith("等待") ? "\n" + current : ""));
+                    }
+                });
+            }
         });
         pairingServer.start();
     }

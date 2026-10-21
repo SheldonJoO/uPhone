@@ -10,6 +10,8 @@ struct BlePairingCandidate: Identifiable, Equatable {
     var serverPublicKey: Data = Data()
     var expiresAt: Date = .distantFuture
     var deviceIDHint: String = ""
+    /// 安卓稳定身份（ANDROID_ID 派生）；本地模式配对无 relay id 时的同机重配依据。
+    var androidAgentID: String = ""
 
     var hasSessionMaterial: Bool { !sessionID.isEmpty && !serverPublicKey.isEmpty }
 
@@ -100,6 +102,7 @@ final class BlePairingBrowser: NSObject, ObservableObject {
         filled.serverPublicKey = session.serverPublicKey
         filled.expiresAt = session.expiresAt
         filled.deviceIDHint = session.did ?? ""
+        filled.androidAgentID = session.aid ?? ""
         if let index = candidates.firstIndex(where: { $0.id == filled.id }) {
             candidates[index] = filled
         }
@@ -164,9 +167,11 @@ private struct BleSessionInfo: Decodable {
     let key: String
     let expires: Double
     let did: String?
+    /// 安卓稳定身份（ANDROID_ID 派生），本地模式同机重配判定用。
+    let aid: String?
 
     enum CodingKeys: String, CodingKey {
-        case v, session, key, expires, did
+        case v, session, key, expires, did, aid
     }
 
     init(from decoder: Decoder) throws {
@@ -176,6 +181,7 @@ private struct BleSessionInfo: Decodable {
         key = try values.decode(String.self, forKey: .key)
         expires = try values.decode(Double.self, forKey: .expires)
         did = try values.decodeIfPresent(String.self, forKey: .did)
+        aid = try values.decodeIfPresent(String.self, forKey: .aid)
     }
 
     var expiresAt: Date { Date(timeIntervalSince1970: expires / 1000) }

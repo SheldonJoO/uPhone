@@ -120,6 +120,7 @@ struct AirSIMSettingsView: View {
     @State private var selfTestReport: CloudSelfTestReport?
     @State private var selfTestTask: Task<Void, Never>?
     @AppStorage("sideloadSkipPushCredentials") private var skipPushForSelfTest = false
+    @State private var connectionMode: ConnectionMode = ConnectionMode.current
     @State private var localSelfTestPhase: SelfTestPhase = .idle
     @State private var localSelfTestReport: CloudSelfTestReport?
     @State private var localSelfTestTask: Task<Void, Never>?
@@ -136,6 +137,15 @@ struct AirSIMSettingsView: View {
                 }
 
                 Section {
+                    Picker("连接模式", selection: $connectionMode) {
+                        ForEach(ConnectionMode.allCases) { mode in
+                            Label(mode.title, systemImage: mode.systemImage).tag(mode)
+                        }
+                    }
+                    .onChange(of: connectionMode) { mode in
+                        model.applyConnectionMode(mode)
+                    }
+
                     LabeledContent("Wi-Fi 直连", value: VoWLANStatusCopy.text(for: model.vowlan.availability))
                     Button("重新发现", systemImage: "arrow.clockwise") {
                         model.vowlan.restartBrowsing()
@@ -197,8 +207,12 @@ struct AirSIMSettingsView: View {
                 } header: {
                     Text("连接方式")
                 } footer: {
-                    Text("云中继关闭后，只有同一 Wi-Fi 下的值守机可用；人在外地时请保持云中继开启。")
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(connectionMode.detail)
+                        Text("云中继关闭后，只有同一 Wi-Fi 下的值守机可用；人在外地时请保持云中继开启。")
+                    }
                 }
+                .onAppear { connectionMode = ConnectionMode.current }
 
                 Section {
                     NavigationLink {

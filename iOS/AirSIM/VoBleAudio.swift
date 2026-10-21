@@ -120,6 +120,8 @@ final class VoBleClient: NSObject, ObservableObject {
     func ensureScanning() {
         guard let manager = central else { return }
         guard manager.state == .poweredOn, !scanning else { return }
+        // 连接模式门控：仅混合 / 蓝牙模式扫描 VoBLE；纯 Wi-Fi / 纯云端模式不占 BLE。
+        guard ConnectionMode.current.scansVoBLE else { return }
         scanning = true
         manager.scanForPeripherals(
             withServices: [Self.serviceUUID],

@@ -33,6 +33,25 @@ public final class VoWLANGatewayService extends Service {
     private String lastDiagnosticState = "";
     private static volatile String currentDiagnosticState = "尚未检查";
 
+    // 配对窗口与 VoBLE 音频网关共用同一个 BLE 广播槽（legacy 单广播）。
+    // 配对窗口开启期间停掉 VoBLE 广播并阻止其重启，窗口关闭后交还。
+    private static volatile VoWLANGatewayService runningInstance;
+    private static volatile boolean pairingWindowActive;
+
+    /** 配对窗口开启：立即停掉 VoBLE 广播（让出 BLE 广播槽），并阻止 lifecycleLoop 重启。 */
+    public static void beginPairingWindow() {
+        pairingWindowActive = true;
+        VoWLANGatewayService active = runningInstance;
+        if (active != null) active.stopVoBle();
+        BridgeLog.info("voble_paused_for_pairing");
+    }
+
+    /** 配对窗口关闭：交还广播槽，lifecycleLoop 会按需重新拉起 VoBLE。 */
+    public static void endPairingWindow() {
+        pairingWindowActive = false;
+        BridgeLog.info("voble_resume_after_pairing");
+    }
+
     static String currentDiagnosticState() {
         return currentDiagnosticState;
     }
@@ -45,6 +64,7 @@ public final class VoWLANGatewayService extends Service {
 
     @Override public void onCreate() {
         super.onCreate();
+        runningInstance = this;
         currentDiagnosticState = "服务正在启动";
         BridgeLog.info("vowlan_service_created");
         startForeground(BridgeNotification.VOWLAN_ID, BridgeNotification.vowlan(this, "正在发现 VoWLAN 网络"),
@@ -107,9 +127,14 @@ public final class VoWLANGatewayService extends Service {
                     update("VoWLAN 就绪 · " + hotspot.getHostAddress());
                 } else {
                     stopGateways();
-                    if (paired && AppConfig.configured(this)) {
+                    if (paired && AppConfig.configured(this) && !pairingWindowActive) {
+                        // 配对窗口开着时 BLE 广播槽归配对用（见 beginPairingWindow），
+                        // 这里不再抢广播，否则无 Wi-Fi 重配时 iPhone 扫不到配对设备。
                         ensureVoBle();
                         update("VoBLE 就绪 · 蓝牙直连（无共享 Wi-Fi）");
+                    } else if (pairingWindowActive) {
+                        stopVoBle();
+                        update("配对窗口进行中 · 蓝牙广播归配对使用");
                     } else {
                         stopVoBle();
                         update(!dialerRoleHeld ? "请将 AirSIM 设为默认电话应用"
@@ -287,6 +312,7 @@ public final class VoWLANGatewayService extends Service {
         BridgeLog.info("vowlan_service_destroyed");
         currentDiagnosticState = "服务已停止";
         running = false;
+        if (VoWLANGatewayService.runningInstance == this) VoWLANGatewayService.runningInstance = null;
         worker.shutdownNow();
         stopVoBle();
         stopGateways();

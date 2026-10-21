@@ -153,7 +153,35 @@ final class AppModel: ObservableObject {
                 self?.reportVoBLEIncomingCall(number: number, callerName: callerName)
             }
         }
-        VoBleClient.shared.ensureScanning()
+        // 模式门控：仅混合 / 蓝牙模式持续扫描 VoBLE 服务。
+        if ConnectionMode.current.scansVoBLE {
+            VoBleClient.shared.ensureScanning()
+        }
+    }
+
+    /// 应用连接模式（VoWLAN / VoBLE / 云中继 / 混合）。
+    /// 同步云端偏好与 VoBLE 扫描；开云端时走完整的 setCloudModeEnabled 链路
+    /// （含经局域网把完整注册推给安卓升级），立即生效。
+    func applyConnectionMode(_ mode: ConnectionMode) {
+        ConnectionMode.set(mode)
+        switch mode {
+        case .hybrid, .cloud:
+            CloudModePreference.setEnabled(true)
+        case .vowlan, .voble:
+            CloudModePreference.setEnabled(false)
+        }
+        if mode.scansVoBLE {
+            setupVoBleClient()
+        } else {
+            VoBleClient.shared.stopScan()
+        }
+        Task {
+            if CloudModePreference.isEnabled(), let (api, _) = await readyVoWLANRoute() {
+                await VoIPPushController.shared.setCloudModeEnabled(true, with: api)
+            } else {
+                await VoIPPushController.shared.forceRegistrationSync()
+            }
+        }
     }
 
     // MARK: - 多设备管理（配对 sheet 用）
@@ -240,7 +268,14 @@ final class AppModel: ObservableObject {
         let cloudStatus = cloudAgentDirectory ?? cloudAgentStatus
         var values: [String: AndroidAgentPresentation] = [:]
 
+        // 中继目录返回所有历史注册（含历次重配残留的旧身份）。未入库、非活跃槽位、
+        // 且当前离线的一律隐藏——否则「配对后值守机列表出现离线设备」的幽灵永远存在
+        // （实测 ghost 的 device_id 每次重配都变，正是历史注册在目录里堆积）。
+        // 已入库设备（用户明确配对过）与活跃设备即使暂时离线也保留显示。
+        let registryIDs = Set(DeviceRegistry.allDevices().map(\.deviceID))
+        let activeSlotID = DeviceRegistry.activeSlotDeviceID()
         for agent in cloudStatus?.agents ?? [] {
+            if !agent.cloudOnline && !registryIDs.contains(agent.id) && agent.id != activeSlotID { continue }
             let name = agent.deviceName?.isEmpty == false
                 ? agent.deviceName!
                 : [agent.manufacturer, agent.model].compactMap { $0 }.joined(separator: " ")
@@ -316,7 +351,6 @@ final class AppModel: ObservableObject {
         // 忽略名单只对"未入库"的设备生效（VoWLAN 广播发现的设备）。
         // 已在 DeviceRegistry 里的都是用户明确配对过的：即使之前点过"解散配对"，
         // 只要重新配对成功（重新入库），就必须重新显示，否则删了重配也永远是空列表。
-        let registryIDs = Set(DeviceRegistry.allDevices().map(\.deviceID))
         let ignored = ignoredAgentIDs.subtracting(registryIDs)
         return values.values.filter { !ignored.contains($0.id) }.map { item in
             AndroidAgentPresentation(
@@ -2078,8 +2112,9 @@ extension AppModel: CallKitActionHandling {
         audio.stopCallTone()
         backgroundStandby.suspendForCall()
         do {
-            let vowlanRoute = await readyVoWLANRoute()
-            let vobleReady = VoBleClient.shared.isReady
+            let mode = ConnectionMode.current
+            let vowlanRoute = mode.allows(.vowlan) ? await readyVoWLANRoute() : nil
+            let vobleReady = mode.allows(.voble) && VoBleClient.shared.isReady
             let cloudModeEnabled = CloudModePreference.isEnabled()
 
             // 第一档：VoWLAN（同 Wi-Fi / 安卓热点）
@@ -2108,6 +2143,9 @@ extension AppModel: CallKitActionHandling {
             }
 
             // 第三档：云端中继
+            guard mode.allows(.cloud) else {
+                throw CallKitBridgeError.noReachableTransport
+            }
             guard cloudModeEnabled else { throw CloudCommandError.cloudModeDisabled }
             let status: CloudAgentStatus
             if let cloudAgentStatus {
@@ -2157,15 +2195,16 @@ extension AppModel: CallKitActionHandling {
                 return
             }
             let cloudMediaEnabled = CloudModePreference.isEnabled()
-            let vowlanRoute = await readyVoWLANRoute()
-            let vobleReady = VoBleClient.shared.isReady
+            let vowlanRoute = ConnectionMode.current.allows(.vowlan) ? await readyVoWLANRoute() : nil
+            let vobleReady = ConnectionMode.current.allows(.voble) && VoBleClient.shared.isReady
             let moduleLocalReachable = false
             let transport = CallTransportPolicy.preferred(
                 vowlanReady: vowlanRoute != nil,
                 vobleReady: vobleReady,
                 moduleLocalReachable: moduleLocalReachable,
                 cloudMediaAvailable: pushedCall?.authenticatedMediaURL != nil,
-                cloudMediaEnabled: cloudMediaEnabled
+                cloudMediaEnabled: cloudMediaEnabled,
+                mode: ConnectionMode.current
             )
             switch transport {
             case .vowlan:

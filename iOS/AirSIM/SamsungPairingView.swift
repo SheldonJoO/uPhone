@@ -201,7 +201,8 @@ struct SamsungPairingView: View {
                 transport: .ble(sessionID: filled.sessionID,
                                 serverPublicKey: filled.serverPublicKey,
                                 expiresAt: filled.expiresAt),
-                deviceIDHint: filled.deviceIDHint
+                deviceIDHint: filled.deviceIDHint,
+                androidAgentID: filled.androidAgentID
             )
             message = localModeEnabled
                 ? "正在经蓝牙写入 VoWLAN 本地密钥…"
@@ -227,18 +228,23 @@ struct SamsungPairingView: View {
     }
 
     /// 配对成功后的登记逻辑。
-    /// 同一台手机重配（did 匹配活跃设备）：复用身份，不归档、不产生 ghost。
+    /// 同一台手机重配：复用身份，不归档、不产生 ghost。
     /// 真正的新设备：stage 新身份并归档旧设备。
+    /// 同机判定双通道：① relay device_id 尾段匹配活跃设备（云端模式）；
+    /// ② 安卓稳定 agentID 命中注册表（本地模式无 relay id、did 为空，以前只靠①
+    ///    判定不了，每次重配都被当成新设备——离线 ghost 就是这么来的）。
     @MainActor
     private func finishPairing(service: SamsungPairingService, registration: AgentPushRegistration) {
-        let isAdditionalDevice = !DeviceRegistry.allDevices().isEmpty
-        let rePairSameDevice = isAdditionalDevice
-            && !service.deviceIDHint.isEmpty
-            && (DeviceRegistry.activeDeviceID()?.hasSuffix(service.deviceIDHint) ?? false)
-        if isAdditionalDevice && !rePairSameDevice {
+        let matched = DeviceRegistry.device(forAndroidAgentID: service.androidAgentID)
+        let rePairSameDevice = matched != nil
+            || (!service.deviceIDHint.isEmpty
+                && (DeviceRegistry.activeDeviceID()?.hasSuffix(service.deviceIDHint) ?? false))
+        let isAdditionalDevice = !DeviceRegistry.allDevices().isEmpty && !rePairSameDevice
+        if isAdditionalDevice {
             if let device = DeviceRegistry.activateStagedDevice(
                 deviceName: service.displayName,
-                relayURL: registration.relayURL
+                relayURL: registration.relayURL,
+                androidAgentID: service.androidAgentID
             ) {
                 Task { await VoIPPushController.shared.forceRegistrationSync() }
                 model.clearIgnoredAgent(id: device.deviceID)
@@ -246,8 +252,13 @@ struct SamsungPairingView: View {
                 message = "配对已完成，但保存新设备凭证失败，请重试"
             }
         } else {
-            // 首台设备 / 同机重配：登记进设备列表（幂等）
+            // 首台设备 / 同机重配：登记进设备列表（幂等），并落稳定 agentID 供下次判定。
             DeviceRegistry.archiveActiveDeviceIfNeeded()
+            if let activeID = DeviceRegistry.activeDeviceID() {
+                DeviceRegistry.tagAndroidAgentID(activeID, androidAgentID: service.androidAgentID)
+            } else if let matched {
+                DeviceRegistry.tagAndroidAgentID(matched.deviceID, androidAgentID: service.androidAgentID)
+            }
             if !registration.deviceID.isEmpty {
                 model.clearIgnoredAgent(id: registration.deviceID)
             }
@@ -263,11 +274,10 @@ struct SamsungPairingView: View {
     @MainActor
     private func pairingRegistration(for service: SamsungPairingService) throws -> AgentPushRegistration {
         let registryDevices = DeviceRegistry.allDevices()
-        let isAdditionalDevice = !registryDevices.isEmpty
-        let rePairSameDevice = isAdditionalDevice
-            && !service.deviceIDHint.isEmpty
-            && (DeviceRegistry.activeDeviceID()?.hasSuffix(service.deviceIDHint) ?? false)
-        if rePairSameDevice || !isAdditionalDevice {
+        let rePairSameDevice = DeviceRegistry.device(forAndroidAgentID: service.androidAgentID) != nil
+            || (!service.deviceIDHint.isEmpty
+                && (DeviceRegistry.activeDeviceID()?.hasSuffix(service.deviceIDHint) ?? false))
+        if rePairSameDevice || registryDevices.isEmpty {
             guard let registration = VoIPPushController.shared.pairingRegistration() else {
                 throw SamsungPairingClientError.registrationUnavailable
             }

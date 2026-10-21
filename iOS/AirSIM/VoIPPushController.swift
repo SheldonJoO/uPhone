@@ -198,6 +198,10 @@ enum CloudModePreference {
         guard defaults.object(forKey: key) != nil else { return true }
         return defaults.bool(forKey: key)
     }
+
+    static func setEnabled(_ enabled: Bool, defaults: UserDefaults = .standard) {
+        defaults.set(enabled, forKey: key)
+    }
 }
 
 enum LocalModePreference {
@@ -396,17 +400,19 @@ enum PushDeviceIdentity {
 enum CallTransportPolicy {
     /// 三级递进：VoWLAN（同 Wi-Fi / 热点）› VoBLE（无网本地 BLE）› 模块本地 › 云端中继。
     /// VoWLAN 优先；不可达时退到 VoBLE（窄带 BLE 音频）；都没有再走云端。
+    /// mode 限定可选链路：混合全开；单选模式只放行对应链路（见 ConnectionMode.allows）。
     static func preferred(
         vowlanReady: Bool,
         vobleReady: Bool,
         moduleLocalReachable: Bool,
         cloudMediaAvailable: Bool,
-        cloudMediaEnabled: Bool = true
+        cloudMediaEnabled: Bool = true,
+        mode: ConnectionMode = .hybrid
     ) -> CallTransport? {
-        if vowlanReady { return .vowlan }
-        if vobleReady { return .voble }
-        if moduleLocalReachable { return .moduleLocal }
-        if cloudMediaEnabled && cloudMediaAvailable { return .cloud }
+        if vowlanReady, mode.allows(.vowlan) { return .vowlan }
+        if vobleReady, mode.allows(.voble) { return .voble }
+        if moduleLocalReachable, mode.allows(.moduleLocal) { return .moduleLocal }
+        if cloudMediaEnabled && cloudMediaAvailable, mode.allows(.cloud) { return .cloud }
         return nil
     }
 }
