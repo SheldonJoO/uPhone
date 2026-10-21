@@ -1,0 +1,10 @@
+# 复制本文件为 .dev.vars 并填入真实值，或改用：
+#   wrangler secret put APNS_KEY_ID APNS_P8 APNS_TEAM_ID DASHBOARD_TOKEN
+#
+# 注意：.dev.vars 含密钥，切勿提交到 git（已加入 .gitignore 为佳）。
+
+APNS_KEY_ID=your_apns_key_id
+APNS_P8="-----BEGIN PRIVATE KEY-----
+-----END PRIVATE KEY-----"
+APNS_TEAM_ID=your_apns_team_id
+DASHBOARD_TOKEN=your_dashboard_token

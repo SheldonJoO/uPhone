@@ -1,0 +1,51 @@
+# ⚠️ 部署前必读（本文件为模板，含占位符，不能直接 wrangler deploy）
+#
+# 1) name 必须与 airsim-push.dntmove.asia 当前已绑定的 Worker 脚本名一致。
+#    最可能是 "airsim-push"（与子域名一致）。若你之前用的是别的名字（如 push-relay-worker），
+#    请改这里的 name，否则会新建一个重复 Worker 并与已有路由冲突。
+#
+# 2) DEVICES 的 KV namespace id 必须填你账号里【已存在】的那个，不能用占位符。
+#    在已登录 wrangler 的机器上执行： wrangler kv namespace list
+#    找到 binding=DEVICES 对应的 id 填进来。
+#
+# 3) 以下 secret 不要写进本文件，用命令设置：
+#    wrangler secret put APNS_KEY_ID APNS_P8 APNS_TEAM_ID DASHBOARD_TOKEN
+#
+# 4) vars 里 ALLOWED_BUNDLE_ID / WEBRTC_* 也要填真实值（从原部署配置里抄）。
+
+name = "airsim-push"
+main = "src/index.mjs"
+compatibility_date = "2026-10-05"
+workers_dev = false
+
+[[routes]]
+pattern = "airsim-push.dntmove.asia/*"
+zone_id = "61edb172f1928afe0512cb9c1075576c"
+
+# KV：设备注册表（线上已存在，必须复用同一个 namespace id）
+[[kv_namespaces]]
+binding = "DEVICES"
+id = "REPLACE_WITH_DEVICES_KV_ID"
+
+# Durable Objects
+[[durable_objects.bindings]]
+name = "COMMANDS"
+class_name = "DeviceCommandSession"
+
+[[durable_objects.bindings]]
+name = "STATUS"
+class_name = "AgentStatusRegistry"
+
+[[durable_objects.bindings]]
+name = "MEDIA"
+class_name = "CallMediaSession"
+
+# 首次创建 DO 类需要迁移；若线上已有这些类，复用同一 tag 为无害 no-op
+[[migrations]]
+tag = "v1"
+new_classes = ["DeviceCommandSession", "AgentStatusRegistry", "CallMediaSession"]
+
+[vars]
+ALLOWED_BUNDLE_ID = "REPLACE_WITH_ALLOWED_BUNDLE_ID"
+WEBRTC_ROLLOUT_PERCENT = "0"
+WEBRTC_TRANSPORT_READY = "false"
