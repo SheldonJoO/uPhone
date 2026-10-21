@@ -56,18 +56,40 @@ public final class MainActivity extends Activity {
     private static final int ROLE_REQUEST = 100;
     private static final int DEFAULT_APPS_REQUEST = 102;
 
-    // 暗色主题：底 #10151C，亮阴影 #1E2632 / 暗阴影 #05080C 塑造凸起与凹陷
-    private static final int BG = Color.rgb(16, 21, 28);
-    private static final int SURFACE = Color.rgb(16, 21, 28);
-    private static final int SURFACE_HIGH = Color.rgb(30, 38, 50);
-    private static final int BORDER = Color.rgb(30, 38, 50);
-    private static final int PRIMARY = Color.rgb(47, 191, 143);
-    private static final int CYAN = Color.rgb(34, 211, 238);
-    private static final int BLUE = Color.rgb(76, 154, 255);
-    private static final int TEXT = Color.rgb(230, 237, 243);
-    private static final int MUTED = Color.rgb(139, 152, 165);
-    private static final int WARNING = Color.rgb(245, 166, 35);
-    private static final int DANGER = Color.rgb(255, 90, 90);
+    // Neumorphism 主题色板：运行时从资源解析。
+    // values/（日间浅色，原视觉风格）+ values-night/（夜间暗色）随系统深色模式自动切换；
+    // Activity 无 configChanges，日夜切换时自动重建并重新解析。
+    // 本工程 build.sh 的 javac 先于 aapt2 运行、无 R 类，故按名 getIdentifier 取色。
+    private int BG;
+    private int SURFACE;
+    private int SURFACE_HIGH;
+    private int BORDER;
+    private int PRIMARY;
+    private int CYAN;
+    private int BLUE;
+    private int TEXT;
+    private int MUTED;
+    private int WARNING;
+    private int DANGER;
+
+    private int color(String name) {
+        int id = getResources().getIdentifier(name, "color", getPackageName());
+        return getResources().getColor(id, null);
+    }
+
+    private void resolveThemeColors() {
+        BG = color("neu_bg");
+        SURFACE = color("neu_bg");
+        SURFACE_HIGH = color("neu_shadow_light");
+        BORDER = color("neu_shadow_dark");
+        PRIMARY = color("neu_accent_green");
+        CYAN = color("neu_cyan_dark");
+        BLUE = color("neu_accent_blue");
+        TEXT = color("neu_text");
+        MUTED = color("neu_muted");
+        WARNING = color("neu_warning");
+        DANGER = color("neu_danger");
+    }
 
     // 一键值守：主路径只剩「值守」一页；通话 / 设置 / 诊断收进「更多」里的次级分段，
     // 不再占用底部导航，避免值守机每次打开都要在四个页签里找开关。
@@ -135,6 +157,7 @@ public final class MainActivity extends Activity {
 
     @Override protected void onCreate(Bundle state) {
         super.onCreate(state);
+        resolveThemeColors();
         configureWindow();
         setContentView(buildShell());
         showPage(Page.DUTY);
@@ -171,8 +194,11 @@ public final class MainActivity extends Activity {
     private void configureWindow() {
         getWindow().setStatusBarColor(BG);
         getWindow().setNavigationBarColor(BG);
-        // 浅色主题：状态栏图标切深色
-        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+        // 日间浅色底：状态栏图标深色；夜间暗色底：图标浅色（清掉 LIGHT 标志）。
+        int nightMask = getResources().getConfiguration().uiMode
+                & android.content.res.Configuration.UI_MODE_NIGHT_MASK;
+        boolean night = nightMask == android.content.res.Configuration.UI_MODE_NIGHT_YES;
+        getWindow().getDecorView().setSystemUiVisibility(night ? 0 : View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
     }
 
     private View buildShell() {
@@ -2216,10 +2242,10 @@ public final class MainActivity extends Activity {
         int shadow = dp(6);
         int pad = dp(3);
         GradientDrawable dark = new GradientDrawable();
-        dark.setColor(Color.rgb(163, 177, 198));
+        dark.setColor(color("neu_shadow_dark"));
         dark.setCornerRadius(r);
         GradientDrawable light = new GradientDrawable();
-        light.setColor(Color.WHITE);
+        light.setColor(color("neu_shadow_light"));
         light.setCornerRadius(r);
         GradientDrawable base = new GradientDrawable();
         base.setColor(baseColor);

@@ -89,7 +89,10 @@ final class SamsungPairingBrowser: ObservableObject {
         var androidAgentID = ""
         if let aid = record["aid"], !aid.isEmpty { androidAgentID = aid }
         let displayName: String
-        if case let .service(name, _, _, _) = result.endpoint {
+        if let advertised = record["name"], !advertised.isEmpty {
+            // 安卓广播自带设备名（如「TCL T508N」），优先于 Bonjour 服务名。
+            displayName = advertised
+        } else if case let .service(name, _, _, _) = result.endpoint {
             displayName = name
         } else {
             displayName = "安卓手机桥"

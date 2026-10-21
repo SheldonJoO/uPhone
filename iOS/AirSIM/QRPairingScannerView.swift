@@ -3,7 +3,8 @@ import SwiftUI
 import Network
 
 /// Payload encoded in the Android pairing QR code.
-/// {"v":1,"session":"...","key":"...","ip":"...","port":1234,"code":"123456","expires":...}
+/// {"v":1,"session":"...","key":"...","ip":"...","port":1234,"code":"123456","expires":...,
+///  "aid":"android-xxxx","name":"TCL T508N"}
 struct QRPairingPayload: Codable {
     let v: Int
     let session: String
@@ -12,6 +13,10 @@ struct QRPairingPayload: Codable {
     let port: Int
     let code: String
     let expires: Double
+    /// 安卓稳定身份（ANDROID_ID 派生）：同机重配判定，缺了它每次扫码配对都生成新 relay 身份。
+    var aid: String?
+    /// 安卓设备名：配对结果直接显示真实机型，而不是「安卓手机（扫码）」。
+    var name: String?
 
     /// Build a SamsungPairingService for direct TCP pairing (bypasses Bonjour).
     func asService() -> SamsungPairingService? {
@@ -26,9 +31,10 @@ struct QRPairingPayload: Codable {
         let endpoint = NWEndpoint.hostPort(host: NWEndpoint.Host(ip), port: nwPort)
         return SamsungPairingService(
             id: session,
-            displayName: "安卓手机（扫码）",
+            displayName: (name?.isEmpty == false) ? name! : "安卓手机（扫码）",
             transport: .tcp(endpoint: endpoint,
                             expiresAt: Date(timeIntervalSince1970: expires / 1_000)),
+            androidAgentID: aid ?? "",
             serverPublicKey: serverPublicKey
         )
     }

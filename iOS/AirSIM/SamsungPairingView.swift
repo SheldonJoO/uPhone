@@ -197,7 +197,7 @@ struct SamsungPairingView: View {
             let filled = try await bleBrowser.connect(candidate)
             let service = SamsungPairingService(
                 id: filled.sessionID,
-                displayName: filled.displayName,
+                displayName: filled.androidName.isEmpty ? filled.displayName : filled.androidName,
                 transport: .ble(sessionID: filled.sessionID,
                                 serverPublicKey: filled.serverPublicKey,
                                 expiresAt: filled.expiresAt),

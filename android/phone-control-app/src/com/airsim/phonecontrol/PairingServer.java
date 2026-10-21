@@ -74,7 +74,9 @@ public final class PairingServer implements Closeable {
                 try {
                     String ip = preferredPrivateIPv4();
                     address = ip + ":" + server.getLocalPort();
-                    qr = qrPayload(created, address);
+                    qr = qrPayload(created, address,
+                            AndroidAgentIdentity.agentID(context),
+                            AndroidAgentIdentity.deviceName());
                 } catch (IOException ipError) {
                     BridgeLog.info("pairing_no_private_ip reason=" + safeMessage(ipError));
                 }
@@ -222,6 +224,7 @@ public final class PairingServer implements Closeable {
         // aid 是安卓稳定身份（ANDROID_ID 派生，重配/本地模式都不变）。
         // 本地配对没有 relay device_id、did 为空，同机重配判定靠它。
         info.setAttribute("aid", AndroidAgentIdentity.agentID(context));
+        info.setAttribute("name", AndroidAgentIdentity.deviceName());
         registration = new NsdManager.RegistrationListener() {
             @Override public void onServiceRegistered(NsdServiceInfo ignored) {}
             @Override public void onRegistrationFailed(NsdServiceInfo ignored, int code) {
@@ -246,6 +249,7 @@ public final class PairingServer implements Closeable {
             if (!did.isEmpty()) sessionInfo.put("did", did);
             // 稳定安卓身份：本地模式（无 relay device_id）下 iPhone 靠它识别同机重配。
             sessionInfo.put("aid", AndroidAgentIdentity.agentID(context));
+            sessionInfo.put("name", AndroidAgentIdentity.deviceName());
             ble = new BlePairingAdvertiser(context,
                     sessionInfo.toString().getBytes(StandardCharsets.UTF_8),
                     body -> processClaim(body, created));
@@ -316,7 +320,7 @@ public final class PairingServer implements Closeable {
      * connect directly: session, server public key, IP/port, code, expiry.
      * Format: {"v":1,"session":"...","key":"...","ip":"...","port":1234,"code":"123456","expires":...}
      */
-    static String qrPayload(PairingSession session, String address) {
+    static String qrPayload(PairingSession session, String address, String aid, String deviceName) {
         try {
             int colon = address.lastIndexOf(':');
             String ip = colon > 0 ? address.substring(0, colon) : address;
@@ -329,6 +333,11 @@ public final class PairingServer implements Closeable {
             json.put("port", port);
             json.put("code", session.code());
             json.put("expires", session.expiresAtMillis());
+            // 稳定身份与设备名：iPhone 靠 aid 判定同机重配（否则每次扫码配对都生成
+            // 新 relay 身份、旧设备变 ghost）；name 让配对结果直接显示「TCL T508N」
+            // 而不是「安卓手机（扫码）」。
+            if (aid != null && !aid.isEmpty()) json.put("aid", aid);
+            if (deviceName != null && !deviceName.isEmpty()) json.put("name", deviceName);
             return json.toString();
         } catch (Exception error) {
             BridgeLog.info("qr_payload_failed reason=" + error.getClass().getSimpleName());

@@ -2,17 +2,17 @@
 <resources>
     <color name="launcher_icon_background">#43CC5C</color>
 
-    <!-- Neumorphism 暗色主题色板 -->
-    <color name="neu_bg">#10151C</color>
-    <color name="neu_shadow_dark">#05080C</color>
-    <color name="neu_shadow_light">#1E2632</color>
-    <color name="neu_text">#E6EDF3</color>
-    <color name="neu_muted">#8B98A5</color>
-    <color name="neu_accent_green">#2FBF8F</color>
-    <color name="neu_accent_green_pressed">#239977</color>
-    <color name="neu_accent_blue">#4C9AFF</color>
-    <color name="neu_accent_blue_pressed">#3B82F6</color>
-    <color name="neu_warning">#F5A623</color>
-    <color name="neu_danger">#FF5A5A</color>
-    <color name="neu_cyan_dark">#22D3EE</color>
+    <!-- Neumorphism 浅色主题色板（日间，还原原视觉风格） -->
+    <color name="neu_bg">#E0E5EC</color>
+    <color name="neu_shadow_dark">#A3B1C6</color>
+    <color name="neu_shadow_light">#FFFFFF</color>
+    <color name="neu_text">#2E3A4D</color>
+    <color name="neu_muted">#6B7889</color>
+    <color name="neu_accent_green">#189A76</color>
+    <color name="neu_accent_green_pressed">#127A5D</color>
+    <color name="neu_accent_blue">#2F80ED</color>
+    <color name="neu_accent_blue_pressed">#2568C4</color>
+    <color name="neu_warning">#B26A00</color>
+    <color name="neu_danger">#D64545</color>
+    <color name="neu_cyan_dark">#0E7C86</color>
 </resources>
