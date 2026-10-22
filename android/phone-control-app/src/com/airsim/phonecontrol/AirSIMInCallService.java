@@ -52,10 +52,11 @@ public final class AirSIMInCallService extends InCallService {
             }
         }
         String callId = CallRepository.add(call);
-        // 去电：消费拨号命令里暂存的 subscription_id（取一次后清空），供本次通话的事件推断使用。
+        // 去电：消费拨号命令里按号码暂存的 subscription_id（取一次后移除），供本次通话的事件推断使用。
         if ("outgoing".equals(direction(call))) {
-            String pending = CallRepository.pendingDialSubscriptionId;
-            CallRepository.pendingDialSubscriptionId = "";
+            String pending = CallRepository.pendingDialSubscriptionIds.remove(
+                    CallRepository.canonicalDialNumber(number(call)));
+            if (pending == null) pending = "";
             int subscriptionId = parseSubscriptionId(pending);
             if (subscriptionId >= 0) {
                 // 手动补卡的 0/1 占位先解析为真实订阅，保证事件上报的是真实 subId 和正确卡槽。

@@ -12,6 +12,7 @@ import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /** In-process replacement for the HTTP API previously hosted by the AVF Agent. */
 final class StandaloneAgentGateway {
@@ -36,6 +37,11 @@ final class StandaloneAgentGateway {
     private final StandaloneLongPoll callEvents = new StandaloneLongPoll();
     private final StandaloneLongPoll agentEvents = new StandaloneLongPoll();
     private final Map<String, String> commandResults = new LinkedHashMap<>();
+    /**
+     * 按命令 key 的细粒度锁：同一命令不并发执行（拨号非幂等），不同命令互不阻塞。
+     * 之前是方法级 synchronized，一条短信 45s 等待会卡住挂断等所有云端命令。
+     */
+    private final ConcurrentHashMap<String, Object> commandKeyLocks = new ConcurrentHashMap<>();
     private JSONObject activeCall;
     private final JSONArray callHistory = new JSONArray();
 
@@ -214,9 +220,24 @@ final class StandaloneAgentGateway {
         };
     }
 
-    synchronized JSONObject executeCloudCommand(JSONObject command) throws Exception {
+    JSONObject executeCloudCommand(JSONObject command) throws Exception {
         String commandID = command.optString("command_id", "");
         String commandKey = commandID.trim().toLowerCase(Locale.ROOT);
+        // 细粒度锁：同 key 串行（防拨号重入），不同 key 并行（短信 45s 不卡挂断）。
+        Object keyLock = commandKey.isEmpty()
+                ? new Object()
+                : commandKeyLocks.computeIfAbsent(commandKey, k -> new Object());
+        synchronized (keyLock) {
+            try {
+                return executeCloudCommandLocked(command, commandID, commandKey);
+            } finally {
+                if (!commandKey.isEmpty()) commandKeyLocks.remove(commandKey, keyLock);
+            }
+        }
+    }
+
+    private JSONObject executeCloudCommandLocked(JSONObject command, String commandID, String commandKey)
+            throws Exception {
         if (!commandKey.isEmpty()) {
             synchronized (commandsLock) {
                 String cached = commandResults.get(commandKey);
@@ -312,6 +333,7 @@ final class StandaloneAgentGateway {
         try {
             VoWLANPairingStore.clear(context);
             store.clearRegistration();
+            AppConfig.clearCredentials(context);
             VoWLANGatewayService.stop(context);
             StandaloneAgentService.stop(context);
             BridgeLog.info("agent_unpaired");

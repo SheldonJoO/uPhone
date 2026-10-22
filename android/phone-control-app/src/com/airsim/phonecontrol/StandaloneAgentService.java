@@ -182,7 +182,21 @@ public final class StandaloneAgentService extends Service {
             JSONObject result;
             try {
                 String expires = command.optString("expires_at", "");
-                if (expires.isEmpty() || Instant.now().isAfter(Instant.parse(expires))) {
+                // 无 expires_at 的命令不判过期（与 StandaloneAgentGateway 一致）：
+                // 缺字段直接判死刑会把 HTTP 回退链路的命令静默丢掉。
+                boolean expired = false;
+                boolean expiryInvalid = false;
+                if (!expires.isEmpty()) {
+                    try {
+                        expired = Instant.now().isAfter(Instant.parse(expires));
+                    } catch (Exception invalidExpiry) {
+                        expiryInvalid = true;
+                    }
+                }
+                if (expiryInvalid) {
+                    result = new JSONObject().put("command_id", commandID).put("status", "failed")
+                            .put("error", "云端命令有效期无效");
+                } else if (expired) {
                     result = new JSONObject().put("command_id", commandID).put("status", "failed")
                             .put("error", "云端命令已过期");
                 } else {

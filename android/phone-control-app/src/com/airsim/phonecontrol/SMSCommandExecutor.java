@@ -49,8 +49,17 @@ final class SMSCommandExecutor {
             if (subscriptionID == SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
                 return AgentCommandDispatcher.Result.failure("请在系统 SIM 卡设置中选择默认短信 SIM");
             }
-            SmsManager manager = context.getSystemService(SmsManager.class)
-                    .createForSubscriptionId(subscriptionID);
+            SmsManager manager;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                manager = context.getSystemService(SmsManager.class)
+                        .createForSubscriptionId(subscriptionID);
+            } else if (!command.subscriptionId.isEmpty()) {
+                // API 29/30 没有 createForSubscriptionId：明确选卡时直接报错，
+                // 不静默用默认卡发出（与拨号侧 loud fail 同原则）。
+                return AgentCommandDispatcher.Result.failure("当前系统版本不支持按卡发送短信");
+            } else {
+                manager = SmsManager.getDefault();
+            }
             ArrayList<String> parts = manager.divideMessage(command.message);
             if (parts == null || parts.isEmpty()) {
                 return AgentCommandDispatcher.Result.failure("短信分段失败");

@@ -84,6 +84,11 @@ public final class AppConfig {
         return context.getSharedPreferences(FILE, Context.MODE_PRIVATE);
     }
 
+    /** 解绑时清除 AVF 控制令牌与地址：否则 BootReceiver 见 token 非空会拉起 Agent，解绑不彻底。 */
+    public static void clearCredentials(Context context) {
+        preferences(context).edit().remove("endpoint").remove("token").apply();
+    }
+
     /** 手动配置的 SIM 1 号码（自动检测失败时的兜底）。 */
     public static String sim1Number(Context context) {
         return preferences(context).getString("sim1_number", "");

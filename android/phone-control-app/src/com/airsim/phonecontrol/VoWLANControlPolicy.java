@@ -11,7 +11,7 @@ public final class VoWLANControlPolicy {
             "/api/calls/hangup", "/api/calls/dtmf", "/api/calls/audio/mute",
             "/api/calls/audio/host/warmup", "/api/calls/audio/host/register", "/api/push/register",
 			"/api/sms/send", "/api/sms/ack", "/api/sms/refresh",
-            "/api/policy/blocklist");
+            "/api/policy/blocklist", "/api/pairing/unpair");
 
     private VoWLANControlPolicy() {}
 
