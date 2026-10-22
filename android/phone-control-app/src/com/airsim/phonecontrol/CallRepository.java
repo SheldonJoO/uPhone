@@ -28,10 +28,21 @@ public final class CallRepository {
     private static final Map<Call, String> IDS = new ConcurrentHashMap<>();
 
     /**
-     * 最近一次拨号命令指定的 subscription_id（字符串，可能为空）。
-     * execute() 发起 placeCall 时写入；AirSIMInCallService 在去电的 onCallAdded 里消费一次后清空。
+     * 待推断 SIM 的去电：归一化号码 -> subscription_id（字符串）。
+     * execute() 发起 placeCall 时按号码写入；AirSIMInCallService 在去电的 onCallAdded 里
+     * 按号码消费并移除。按号码 key 而不是单个静态槽位，避免连续快速拨号时串卡。
      */
-    public static volatile String pendingDialSubscriptionId = "";
+    public static final ConcurrentHashMap<String, String> pendingDialSubscriptionIds =
+            new ConcurrentHashMap<>();
+
+    /** 号码归一化：只保留数字与开头的 +，供拨号暂存与消费两端对齐。 */
+    public static String canonicalDialNumber(String number) {
+        if (number == null) return "";
+        String digits = number.replaceAll("[^0-9+]", "");
+        // 只保留开头的 +，中间的 + 去掉
+        if (digits.startsWith("+")) return "+" + digits.substring(1).replace("+", "");
+        return digits.replace("+", "");
+    }
 
     private CallRepository() {}
 
@@ -201,9 +212,23 @@ public final class CallRepository {
                 BridgeLog.info("dial_sim_not_found subscription_id=" + command.subscriptionId
                         + " rejected: no matching PhoneAccount");
                 return ActionResult.failure("选卡失败：本机无法定位该 SIM 的通话账号");
+            } else {
+                // 未指定选卡：用值守卡（UI 承诺"拨出默认使用"），值守卡也定位不到才走系统默认。
+                int dutySub = DutyStore.getDutySubscriptionId(context);
+                if (dutySub != SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
+                    PhoneAccountHandle dutyHandle = findPhoneAccountForSubscription(
+                            context, telecomManager, String.valueOf(dutySub));
+                    if (dutyHandle != null) {
+                        extras.putParcelable(TelecomManager.EXTRA_PHONE_ACCOUNT_HANDLE, dutyHandle);
+                        BridgeLog.info("dial_with_duty_sim subscription_id=" + dutySub);
+                    }
+                }
             }
-            // 暂存本次拨号指定的订阅，供 InCallService 推断通话所用 SIM 卡（去电消费一次后清空）。
-            pendingDialSubscriptionId = command.subscriptionId == null ? "" : command.subscriptionId;
+            // 暂存本次拨号指定的订阅，供 InCallService 按号码推断通话所用 SIM 卡（消费一次后移除）。
+            String dialSubId = command.subscriptionId == null ? "" : command.subscriptionId;
+            if (!dialSubId.isEmpty()) {
+                pendingDialSubscriptionIds.put(canonicalDialNumber(command.number), dialSubId);
+            }
             String error = TelecomInvocation.run(
                     task -> new Handler(Looper.getMainLooper()).post(task),
                     () -> telecomManager.placeCall(Uri.parse("tel:" + command.number), extras),

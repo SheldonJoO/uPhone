@@ -43,6 +43,9 @@ struct AirSIMAPI: Sendable {
 
     let baseURL: URL
     let route: LocalAgentRoute
+    /// 拨号/短信选卡的作用域设备：nil 时沿用 SimSelectionStore.currentDeviceID（老行为）。
+    /// readyVoWLANRoute 会填入实际发现的设备，避免"给 A 的端点拨号、带 B 的选卡"。
+    let deviceID: String?
     private let transport: WiredHTTPTransport
 
     static func makeDecoder() -> JSONDecoder {
@@ -66,8 +69,9 @@ struct AirSIMAPI: Sendable {
 
     private static let decoder = makeDecoder()
 
-    init(route: LocalAgentRoute = .moduleLocal) {
+    init(route: LocalAgentRoute = .moduleLocal, deviceID: String? = nil) {
         self.route = route
+        self.deviceID = deviceID
         let baseURL = route.baseURL
         precondition(Self.isAllowedLocalURL(baseURL), "模块代理地址必须是本地 HTTP 地址")
         self.baseURL = baseURL
@@ -147,7 +151,8 @@ struct AirSIMAPI: Sendable {
     func dial(number: String) async throws {
         do {
             var body: [String: String] = ["number": number]
-            if let sim = SimSelectionStore.selectedSubscriptionID() {
+            let scopeID = deviceID ?? SimSelectionStore.currentDeviceID
+            if let sim = SimSelectionStore.selectedSubscriptionID(for: scopeID) {
                 body["subscription_id"] = String(sim)
             }
             try await post(
@@ -186,7 +191,8 @@ struct AirSIMAPI: Sendable {
 
     func sendSMS(to phone: String, message: String) async throws -> SMSSendResult {
         var body: [String: String] = ["phone": phone, "message": message]
-        if let sim = SimSelectionStore.selectedSubscriptionID() {
+        let scopeID = deviceID ?? SimSelectionStore.currentDeviceID
+        if let sim = SimSelectionStore.selectedSubscriptionID(for: scopeID) {
             body["subscription_id"] = String(sim)
         }
         return try await postDecoded("api/sms/send", body, timeout: 80)
