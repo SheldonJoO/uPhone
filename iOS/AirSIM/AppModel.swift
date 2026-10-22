@@ -495,6 +495,11 @@ final class AppModel: ObservableObject {
         }
         ignoredAgentIDs.insert(id)
         if let target { ignoredAgentIDs.insert(target.deviceID) }
+        // VoWLAN 发现用的是安卓 ANDROID_ID 派生的 agent_id：一起记下来，
+        // 解绑时安卓离线、之后重现，路由层才能认出它并拒绝（见 readyVoWLANRoute）。
+        if let agentID = target?.androidAgentID, !agentID.isEmpty {
+            ignoredAgentIDs.insert(agentID)
+        }
         DeviceRegistry.remove(deviceID: id)
         if let target { DeviceRegistry.remove(deviceID: target.deviceID) }
         if preferredAgentID == id || preferredAgentID == target?.deviceID {
@@ -1839,8 +1844,19 @@ final class AppModel: ObservableObject {
         if vowlan.availability.isReady(),
            let endpoint = vowlan.availability.endpoint,
            let credential = VoWLANCredentialStore.load() {
+            let discoveredAgentID = vowlan.discoveredAgents.first(where: { $0.endpoint == endpoint })?.id
+            // 解绑后设备离线重现：忽略名单里的设备不给路由（即使 VoWLAN 发现了它）。
+            // 已重新配对入库的不受影响（忽略名单只对未入库设备生效，与设备列表同语义）。
+            if let agentID = discoveredAgentID {
+                let registryAgentIDs = Set(DeviceRegistry.allDevices().compactMap { $0.androidAgentID })
+                if ignoredAgentIDs.subtracting(registryAgentIDs).contains(agentID) { return nil }
+            }
+            // 选卡作用域跟路由走：避免"给 A 的端点拨号、带 B 的选卡"。
+            let routeDeviceID = discoveredAgentID.flatMap { agentID in
+                DeviceRegistry.allDevices().first(where: { $0.androidAgentID == agentID })?.deviceID
+            }
             return (
-                AirSIMAPI(route: .vowlan(endpoint: endpoint, credential: credential)),
+                AirSIMAPI(route: .vowlan(endpoint: endpoint, credential: credential), deviceID: routeDeviceID),
                 .vowlan(endpoint: endpoint, credential: credential)
             )
         }
