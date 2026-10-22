@@ -1858,7 +1858,12 @@ final class AppModel: ObservableObject {
         guard let credential = VoWLANCredentialStore.load() else { throw CloudCommandError.unavailable }
         let ok = await VoBleClient.shared.beginSession(credential: credential)
         guard ok else { throw CloudCommandError.unavailable }
-        VoBleClient.shared.sendControl(["action": "dial", "number": number])
+        var payload: [String: Any] = ["action": "dial", "number": number]
+        // VoBLE 链路也要带选卡：对端 VoBleGateway 已支持 subscription_id，不传恒走默认卡。
+        if let subID = SimSelectionStore.selectedSubscriptionID() {
+            payload["subscription_id"] = String(subID)
+        }
+        VoBleClient.shared.sendControl(payload)
     }
 
     /// 经 BLE 建立会话并接听（与安卓 VoBleGateway 共用通话执行链）。

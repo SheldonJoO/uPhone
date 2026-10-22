@@ -196,9 +196,11 @@ public final class CallRepository {
             if (handle != null) {
                 extras.putParcelable(TelecomManager.EXTRA_PHONE_ACCOUNT_HANDLE, handle);
                 BridgeLog.info("dial_with_sim subscription_id=" + command.subscriptionId);
-            } else if (!command.subscriptionId.isEmpty()) {
+            } else if (command.subscriptionId != null && !command.subscriptionId.isEmpty()) {
+                // 选卡失败必须 loud fail：静默回退默认卡会导致用户以为用 A 卡打出、实际走 B 卡。
                 BridgeLog.info("dial_sim_not_found subscription_id=" + command.subscriptionId
-                        + " fallback=default");
+                        + " rejected: no matching PhoneAccount");
+                return ActionResult.failure("选卡失败：本机无法定位该 SIM 的通话账号");
             }
             // 暂存本次拨号指定的订阅，供 InCallService 推断通话所用 SIM 卡（去电消费一次后清空）。
             pendingDialSubscriptionId = command.subscriptionId == null ? "" : command.subscriptionId;
