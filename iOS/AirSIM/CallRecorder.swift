@@ -257,7 +257,7 @@ final class CallRecordingCenter: @unchecked Sendable {
         return recorder != nil
     }
 
-    /// 通话 teardown 路径调用：若正在录音则收尾并通知 UI 弹出分享。
+    /// 通话 teardown 路径调用：若正在录音则静默收尾保存（不再弹分享框，转发入口在录音列表）。
     func finishIfRecording() {
         if let url = stop() {
             DispatchQueue.main.async {
