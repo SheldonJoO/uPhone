@@ -1099,9 +1099,10 @@ async function receiveCall(request, env) {
   const call = await readJSON(request);
   const authenticated = await authenticate(call, env);
   if (authenticated.response) return authenticated.response;
-  if (!authenticated.device.voip_token && !authenticated.device.watch_voip_token) {
-    return jsonResponse(409, { error: "VoIP token unavailable" });
-  }
+  // 侧载设备无 APNs token：不再在此 409 拒绝。
+  // 推送本就由下方 `voipDuplicate = !voip_token` 跳过；这里必须继续落 call-lifecycle，
+  // 供 iPhone 轮询 /v1/devices/status（readRingingCallForStatus）取到振铃来电。
+  // 旧逻辑在此 409，导致无 token 的侧载设备来电从不落库、轮询兜底完全失效（2026-10-22 修）。
 
   const now = Date.now();
   const expiresAt = Date.parse(call.expires_at);
