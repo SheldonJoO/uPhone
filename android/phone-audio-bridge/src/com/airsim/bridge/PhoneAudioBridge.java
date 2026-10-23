@@ -189,11 +189,10 @@ public final class PhoneAudioBridge {
         AudioDeviceInfo telephonyTx = samsungTagAvailable ? null : findTelephonyTxDevice();
         PlaybackRoute playbackRoute = playbackRoute(
             samsungTagAvailable, telephonyTx != null);
-        if (playbackRoute == PlaybackRoute.UNSUPPORTED) {
-            recorder.release();
-            throw new IllegalStateException(
-                "neither Samsung VOICE_TX nor Android Telephony Tx is available");
-        }
+        // 非三星设备常既无 sem VOICE_TX tag、也枚举不到 TYPE_TELEPHONY 输出设备。
+        // 旧逻辑在此直接抛异常，导致 VOICE_DOWNLINK 下行还没开始采就整体失败、
+        // 云端/VoWLAN 上下行全灭（接听无声）。改为降级：用默认输出路由建 track，
+        // 至少保证下行能采到并送达 iPhone；上行路由稍后在 playUplink 里软降级。（2026-10-23 修）
         AudioTrack track = new AudioTrack.Builder()
             .setAudioAttributes(attributeBuilder.build())
             .setAudioFormat(new AudioFormat.Builder()
@@ -310,6 +309,7 @@ public final class PhoneAudioBridge {
         byte[] frame = new byte[BridgeProtocol.FRAME_BYTES];
         long firstPlaybackAt = 0;
         boolean routeVerified = false;
+        boolean routeDegraded = false;
         try {
             client.setSoTimeout(250);
             InputStream input = client.getInputStream();
@@ -320,7 +320,11 @@ public final class PhoneAudioBridge {
                 } catch (SocketTimeoutException timeout) {
                     if (voiceTxRouteTimedOut(
                             routeVerified, firstPlaybackAt, SystemClock.elapsedRealtime())) {
-                        throw new IllegalStateException("VOICE_TX did not route to Telephony Tx");
+                        // 非三星设备拿不到 Telephony Tx：软降级，只停上行、不关客户端，
+                        // 保住 VOICE_DOWNLINK 下行。（2026-10-23 修）
+                        routeDegraded = true;
+                        emit(started, "voice_tx_route_degraded", Map.of("result", "degraded"));
+                        return;
                     }
                     continue;
                 }
@@ -343,7 +347,9 @@ public final class PhoneAudioBridge {
                 }
                 if (voiceTxRouteTimedOut(
                         routeVerified, firstPlaybackAt, SystemClock.elapsedRealtime())) {
-                    throw new IllegalStateException("VOICE_TX did not route to Telephony Tx");
+                    routeDegraded = true;
+                    emit(started, "voice_tx_route_degraded", Map.of("result", "degraded"));
+                    return;
                 }
             }
         } catch (Throwable error) {
@@ -354,7 +360,8 @@ public final class PhoneAudioBridge {
             }
         } finally {
             Arrays.fill(frame, (byte) 0);
-            stop.run();
+            // 路由降级只停上行；只有真实错误才 stop.run() 关客户端结束会话。（2026-10-23 修）
+            if (!routeDegraded) stop.run();
         }
     }
 

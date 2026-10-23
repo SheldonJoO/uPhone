@@ -925,6 +925,12 @@ final class AppModel: ObservableObject {
             if lifecycleCall?.direction == "incoming", callKit.suppressesInAppIncomingRingtone {
                 // CallKit 已负责系统铃声，不能再叠加应用内铃声。
                 audio.stopCallTone()
+            } else if callKit.managesCurrentCall {
+                // CallKit 正在管理系统通话（含接听/已接通）：绝不再放应用内铃声。
+                // 否则 playCallTone 的 setCategory(.soloAmbient)+setActive(true) 会与
+                // CallKit 抢同一个 AVAudioSession，setActive 失败（OSStatus 560557684）
+                // 并污染通话音频会话，导致语音链路建不起来。（2026-10-23 修）
+                audio.stopCallTone()
             } else {
                 audio.updateCallTone(for: lifecycleCall)
             }
@@ -1784,7 +1790,12 @@ final class AppModel: ObservableObject {
             return
         }
         guard !managedByCallKit || callKit.audioSessionIsActive else { return }
-        guard callLifecycleSnapshot.state == .active, !audio.active, !startingCallAudio else { return }
+        // CallKit 已接听（currentCallIsAnswered）即视为通话活跃，不再死等
+        // callLifecycleSnapshot.state == .active：云中继响铃的来电，relay 只在
+        // ringing/connecting 回报通话，active 后 readRingingCallForStatus 直接返回 null，
+        // 快照可能长期停在非 active，导致 activateForCall 永不调用、语音链路卡死。（2026-10-23 修）
+        let callIsActive = callLifecycleSnapshot.state == .active || callKit.currentCallIsAnswered
+        guard callIsActive, !audio.active, !startingCallAudio else { return }
         startingCallAudio = true
         defer { startingCallAudio = false }
         backgroundStandby.suspendForCall()
