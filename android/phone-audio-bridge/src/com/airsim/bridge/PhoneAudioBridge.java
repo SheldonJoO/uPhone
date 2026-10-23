@@ -158,6 +158,10 @@ public final class PhoneAudioBridge {
         try (client) {
             client.setKeepAlive(true);
             client.setTcpNoDelay(true);
+            // 收紧 7580 接收缓冲：默认 localhost TCP 接收窗口 ~200KB，突发到达时会在 socket 里
+            // 堆积约 10-15 秒音频，playUplink 按实时节奏排空 → 表现为固定大延迟。收到缓冲压到
+            // 4 帧（~1.2KB）后，溢出即背压到上游 CloudSession，整条链路被实时节奏自然限流。（2026-10-24 修）
+            try { client.setReceiveBufferSize(BridgeProtocol.FRAME_BYTES * 4); } catch (Throwable ignored) {}
             BridgeProtocol.acceptHandshake(client.getInputStream(), client.getOutputStream());
             emit(started, "client_ready", Map.of("result", "ok"));
             streamCallAudio(client, started, stats);
@@ -324,8 +328,6 @@ public final class PhoneAudioBridge {
             AtomicBoolean running,
             Runnable stop) {
         byte[] frame = new byte[BridgeProtocol.FRAME_BYTES];
-        long lastWriteAt = 0;
-        long writtenFrames = 0;
         boolean routeVerified = false;
         boolean routeWarned = false;
         long firstPlaybackAt = 0;
@@ -342,48 +344,13 @@ public final class PhoneAudioBridge {
                 if (count < 0) {
                     return;
                 }
-                long now = SystemClock.elapsedRealtime();
-                if (firstPlaybackAt == 0) {
-                    firstPlaybackAt = now;
-                }
-                // 上行 10-15 秒固定延迟根治（2026-10-23 修）：网络抖动把若干帧攒成突发送达时，
-                // WRITE_BLOCKING 逐帧实时播出会把积压永久固化成固定延迟（=localhost TCP 缓冲
-                // 的容量，恰好 10-15 秒），且一旦形成只会越来越大、全程不恢复。
-                // 改为「限速丢弃」：两次写入至少间隔 15ms（≤50 帧/秒 = 实时节奏），突发中
-                // 的陈旧帧直接丢弃；AudioTrack 缓冲放不下的帧也丢弃。延迟收敛在一个音频缓冲内。
-                // 关键：任何 AudioTrack 查询在该机型抛异常都必须就地吞掉——外传到循环外会退出
-                // 上行线程并关掉共享 socket，连带下行（听筒）一起死，整通通话上下行全灭。
-                // 这才是 2026-10-23 第二版「所有通话静音」回归的真凶。（2026-10-23 再修）
-                boolean writeFrame = true;
-                if (now - lastWriteAt >= 15) {
-                    boolean bufferQueryOk = true;
-                    try {
-                        long head = track.getPlaybackHeadPosition() & 0xFFFFFFFFL;
-                        int bufferedFrames = (int) (writtenFrames - head);
-                        int frameFrames = count / 2;
-                        if (frameFrames > track.getBufferSizeInFrames() - bufferedFrames) {
-                            writeFrame = false; // 缓冲放不下：丢弃这一帧（陈旧突发）
-                        }
-                    } catch (Throwable ignored) {
-                        // 查询不可靠的机型（Track 尚未进入 PLAYING 等）：退回「直接写」
-                        // 旧行为，至少保证通话有声，绝不让异常杀掉整条会话。
-                        bufferQueryOk = false;
-                    }
-                    if (!bufferQueryOk) {
-                        writeFrame = true;
-                    }
-                } else {
-                    writeFrame = false; // 距上次写入不足 15ms：丢弃（限速）
-                }
-                if (writeFrame) {
-                    int written = track.write(frame, 0, count, AudioTrack.WRITE_BLOCKING);
-                    // written < 0 视为本帧写入失败：跳过这一帧，绝不抛异常杀循环。
-                    if (written > 0) {
-                        writtenFrames += written / 2;
-                        lastWriteAt = SystemClock.elapsedRealtime();
-                    }
-                }
-                stats.recordUplink(frame, count);
+                if (firstPlaybackAt == 0) firstPlaybackAt = SystemClock.elapsedRealtime();
+                // 直接实时写入：AudioTrack 用最小缓冲 + WRITE_BLOCKING，写满即自动按实时节奏阻塞，
+                // 天然限流，不再像旧「限速丢弃」那样把突发帧丢掉造成卡顿/杂音；延迟由 7580 接收缓冲
+                // （handleClient 已设为 FRAME_BYTES*4）约束，不会堆积成 10-15 秒。（2026-10-24 重写）
+                // 只接受完整 320 字节帧：任何非整帧的字节都跳过，杜绝 16-bit 采样错位成杂音。
+                int written = track.write(frame, 0, BridgeProtocol.FRAME_BYTES, AudioTrack.WRITE_BLOCKING);
+                if (written > 0) stats.recordUplink(frame, written);
                 AudioDeviceInfo routed = track.getRoutedDevice();
                 if (!routeVerified && routed != null
                         && routed.getType() == AudioDeviceInfo.TYPE_TELEPHONY) {

@@ -128,6 +128,8 @@ final class StandaloneCloudMediaManager implements Closeable {
         volatile boolean mediaStarted;
         volatile boolean pcmLoopRunning;
         int sequence;
+        // 上行重成帧缓冲：中继二进制帧写入前先按 320 字节对齐，杜绝 7580 流错位。（2026-10-24）
+        private final ByteArrayOutputStream pendingUplink = new ByteArrayOutputStream();
 
         CloudSession(Descriptor descriptor) { this.descriptor = descriptor; }
 
@@ -161,7 +163,11 @@ final class StandaloneCloudMediaManager implements Closeable {
             while (running && webSocket != null) {
                 StandaloneWebSocket.Message message = webSocket.read();
                 if (message.opcode() == 2) {
-                    if (mediaStarted && pcm != null) pcm.getOutputStream().write(decodePCM(message.payload()));
+                    // 上行（iPhone 用户语音 → 其他方）：先解码再按 320 字节严格重新成帧写入本地桥。
+                    // 旧逻辑直接把原始 payload 写进 127.0.0.1:7580，一旦中继把多帧合并成一个 WS 二进制
+                    // 消息，7580 流里就会出现「非 320 整数倍」的字节错位，AudioTrack 按 16-bit 采样解析
+                    // 后整条上行变成杂音。这里与 downlink 的 pipeDownlink 对称，保证桥上永远是 320 对齐帧。（2026-10-24 修）
+                    if (mediaStarted && pcm != null) writeUplink(decodePCM(message.payload()));
                     continue;
                 }
                 JSONObject control = new JSONObject(new String(message.payload(), StandardCharsets.UTF_8));
@@ -255,6 +261,22 @@ final class StandaloneCloudMediaManager implements Closeable {
                 pending.reset();
                 if (offset < bytes.length) pending.write(bytes, offset, bytes.length - offset);
             }
+        }
+
+        // 上行重成帧：把中继二进制帧累积后按 320 字节对齐写进本地桥。这样无论中继把多少帧合并成
+        // 一个 WS 消息，7580 流里永远是 320 整数倍字节，AudioTrack 解析不会错位成杂音。（2026-10-24）
+        private void writeUplink(byte[] payload) throws Exception {
+            if (pcm == null) return;
+            pendingUplink.write(payload, 0, payload.length);
+            byte[] bytes = pendingUplink.toByteArray();
+            int offset = 0;
+            while (bytes.length - offset >= 320) {
+                byte[] frame = java.util.Arrays.copyOfRange(bytes, offset, offset + 320);
+                pcm.getOutputStream().write(frame);
+                offset += 320;
+            }
+            pendingUplink.reset();
+            if (offset < bytes.length) pendingUplink.write(bytes, offset, bytes.length - offset);
         }
 
         private byte[] encodePCM(byte[] payload) {
