@@ -121,6 +121,7 @@ final class StandaloneCloudMediaManager implements Closeable {
         volatile Socket pcm;
         volatile String mediaProtocol = "";
         volatile boolean mediaStarted;
+        volatile boolean pcmLoopRunning;
         int sequence;
 
         CloudSession(Descriptor descriptor) { this.descriptor = descriptor; }
@@ -172,8 +173,10 @@ final class StandaloneCloudMediaManager implements Closeable {
                 }
                 if ("answer".equals(action)) {
                     webSocket.writeText(status("answer_ok", ""));
-                    if (!mediaStarted) {
-                        mediaStarted = true;
+                    mediaStarted = true;
+                    // PCM 桥死亡（媒体 WS 重连后 pcm 已被 finally 关闭）时必须能重启，
+                    // 否则重连后的会话上下行全灭、状态也不再转发。（2026-10-23 修）
+                    if (pcm == null && !pcmLoopRunning) {
                         sessions.execute(this::runPCM);
                     }
                 } else {
@@ -184,6 +187,15 @@ final class StandaloneCloudMediaManager implements Closeable {
         }
 
         private void runPCM() {
+            pcmLoopRunning = true;
+            try {
+                runPCMLocked();
+            } finally {
+                pcmLoopRunning = false;
+            }
+        }
+
+        private void runPCMLocked() {
             long deadline = System.currentTimeMillis() + 45_000;
             while (running && mediaStarted && System.currentTimeMillis() < deadline) {
                 try {

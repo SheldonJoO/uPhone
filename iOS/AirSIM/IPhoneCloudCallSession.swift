@@ -768,6 +768,14 @@ final class IPhoneCloudCallSession {
             stop()
             throw IPhoneCloudCallError.mediaUnavailable
         }
+        // 拒接双通道（2026-10-23 修）：持久化 HTTP 通道要经 Relay → COMMANDS DO → Agent 命令
+        // 通道多处接力，任一环卡住蜂窝端就一直振铃、主叫方收不到拒接。补上与 answer 同路的
+        // 媒体控制 WS 直发：振铃期 WS 可能未连，先有界连接再发；失败不影响 HTTP 兜底。
+        // 两条通道 command_id 同源，Agent 端按 command_id 去重，不会重复执行。
+        if !media.isConnected, let url = incoming.authenticatedMediaURL {
+            try? await media.connect(to: url)
+        }
+        media.sendControl("reject", call: incoming)
         stop()
         submitPersistentControl(envelope, credentials: credentials)
     }

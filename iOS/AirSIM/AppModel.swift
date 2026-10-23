@@ -983,6 +983,13 @@ final class AppModel: ObservableObject {
             print("[AirSIM Poll] module status failed: \(error.localizedDescription)")
 #endif
             consecutivePollFailures += 1
+            if lastSuccessfulLocalAPI == nil, verifiedVoWLANAPI() == nil,
+               case CallKitBridgeError.noReachableTransport = error {
+                // 纯云端模式：本地轮询没有可连的路线，「失败」是常态而非抖动。
+                // 不能让它进入指数退避（后台最高 30 秒），否则云端来电发现同样被拖慢，
+                // 表现为「对方拨打后很久 iPhone 才响铃」。固定按 1 次失败计，保持 ~1 秒节拍。（2026-10-23 修）
+                consecutivePollFailures = 1
+            }
             isReconnecting = true
             let failedRouteName: String = {
                 guard let route = lastSuccessfulLocalAPI?.route else { return "本地控制链路" }

@@ -307,9 +307,11 @@ public final class PhoneAudioBridge {
             AtomicBoolean running,
             Runnable stop) {
         byte[] frame = new byte[BridgeProtocol.FRAME_BYTES];
-        long firstPlaybackAt = 0;
+        long lastWriteAt = 0;
+        long writtenFrames = 0;
         boolean routeVerified = false;
-        boolean routeDegraded = false;
+        boolean routeWarned = false;
+        long firstPlaybackAt = 0;
         try {
             client.setSoTimeout(250);
             InputStream input = client.getInputStream();
@@ -318,24 +320,36 @@ public final class PhoneAudioBridge {
                 try {
                     count = readFrame(input, frame);
                 } catch (SocketTimeoutException timeout) {
-                    if (voiceTxRouteTimedOut(
-                            routeVerified, firstPlaybackAt, SystemClock.elapsedRealtime())) {
-                        // 非三星设备拿不到 Telephony Tx：软降级，只停上行、不关客户端，
-                        // 保住 VOICE_DOWNLINK 下行。（2026-10-23 修）
-                        routeDegraded = true;
-                        emit(started, "voice_tx_route_degraded", Map.of("result", "degraded"));
-                        return;
-                    }
                     continue;
                 }
                 if (count < 0) {
                     return;
                 }
-                writeTrackFrame(track, frame, count);
-                stats.recordUplink(frame, count);
+                long now = SystemClock.elapsedRealtime();
                 if (firstPlaybackAt == 0) {
-                    firstPlaybackAt = SystemClock.elapsedRealtime();
+                    firstPlaybackAt = now;
                 }
+                // 上行 10-15 秒固定延迟根治（2026-10-23 修）：网络抖动把若干帧攒成突发送达时，
+                // WRITE_BLOCKING 逐帧实时播出会把积压永久固化成固定延迟（=localhost TCP 缓冲
+                // 的容量，恰好 10-15 秒），且一旦形成只会越来越大、全程不恢复。
+                // 改为「限速丢弃」：两次写入至少间隔 15ms（≤50 帧/秒 = 实时节奏），突发中
+                // 的陈旧帧直接丢弃；AudioTrack 缓冲放不下的帧也丢弃。延迟收敛在一个音频缓冲内。
+                if (now - lastWriteAt >= 15) {
+                    long head = track.getPlaybackHeadPosition() & 0xFFFFFFFFL;
+                    int bufferedFrames = (int) (writtenFrames - head);
+                    int frameFrames = count / 2;
+                    if (frameFrames <= track.getBufferSizeInFrames() - bufferedFrames) {
+                        int written = track.write(frame, 0, count, AudioTrack.WRITE_BLOCKING);
+                        if (written < 0) {
+                            throw new IOException("AudioTrack write failed: " + written);
+                        }
+                        if (written > 0) {
+                            writtenFrames += written / 2;
+                            lastWriteAt = SystemClock.elapsedRealtime();
+                        }
+                    }
+                }
+                stats.recordUplink(frame, count);
                 AudioDeviceInfo routed = track.getRoutedDevice();
                 if (!routeVerified && routed != null
                         && routed.getType() == AudioDeviceInfo.TYPE_TELEPHONY) {
@@ -345,11 +359,13 @@ public final class PhoneAudioBridge {
                         "device_type", routed.getType(),
                         "result", "ok"));
                 }
-                if (voiceTxRouteTimedOut(
+                // 路由超时只告警、绝不再退出会话（2026-10-23 修）：旧逻辑在 2 秒内验证不到
+                // TYPE_TELEPHONY 就 return，本套接字从此无人读取，上游 readLoop 写上行 PCM
+                // 在 TCP 缓冲填满后永久阻塞，连带拒接/挂断/状态消息全部卡死、下行也被拖垮。
+                if (!routeVerified && !routeWarned && voiceTxRouteTimedOut(
                         routeVerified, firstPlaybackAt, SystemClock.elapsedRealtime())) {
-                    routeDegraded = true;
-                    emit(started, "voice_tx_route_degraded", Map.of("result", "degraded"));
-                    return;
+                    routeWarned = true;
+                    emit(started, "voice_tx_route_unverified", Map.of("result", "keep_draining"));
                 }
             }
         } catch (Throwable error) {
@@ -360,8 +376,7 @@ public final class PhoneAudioBridge {
             }
         } finally {
             Arrays.fill(frame, (byte) 0);
-            // 路由降级只停上行；只有真实错误才 stop.run() 关客户端结束会话。（2026-10-23 修）
-            if (!routeDegraded) stop.run();
+            stop.run();
         }
     }
 
@@ -377,21 +392,6 @@ public final class PhoneAudioBridge {
             }
         }
         return offset;
-    }
-
-    private static void writeTrackFrame(AudioTrack track, byte[] frame, int count)
-            throws IOException {
-        int offset = 0;
-        while (offset < count) {
-            int written = track.write(frame, offset, count - offset, AudioTrack.WRITE_BLOCKING);
-            if (written < 0) {
-                throw new IOException("AudioTrack write failed: " + written);
-            }
-            if (written == 0) {
-                continue;
-            }
-            offset += written;
-        }
     }
 
     private static boolean tryAddSamsungVoiceTxTag(AudioAttributes.Builder builder) {
