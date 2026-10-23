@@ -293,7 +293,13 @@ final class AppModel: ObservableObject {
             let registryKey = aidToDeviceID[agent.id]
             if registryKey == nil, !agent.cloudOnline, !registryIDs.contains(agent.id),
                agent.id != activeSlotID { continue }
-            let key = registryKey ?? agent.id
+            // 单设备场景：注册表只有一台值守机、且本 agent 无法用 androidAgentID 关联时，
+            // 直接并入这台注册表设备（用其 deviceID 作 key），避免「云端在线 agent 卡 +
+            // 注册表离线幽灵卡」双卡。这是纯云端（非同 Wi-Fi、VoWLAN 未发现）下「幽灵离线值守机」
+            // 的根因：iOS 用 BLE 的 androidAgentID 关联，而中继回的是心跳里的 agent_id，两者对不上
+            // 时注册表设备被强制离线、云端 agent 单独成卡。（2026-10-24 修）
+            let key = registryKey
+                ?? (registryDevices.count == 1 ? registryDevices[0].deviceID : agent.id)
             let name = agent.deviceName?.isEmpty == false
                 ? agent.deviceName!
                 : [agent.manufacturer, agent.model].compactMap { $0 }.joined(separator: " ")
