@@ -196,8 +196,11 @@ final class StandaloneCloudMediaManager implements Closeable {
         }
 
         private void runPCMLocked() {
-            long deadline = System.currentTimeMillis() + 45_000;
-            while (running && mediaStarted && System.currentTimeMillis() < deadline) {
+            // 整个通话期间持续保活 PCM 桥：媒体 WS 抖动/重连时 pcm 会被 CloudSession.run 的
+            // finally 关闭，这里循环重连本地 127.0.0.1:7580 桥，直到通话结束（running=false）
+            // 或 mediaStarted 被复位。否则 WS 一断、pcm 一关，上下行全灭、状态也不再转发。
+            // 旧逻辑有 45 秒上限，长通话中途 WS 重连后 pcm 再掉就再也接不回来。（2026-10-23 再修）
+            while (running && mediaStarted) {
                 try {
                     Socket connection = new Socket();
                     connection.connect(new InetSocketAddress("127.0.0.1", 7580), 2_000);
