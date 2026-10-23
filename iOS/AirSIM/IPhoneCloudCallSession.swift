@@ -40,7 +40,12 @@ enum CloudCallAudioStartupPolicy {
         callKitAudioSessionActive: Bool
     ) -> Bool {
         guard answered, mediaPrepared else { return false }
-        guard lifecycleState == .active || (isOutgoing && lifecycleState == .connecting) else {
+        // 关键修正（2026-10-23）：来电在用户接听、媒体 WS 已连通（answered + mediaPrepared）后
+        // 即可启动音频引擎，不再等 Agent 回传 lifecycle=active。否则整条 iOS 音频链路被
+        // 「Agent 必须先连通本机 127.0.0.1:7580 PCM 桥才发 active」这一前置卡死——
+        // 本地桥未起/起慢时 iPhone 音频引擎永不启动，接听后上下行全静音（推送/振铃正常）。
+        // 现在音频引擎一接听就跑，下行帧一到即播、上行立刻发；Agent 侧 keepalive 会在桥就绪后接回。
+        guard lifecycleState == .active || lifecycleState == .connecting else {
             return false
         }
         return !managedByCallKit || callKitAudioSessionActive

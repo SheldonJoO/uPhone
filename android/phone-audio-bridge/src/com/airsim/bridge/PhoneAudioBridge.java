@@ -179,9 +179,26 @@ public final class PhoneAudioBridge {
             throw new IllegalStateException("invalid Android audio buffer sizes");
         }
 
-        AudioRecord recorder = new AudioRecord(
-            captureSource(), SAMPLE_RATE, CHANNEL_IN, ENCODING,
-            Math.max(recordBufferSize, BridgeProtocol.FRAME_BYTES * 10));
+        // 下行采集源按优先级回退：VOICE_DOWNLINK(3) 优先；部分 ROM 该源初始化会失败，
+        // 退回 VOICE_CALL(4)。两者都需 CAPTURE_AUDIO_OUTPUT（值守机已借 Shizuku 以 shell 身份运行），
+        // 若都失败才整体报错。这样能覆盖更多机型，避免「下行 AudioRecord 初始化失败 → 桥崩溃 → 听筒全静音」。（2026-10-23 补）
+        AudioRecord chosenRecorder = null;
+        int chosenSource = -1;
+        for (int candidate : new int[]{ captureSource(), 4 }) {
+            AudioRecord attempt = new AudioRecord(candidate, SAMPLE_RATE, CHANNEL_IN, ENCODING,
+                    Math.max(recordBufferSize, BridgeProtocol.FRAME_BYTES * 10));
+            if (attempt.getState() == AudioRecord.STATE_INITIALIZED) {
+                chosenRecorder = attempt;
+                chosenSource = candidate;
+                break;
+            }
+            attempt.release();
+        }
+        if (chosenRecorder == null) {
+            throw new IllegalStateException("VOICE_DOWNLINK/VOICE_CALL AudioRecord initialization failed");
+        }
+        final AudioRecord recorder = chosenRecorder;
+        emit(SystemClock.elapsedRealtime(), "audio_record_source_chosen", Map.of("source", chosenSource));
         AudioAttributes.Builder attributeBuilder = new AudioAttributes.Builder()
             .setUsage(playbackUsage())
             .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH);
@@ -209,7 +226,7 @@ public final class PhoneAudioBridge {
                 throw new IllegalStateException("Android Telephony Tx route was rejected");
             }
             if (recorder.getState() != AudioRecord.STATE_INITIALIZED) {
-                throw new IllegalStateException("VOICE_DOWNLINK AudioRecord initialization failed");
+                throw new IllegalStateException("downlink AudioRecord not initialized (source=" + chosenSource + ")");
             }
             if (track.getState() != AudioTrack.STATE_INITIALIZED) {
                 throw new IllegalStateException("VOICE_TX AudioTrack initialization failed");

@@ -372,7 +372,9 @@ private final class ColdLaunchCallKitHandler: CallKitActionHandling {
     func callKitAudioSessionDidActivate() async {
         if VirtualCallTTSController.shared.isPrepared {
             VirtualCallTTSController.shared.start()
-        } else if IPhoneCloudCallSession.shared.hasActiveCall {
+        } else if IPhoneCloudCallSession.shared.answered {
+            // 接听即启动音频引擎（不再等 lifecycle=active）：来电的 active 状态依赖 Agent 先连通
+            // 本机 PCM 桥，桥未就绪时 hasActiveCall 长时间为假会卡死音频链路，导致接听后全静音。
             IPhoneCloudCallSession.shared.startAudioWithRetry()
         }
     }

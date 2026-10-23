@@ -97,6 +97,11 @@ final class StandaloneCloudMediaManager implements Closeable {
             if (active != null && active.descriptor.same(descriptor)) return;
             if (active != null) active.close();
             active = new CloudSession(descriptor);
+            // 云端通话开始即确保本地 PCM 桥（Shizuku 特权进程）已拉起：否则 runPCMLocked 连不上
+            // 127.0.0.1:7580，pcm 永远为 null，下行送不出去、上行被丢弃，整通通话上下行全灭。
+            // 这是 iOS 接听后「上下行全静音但推送/振铃正常」的根因前置之一。（2026-10-23 补）
+            try { ShizukuBridgeManager.get(context).ensureStarted(); }
+            catch (Throwable ignored) { BridgeLog.error("standalone_cloud_bridge_ensure_failed", ignored); }
             // 云端通话期间本机必须静默：不依赖 InCallService（默认拨号角色丢失 /
             // 服务被回收时它收不到 call），由媒体会话自己保持静音原因。
             LocalCallAudioController.get(context).retain("cloud-media");
