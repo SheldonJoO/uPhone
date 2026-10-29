@@ -3,7 +3,7 @@ name: Build & Upload uKit (App Store / TestFlight)
 on:
   workflow_dispatch:
   push:
-    branches: [appstore]
+    branches: [appstore, ukit]
     paths:
       - 'iOS/**'
       - '.github/workflows/build-appstore.yml'
