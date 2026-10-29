@@ -10,10 +10,9 @@
     <string>manual</string>
     <key>provisioningProfiles</key>
     <dict>
+        <!-- v1.0.0 不含 Watch App，故仅主 App + LiveActivity 扩展 -->
         <key>com.sheldonjoo.ukit</key>
         <string>uKit App Store</string>
-        <key>com.sheldonjoo.ukit.watchkitapp</key>
-        <string>uKit Watch App Store</string>
         <key>com.sheldonjoo.ukit.liveactivity</key>
         <string>uKit LiveActivity App Store</string>
     </dict>
