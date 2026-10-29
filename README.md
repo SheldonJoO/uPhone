@@ -1,11 +1,11 @@
-# üPhone
+# uKit
 
 个人定制版 AirSIM iPhone App（侧载用），基于 [kai-wu-cortex/AirSIM](https://github.com/kai-wu-cortex/AirSIM) 的 iOS 源码定制。
 
 ## 定制内容
 
-- App 名：**üPhone**，图标换成个人头像
-- Bundle ID：`com.sheldonjoo.uphone`（及 `.watchkitapp` / `.liveactivity` 后缀）
+- App 名：**uKit**，图标换成个人头像
+- Bundle ID：`com.sheldonjoo.ukit`（及 `.watchkitapp` / `.liveactivity` 后缀）
 - 「配对三星手机」改名为「值守配对」
 - 拨号盘：设备状态卡从拨号区上方移到**屏幕底部紧凑条**，不再挤占拨号盘
 - **双卡拨号**：底部状态条可点选 SIM 1 / SIM 2（显示运营商），拨号命令携带 `subscription_id`，Android 端通过 `PhoneAccountHandle` 指定 SIM 呼出
@@ -23,7 +23,7 @@
 
 ```bash
 cd iOS
-xcodebuild -project AirSIM.xcodeproj -scheme AirSIM -configuration Release \
+xcodebuild -project uKit.xcodeproj -scheme uKit -configuration Release \
   -destination 'generic/platform=iOS' \
   CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO build
 ```

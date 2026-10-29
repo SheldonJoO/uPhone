@@ -44,6 +44,6 @@ tag = "v1"
 new_classes = ["DeviceCommandSession", "AgentStatusRegistry", "CallMediaSession"]
 
 [vars]
-ALLOWED_BUNDLE_ID = "com.sheldonjoo.uphone"
+ALLOWED_BUNDLE_ID = "com.sheldonjoo.ukit"
 WEBRTC_ROLLOUT_PERCENT = "0"
 WEBRTC_TRANSPORT_READY = "false"

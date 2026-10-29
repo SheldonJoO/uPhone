@@ -37,8 +37,8 @@ jobs:
         run: |
           cd iOS
           set -o pipefail
-          xcodebuild -project AirSIM.xcodeproj \
-            -scheme AirSIM \
+          xcodebuild -project uKit.xcodeproj \
+            -scheme uKit \
             -configuration Release \
             -destination 'generic/platform=iOS' \
             -derivedDataPath build \
@@ -56,13 +56,13 @@ jobs:
           mkdir -p "$APP_DIR/Payload"
           cp -r "$APP_DIR/$APP_NAME" "$APP_DIR/Payload/"
           cd "$APP_DIR"
-          zip -qry uPhone-unsigned.ipa Payload
-          ls -lh uPhone-unsigned.ipa
+          zip -qry uKit-unsigned.ipa Payload
+          ls -lh uKit-unsigned.ipa
 
       - name: Upload IPA
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: uPhone-unsigned-ipa
-          path: iOS/build/Build/Products/Release-iphoneos/uPhone-unsigned.ipa
+          name: uKit-unsigned-ipa
+          path: iOS/build/Build/Products/Release-iphoneos/uKit-unsigned.ipa
           if-no-files-found: error

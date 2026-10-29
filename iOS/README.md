@@ -9,7 +9,7 @@
 打开：
 
 ```text
-iOS/AirSIM.xcodeproj
+iOS/uKit.xcodeproj
 ```
 
 主要 target：
@@ -52,8 +52,8 @@ PushKit VoIP push 仅用于真实来电并交给 CallKit，不能拿它承载短
 ## 构建与测试
 
 ```sh
-xcodebuild -project iOS/AirSIM.xcodeproj \
-  -scheme AirSIM \
+xcodebuild -project iOS/uKit.xcodeproj \
+  -scheme uKit \
   -destination 'generic/platform=iOS Simulator' \
   CODE_SIGNING_ALLOWED=NO \
   build-for-testing
@@ -62,8 +62,8 @@ xcodebuild -project iOS/AirSIM.xcodeproj \
 在指定模拟器运行测试：
 
 ```sh
-xcodebuild -project iOS/AirSIM.xcodeproj \
-  -scheme AirSIM \
+xcodebuild -project iOS/uKit.xcodeproj \
+  -scheme uKit \
   -destination 'platform=iOS Simulator,name=iPhone Air' \
   CODE_SIGNING_ALLOWED=NO \
   test

@@ -787,7 +787,7 @@ final class VoIPPushController: NSObject {
         static let liveActivityPushToStartToken = "airsim.live-activity-push-to-start-token"
         static let deviceID = "airsim.push-device-id"
         static let relayURL = "airsim.push-relay-url"
-        static let keychainService = "com.sheldonjoo.uphone.push"
+        static let keychainService = "com.sheldonjoo.ukit.push"
         static let keychainAccount = "device-secret"
     }
 
@@ -1739,9 +1739,9 @@ final class VoIPPushController: NSObject {
             token: resolvedToken,
             alertToken: defaults.string(forKey: Keys.alertToken) ?? "",
             watchVoIPToken: defaults.string(forKey: Keys.watchVoIPToken) ?? "",
-            watchBundleID: defaults.string(forKey: Keys.watchBundleID) ?? "com.sheldonjoo.uphone.watchkitapp",
+            watchBundleID: defaults.string(forKey: Keys.watchBundleID) ?? "com.sheldonjoo.ukit.watchkitapp",
             liveActivityPushToStartToken: defaults.string(forKey: Keys.liveActivityPushToStartToken) ?? "",
-            bundleID: Bundle.main.bundleIdentifier ?? "com.sheldonjoo.uphone",
+            bundleID: Bundle.main.bundleIdentifier ?? "com.sheldonjoo.ukit",
             environment: APNsEnvironment.current,
             relayURL: relayURL,
             mediaTransport: CloudMediaTransportPreference.requested().rawValue,
@@ -1778,9 +1778,9 @@ final class VoIPPushController: NSObject {
             token: "",
             alertToken: "",
             watchVoIPToken: "",
-            watchBundleID: Bundle.main.bundleIdentifier ?? "com.sheldonjoo.uphone",
+            watchBundleID: Bundle.main.bundleIdentifier ?? "com.sheldonjoo.ukit",
             liveActivityPushToStartToken: "",
-            bundleID: Bundle.main.bundleIdentifier ?? "com.sheldonjoo.uphone",
+            bundleID: Bundle.main.bundleIdentifier ?? "com.sheldonjoo.ukit",
             environment: APNsEnvironment.current,
             relayURL: relayURL,
             mediaTransport: CloudMediaTransportPreference.requested().rawValue,

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plist version="1.0">
+<dict>
+    <key>method</key>
+    <string>app-store</string>
+    <!-- 由 CI 用 secrets.UKIT_TEAM_ID 替换 -->
+    <key>teamID</key>
+    <string>REPLACE_WITH_TEAM_ID</string>
+    <key>signingStyle</key>
+    <string>manual</string>
+    <key>provisioningProfiles</key>
+    <dict>
+        <key>com.sheldonjoo.ukit</key>
+        <string>uKit App Store</string>
+        <key>com.sheldonjoo.ukit.watchkitapp</key>
+        <string>uKit Watch App Store</string>
+        <key>com.sheldonjoo.ukit.liveactivity</key>
+        <string>uKit LiveActivity App Store</string>
+    </dict>
+    <key>uploadBitcode</key>
+    <false/>
+    <key>stripSwiftSymbols</key>
+    <true/>
+    <key>uploadSymbols</key>
+    <true/>
+</dict>
+</plist>

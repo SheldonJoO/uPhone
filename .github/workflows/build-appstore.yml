@@ -1,0 +1,95 @@
+name: Build & Upload uKit (App Store / TestFlight)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [appstore]
+    paths:
+      - 'iOS/**'
+      - '.github/workflows/build-appstore.yml'
+
+# 需要先在仓库 Settings → Secrets 配置以下密钥：
+#   UKIT_TEAM_ID                 10 位 Apple Team ID
+#   UKIT_DIST_CERT_P12           App Store 分发证书（base64）
+#   UKIT_DIST_CERT_PASSWORD      证书导出密码
+#   UKIT_KEYCHAIN_PASSWORD       临时 keychain 密码（随便设）
+#   UKIT_APP_STORE_PROFILE       iOS 主 App 的 App Store 描述文件（base64）
+#   UKIT_WATCH_STORE_PROFILE     Watch App 的 App Store 描述文件（base64）
+#   UKIT_LIVEACTIVITY_STORE_PROFILE  LiveActivity 扩展描述文件（base64）
+#   UKIT_PUSH_RELAY_URL          生产 relay 地址（默认 https://airsim-push.dntmove.asia）
+#   UKIT_APPSTORE_API_KEY_ID     App Store Connect API Key ID
+#   UKIT_APPSTORE_ISSUER_ID      App Store Connect Issuer ID
+#   UKIT_APPSTORE_API_KEY_P8     App Store Connect API 私钥（.p8 base64）
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+
+      - name: Install certificate and provisioning profiles
+        env:
+          CERT_P12_B64: ${{ secrets.UKIT_DIST_CERT_P12 }}
+          CERT_PASSWORD: ${{ secrets.UKIT_DIST_CERT_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.UKIT_KEYCHAIN_PASSWORD }}
+          PROFILE_APP_B64: ${{ secrets.UKIT_APP_STORE_PROFILE }}
+          PROFILE_WATCH_B64: ${{ secrets.UKIT_WATCH_STORE_PROFILE }}
+          PROFILE_LIVE_B64: ${{ secrets.UKIT_LIVEACTIVITY_STORE_PROFILE }}
+        run: |
+          set -euo pipefail
+          security create-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+          security set-keychain-settings -t 3600 -u build.keychain
+          echo "$CERT_P12_B64" | base64 -d > /tmp/dist.p12
+          security import /tmp/dist.p12 -k build.keychain -P "$CERT_PASSWORD" -T /usr/bin/codesign -T /usr/bin/security -f pkcs12
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          echo "$PROFILE_APP_B64"   | base64 -d > ~/Library/MobileDevice/Provisioning\ Profiles/app.mobileprovision
+          echo "$PROFILE_WATCH_B64" | base64 -d > ~/Library/MobileDevice/Provisioning\ Profiles/watch.mobileprovision
+          echo "$PROFILE_LIVE_B64"  | base64 -d > ~/Library/MobileDevice/Provisioning\ Profiles/live.mobileprovision
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" build.keychain
+          security find-identity -v -p codesigning build.keychain
+
+      - name: Archive
+        env:
+          TEAM_ID: ${{ secrets.UKIT_TEAM_ID }}
+          RELAY_URL: ${{ secrets.UKIT_PUSH_RELAY_URL || 'https://airsim-push.dntmove.asia' }}
+        run: |
+          set -o pipefail
+          cd iOS
+          xcodebuild -project uKit.xcodeproj -scheme uKit \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath build/uKit.xcarchive \
+            DEVELOPMENT_TEAM=$TEAM_ID \
+            AIRSIM_PUSH_RELAY_URL=$RELAY_URL \
+            AIRSIM_APNS_ENVIRONMENT=production \
+            APS_ENVIRONMENT=production \
+            archive 2>&1 | tee build/archive.log
+
+      - name: Generate ExportOptions.plist
+        env:
+          TEAM_ID: ${{ secrets.UKIT_TEAM_ID }}
+        run: |
+          sed "s/REPLACE_WITH_TEAM_ID/$TEAM_ID/" iOS/ExportOptions.appstore.plist > ExportOptions.plist
+          cat ExportOptions.plist
+
+      - name: Export IPA
+        run: |
+          set -o pipefail
+          xcodebuild -exportArchive \
+            -archivePath iOS/build/uKit.xcarchive \
+            -exportOptionsPlist ExportOptions.plist \
+            -exportPath build/export 2>&1 | tee build/export.log
+          ls -lh build/export
+
+      - name: Upload to TestFlight
+        uses: apple-actions/upload-testflight-build@v1
+        with:
+          app-path: build/export/uKit.ipa
+          api-key-id: ${{ secrets.UKIT_APPSTORE_API_KEY_ID }}
+          api-issuer-id: ${{ secrets.UKIT_APPSTORE_ISSUER_ID }}
+          api-private-key: ${{ secrets.UKIT_APPSTORE_API_KEY_P8 }}
