@@ -10,4 +10,4 @@ jobs:
       - name: List project
         run: |
           cd iOS
-          xcodebuild -list -project AirSIM.xcodeproj
+          xcodebuild -list -project uKit.xcodeproj

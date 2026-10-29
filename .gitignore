@@ -4,3 +4,6 @@ iOS/build/
 module-dashboard/module_config.json
 .dev.vars
 node_modules/
+
+# Android build artifacts (phone-audio-bridge)
+android/phone-audio-bridge/build/
